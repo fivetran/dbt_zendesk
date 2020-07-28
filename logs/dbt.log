@@ -1,0 +1,1290 @@
+2020-06-16 20:55:17.107232 (MainThread): Running with dbt=0.17.0-rc1
+2020-06-16 20:55:17.308506 (MainThread): running dbt with arguments Namespace(cls=<class 'dbt.task.compile.CompileTask'>, debug=False, exclude=None, full_refresh=False, log_cache_events=False, log_format='default', models=None, parse_only=False, partial_parse=None, profile=None, profiles_dir='/Users/kristin/.dbt', project_dir=None, record_timing_info=None, rpc_method='compile', single_threaded=False, strict=False, target=None, test_new_parser=False, threads=None, use_cache=True, vars='{}', version_check=True, warn_error=False, which='compile', write_json=True)
+2020-06-16 20:55:17.310216 (MainThread): Tracking: tracking
+2020-06-16 20:55:17.316986 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10db6f700>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e3902e0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e3903d0>]}
+2020-06-16 20:55:17.337583 (MainThread): Partial parsing not enabled
+2020-06-16 20:55:17.339290 (MainThread): Parsing macros/core.sql
+2020-06-16 20:55:17.343754 (MainThread): Parsing macros/materializations/helpers.sql
+2020-06-16 20:55:17.351275 (MainThread): Parsing macros/materializations/snapshot/snapshot_merge.sql
+2020-06-16 20:55:17.352917 (MainThread): Parsing macros/materializations/snapshot/strategies.sql
+2020-06-16 20:55:17.367193 (MainThread): Parsing macros/materializations/snapshot/snapshot.sql
+2020-06-16 20:55:17.393795 (MainThread): Parsing macros/materializations/seed/seed.sql
+2020-06-16 20:55:17.411915 (MainThread): Parsing macros/materializations/incremental/helpers.sql
+2020-06-16 20:55:17.413807 (MainThread): Parsing macros/materializations/incremental/incremental.sql
+2020-06-16 20:55:17.419706 (MainThread): Parsing macros/materializations/common/merge.sql
+2020-06-16 20:55:17.431961 (MainThread): Parsing macros/materializations/table/table.sql
+2020-06-16 20:55:17.437995 (MainThread): Parsing macros/materializations/view/view.sql
+2020-06-16 20:55:17.443481 (MainThread): Parsing macros/materializations/view/create_or_replace_view.sql
+2020-06-16 20:55:17.447642 (MainThread): Parsing macros/etc/get_custom_alias.sql
+2020-06-16 20:55:17.448474 (MainThread): Parsing macros/etc/query.sql
+2020-06-16 20:55:17.449393 (MainThread): Parsing macros/etc/is_incremental.sql
+2020-06-16 20:55:17.450798 (MainThread): Parsing macros/etc/datetime.sql
+2020-06-16 20:55:17.458856 (MainThread): Parsing macros/etc/get_custom_schema.sql
+2020-06-16 20:55:17.460580 (MainThread): Parsing macros/etc/get_custom_database.sql
+2020-06-16 20:55:17.461516 (MainThread): Parsing macros/adapters/common.sql
+2020-06-16 20:55:17.505356 (MainThread): Parsing macros/schema_tests/relationships.sql
+2020-06-16 20:55:17.506375 (MainThread): Parsing macros/schema_tests/not_null.sql
+2020-06-16 20:55:17.507221 (MainThread): Parsing macros/schema_tests/unique.sql
+2020-06-16 20:55:17.508180 (MainThread): Parsing macros/schema_tests/accepted_values.sql
+2020-06-16 20:55:17.510356 (MainThread): Parsing macros/etc.sql
+2020-06-16 20:55:17.510952 (MainThread): Parsing macros/catalog.sql
+2020-06-16 20:55:17.516309 (MainThread): Parsing macros/adapters.sql
+2020-06-16 20:55:17.530466 (MainThread): Parsing macros/materializations/seed.sql
+2020-06-16 20:55:17.532155 (MainThread): Parsing macros/materializations/view.sql
+2020-06-16 20:55:17.533865 (MainThread): Parsing macros/materializations/table.sql
+2020-06-16 20:55:17.542663 (MainThread): Parsing macros/materializations/incremental.sql
+2020-06-16 20:55:17.553435 (MainThread): Parsing macros/materializations/snapshot.sql
+2020-06-16 20:55:17.600332 (MainThread): * Deprecation Warning: dbt v0.17.0 introduces a new config format for the
+dbt_project.yml file. Support for the existing version 1 format will be removed
+in a future release of dbt. The following packages are currently configured with
+config version 1:
+ - zendesk
+ - dbt_utils
+
+For upgrading instructions, consult the documentation:
+  https://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-0-17-0
+2020-06-16 20:55:17.601277 (MainThread): Partial parsing not enabled
+2020-06-16 20:55:17.603079 (MainThread): Parsing macros/cross_db_utils/except.sql
+2020-06-16 20:55:17.604104 (MainThread): Parsing macros/cross_db_utils/replace.sql
+2020-06-16 20:55:17.605232 (MainThread): Parsing macros/cross_db_utils/concat.sql
+2020-06-16 20:55:17.607996 (MainThread): Parsing macros/cross_db_utils/identifer.sql
+2020-06-16 20:55:17.610127 (MainThread): Parsing macros/cross_db_utils/datatypes.sql
+2020-06-16 20:55:17.616132 (MainThread): Parsing macros/cross_db_utils/_is_relation.sql
+2020-06-16 20:55:17.617516 (MainThread): Parsing macros/cross_db_utils/length.sql
+2020-06-16 20:55:17.619126 (MainThread): Parsing macros/cross_db_utils/dateadd.sql
+2020-06-16 20:55:17.621329 (MainThread): Parsing macros/cross_db_utils/intersect.sql
+2020-06-16 20:55:17.622346 (MainThread): Parsing macros/cross_db_utils/right.sql
+2020-06-16 20:55:17.624489 (MainThread): Parsing macros/cross_db_utils/datediff.sql
+2020-06-16 20:55:17.635147 (MainThread): Parsing macros/cross_db_utils/safe_cast.sql
+2020-06-16 20:55:17.636914 (MainThread): Parsing macros/cross_db_utils/hash.sql
+2020-06-16 20:55:17.638144 (MainThread): Parsing macros/cross_db_utils/position.sql
+2020-06-16 20:55:17.639482 (MainThread): Parsing macros/cross_db_utils/literal.sql
+2020-06-16 20:55:17.640301 (MainThread): Parsing macros/cross_db_utils/current_timestamp.sql
+2020-06-16 20:55:17.642886 (MainThread): Parsing macros/cross_db_utils/width_bucket.sql
+2020-06-16 20:55:17.672047 (MainThread): Parsing macros/cross_db_utils/last_day.sql
+2020-06-16 20:55:17.675674 (MainThread): Parsing macros/cross_db_utils/split_part.sql
+2020-06-16 20:55:17.678114 (MainThread): Parsing macros/cross_db_utils/date_trunc.sql
+2020-06-16 20:55:17.680065 (MainThread): Parsing macros/materializations/insert_by_period_materialization.sql
+2020-06-16 20:55:17.706472 (MainThread): Parsing macros/logger/pretty_log_format.sql
+2020-06-16 20:55:17.707210 (MainThread): Parsing macros/logger/pretty_time.sql
+2020-06-16 20:55:17.708003 (MainThread): Parsing macros/logger/log_info.sql
+2020-06-16 20:55:17.708731 (MainThread): Parsing macros/datetime/date_spine.sql
+2020-06-16 20:55:17.712212 (MainThread): Parsing macros/web/get_url_host.sql
+2020-06-16 20:55:17.713597 (MainThread): Parsing macros/web/get_url_path.sql
+2020-06-16 20:55:17.715727 (MainThread): Parsing macros/web/get_url_parameter.sql
+2020-06-16 20:55:17.716804 (MainThread): Parsing macros/geo/haversine_distance.sql
+2020-06-16 20:55:17.717695 (MainThread): Parsing macros/schema_tests/equal_rowcount.sql
+2020-06-16 20:55:17.718895 (MainThread): Parsing macros/schema_tests/relationships_where.sql
+2020-06-16 20:55:17.720714 (MainThread): Parsing macros/schema_tests/recency.sql
+2020-06-16 20:55:17.721797 (MainThread): Parsing macros/schema_tests/not_constant.sql
+2020-06-16 20:55:17.722676 (MainThread): Parsing macros/schema_tests/at_least_one.sql
+2020-06-16 20:55:17.723543 (MainThread): Parsing macros/schema_tests/unique_combination_of_columns.sql
+2020-06-16 20:55:17.724618 (MainThread): Parsing macros/schema_tests/cardinality_equality.sql
+2020-06-16 20:55:17.725921 (MainThread): Parsing macros/schema_tests/expression_is_true.sql
+2020-06-16 20:55:17.726951 (MainThread): Parsing macros/schema_tests/equality.sql
+2020-06-16 20:55:17.729535 (MainThread): Parsing macros/schema_tests/mutually_exclusive_ranges.sql
+2020-06-16 20:55:17.734695 (MainThread): Parsing macros/sql/nullcheck_table.sql
+2020-06-16 20:55:17.735594 (MainThread): Parsing macros/sql/generate_series.sql
+2020-06-16 20:55:17.738473 (MainThread): Parsing macros/sql/get_relations_by_prefix.sql
+2020-06-16 20:55:17.741632 (MainThread): Parsing macros/sql/get_tables_by_prefix_sql.sql
+2020-06-16 20:55:17.743928 (MainThread): Parsing macros/sql/star.sql
+2020-06-16 20:55:17.746291 (MainThread): Parsing macros/sql/unpivot.sql
+2020-06-16 20:55:17.751484 (MainThread): Parsing macros/sql/union.sql
+2020-06-16 20:55:17.759784 (MainThread): Parsing macros/sql/groupby.sql
+2020-06-16 20:55:17.760627 (MainThread): Parsing macros/sql/surrogate_key.sql
+2020-06-16 20:55:17.762865 (MainThread): Parsing macros/sql/safe_add.sql
+2020-06-16 20:55:17.763788 (MainThread): Parsing macros/sql/nullcheck.sql
+2020-06-16 20:55:17.764889 (MainThread): Parsing macros/sql/get_column_values.sql
+2020-06-16 20:55:17.768440 (MainThread): Parsing macros/sql/pivot.sql
+2020-06-16 20:55:17.770655 (MainThread): Parsing macros/sql/get_query_results_as_dict.sql
+2020-06-16 20:55:17.804448 (MainThread): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-16 20:55:17.804555 (MainThread): Opening a new connection, currently in state init
+2020-06-16 20:55:17.817322 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-16 20:55:17.817402 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.822538 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-16 20:55:17.822609 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.829191 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-16 20:55:17.829260 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.836632 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-16 20:55:17.836701 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.841777 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-16 20:55:17.841845 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.848621 (MainThread): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-16 20:55:17.848691 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.854248 (MainThread): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-16 20:55:17.854317 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.860764 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_reply_time".
+2020-06-16 20:55:17.860832 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.866673 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-16 20:55:17.866746 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.873074 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-16 20:55:17.873146 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.880763 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-16 20:55:17.880834 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.887565 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-16 20:55:17.887638 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:17.893408 (MainThread): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-16 20:55:17.893485 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.033483 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-16 20:55:18.033612 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.054655 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-16 20:55:18.054756 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.073814 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-16 20:55:18.073889 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.090736 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-16 20:55:18.090836 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.107898 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-16 20:55:18.107978 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.124202 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-16 20:55:18.124336 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.141351 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-16 20:55:18.141428 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.158042 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-16 20:55:18.158115 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.175027 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-16 20:55:18.175107 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.192122 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-16 20:55:18.192199 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:18.209447 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-16 20:55:18.209531 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:19.216210 (MainThread): WARNING: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.zendesk.base
+
+2020-06-16 20:55:19.343071 (MainThread): Found 25 models, 10 tests, 0 snapshots, 0 analyses, 273 macros, 0 operations, 0 seed files, 11 sources
+2020-06-16 20:55:19.363000 (MainThread): 
+2020-06-16 20:55:19.363308 (MainThread): Acquiring new bigquery connection "master".
+2020-06-16 20:55:19.363384 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:55:19.368659 (ThreadPoolExecutor-0_0): Acquiring new bigquery connection "list_digital-arbor-400".
+2020-06-16 20:55:19.368780 (ThreadPoolExecutor-0_0): Opening a new connection, currently in state init
+2020-06-16 20:55:19.970638 (ThreadPoolExecutor-1_0): Acquiring new bigquery connection "list_digital-arbor-400_dbt_kristin_test_2".
+2020-06-16 20:55:19.970770 (ThreadPoolExecutor-1_0): Re-using an available connection from the pool (formerly list_digital-arbor-400).
+2020-06-16 20:55:19.970888 (ThreadPoolExecutor-1_0): Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
+2020-06-16 20:55:20.158945 (MainThread): 13:55:20 | Concurrency: 4 threads (target='dev')
+2020-06-16 20:55:20.159110 (MainThread): 13:55:20 | 
+2020-06-16 20:55:20.162099 (Thread-1): Began running node model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:55:20.162262 (Thread-2): Began running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:55:20.162518 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-16 20:55:20.162606 (Thread-3): Began running node model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:55:20.162750 (Thread-4): Began running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:55:20.162988 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-16 20:55:20.163092 (Thread-1): Re-using an available connection from the pool (formerly list_digital-arbor-400_dbt_kristin_test_2).
+2020-06-16 20:55:20.163304 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-16 20:55:20.163525 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-16 20:55:20.163625 (Thread-2): Opening a new connection, currently in state init
+2020-06-16 20:55:20.163720 (Thread-1): Compiling model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:55:20.163827 (Thread-3): Opening a new connection, currently in state init
+2020-06-16 20:55:20.163940 (Thread-4): Opening a new connection, currently in state init
+2020-06-16 20:55:20.164029 (Thread-2): Compiling model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:55:20.170426 (Thread-3): Compiling model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:55:20.177970 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket"
+2020-06-16 20:55:20.178125 (Thread-4): Compiling model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:55:20.191704 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_field_history"
+2020-06-16 20:55:20.192377 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_schedule"
+2020-06-16 20:55:20.199214 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_schedule"
+2020-06-16 20:55:20.200236 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.200571 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:55:20.200718 (Thread-3): Began running node model.zendesk_source.stg_zendesk_user
+2020-06-16 20:55:20.200896 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-16 20:55:20.200964 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.201029 (Thread-3): Compiling model.zendesk_source.stg_zendesk_user
+2020-06-16 20:55:20.206640 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_user"
+2020-06-16 20:55:20.206881 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.207163 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:55:20.207307 (Thread-1): Began running node model.zendesk_source.stg_zendesk_group
+2020-06-16 20:55:20.207479 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-16 20:55:20.207545 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_ticket).
+2020-06-16 20:55:20.207607 (Thread-1): Compiling model.zendesk_source.stg_zendesk_group
+2020-06-16 20:55:20.213161 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.213460 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:55:20.213557 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.213784 (Thread-2): Began running node model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:55:20.214493 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_group"
+2020-06-16 20:55:20.214744 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:55:20.215078 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-16 20:55:20.215356 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.215599 (Thread-4): Began running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:55:20.215833 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.216034 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.216357 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_user
+2020-06-16 20:55:20.216540 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-16 20:55:20.216622 (Thread-2): Compiling model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:55:20.216798 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_group
+2020-06-16 20:55:20.216896 (Thread-3): Began running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:55:20.216989 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.223221 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_organization"
+2020-06-16 20:55:20.223441 (Thread-1): Began running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:55:20.223688 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-16 20:55:20.223827 (Thread-4): Compiling model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:55:20.224083 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-16 20:55:20.224162 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.229616 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.229815 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_group).
+2020-06-16 20:55:20.230803 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_history"
+2020-06-16 20:55:20.230888 (Thread-3): Compiling model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:55:20.231085 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:55:20.231168 (Thread-1): Compiling model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:55:20.237347 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_metric_history"
+2020-06-16 20:55:20.237620 (Thread-2): Began running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:55:20.243250 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_comment"
+2020-06-16 20:55:20.243511 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.243815 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-16 20:55:20.244278 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:55:20.244347 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.244500 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.244699 (Thread-4): Began running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:55:20.244774 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.245053 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:55:20.245181 (Thread-2): Compiling model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:55:20.245347 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_group_id".
+2020-06-16 20:55:20.245529 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:55:20.245627 (Thread-3): Began running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:55:20.252475 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_sla_policy"
+2020-06-16 20:55:20.252543 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.252646 (Thread-1): Began running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:55:20.252846 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_organization_id".
+2020-06-16 20:55:20.253109 (Thread-4): Compiling test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:55:20.253337 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_comment_id".
+2020-06-16 20:55:20.253539 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.253638 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.264536 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_group_id"
+2020-06-16 20:55:20.264597 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_ticket_comment).
+2020-06-16 20:55:20.264677 (Thread-3): Compiling test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:55:20.264876 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:55:20.265148 (Thread-1): Compiling test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:55:20.271697 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_organization_id"
+2020-06-16 20:55:20.271813 (Thread-2): Began running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:55:20.278838 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_comment_id"
+2020-06-16 20:55:20.279402 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_id".
+2020-06-16 20:55:20.279564 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.279828 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.279994 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.280166 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.280321 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.280480 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.280629 (Thread-2): Compiling test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:55:20.280708 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.280979 (Thread-4): Finished running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:55:20.281168 (Thread-3): Finished running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:55:20.287936 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_id"
+2020-06-16 20:55:20.288143 (Thread-1): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:55:20.288256 (Thread-4): Began running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:55:20.288358 (Thread-3): Began running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:55:20.288597 (Thread-1): Began running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:55:20.288894 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_user_id".
+2020-06-16 20:55:20.289197 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_group_id".
+2020-06-16 20:55:20.289263 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.289710 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_organization_id".
+2020-06-16 20:55:20.289864 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.290004 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.290257 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.290458 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_not_null_zendesk_ticket_comment_id).
+2020-06-16 20:55:20.290626 (Thread-4): Compiling test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:55:20.290746 (Thread-3): Compiling test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:55:20.291082 (Thread-2): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:55:20.291207 (Thread-1): Compiling test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:55:20.306303 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_user_id"
+2020-06-16 20:55:20.306995 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_group_id"
+2020-06-16 20:55:20.307255 (Thread-2): Began running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:55:20.313924 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_organization_id"
+2020-06-16 20:55:20.314488 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_comment_id".
+2020-06-16 20:55:20.314969 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.315383 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.315615 (Thread-2): Compiling test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:55:20.315669 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.315836 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.316143 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.323090 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_comment_id"
+2020-06-16 20:55:20.323178 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.323357 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.323651 (Thread-3): Finished running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:55:20.323941 (Thread-4): Finished running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:55:20.324203 (Thread-1): Finished running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:55:20.324436 (Thread-3): Began running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:55:20.324588 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.324758 (Thread-4): Began running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:55:20.325122 (Thread-1): Began running node model.zendesk.ticket_historical_status
+2020-06-16 20:55:20.325551 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_id".
+2020-06-16 20:55:20.325677 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.326075 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_user_id".
+2020-06-16 20:55:20.326513 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-16 20:55:20.326652 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.326927 (Thread-2): Finished running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:55:20.327057 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.327207 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_unique_zendesk_organization_id).
+2020-06-16 20:55:20.327373 (Thread-3): Compiling test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:55:20.327558 (Thread-2): Began running node model.zendesk.remove_private_tickets
+2020-06-16 20:55:20.327744 (Thread-4): Compiling test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:55:20.327857 (Thread-1): Compiling model.zendesk.ticket_historical_status
+2020-06-16 20:55:20.336455 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_id"
+2020-06-16 20:55:20.336687 (Thread-2): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-16 20:55:20.344693 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_user_id"
+2020-06-16 20:55:20.356332 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.356628 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_historical_status"
+2020-06-16 20:55:20.356920 (Thread-2): Compiling model.zendesk.remove_private_tickets
+2020-06-16 20:55:20.357108 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.357616 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.371234 (Thread-2): Writing injected SQL for node "model.zendesk.remove_private_tickets"
+2020-06-16 20:55:20.371367 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.371614 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.372221 (Thread-3): Finished running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:55:20.372591 (Thread-4): Finished running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:55:20.372740 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.372958 (Thread-3): Began running node model.zendesk.ticket_schedule
+2020-06-16 20:55:20.373035 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.373225 (Thread-4): Began running node model.zendesk.tickets_enhanced
+2020-06-16 20:55:20.373508 (Thread-1): Finished running node model.zendesk.ticket_historical_status
+2020-06-16 20:55:20.373688 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-16 20:55:20.373874 (Thread-2): Finished running node model.zendesk.remove_private_tickets
+2020-06-16 20:55:20.374045 (Thread-4): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-16 20:55:20.374140 (Thread-1): Began running node model.zendesk.sla_policy_historical
+2020-06-16 20:55:20.374216 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.374621 (Thread-2): Began running node model.zendesk.public_comments
+2020-06-16 20:55:20.374745 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.375120 (Thread-1): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-16 20:55:20.375218 (Thread-3): Compiling model.zendesk.ticket_schedule
+2020-06-16 20:55:20.375497 (Thread-2): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-16 20:55:20.375619 (Thread-4): Compiling model.zendesk.tickets_enhanced
+2020-06-16 20:55:20.375738 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_historical_status).
+2020-06-16 20:55:20.388425 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.389927 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_schedule"
+2020-06-16 20:55:20.401628 (Thread-4): Writing injected SQL for node "model.zendesk.tickets_enhanced"
+2020-06-16 20:55:20.401707 (Thread-1): Compiling model.zendesk.sla_policy_historical
+2020-06-16 20:55:20.401789 (Thread-2): Compiling model.zendesk.public_comments
+2020-06-16 20:55:20.414598 (Thread-1): Writing injected SQL for node "model.zendesk.sla_policy_historical"
+2020-06-16 20:55:20.414721 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.414974 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.435900 (Thread-2): Writing injected SQL for node "model.zendesk.public_comments"
+2020-06-16 20:55:20.436175 (Thread-3): Finished running node model.zendesk.ticket_schedule
+2020-06-16 20:55:20.436318 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.436490 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.436759 (Thread-3): Began running node model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:55:20.436996 (Thread-1): Finished running node model.zendesk.sla_policy_historical
+2020-06-16 20:55:20.437491 (Thread-4): Finished running node model.zendesk.tickets_enhanced
+2020-06-16 20:55:20.437616 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.437889 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-16 20:55:20.438000 (Thread-1): Began running node model.zendesk.ticket_work_time_calendar
+2020-06-16 20:55:20.438107 (Thread-4): Began running node model.zendesk.ticket_work_time_business
+2020-06-16 20:55:20.438464 (Thread-2): Finished running node model.zendesk.public_comments
+2020-06-16 20:55:20.438556 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.438740 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-16 20:55:20.438922 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-16 20:55:20.439023 (Thread-2): Began running node model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:55:20.439115 (Thread-3): Compiling model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:55:20.439280 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.sla_policy_historical).
+2020-06-16 20:55:20.439347 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.439522 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-16 20:55:20.452223 (Thread-1): Compiling model.zendesk.ticket_work_time_calendar
+2020-06-16 20:55:20.452691 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_resolution_times_calendar"
+2020-06-16 20:55:20.452783 (Thread-4): Compiling model.zendesk.ticket_work_time_business
+2020-06-16 20:55:20.452851 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.465740 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_work_time_calendar"
+2020-06-16 20:55:20.483793 (Thread-2): Compiling model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:55:20.502424 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.504618 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_work_time_business"
+2020-06-16 20:55:20.516620 (Thread-3): Finished running node model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:55:20.521919 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_sla_policy_applied"
+2020-06-16 20:55:20.522070 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.522382 (Thread-3): Began running node model.zendesk.ticket_reply_time
+2020-06-16 20:55:20.522829 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.523069 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.523454 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_reply_time".
+2020-06-16 20:55:20.523605 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.523764 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.524059 (Thread-1): Finished running node model.zendesk.ticket_work_time_calendar
+2020-06-16 20:55:20.524139 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.524320 (Thread-4): Finished running node model.zendesk.ticket_work_time_business
+2020-06-16 20:55:20.524512 (Thread-2): Finished running node model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:55:20.524612 (Thread-1): Began running node model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:55:20.524696 (Thread-3): Compiling model.zendesk.ticket_reply_time
+2020-06-16 20:55:20.524814 (Thread-4): Began running node model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:55:20.525094 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-16 20:55:20.531412 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-16 20:55:20.540298 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_reply_time"
+2020-06-16 20:55:20.540411 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_work_time_calendar).
+2020-06-16 20:55:20.540481 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.540723 (Thread-1): Compiling model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:55:20.540808 (Thread-4): Compiling model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:55:20.547025 (Thread-3): finished collecting timing info
+2020-06-16 20:55:20.558179 (Thread-3): Finished running node model.zendesk.ticket_reply_time
+2020-06-16 20:55:20.585264 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_first_resolution_time_business"
+2020-06-16 20:55:20.593748 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_full_resolution_time_business"
+2020-06-16 20:55:20.594019 (Thread-1): finished collecting timing info
+2020-06-16 20:55:20.594334 (Thread-1): Finished running node model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:55:20.594546 (Thread-4): finished collecting timing info
+2020-06-16 20:55:20.594819 (Thread-4): Finished running node model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:55:20.595125 (Thread-2): Began running node model.zendesk.ticket_metrics
+2020-06-16 20:55:20.595341 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-16 20:55:20.595413 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:55:20.595482 (Thread-2): Compiling model.zendesk.ticket_metrics
+2020-06-16 20:55:20.610982 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_metrics"
+2020-06-16 20:55:20.611318 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.611509 (Thread-2): finished collecting timing info
+2020-06-16 20:55:20.611808 (Thread-2): Finished running node model.zendesk.ticket_metrics
+2020-06-16 20:55:20.612809 (MainThread): Connection 'master' was properly closed.
+2020-06-16 20:55:20.612962 (MainThread): Connection 'model.zendesk.ticket_first_resolution_time_business' was left open.
+2020-06-16 20:55:20.613020 (MainThread): Connection 'model.zendesk.ticket_metrics' was properly closed.
+2020-06-16 20:55:20.613113 (MainThread): Connection 'model.zendesk.ticket_reply_time' was properly closed.
+2020-06-16 20:55:20.613163 (MainThread): Connection 'model.zendesk.ticket_full_resolution_time_business' was properly closed.
+2020-06-16 20:55:20.641623 (MainThread): 13:55:20 | Done.
+2020-06-16 20:55:20.641791 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e803970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e666c40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e666c70>]}
+2020-06-16 20:55:20.641948 (MainThread): Flushing usage events
+2020-06-16 20:56:40.122365 (MainThread): Running with dbt=0.17.0-rc1
+2020-06-16 20:56:40.317661 (MainThread): running dbt with arguments Namespace(cls=<class 'dbt.task.compile.CompileTask'>, debug=False, exclude=None, full_refresh=False, log_cache_events=False, log_format='default', models=None, parse_only=False, partial_parse=None, profile=None, profiles_dir='/Users/kristin/.dbt', project_dir=None, record_timing_info=None, rpc_method='compile', single_threaded=False, strict=False, target=None, test_new_parser=False, threads=None, use_cache=True, vars='{}', version_check=True, warn_error=False, which='compile', write_json=True)
+2020-06-16 20:56:40.318619 (MainThread): Tracking: tracking
+2020-06-16 20:56:40.326073 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10d51e340>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dd3f550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dd3f790>]}
+2020-06-16 20:56:40.347321 (MainThread): Partial parsing not enabled
+2020-06-16 20:56:40.349227 (MainThread): Parsing macros/core.sql
+2020-06-16 20:56:40.354332 (MainThread): Parsing macros/materializations/helpers.sql
+2020-06-16 20:56:40.362135 (MainThread): Parsing macros/materializations/snapshot/snapshot_merge.sql
+2020-06-16 20:56:40.363909 (MainThread): Parsing macros/materializations/snapshot/strategies.sql
+2020-06-16 20:56:40.378694 (MainThread): Parsing macros/materializations/snapshot/snapshot.sql
+2020-06-16 20:56:40.404850 (MainThread): Parsing macros/materializations/seed/seed.sql
+2020-06-16 20:56:40.423389 (MainThread): Parsing macros/materializations/incremental/helpers.sql
+2020-06-16 20:56:40.425032 (MainThread): Parsing macros/materializations/incremental/incremental.sql
+2020-06-16 20:56:40.431081 (MainThread): Parsing macros/materializations/common/merge.sql
+2020-06-16 20:56:40.443410 (MainThread): Parsing macros/materializations/table/table.sql
+2020-06-16 20:56:40.449471 (MainThread): Parsing macros/materializations/view/view.sql
+2020-06-16 20:56:40.455182 (MainThread): Parsing macros/materializations/view/create_or_replace_view.sql
+2020-06-16 20:56:40.459379 (MainThread): Parsing macros/etc/get_custom_alias.sql
+2020-06-16 20:56:40.460206 (MainThread): Parsing macros/etc/query.sql
+2020-06-16 20:56:40.461123 (MainThread): Parsing macros/etc/is_incremental.sql
+2020-06-16 20:56:40.462569 (MainThread): Parsing macros/etc/datetime.sql
+2020-06-16 20:56:40.470300 (MainThread): Parsing macros/etc/get_custom_schema.sql
+2020-06-16 20:56:40.472019 (MainThread): Parsing macros/etc/get_custom_database.sql
+2020-06-16 20:56:40.472989 (MainThread): Parsing macros/adapters/common.sql
+2020-06-16 20:56:40.516695 (MainThread): Parsing macros/schema_tests/relationships.sql
+2020-06-16 20:56:40.517839 (MainThread): Parsing macros/schema_tests/not_null.sql
+2020-06-16 20:56:40.518643 (MainThread): Parsing macros/schema_tests/unique.sql
+2020-06-16 20:56:40.519590 (MainThread): Parsing macros/schema_tests/accepted_values.sql
+2020-06-16 20:56:40.521602 (MainThread): Parsing macros/etc.sql
+2020-06-16 20:56:40.522293 (MainThread): Parsing macros/catalog.sql
+2020-06-16 20:56:40.527748 (MainThread): Parsing macros/adapters.sql
+2020-06-16 20:56:40.541883 (MainThread): Parsing macros/materializations/seed.sql
+2020-06-16 20:56:40.543749 (MainThread): Parsing macros/materializations/view.sql
+2020-06-16 20:56:40.545455 (MainThread): Parsing macros/materializations/table.sql
+2020-06-16 20:56:40.554088 (MainThread): Parsing macros/materializations/incremental.sql
+2020-06-16 20:56:40.565580 (MainThread): Parsing macros/materializations/snapshot.sql
+2020-06-16 20:56:40.613199 (MainThread): * Deprecation Warning: dbt v0.17.0 introduces a new config format for the
+dbt_project.yml file. Support for the existing version 1 format will be removed
+in a future release of dbt. The following packages are currently configured with
+config version 1:
+ - zendesk
+ - dbt_utils
+
+For upgrading instructions, consult the documentation:
+  https://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-0-17-0
+2020-06-16 20:56:40.614146 (MainThread): Partial parsing not enabled
+2020-06-16 20:56:40.615925 (MainThread): Parsing macros/cross_db_utils/except.sql
+2020-06-16 20:56:40.617273 (MainThread): Parsing macros/cross_db_utils/replace.sql
+2020-06-16 20:56:40.618436 (MainThread): Parsing macros/cross_db_utils/concat.sql
+2020-06-16 20:56:40.620884 (MainThread): Parsing macros/cross_db_utils/identifer.sql
+2020-06-16 20:56:40.622669 (MainThread): Parsing macros/cross_db_utils/datatypes.sql
+2020-06-16 20:56:40.629529 (MainThread): Parsing macros/cross_db_utils/_is_relation.sql
+2020-06-16 20:56:40.630840 (MainThread): Parsing macros/cross_db_utils/length.sql
+2020-06-16 20:56:40.632481 (MainThread): Parsing macros/cross_db_utils/dateadd.sql
+2020-06-16 20:56:40.634574 (MainThread): Parsing macros/cross_db_utils/intersect.sql
+2020-06-16 20:56:40.635509 (MainThread): Parsing macros/cross_db_utils/right.sql
+2020-06-16 20:56:40.637605 (MainThread): Parsing macros/cross_db_utils/datediff.sql
+2020-06-16 20:56:40.647851 (MainThread): Parsing macros/cross_db_utils/safe_cast.sql
+2020-06-16 20:56:40.649562 (MainThread): Parsing macros/cross_db_utils/hash.sql
+2020-06-16 20:56:40.650961 (MainThread): Parsing macros/cross_db_utils/position.sql
+2020-06-16 20:56:40.652323 (MainThread): Parsing macros/cross_db_utils/literal.sql
+2020-06-16 20:56:40.653186 (MainThread): Parsing macros/cross_db_utils/current_timestamp.sql
+2020-06-16 20:56:40.655842 (MainThread): Parsing macros/cross_db_utils/width_bucket.sql
+2020-06-16 20:56:40.684954 (MainThread): Parsing macros/cross_db_utils/last_day.sql
+2020-06-16 20:56:40.688702 (MainThread): Parsing macros/cross_db_utils/split_part.sql
+2020-06-16 20:56:40.691109 (MainThread): Parsing macros/cross_db_utils/date_trunc.sql
+2020-06-16 20:56:40.693088 (MainThread): Parsing macros/materializations/insert_by_period_materialization.sql
+2020-06-16 20:56:40.719729 (MainThread): Parsing macros/logger/pretty_log_format.sql
+2020-06-16 20:56:40.720479 (MainThread): Parsing macros/logger/pretty_time.sql
+2020-06-16 20:56:40.721261 (MainThread): Parsing macros/logger/log_info.sql
+2020-06-16 20:56:40.721993 (MainThread): Parsing macros/datetime/date_spine.sql
+2020-06-16 20:56:40.725425 (MainThread): Parsing macros/web/get_url_host.sql
+2020-06-16 20:56:40.726791 (MainThread): Parsing macros/web/get_url_path.sql
+2020-06-16 20:56:40.728942 (MainThread): Parsing macros/web/get_url_parameter.sql
+2020-06-16 20:56:40.730117 (MainThread): Parsing macros/geo/haversine_distance.sql
+2020-06-16 20:56:40.731025 (MainThread): Parsing macros/schema_tests/equal_rowcount.sql
+2020-06-16 20:56:40.732248 (MainThread): Parsing macros/schema_tests/relationships_where.sql
+2020-06-16 20:56:40.734106 (MainThread): Parsing macros/schema_tests/recency.sql
+2020-06-16 20:56:40.735201 (MainThread): Parsing macros/schema_tests/not_constant.sql
+2020-06-16 20:56:40.736124 (MainThread): Parsing macros/schema_tests/at_least_one.sql
+2020-06-16 20:56:40.736992 (MainThread): Parsing macros/schema_tests/unique_combination_of_columns.sql
+2020-06-16 20:56:40.738031 (MainThread): Parsing macros/schema_tests/cardinality_equality.sql
+2020-06-16 20:56:40.739340 (MainThread): Parsing macros/schema_tests/expression_is_true.sql
+2020-06-16 20:56:40.740483 (MainThread): Parsing macros/schema_tests/equality.sql
+2020-06-16 20:56:40.743092 (MainThread): Parsing macros/schema_tests/mutually_exclusive_ranges.sql
+2020-06-16 20:56:40.748224 (MainThread): Parsing macros/sql/nullcheck_table.sql
+2020-06-16 20:56:40.749134 (MainThread): Parsing macros/sql/generate_series.sql
+2020-06-16 20:56:40.752187 (MainThread): Parsing macros/sql/get_relations_by_prefix.sql
+2020-06-16 20:56:40.755356 (MainThread): Parsing macros/sql/get_tables_by_prefix_sql.sql
+2020-06-16 20:56:40.757652 (MainThread): Parsing macros/sql/star.sql
+2020-06-16 20:56:40.760012 (MainThread): Parsing macros/sql/unpivot.sql
+2020-06-16 20:56:40.765200 (MainThread): Parsing macros/sql/union.sql
+2020-06-16 20:56:40.773411 (MainThread): Parsing macros/sql/groupby.sql
+2020-06-16 20:56:40.774241 (MainThread): Parsing macros/sql/surrogate_key.sql
+2020-06-16 20:56:40.776520 (MainThread): Parsing macros/sql/safe_add.sql
+2020-06-16 20:56:40.777448 (MainThread): Parsing macros/sql/nullcheck.sql
+2020-06-16 20:56:40.778746 (MainThread): Parsing macros/sql/get_column_values.sql
+2020-06-16 20:56:40.782742 (MainThread): Parsing macros/sql/pivot.sql
+2020-06-16 20:56:40.785014 (MainThread): Parsing macros/sql/get_query_results_as_dict.sql
+2020-06-16 20:56:40.818983 (MainThread): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-16 20:56:40.819084 (MainThread): Opening a new connection, currently in state init
+2020-06-16 20:56:40.831534 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-16 20:56:40.831612 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.836877 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-16 20:56:40.836965 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.843602 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-16 20:56:40.843669 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.850910 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-16 20:56:40.850977 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.855933 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-16 20:56:40.856000 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.862927 (MainThread): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-16 20:56:40.863022 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.868483 (MainThread): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-16 20:56:40.868551 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.874815 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_reply_time".
+2020-06-16 20:56:40.874881 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.881120 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-16 20:56:40.881213 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.887412 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-16 20:56:40.887480 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.894807 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-16 20:56:40.894875 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.903049 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-16 20:56:40.903133 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:40.910336 (MainThread): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-16 20:56:40.910410 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.051483 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-16 20:56:41.051621 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.073138 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-16 20:56:41.073235 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.092826 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-16 20:56:41.092922 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.109521 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-16 20:56:41.109593 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.126359 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-16 20:56:41.126433 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.142872 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-16 20:56:41.142944 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.159675 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-16 20:56:41.159748 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.176091 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-16 20:56:41.176164 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.192633 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-16 20:56:41.192709 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.209838 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-16 20:56:41.209914 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:41.226614 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-16 20:56:41.226687 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.215670 (MainThread): WARNING: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.zendesk.base
+
+2020-06-16 20:56:42.336292 (MainThread): Found 25 models, 10 tests, 0 snapshots, 0 analyses, 273 macros, 0 operations, 0 seed files, 11 sources
+2020-06-16 20:56:42.358025 (MainThread): 
+2020-06-16 20:56:42.358325 (MainThread): Acquiring new bigquery connection "master".
+2020-06-16 20:56:42.358423 (MainThread): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.399000 (ThreadPoolExecutor-1_0): Acquiring new bigquery connection "list_digital-arbor-400_dbt_kristin_test_2".
+2020-06-16 20:56:42.399166 (ThreadPoolExecutor-1_0): Opening a new connection, currently in state init
+2020-06-16 20:56:42.399695 (ThreadPoolExecutor-1_0): Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
+2020-06-16 20:56:42.879435 (MainThread): 13:56:42 | Concurrency: 4 threads (target='dev')
+2020-06-16 20:56:42.879598 (MainThread): 13:56:42 | 
+2020-06-16 20:56:42.882581 (Thread-1): Began running node model.zendesk_source.stg_zendesk_group
+2020-06-16 20:56:42.882724 (Thread-2): Began running node model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:56:42.882995 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-16 20:56:42.883084 (Thread-3): Began running node model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:56:42.883319 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-16 20:56:42.883405 (Thread-4): Began running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:56:42.883504 (Thread-1): Re-using an available connection from the pool (formerly list_digital-arbor-400_dbt_kristin_test_2).
+2020-06-16 20:56:42.883706 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-16 20:56:42.883798 (Thread-2): Opening a new connection, currently in state init
+2020-06-16 20:56:42.883997 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-16 20:56:42.884101 (Thread-1): Compiling model.zendesk_source.stg_zendesk_group
+2020-06-16 20:56:42.884176 (Thread-3): Opening a new connection, currently in state init
+2020-06-16 20:56:42.884398 (Thread-2): Compiling model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:56:42.884552 (Thread-4): Opening a new connection, currently in state init
+2020-06-16 20:56:42.894964 (Thread-3): Compiling model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:56:42.897756 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_group"
+2020-06-16 20:56:42.904744 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_organization"
+2020-06-16 20:56:42.904845 (Thread-4): Compiling model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:56:42.913156 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_schedule"
+2020-06-16 20:56:42.920938 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_history"
+2020-06-16 20:56:42.921529 (Thread-3): finished collecting timing info
+2020-06-16 20:56:42.921904 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_schedule
+2020-06-16 20:56:42.922015 (Thread-3): Began running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:56:42.922206 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-16 20:56:42.922281 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.922382 (Thread-3): Compiling model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:56:42.927768 (Thread-2): finished collecting timing info
+2020-06-16 20:56:42.927983 (Thread-4): finished collecting timing info
+2020-06-16 20:56:42.928218 (Thread-1): finished collecting timing info
+2020-06-16 20:56:42.930900 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_metric_history"
+2020-06-16 20:56:42.931162 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_organization
+2020-06-16 20:56:42.931370 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-16 20:56:42.931571 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_group
+2020-06-16 20:56:42.931808 (Thread-2): Began running node model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:56:42.931926 (Thread-4): Began running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:56:42.932193 (Thread-1): Began running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:56:42.932328 (Thread-3): finished collecting timing info
+2020-06-16 20:56:42.932586 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-16 20:56:42.932820 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-16 20:56:42.933000 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-16 20:56:42.933191 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-16 20:56:42.933270 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.933332 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.933391 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_group).
+2020-06-16 20:56:42.933494 (Thread-3): Began running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:56:42.933595 (Thread-2): Compiling model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:56:42.933769 (Thread-4): Compiling model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:56:42.933841 (Thread-1): Compiling model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:56:42.934016 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-16 20:56:42.940100 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket"
+2020-06-16 20:56:42.947529 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_comment"
+2020-06-16 20:56:42.953358 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_field_history"
+2020-06-16 20:56:42.953445 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.953904 (Thread-3): Compiling model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:56:42.959419 (Thread-2): finished collecting timing info
+2020-06-16 20:56:42.959679 (Thread-4): finished collecting timing info
+2020-06-16 20:56:42.961353 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_schedule"
+2020-06-16 20:56:42.961651 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_ticket
+2020-06-16 20:56:42.961725 (Thread-1): finished collecting timing info
+2020-06-16 20:56:42.962019 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-16 20:56:42.962200 (Thread-2): Began running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:56:42.962468 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-16 20:56:42.962762 (Thread-4): Began running node model.zendesk_source.stg_zendesk_user
+2020-06-16 20:56:42.962897 (Thread-3): finished collecting timing info
+2020-06-16 20:56:42.963275 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-16 20:56:42.963425 (Thread-1): Began running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:56:42.963615 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-16 20:56:42.964043 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-16 20:56:42.964211 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.964401 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_group_id".
+2020-06-16 20:56:42.964479 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.964568 (Thread-3): Began running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:56:42.964655 (Thread-2): Compiling model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:56:42.964817 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_ticket_field_history).
+2020-06-16 20:56:42.964908 (Thread-4): Compiling model.zendesk_source.stg_zendesk_user
+2020-06-16 20:56:42.965094 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_organization_id".
+2020-06-16 20:56:42.971768 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_sla_policy"
+2020-06-16 20:56:42.971840 (Thread-1): Compiling test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:56:42.977939 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_user"
+2020-06-16 20:56:42.978056 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:42.989545 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_group_id"
+2020-06-16 20:56:42.989798 (Thread-3): Compiling test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:56:42.990046 (Thread-2): finished collecting timing info
+2020-06-16 20:56:42.990233 (Thread-4): finished collecting timing info
+2020-06-16 20:56:42.996000 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-16 20:56:42.998399 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_organization_id"
+2020-06-16 20:56:42.998595 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_user
+2020-06-16 20:56:42.998758 (Thread-2): Began running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:56:42.999114 (Thread-1): finished collecting timing info
+2020-06-16 20:56:42.999289 (Thread-4): Began running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:56:42.999737 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_comment_id".
+2020-06-16 20:56:42.999920 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.000427 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_id".
+2020-06-16 20:56:43.000611 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.000679 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.001011 (Thread-1): Finished running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-16 20:56:43.001115 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.001261 (Thread-2): Compiling test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:56:43.001431 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.001649 (Thread-1): Began running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:56:43.001773 (Thread-4): Compiling test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:56:43.007708 (Thread-3): Finished running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-16 20:56:43.009858 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_comment_id"
+2020-06-16 20:56:43.010256 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_user_id".
+2020-06-16 20:56:43.017951 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_id"
+2020-06-16 20:56:43.018068 (Thread-3): Began running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:56:43.018326 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_not_null_zendesk_group_id).
+2020-06-16 20:56:43.018831 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_group_id".
+2020-06-16 20:56:43.018985 (Thread-1): Compiling test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:56:43.019162 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.019331 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.019460 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.027516 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_user_id"
+2020-06-16 20:56:43.027784 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.028133 (Thread-3): Compiling test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:56:43.028278 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.028992 (Thread-2): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-16 20:56:43.037225 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_group_id"
+2020-06-16 20:56:43.037568 (Thread-4): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-16 20:56:43.037750 (Thread-2): Began running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:56:43.038010 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.038278 (Thread-4): Began running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:56:43.038638 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_organization_id".
+2020-06-16 20:56:43.038766 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.039046 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.039366 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_comment_id".
+2020-06-16 20:56:43.039476 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.039612 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.039961 (Thread-1): Finished running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-16 20:56:43.040057 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.040144 (Thread-2): Compiling test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:56:43.040359 (Thread-3): Finished running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-16 20:56:43.040501 (Thread-1): Began running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:56:43.040682 (Thread-4): Compiling test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:56:43.049449 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_organization_id"
+2020-06-16 20:56:43.049583 (Thread-3): Began running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:56:43.049919 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_id".
+2020-06-16 20:56:43.057832 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_comment_id"
+2020-06-16 20:56:43.058092 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_user_id".
+2020-06-16 20:56:43.058244 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_not_null_zendesk_user_id).
+2020-06-16 20:56:43.058475 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.058640 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.058837 (Thread-1): Compiling test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:56:43.058899 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.059093 (Thread-3): Compiling test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:56:43.059197 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.065780 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.067739 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_id"
+2020-06-16 20:56:43.075827 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_user_id"
+2020-06-16 20:56:43.076109 (Thread-2): Finished running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-16 20:56:43.076531 (Thread-4): Finished running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-16 20:56:43.077020 (Thread-2): Began running node model.zendesk.sla_policy_historical
+2020-06-16 20:56:43.077346 (Thread-4): Began running node model.zendesk.remove_private_tickets
+2020-06-16 20:56:43.077936 (Thread-2): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-16 20:56:43.078114 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.078371 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.078677 (Thread-4): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-16 20:56:43.078775 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.078882 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.079089 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.079265 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.079356 (Thread-2): Compiling model.zendesk.sla_policy_historical
+2020-06-16 20:56:43.079582 (Thread-3): Finished running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-16 20:56:43.079817 (Thread-1): Finished running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-16 20:56:43.079919 (Thread-4): Compiling model.zendesk.remove_private_tickets
+2020-06-16 20:56:43.090835 (Thread-3): Began running node model.zendesk.ticket_historical_status
+2020-06-16 20:56:43.096038 (Thread-2): Writing injected SQL for node "model.zendesk.sla_policy_historical"
+2020-06-16 20:56:43.096306 (Thread-1): Began running node model.zendesk.ticket_schedule
+2020-06-16 20:56:43.111163 (Thread-4): Writing injected SQL for node "model.zendesk.remove_private_tickets"
+2020-06-16 20:56:43.111492 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-16 20:56:43.111824 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-16 20:56:43.112089 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.112322 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_unique_zendesk_ticket_id).
+2020-06-16 20:56:43.112507 (Thread-3): Compiling model.zendesk.ticket_historical_status
+2020-06-16 20:56:43.112690 (Thread-1): Compiling model.zendesk.ticket_schedule
+2020-06-16 20:56:43.112882 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.113077 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.132298 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_historical_status"
+2020-06-16 20:56:43.138949 (Thread-2): Finished running node model.zendesk.sla_policy_historical
+2020-06-16 20:56:43.141345 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_schedule"
+2020-06-16 20:56:43.141623 (Thread-4): Finished running node model.zendesk.remove_private_tickets
+2020-06-16 20:56:43.141891 (Thread-2): Began running node model.zendesk.public_comments
+2020-06-16 20:56:43.142345 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.142592 (Thread-4): Began running node model.zendesk.tickets_enhanced
+2020-06-16 20:56:43.142948 (Thread-2): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-16 20:56:43.143321 (Thread-3): Finished running node model.zendesk.ticket_historical_status
+2020-06-16 20:56:43.143483 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.143926 (Thread-4): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-16 20:56:43.144077 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.144239 (Thread-3): Began running node model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:56:43.144505 (Thread-1): Finished running node model.zendesk.ticket_schedule
+2020-06-16 20:56:43.144787 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.144908 (Thread-2): Compiling model.zendesk.public_comments
+2020-06-16 20:56:43.145138 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-16 20:56:43.145265 (Thread-1): Began running node model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:56:43.145431 (Thread-4): Compiling model.zendesk.tickets_enhanced
+2020-06-16 20:56:43.151876 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.167550 (Thread-2): Writing injected SQL for node "model.zendesk.public_comments"
+2020-06-16 20:56:43.167876 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-16 20:56:43.180171 (Thread-3): Compiling model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:56:43.182553 (Thread-4): Writing injected SQL for node "model.zendesk.tickets_enhanced"
+2020-06-16 20:56:43.182789 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_schedule).
+2020-06-16 20:56:43.199944 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.200197 (Thread-1): Compiling model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:56:43.203369 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_sla_policy_applied"
+2020-06-16 20:56:43.203753 (Thread-2): Finished running node model.zendesk.public_comments
+2020-06-16 20:56:43.209727 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.218840 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_resolution_times_calendar"
+2020-06-16 20:56:43.219067 (Thread-2): Began running node model.zendesk.ticket_work_time_calendar
+2020-06-16 20:56:43.219453 (Thread-4): Finished running node model.zendesk.tickets_enhanced
+2020-06-16 20:56:43.219882 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.220197 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-16 20:56:43.220376 (Thread-4): Began running node model.zendesk.ticket_work_time_business
+2020-06-16 20:56:43.220466 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.220804 (Thread-3): Finished running node model.zendesk.ticket_sla_policy_applied
+2020-06-16 20:56:43.221029 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.221250 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-16 20:56:43.221479 (Thread-1): Finished running node model.zendesk.ticket_resolution_times_calendar
+2020-06-16 20:56:43.221598 (Thread-3): Began running node model.zendesk.ticket_reply_time
+2020-06-16 20:56:43.221699 (Thread-2): Compiling model.zendesk.ticket_work_time_calendar
+2020-06-16 20:56:43.221810 (Thread-4): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.222131 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_reply_time".
+2020-06-16 20:56:43.237959 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_work_time_calendar"
+2020-06-16 20:56:43.238123 (Thread-1): Began running node model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:56:43.238238 (Thread-4): Compiling model.zendesk.ticket_work_time_business
+2020-06-16 20:56:43.238323 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.238690 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-16 20:56:43.250011 (Thread-3): Compiling model.zendesk.ticket_reply_time
+2020-06-16 20:56:43.260897 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_resolution_times_calendar).
+2020-06-16 20:56:43.278506 (Thread-1): Compiling model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:56:43.288986 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.300211 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_reply_time"
+2020-06-16 20:56:43.308117 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_work_time_business"
+2020-06-16 20:56:43.314683 (Thread-2): Finished running node model.zendesk.ticket_work_time_calendar
+2020-06-16 20:56:43.329391 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_first_resolution_time_business"
+2020-06-16 20:56:43.329736 (Thread-2): Began running node model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:56:43.330122 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.330584 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-16 20:56:43.330653 (Thread-4): finished collecting timing info
+2020-06-16 20:56:43.330941 (Thread-3): Finished running node model.zendesk.ticket_reply_time
+2020-06-16 20:56:43.331093 (Thread-1): finished collecting timing info
+2020-06-16 20:56:43.331306 (Thread-2): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.331608 (Thread-4): Finished running node model.zendesk.ticket_work_time_business
+2020-06-16 20:56:43.331913 (Thread-1): Finished running node model.zendesk.ticket_first_resolution_time_business
+2020-06-16 20:56:43.332009 (Thread-2): Compiling model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:56:43.359269 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_full_resolution_time_business"
+2020-06-16 20:56:43.359624 (Thread-2): finished collecting timing info
+2020-06-16 20:56:43.359975 (Thread-2): Finished running node model.zendesk.ticket_full_resolution_time_business
+2020-06-16 20:56:43.360374 (Thread-3): Began running node model.zendesk.ticket_metrics
+2020-06-16 20:56:43.360583 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-16 20:56:43.360654 (Thread-3): Opening a new connection, currently in state closed
+2020-06-16 20:56:43.360724 (Thread-3): Compiling model.zendesk.ticket_metrics
+2020-06-16 20:56:43.375817 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_metrics"
+2020-06-16 20:56:43.376180 (Thread-3): finished collecting timing info
+2020-06-16 20:56:43.376534 (Thread-3): Finished running node model.zendesk.ticket_metrics
+2020-06-16 20:56:43.377365 (MainThread): Connection 'master' was properly closed.
+2020-06-16 20:56:43.377444 (MainThread): Connection 'model.zendesk.ticket_first_resolution_time_business' was left open.
+2020-06-16 20:56:43.377502 (MainThread): Connection 'model.zendesk.ticket_full_resolution_time_business' was properly closed.
+2020-06-16 20:56:43.377555 (MainThread): Connection 'model.zendesk.ticket_metrics' was properly closed.
+2020-06-16 20:56:43.377606 (MainThread): Connection 'model.zendesk.ticket_work_time_business' was properly closed.
+2020-06-16 20:56:43.397445 (MainThread): 13:56:43 | Done.
+2020-06-16 20:56:43.397590 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10df84cd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10ddc92b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e253760>]}
+2020-06-16 20:56:43.397742 (MainThread): Flushing usage events
+2020-06-24 19:53:53.247524 (MainThread): Running with dbt=0.17.0-rc1
+2020-06-24 19:53:53.674524 (MainThread): running dbt with arguments Namespace(cls=<class 'dbt.task.compile.CompileTask'>, debug=False, exclude=None, full_refresh=False, log_cache_events=False, log_format='default', models=None, parse_only=False, partial_parse=None, profile=None, profiles_dir='/Users/kristin/.dbt', project_dir=None, record_timing_info=None, rpc_method='compile', single_threaded=False, strict=False, target=None, test_new_parser=False, threads=None, use_cache=True, vars='{}', version_check=True, warn_error=False, which='compile', write_json=True)
+2020-06-24 19:53:53.675760 (MainThread): Tracking: tracking
+2020-06-24 19:53:53.685479 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x112c3f880>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1134614c0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113461700>]}
+2020-06-24 19:53:53.706570 (MainThread): Partial parsing not enabled
+2020-06-24 19:53:53.709076 (MainThread): Parsing macros/core.sql
+2020-06-24 19:53:53.714376 (MainThread): Parsing macros/materializations/helpers.sql
+2020-06-24 19:53:53.721628 (MainThread): Parsing macros/materializations/snapshot/snapshot_merge.sql
+2020-06-24 19:53:53.723629 (MainThread): Parsing macros/materializations/snapshot/strategies.sql
+2020-06-24 19:53:53.738627 (MainThread): Parsing macros/materializations/snapshot/snapshot.sql
+2020-06-24 19:53:53.764839 (MainThread): Parsing macros/materializations/seed/seed.sql
+2020-06-24 19:53:53.783302 (MainThread): Parsing macros/materializations/incremental/helpers.sql
+2020-06-24 19:53:53.785121 (MainThread): Parsing macros/materializations/incremental/incremental.sql
+2020-06-24 19:53:53.791120 (MainThread): Parsing macros/materializations/common/merge.sql
+2020-06-24 19:53:53.803576 (MainThread): Parsing macros/materializations/table/table.sql
+2020-06-24 19:53:53.809651 (MainThread): Parsing macros/materializations/view/view.sql
+2020-06-24 19:53:53.815439 (MainThread): Parsing macros/materializations/view/create_or_replace_view.sql
+2020-06-24 19:53:53.820155 (MainThread): Parsing macros/etc/get_custom_alias.sql
+2020-06-24 19:53:53.821390 (MainThread): Parsing macros/etc/query.sql
+2020-06-24 19:53:53.822586 (MainThread): Parsing macros/etc/is_incremental.sql
+2020-06-24 19:53:53.824221 (MainThread): Parsing macros/etc/datetime.sql
+2020-06-24 19:53:53.832189 (MainThread): Parsing macros/etc/get_custom_schema.sql
+2020-06-24 19:53:53.834139 (MainThread): Parsing macros/etc/get_custom_database.sql
+2020-06-24 19:53:53.835710 (MainThread): Parsing macros/adapters/common.sql
+2020-06-24 19:53:53.882561 (MainThread): Parsing macros/schema_tests/relationships.sql
+2020-06-24 19:53:53.883854 (MainThread): Parsing macros/schema_tests/not_null.sql
+2020-06-24 19:53:53.884990 (MainThread): Parsing macros/schema_tests/unique.sql
+2020-06-24 19:53:53.886208 (MainThread): Parsing macros/schema_tests/accepted_values.sql
+2020-06-24 19:53:53.888462 (MainThread): Parsing macros/etc.sql
+2020-06-24 19:53:53.889765 (MainThread): Parsing macros/catalog.sql
+2020-06-24 19:53:53.895498 (MainThread): Parsing macros/adapters.sql
+2020-06-24 19:53:53.910250 (MainThread): Parsing macros/materializations/seed.sql
+2020-06-24 19:53:53.912524 (MainThread): Parsing macros/materializations/view.sql
+2020-06-24 19:53:53.915076 (MainThread): Parsing macros/materializations/table.sql
+2020-06-24 19:53:53.924846 (MainThread): Parsing macros/materializations/incremental.sql
+2020-06-24 19:53:53.937203 (MainThread): Parsing macros/materializations/snapshot.sql
+2020-06-24 19:53:53.991154 (MainThread): * Deprecation Warning: dbt v0.17.0 introduces a new config format for the
+dbt_project.yml file. Support for the existing version 1 format will be removed
+in a future release of dbt. The following packages are currently configured with
+config version 1:
+ - zendesk
+ - dbt_utils
+
+For upgrading instructions, consult the documentation:
+  https://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-0-17-0
+2020-06-24 19:53:53.992060 (MainThread): Partial parsing not enabled
+2020-06-24 19:53:53.994109 (MainThread): Parsing macros/cross_db_utils/except.sql
+2020-06-24 19:53:53.995921 (MainThread): Parsing macros/cross_db_utils/replace.sql
+2020-06-24 19:53:53.998072 (MainThread): Parsing macros/cross_db_utils/concat.sql
+2020-06-24 19:53:54.001412 (MainThread): Parsing macros/cross_db_utils/identifer.sql
+2020-06-24 19:53:54.003177 (MainThread): Parsing macros/cross_db_utils/datatypes.sql
+2020-06-24 19:53:54.009463 (MainThread): Parsing macros/cross_db_utils/_is_relation.sql
+2020-06-24 19:53:54.011319 (MainThread): Parsing macros/cross_db_utils/length.sql
+2020-06-24 19:53:54.012929 (MainThread): Parsing macros/cross_db_utils/dateadd.sql
+2020-06-24 19:53:54.015969 (MainThread): Parsing macros/cross_db_utils/intersect.sql
+2020-06-24 19:53:54.017266 (MainThread): Parsing macros/cross_db_utils/right.sql
+2020-06-24 19:53:54.020116 (MainThread): Parsing macros/cross_db_utils/datediff.sql
+2020-06-24 19:53:54.031023 (MainThread): Parsing macros/cross_db_utils/safe_cast.sql
+2020-06-24 19:53:54.032974 (MainThread): Parsing macros/cross_db_utils/hash.sql
+2020-06-24 19:53:54.034723 (MainThread): Parsing macros/cross_db_utils/position.sql
+2020-06-24 19:53:54.036551 (MainThread): Parsing macros/cross_db_utils/literal.sql
+2020-06-24 19:53:54.037662 (MainThread): Parsing macros/cross_db_utils/current_timestamp.sql
+2020-06-24 19:53:54.040949 (MainThread): Parsing macros/cross_db_utils/width_bucket.sql
+2020-06-24 19:53:54.072211 (MainThread): Parsing macros/cross_db_utils/last_day.sql
+2020-06-24 19:53:54.076272 (MainThread): Parsing macros/cross_db_utils/split_part.sql
+2020-06-24 19:53:54.078954 (MainThread): Parsing macros/cross_db_utils/date_trunc.sql
+2020-06-24 19:53:54.081201 (MainThread): Parsing macros/materializations/insert_by_period_materialization.sql
+2020-06-24 19:53:54.109356 (MainThread): Parsing macros/logger/pretty_log_format.sql
+2020-06-24 19:53:54.110419 (MainThread): Parsing macros/logger/pretty_time.sql
+2020-06-24 19:53:54.111499 (MainThread): Parsing macros/logger/log_info.sql
+2020-06-24 19:53:54.112532 (MainThread): Parsing macros/datetime/date_spine.sql
+2020-06-24 19:53:54.116742 (MainThread): Parsing macros/web/get_url_host.sql
+2020-06-24 19:53:54.118935 (MainThread): Parsing macros/web/get_url_path.sql
+2020-06-24 19:53:54.121875 (MainThread): Parsing macros/web/get_url_parameter.sql
+2020-06-24 19:53:54.123357 (MainThread): Parsing macros/geo/haversine_distance.sql
+2020-06-24 19:53:54.124629 (MainThread): Parsing macros/schema_tests/equal_rowcount.sql
+2020-06-24 19:53:54.126308 (MainThread): Parsing macros/schema_tests/relationships_where.sql
+2020-06-24 19:53:54.128808 (MainThread): Parsing macros/schema_tests/recency.sql
+2020-06-24 19:53:54.130383 (MainThread): Parsing macros/schema_tests/not_constant.sql
+2020-06-24 19:53:54.131682 (MainThread): Parsing macros/schema_tests/at_least_one.sql
+2020-06-24 19:53:54.132915 (MainThread): Parsing macros/schema_tests/unique_combination_of_columns.sql
+2020-06-24 19:53:54.134352 (MainThread): Parsing macros/schema_tests/cardinality_equality.sql
+2020-06-24 19:53:54.136120 (MainThread): Parsing macros/schema_tests/expression_is_true.sql
+2020-06-24 19:53:54.137537 (MainThread): Parsing macros/schema_tests/equality.sql
+2020-06-24 19:53:54.140686 (MainThread): Parsing macros/schema_tests/mutually_exclusive_ranges.sql
+2020-06-24 19:53:54.146168 (MainThread): Parsing macros/sql/nullcheck_table.sql
+2020-06-24 19:53:54.147325 (MainThread): Parsing macros/sql/generate_series.sql
+2020-06-24 19:53:54.150358 (MainThread): Parsing macros/sql/get_relations_by_prefix.sql
+2020-06-24 19:53:54.153812 (MainThread): Parsing macros/sql/get_tables_by_prefix_sql.sql
+2020-06-24 19:53:54.156336 (MainThread): Parsing macros/sql/star.sql
+2020-06-24 19:53:54.158961 (MainThread): Parsing macros/sql/unpivot.sql
+2020-06-24 19:53:54.166127 (MainThread): Parsing macros/sql/union.sql
+2020-06-24 19:53:54.175747 (MainThread): Parsing macros/sql/groupby.sql
+2020-06-24 19:53:54.178273 (MainThread): Parsing macros/sql/surrogate_key.sql
+2020-06-24 19:53:54.182739 (MainThread): Parsing macros/sql/safe_add.sql
+2020-06-24 19:53:54.184355 (MainThread): Parsing macros/sql/nullcheck.sql
+2020-06-24 19:53:54.185982 (MainThread): Parsing macros/sql/get_column_values.sql
+2020-06-24 19:53:54.190092 (MainThread): Parsing macros/sql/pivot.sql
+2020-06-24 19:53:54.192692 (MainThread): Parsing macros/sql/get_query_results_as_dict.sql
+2020-06-24 19:53:54.228748 (MainThread): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-24 19:53:54.228869 (MainThread): Opening a new connection, currently in state init
+2020-06-24 19:53:54.242367 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-24 19:53:54.242486 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.249096 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-24 19:53:54.249224 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.257191 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-24 19:53:54.257318 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.266891 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-24 19:53:54.267011 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.274473 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-24 19:53:54.274602 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.286191 (MainThread): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-24 19:53:54.286368 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.297408 (MainThread): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-24 19:53:54.297560 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.307964 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_reply_times".
+2020-06-24 19:53:54.308102 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.317226 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-24 19:53:54.317364 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.327250 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_reply_time_business".
+2020-06-24 19:53:54.327389 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.336687 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-24 19:53:54.336778 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.346859 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-24 19:53:54.346998 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.357185 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-24 19:53:54.357322 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.364643 (MainThread): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-24 19:53:54.364733 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.506048 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-24 19:53:54.506197 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.529841 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-24 19:53:54.529975 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.551746 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-24 19:53:54.551870 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.571693 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-24 19:53:54.571805 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.589424 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-24 19:53:54.589536 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.607295 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-24 19:53:54.607410 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.625213 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-24 19:53:54.625322 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.642711 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-24 19:53:54.642824 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.660306 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-24 19:53:54.660421 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.678138 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-24 19:53:54.678334 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:54.695924 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-24 19:53:54.696040 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:55.669677 (MainThread): WARNING: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.zendesk.base
+
+2020-06-24 19:53:55.789445 (MainThread): Found 26 models, 10 tests, 0 snapshots, 0 analyses, 273 macros, 0 operations, 0 seed files, 11 sources
+2020-06-24 19:53:55.811034 (MainThread): 
+2020-06-24 19:53:55.811444 (MainThread): Acquiring new bigquery connection "master".
+2020-06-24 19:53:55.811570 (MainThread): Opening a new connection, currently in state closed
+2020-06-24 19:53:55.848082 (ThreadPoolExecutor-1_0): Acquiring new bigquery connection "list_digital-arbor-400_dbt_kristin_test_2".
+2020-06-24 19:53:55.848209 (ThreadPoolExecutor-1_0): Opening a new connection, currently in state init
+2020-06-24 19:53:55.850392 (ThreadPoolExecutor-1_0): Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
+2020-06-24 19:53:56.200420 (MainThread): 12:53:56 | Concurrency: 4 threads (target='dev')
+2020-06-24 19:53:56.200664 (MainThread): 12:53:56 | 
+2020-06-24 19:53:56.204977 (Thread-1): Began running node model.zendesk_source.stg_zendesk_group
+2020-06-24 19:53:56.205329 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-06-24 19:53:56.205494 (Thread-2): Began running node model.zendesk_source.stg_zendesk_organization
+2020-06-24 19:53:56.205602 (Thread-1): Re-using an available connection from the pool (formerly list_digital-arbor-400_dbt_kristin_test_2).
+2020-06-24 19:53:56.205684 (Thread-3): Began running node model.zendesk_source.stg_zendesk_schedule
+2020-06-24 19:53:56.205823 (Thread-4): Began running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-24 19:53:56.206069 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-06-24 19:53:56.206198 (Thread-1): Compiling model.zendesk_source.stg_zendesk_group
+2020-06-24 19:53:56.206430 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-06-24 19:53:56.206672 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_history".
+2020-06-24 19:53:56.206783 (Thread-2): Opening a new connection, currently in state init
+2020-06-24 19:53:56.217131 (Thread-3): Opening a new connection, currently in state init
+2020-06-24 19:53:56.221600 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_group"
+2020-06-24 19:53:56.221750 (Thread-4): Opening a new connection, currently in state init
+2020-06-24 19:53:56.221859 (Thread-2): Compiling model.zendesk_source.stg_zendesk_organization
+2020-06-24 19:53:56.221950 (Thread-3): Compiling model.zendesk_source.stg_zendesk_schedule
+2020-06-24 19:53:56.222189 (Thread-4): Compiling model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-24 19:53:56.236212 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_organization"
+2020-06-24 19:53:56.239116 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_schedule"
+2020-06-24 19:53:56.247399 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_history"
+2020-06-24 19:53:56.247810 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.248468 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_group
+2020-06-24 19:53:56.248616 (Thread-1): Began running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-24 19:53:56.248942 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.249493 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_sla_policy_metric_history".
+2020-06-24 19:53:56.249585 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.249810 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.250179 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_sla_policy_history
+2020-06-24 19:53:56.250294 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_group).
+2020-06-24 19:53:56.250526 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_schedule
+2020-06-24 19:53:56.250783 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_organization
+2020-06-24 19:53:56.250917 (Thread-4): Began running node model.zendesk_source.stg_zendesk_ticket
+2020-06-24 19:53:56.251113 (Thread-1): Compiling model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-24 19:53:56.251329 (Thread-3): Began running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-24 19:53:56.251500 (Thread-2): Began running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-24 19:53:56.251900 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-06-24 19:53:56.257450 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-06-24 19:53:56.260769 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_sla_policy_metric_history"
+2020-06-24 19:53:56.261174 (Thread-2): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-06-24 19:53:56.261364 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.261506 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.261704 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.261919 (Thread-4): Compiling model.zendesk_source.stg_zendesk_ticket
+2020-06-24 19:53:56.262032 (Thread-3): Compiling model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-24 19:53:56.262162 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.262379 (Thread-2): Compiling model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-24 19:53:56.275395 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket"
+2020-06-24 19:53:56.275706 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_sla_policy_metric_history
+2020-06-24 19:53:56.279440 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_comment"
+2020-06-24 19:53:56.287091 (Thread-2): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_field_history"
+2020-06-24 19:53:56.287319 (Thread-1): Began running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-24 19:53:56.287868 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.288353 (Thread-1): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-06-24 19:53:56.288509 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.288874 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_ticket
+2020-06-24 19:53:56.289019 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.289211 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_sla_policy_metric_history).
+2020-06-24 19:53:56.289446 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_ticket_comment
+2020-06-24 19:53:56.289575 (Thread-4): Began running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-24 19:53:56.289887 (Thread-2): Finished running node model.zendesk_source.stg_zendesk_ticket_field_history
+2020-06-24 19:53:56.290077 (Thread-1): Compiling model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-24 19:53:56.290199 (Thread-3): Began running node model.zendesk_source.stg_zendesk_user
+2020-06-24 19:53:56.290438 (Thread-4): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_sla_policy".
+2020-06-24 19:53:56.290617 (Thread-2): Began running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-24 19:53:56.298668 (Thread-1): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_schedule"
+2020-06-24 19:53:56.298895 (Thread-3): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-06-24 19:53:56.299011 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.299226 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_group_id".
+2020-06-24 19:53:56.299425 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.299553 (Thread-4): Compiling model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-24 19:53:56.299711 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.299793 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.300000 (Thread-3): Compiling model.zendesk_source.stg_zendesk_user
+2020-06-24 19:53:56.307649 (Thread-4): Writing injected SQL for node "model.zendesk_source.stg_zendesk_ticket_sla_policy"
+2020-06-24 19:53:56.307757 (Thread-2): Compiling test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-24 19:53:56.308039 (Thread-1): Finished running node model.zendesk_source.stg_zendesk_ticket_schedule
+2020-06-24 19:53:56.321468 (Thread-3): Writing injected SQL for node "model.zendesk_source.stg_zendesk_user"
+2020-06-24 19:53:56.326943 (Thread-1): Began running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-24 19:53:56.328421 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_group_id"
+2020-06-24 19:53:56.328704 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.329114 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_organization_id".
+2020-06-24 19:53:56.329547 (Thread-4): Finished running node model.zendesk_source.stg_zendesk_ticket_sla_policy
+2020-06-24 19:53:56.329738 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk_source.stg_zendesk_ticket_schedule).
+2020-06-24 19:53:56.329917 (Thread-4): Began running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-24 19:53:56.330082 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.330429 (Thread-1): Compiling test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-24 19:53:56.330744 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_comment_id".
+2020-06-24 19:53:56.331009 (Thread-3): Finished running node model.zendesk_source.stg_zendesk_user
+2020-06-24 19:53:56.331127 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.338757 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_organization_id"
+2020-06-24 19:53:56.338867 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.339040 (Thread-3): Began running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-24 19:53:56.339190 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.339685 (Thread-4): Compiling test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-24 19:53:56.340018 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_ticket_id".
+2020-06-24 19:53:56.340134 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.340461 (Thread-2): Finished running node test.zendesk_source.source_not_null_zendesk_group_id
+2020-06-24 19:53:56.348393 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_comment_id"
+2020-06-24 19:53:56.348484 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.348611 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.348837 (Thread-2): Began running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-24 19:53:56.349107 (Thread-3): Compiling test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-24 19:53:56.349429 (Thread-1): Finished running node test.zendesk_source.source_not_null_zendesk_organization_id
+2020-06-24 19:53:56.349742 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_not_null_zendesk_user_id".
+2020-06-24 19:53:56.354978 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.358115 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_ticket_id"
+2020-06-24 19:53:56.358234 (Thread-1): Began running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-24 19:53:56.358433 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.358560 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.359021 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_group_id".
+2020-06-24 19:53:56.359136 (Thread-2): Compiling test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-24 19:53:56.359480 (Thread-4): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_comment_id
+2020-06-24 19:53:56.359566 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.359766 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_not_null_zendesk_organization_id).
+2020-06-24 19:53:56.366235 (Thread-4): Began running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-24 19:53:56.368449 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_not_null_zendesk_user_id"
+2020-06-24 19:53:56.368602 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.368875 (Thread-1): Compiling test.zendesk_source.source_unique_zendesk_group_id
+2020-06-24 19:53:56.369107 (Thread-4): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_organization_id".
+2020-06-24 19:53:56.369496 (Thread-3): Finished running node test.zendesk_source.source_not_null_zendesk_ticket_id
+2020-06-24 19:53:56.374746 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.377944 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_group_id"
+2020-06-24 19:53:56.378178 (Thread-3): Began running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-24 19:53:56.378447 (Thread-4): Compiling test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-24 19:53:56.378525 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.379159 (Thread-3): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_comment_id".
+2020-06-24 19:53:56.388289 (Thread-4): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_organization_id"
+2020-06-24 19:53:56.388477 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.388705 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.388856 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.389314 (Thread-2): Finished running node test.zendesk_source.source_not_null_zendesk_user_id
+2020-06-24 19:53:56.389438 (Thread-3): Compiling test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-24 19:53:56.389622 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.389808 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.390027 (Thread-2): Began running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-24 19:53:56.398350 (Thread-3): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_comment_id"
+2020-06-24 19:53:56.398601 (Thread-1): Finished running node test.zendesk_source.source_unique_zendesk_group_id
+2020-06-24 19:53:56.398736 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.399072 (Thread-2): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_ticket_id".
+2020-06-24 19:53:56.399309 (Thread-1): Began running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-24 19:53:56.399601 (Thread-4): Finished running node test.zendesk_source.source_unique_zendesk_organization_id
+2020-06-24 19:53:56.399813 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.400048 (Thread-1): Acquiring new bigquery connection "test.zendesk_source.source_unique_zendesk_user_id".
+2020-06-24 19:53:56.400155 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.400359 (Thread-4): Began running node model.zendesk.sla_policy_historical
+2020-06-24 19:53:56.400475 (Thread-2): Compiling test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-24 19:53:56.400611 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_unique_zendesk_group_id).
+2020-06-24 19:53:56.400712 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.401047 (Thread-4): Acquiring new bigquery connection "model.zendesk.sla_policy_historical".
+2020-06-24 19:53:56.407564 (Thread-1): Compiling test.zendesk_source.source_unique_zendesk_user_id
+2020-06-24 19:53:56.409548 (Thread-2): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_ticket_id"
+2020-06-24 19:53:56.409857 (Thread-3): Finished running node test.zendesk_source.source_unique_zendesk_ticket_comment_id
+2020-06-24 19:53:56.409967 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.418556 (Thread-1): Writing injected SQL for node "test.zendesk_source.source_unique_zendesk_user_id"
+2020-06-24 19:53:56.418823 (Thread-3): Began running node model.zendesk.remove_private_tickets
+2020-06-24 19:53:56.418970 (Thread-4): Compiling model.zendesk.sla_policy_historical
+2020-06-24 19:53:56.419658 (Thread-3): Acquiring new bigquery connection "model.zendesk.remove_private_tickets".
+2020-06-24 19:53:56.419807 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.420060 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.425803 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.436416 (Thread-4): Writing injected SQL for node "model.zendesk.sla_policy_historical"
+2020-06-24 19:53:56.436657 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.436915 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.437135 (Thread-3): Compiling model.zendesk.remove_private_tickets
+2020-06-24 19:53:56.437567 (Thread-1): Finished running node test.zendesk_source.source_unique_zendesk_user_id
+2020-06-24 19:53:56.437885 (Thread-2): Finished running node test.zendesk_source.source_unique_zendesk_ticket_id
+2020-06-24 19:53:56.443215 (Thread-1): Began running node model.zendesk.ticket_historical_status
+2020-06-24 19:53:56.452834 (Thread-3): Writing injected SQL for node "model.zendesk.remove_private_tickets"
+2020-06-24 19:53:56.453130 (Thread-2): Began running node model.zendesk.ticket_schedule
+2020-06-24 19:53:56.453507 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-06-24 19:53:56.454032 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_schedule".
+2020-06-24 19:53:56.454188 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.454443 (Thread-1): Re-using an available connection from the pool (formerly test.zendesk_source.source_unique_zendesk_user_id).
+2020-06-24 19:53:56.454535 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.454743 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.454996 (Thread-4): Finished running node model.zendesk.sla_policy_historical
+2020-06-24 19:53:56.455128 (Thread-1): Compiling model.zendesk.ticket_historical_status
+2020-06-24 19:53:56.455404 (Thread-3): Finished running node model.zendesk.remove_private_tickets
+2020-06-24 19:53:56.455521 (Thread-2): Compiling model.zendesk.ticket_schedule
+2020-06-24 19:53:56.455635 (Thread-4): Began running node model.zendesk.public_comments
+2020-06-24 19:53:56.468752 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_historical_status"
+2020-06-24 19:53:56.468895 (Thread-3): Began running node model.zendesk.tickets_enhanced
+2020-06-24 19:53:56.480729 (Thread-4): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-06-24 19:53:56.483085 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_schedule"
+2020-06-24 19:53:56.483423 (Thread-3): Acquiring new bigquery connection "model.zendesk.tickets_enhanced".
+2020-06-24 19:53:56.483583 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.483825 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.483985 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.484207 (Thread-4): Compiling model.zendesk.public_comments
+2020-06-24 19:53:56.484368 (Thread-3): Compiling model.zendesk.tickets_enhanced
+2020-06-24 19:53:56.484468 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.484833 (Thread-1): Finished running node model.zendesk.ticket_historical_status
+2020-06-24 19:53:56.517783 (Thread-4): Writing injected SQL for node "model.zendesk.public_comments"
+2020-06-24 19:53:56.519966 (Thread-3): Writing injected SQL for node "model.zendesk.tickets_enhanced"
+2020-06-24 19:53:56.520218 (Thread-2): Finished running node model.zendesk.ticket_schedule
+2020-06-24 19:53:56.520345 (Thread-1): Began running node model.zendesk.ticket_sla_policy_applied
+2020-06-24 19:53:56.520876 (Thread-2): Began running node model.zendesk.ticket_resolution_times_calendar
+2020-06-24 19:53:56.521083 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.521459 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_sla_policy_applied".
+2020-06-24 19:53:56.521699 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.522025 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-06-24 19:53:56.522229 (Thread-4): Finished running node model.zendesk.public_comments
+2020-06-24 19:53:56.522313 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_historical_status).
+2020-06-24 19:53:56.522498 (Thread-3): Finished running node model.zendesk.tickets_enhanced
+2020-06-24 19:53:56.522579 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.522668 (Thread-4): Began running node model.zendesk.ticket_work_time_calendar
+2020-06-24 19:53:56.522817 (Thread-1): Compiling model.zendesk.ticket_sla_policy_applied
+2020-06-24 19:53:56.522923 (Thread-3): Began running node model.zendesk.ticket_work_time_business
+2020-06-24 19:53:56.523018 (Thread-2): Compiling model.zendesk.ticket_resolution_times_calendar
+2020-06-24 19:53:56.523290 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-06-24 19:53:56.541245 (Thread-3): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-06-24 19:53:56.541422 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_sla_policy_applied"
+2020-06-24 19:53:56.554223 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.554500 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_resolution_times_calendar"
+2020-06-24 19:53:56.554580 (Thread-3): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.554749 (Thread-4): Compiling model.zendesk.ticket_work_time_calendar
+2020-06-24 19:53:56.555083 (Thread-3): Compiling model.zendesk.ticket_work_time_business
+2020-06-24 19:53:56.560791 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.569468 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_work_time_calendar"
+2020-06-24 19:53:56.581316 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.581650 (Thread-1): Finished running node model.zendesk.ticket_sla_policy_applied
+2020-06-24 19:53:56.610056 (Thread-3): Writing injected SQL for node "model.zendesk.ticket_work_time_business"
+2020-06-24 19:53:56.610382 (Thread-2): Finished running node model.zendesk.ticket_resolution_times_calendar
+2020-06-24 19:53:56.610565 (Thread-1): Began running node model.zendesk.ticket_reply_times
+2020-06-24 19:53:56.610899 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.611704 (Thread-1): Acquiring new bigquery connection "model.zendesk.ticket_reply_times".
+2020-06-24 19:53:56.611920 (Thread-2): Began running node model.zendesk.ticket_first_resolution_time_business
+2020-06-24 19:53:56.612041 (Thread-3): finished collecting timing info
+2020-06-24 19:53:56.612321 (Thread-4): Finished running node model.zendesk.ticket_work_time_calendar
+2020-06-24 19:53:56.612408 (Thread-1): Re-using an available connection from the pool (formerly model.zendesk.ticket_sla_policy_applied).
+2020-06-24 19:53:56.612580 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-06-24 19:53:56.612777 (Thread-3): Finished running node model.zendesk.ticket_work_time_business
+2020-06-24 19:53:56.612883 (Thread-4): Began running node model.zendesk.ticket_full_resolution_time_business
+2020-06-24 19:53:56.613025 (Thread-1): Compiling model.zendesk.ticket_reply_times
+2020-06-24 19:53:56.613110 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.613407 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-06-24 19:53:56.626230 (Thread-2): Compiling model.zendesk.ticket_first_resolution_time_business
+2020-06-24 19:53:56.628329 (Thread-1): Writing injected SQL for node "model.zendesk.ticket_reply_times"
+2020-06-24 19:53:56.628443 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.653914 (Thread-4): Compiling model.zendesk.ticket_full_resolution_time_business
+2020-06-24 19:53:56.661158 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_first_resolution_time_business"
+2020-06-24 19:53:56.682669 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_full_resolution_time_business"
+2020-06-24 19:53:56.683079 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.683445 (Thread-2): Finished running node model.zendesk.ticket_first_resolution_time_business
+2020-06-24 19:53:56.683576 (Thread-1): finished collecting timing info
+2020-06-24 19:53:56.683872 (Thread-1): Finished running node model.zendesk.ticket_reply_times
+2020-06-24 19:53:56.684283 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.684587 (Thread-4): Finished running node model.zendesk.ticket_full_resolution_time_business
+2020-06-24 19:53:56.684694 (Thread-4): Began running node model.zendesk.ticket_first_reply_time_business
+2020-06-24 19:53:56.684886 (Thread-4): Acquiring new bigquery connection "model.zendesk.ticket_first_reply_time_business".
+2020-06-24 19:53:56.685004 (Thread-4): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.685174 (Thread-4): Compiling model.zendesk.ticket_first_reply_time_business
+2020-06-24 19:53:56.703791 (Thread-2): Began running node model.zendesk.ticket_metrics
+2020-06-24 19:53:56.704112 (Thread-2): Acquiring new bigquery connection "model.zendesk.ticket_metrics".
+2020-06-24 19:53:56.704191 (Thread-2): Opening a new connection, currently in state closed
+2020-06-24 19:53:56.704269 (Thread-2): Compiling model.zendesk.ticket_metrics
+2020-06-24 19:53:56.721214 (Thread-4): Writing injected SQL for node "model.zendesk.ticket_first_reply_time_business"
+2020-06-24 19:53:56.730536 (Thread-2): Writing injected SQL for node "model.zendesk.ticket_metrics"
+2020-06-24 19:53:56.730841 (Thread-2): finished collecting timing info
+2020-06-24 19:53:56.731184 (Thread-2): Finished running node model.zendesk.ticket_metrics
+2020-06-24 19:53:56.731343 (Thread-4): finished collecting timing info
+2020-06-24 19:53:56.731613 (Thread-4): Finished running node model.zendesk.ticket_first_reply_time_business
+2020-06-24 19:53:56.732712 (MainThread): Connection 'master' was properly closed.
+2020-06-24 19:53:56.732795 (MainThread): Connection 'model.zendesk.ticket_reply_times' was left open.
+2020-06-24 19:53:56.732857 (MainThread): Connection 'model.zendesk.ticket_metrics' was properly closed.
+2020-06-24 19:53:56.732915 (MainThread): Connection 'model.zendesk.ticket_work_time_business' was properly closed.
+2020-06-24 19:53:56.732970 (MainThread): Connection 'model.zendesk.ticket_first_reply_time_business' was properly closed.
+2020-06-24 19:53:56.753549 (MainThread): 12:53:56 | Done.
+2020-06-24 19:53:56.753946 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1136a4160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1138ccaf0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113a12a30>]}
+2020-06-24 19:53:56.754296 (MainThread): Flushing usage events
