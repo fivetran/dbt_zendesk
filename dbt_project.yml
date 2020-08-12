@@ -1,3 +1,5 @@
+config-version: 2
+
 name: 'zendesk'
 version: '0.0.1'
 
@@ -6,13 +8,11 @@ profile: 'fivetran'
 
 models:
     zendesk:
-        materialized: ephemeral
+        materialized: table
         base:
-            materialized: ephemeral
+            materialized: table
         intermediate:
-            materialized: ephemeral 
-        vars:
-            default_schedule_id: '15574'
+            materialized: table 
 
     zendesk_source:
         vars:
