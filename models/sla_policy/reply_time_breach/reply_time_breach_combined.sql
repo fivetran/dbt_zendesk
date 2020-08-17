@@ -1,12 +1,18 @@
+{{ config(enabled=var('using_sla_policy', True)) }}
+
 with reply_time_calendar_hours_breached as (
   
   select *
   from {{ ref('reply_time_calendar_hours_breached') }}
 
+{% if var('using_schedules', True) %}
+
 ), reply_time_business_hours_breached as (
  
   select *
   from {{ ref('reply_time_business_hours_breached') }}
+
+{% endif %}
 
 ), ticket_field_history as (
  
@@ -36,11 +42,14 @@ with reply_time_calendar_hours_breached as (
     breached_at
   from reply_time_calendar_hours_breached
 
+{% if var('using_schedules', True) %}
+
   union all
 
   select 
     *
   from reply_time_business_hours_breached
+{% endif %}
 
 -- Now that we have the breach time, see when the first reply after the sla policy was applied took place.
 ), ticket_solved_times as (

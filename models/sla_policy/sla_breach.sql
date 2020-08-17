@@ -1,3 +1,5 @@
+{{ config(enabled=var('using_sla_policy', True)) }}
+
 --final step where we union together all of the reply time and agent work time breaches
 
 with reply_time_breach as (
@@ -10,11 +12,14 @@ with reply_time_breach as (
   select *
   from {{ ref('agent_work_time_calendar_hours_breached') }}
 
+{% if var('using_schedules', True) %}
+
 ), agent_work_business_breach as (
 
   select *
   from {{ ref('agent_work_time_business_hours_breached') }}
 
+{% endif %}
 
 ), all_breaches_unioned as (
   select
@@ -37,6 +42,8 @@ union all
     breached_at
   from agent_work_calendar_breach
 
+{% if var('using_schedules', True) %}
+
 union all 
 
   select 
@@ -47,6 +54,8 @@ union all
     'true' as in_business_hours,
     breached_at
   from agent_work_business_breach
+
+{% endif %}
 
 )
 

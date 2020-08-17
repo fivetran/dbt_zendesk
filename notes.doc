@@ -1,0 +1,17 @@
+open questions/optimizations
+- can we combine ticket_first_resolution_time_business & ticket_full_resolution_time_business?
+- can I write a macro that will take two times and convert from calendar to business hours?
+
+
+
+To do:
+- Cross db compatibility
+
+
+- create ticket for user historical roles (was this ever mentioned?)
+
+- agent work time
+
+assignee_id
+status
+priority

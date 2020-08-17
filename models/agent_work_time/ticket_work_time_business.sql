@@ -1,12 +1,14 @@
+{{ config(enabled=var('using_schedules', True)) }}
+
 with ticket_historical_status as (
 
     select *
     from {{ ref('ticket_historical_status') }}
 
-), ticket_schedule as (
+), ticket_schedules as (
 
     select *
-    from {{ ref('ticket_schedule') }}
+    from {{ ref('ticket_schedules') }}
 
 ), schedule as (
 
@@ -18,12 +20,12 @@ with ticket_historical_status as (
     select
       ticket_historical_status.ticket_id,
       ticket_historical_status.status as ticket_status,
-      ticket_schedule.schedule_id,
+      ticket_schedules.schedule_id,
       greatest(valid_starting_at, schedule_created_at) as status_schedule_start,
       least(valid_ending_at, schedule_invalidated_at) as status_schedule_end
     from ticket_historical_status
-    left join ticket_schedule
-      on ticket_historical_status.ticket_id = ticket_schedule.ticket_id
+    left join ticket_schedules
+      on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
     where timestamp_diff(least(valid_ending_at, schedule_invalidated_at), greatest(valid_starting_at, schedule_created_at), second) > 0
 
 ), ticket_full_solved_time as (

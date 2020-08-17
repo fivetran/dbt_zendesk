@@ -1,12 +1,14 @@
+{{ config(enabled=var('using_schedules', True)) }}
+
 with ticket_reply_times as (
 
     select *
     from {{ ref('ticket_reply_times') }}
 
-), ticket_schedule as (
+), ticket_schedules as (
 
     select *
-    from {{ ref('ticket_schedule') }}
+    from {{ ref('ticket_schedules') }}
 
 ), schedule as (
 
@@ -27,22 +29,22 @@ with ticket_reply_times as (
 
   select 
     first_reply_time.ticket_id,
-    ticket_schedule.schedule_created_at,
-    ticket_schedule.schedule_invalidated_at,
-    ticket_schedule.schedule_id,
+    ticket_schedules.schedule_created_at,
+    ticket_schedules.schedule_invalidated_at,
+    ticket_schedules.schedule_id,
     round(
-      timestamp_diff(ticket_schedule.schedule_created_at, 
-        timestamp_trunc(ticket_schedule.schedule_created_at, week), second)/60
+      timestamp_diff(ticket_schedules.schedule_created_at, 
+        timestamp_trunc(ticket_schedules.schedule_created_at, week), second)/60
       , 0) as start_time_in_minutes_from_week,
     greatest(0,
       round(
         timestamp_diff(
-          least(ticket_schedule.schedule_invalidated_at, min(first_reply_time.agent_responsed_at))
-        ,ticket_schedule.schedule_created_at, second)/60
+          least(ticket_schedules.schedule_invalidated_at, min(first_reply_time.agent_responsed_at))
+        ,ticket_schedules.schedule_created_at, second)/60
       , 0)) as raw_delta_in_minutes
   
   from first_reply_time
-  join ticket_schedule on first_reply_time.ticket_id = ticket_schedule.ticket_id
+  join ticket_schedules on first_reply_time.ticket_id = ticket_schedules.ticket_id
   group by 1, 2, 3, 4
 
 ), weekly_periods as (

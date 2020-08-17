@@ -1,27 +1,16 @@
-{{ config(enabled=var('using_sla_policy', True)) }}
+{{ config(enabled=enabled_vars(['using_sla_policy','using_schedules'])) }}
+
 
 -- step 3, determine when an SLA will breach for SLAs that are in business hours
 
-with ticket as (
-  
-  select *
-  from {{ ref('stg_zendesk_ticket') }}
-
-), ticket_schedule as (
+with ticket_schedules as (
  
   select *
-  from {{ ref('stg_zendesk_ticket_schedule') }}
+  from {{ ref('ticket_schedules') }}
 
 ), schedule as (
  
-  select 
-    
-    cast(schedule_id as string) as schedule_id,
-    end_time_utc,
-    start_time_utc,
-    schedule_name,
-    created_at
-
+  select *
   from {{ ref('stg_zendesk_schedule') }}
 
 ), sla_policy_applied as (
@@ -29,70 +18,6 @@ with ticket as (
   select *
   from {{ ref('sla_policy_applied') }}
 
-
-), default_schedule_events as (
--- Goal: understand the working schedules applied to tickets, so that we can then determine the applicable business hours/schedule.
--- Your default schedule is used for all tickets, unless you set up a trigger to apply a specific schedule to specific tickets.
-
--- This portion of the query creates ticket_schedules for these "default" schedules, as the tikcet_schedule table only includes
--- trigger schedules
-
-{% if execute %}
-
-    {% set default_schedule_id_query %}
-        with set_default_schedule_flag as (
-          select 
-            row_number() over (order by created_at) = 1 as is_default_schedule,
-            schedule_id
-          from {{ ref('stg_zendesk_schedule') }}
-        )
-        select 
-          schedule_id
-        from set_default_schedule_flag
-        where is_default_schedule
-
-    {% endset %}
-
-    {% set default_schedule_id = run_query(default_schedule_id_query).columns[0][0]|string %}
-
-    {% endif %}
-
-  select
-    ticket.ticket_id,
-    ticket.created_at as schedule_created_at,
-    '{{default_schedule_id}}' as schedule_id
-  from ticket
-  left join ticket_schedule as first_schedule
-    on first_schedule.ticket_id = ticket.ticket_id
-    and timestamp_add(first_schedule.created_at, interval -5 second) <= ticket.created_at -- make cross-db compatible
-    and first_schedule.created_at >= ticket.created_at    
-  where first_schedule.ticket_id is null
-
-), schedule_events as (
-  
-  select
-    *
-  from default_schedule_events
-  
-  union all
-  
-  select 
-    ticket_id,
-    created_at as schedule_created_at,
-    cast(schedule_id as string) as schedule_id
-  from ticket_schedule
-
-), ticket_schedules as (
-  
-  select 
-    ticket_id,
-    schedule_id,
-    schedule_created_at,
-    coalesce(lead(schedule_created_at) over (partition by ticket_id order by schedule_created_at)
-            , timestamp("9999-12-31 01:01:01")) as schedule_invalidated_at --- make cross db compatible
-  from schedule_events
-      
--- -- step 3b, using the sla target and sla_applied_at, figure out when the breach will happen for sla's that are in business hours.
 
 ), schedule_business_hours as (
   
@@ -144,7 +69,7 @@ with ticket as (
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
-    and weekly_periods.schedule_id = cast(schedule.schedule_id as string)
+    and weekly_periods.schedule_id = schedule_id
   
 ), intercepted_periods_with_breach_flag as (
   

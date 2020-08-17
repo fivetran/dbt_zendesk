@@ -16,14 +16,4 @@ models:
 
     zendesk_source:
         vars:
-            zendesk_schema: 'zendesk'            
-
-
-# need to figure out how to make "default schedule" into a 
-#   select 
-#     row_number() over (order by created_at) = 1 as is_default_schedule,
-#     id,
-#     start_time_utc,
-#     end_time_utc
-#   from `fivetran-sisense-1-mkto-ware-h.zendesk.schedule` 
-#   where not _fivetran_deleted            
+            zendesk_schema: 'zendesk'  
