@@ -5,13 +5,8 @@ open questions/optimizations
 
 
 To do:
-- Cross db compatibility
-
-
 - create ticket for user historical roles (was this ever mentioned?)
-
+- Cross db compatibility
 - agent work time
-
-assignee_id
-status
-priority
+- historical ticket details
+- README

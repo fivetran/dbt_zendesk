@@ -20,7 +20,7 @@ with ticket as (
 -- Goal: understand the working schedules applied to tickets, so that we can then determine the applicable business hours/schedule.
 -- Your default schedule is used for all tickets, unless you set up a trigger to apply a specific schedule to specific tickets.
 
--- This portion of the query creates ticket_schedules for these "default" schedules, as the tikcet_schedule table only includes
+-- This portion of the query creates ticket_schedules for these "default" schedules, as the ticket_schedule table only includes
 -- trigger schedules
 
 {% if execute %}

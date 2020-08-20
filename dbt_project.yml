@@ -12,8 +12,22 @@ models:
         base:
             materialized: table
         intermediate:
-            materialized: table 
+            materialized: table
 
     zendesk_source:
         vars:
             zendesk_schema: 'zendesk'  
+
+on-run-start: "{{ ticket_field_history_columns_warning() }}"
+
+vars:
+    zendesk:
+        ticket_field_history_columns: [
+            'assignee_id',
+            'status',
+            'priority'
+        ]
+        
+        field_history: "{{ ref('stg_zendesk_ticket_field_history') }}"
+        ticket: "{{ ref('stg_zendesk_ticket') }}"
+        

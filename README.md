@@ -36,6 +36,20 @@ vars:
     Zendesk_schema: your_schema_name 
 ```
 
+
+The `marketo__lead_history` model generates historical data for the columns specified by the `lead_history_columns` variable. By default, the columns tracked are `lead_status`, `urgency`, `priority`, `relative_score`, `relative_urgency`, `demographic_score_marketing` and `behavior_score_marketing`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file.  After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
+
+```yml
+# dbt_project.yml
+
+...
+config-version: 2
+
+vars:
+  marketo:
+    lead_history_columns: ['the','list','of','column','names']
+```
+
 ## Contributions
 
 Additional contributions to this package are very welcome! Please create issues
