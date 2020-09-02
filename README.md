@@ -2,21 +2,18 @@
 
 This package models Zendesk data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://docs.google.com/presentation/d/1AQv77L9WlDXqRS0gkdQTmg1HSUo-Znlcoq7CHg0JrP8).
 
-The main focus of this package is to enable you to better understand the performance of your Support team. Metrics focused on response times, resolution times and work time are calculated for you. Optionally, these metrics can be converted to business times if you use Zendesk's scheduling feature.  SLA policy breaches are also calculated.
+The main focus of this package is to enable you to better understand the performance of your Support team. Metrics focused on response times, resolution times and work time are calculated for you. Optionally, these metrics can be converted to business times if you use Zendesk's scheduling feature.  Optionally, SLA policy breaches are also calculated.
 
 ## Models
 
 This package contains transformation models, designed to work simultaneously with our [Zendesk source package](https://github.com/fivetran/dbt_zendesk_source). A depenedency on the source package is declared in this package's `packages.yml` file, so it will automatically download when you run `dbt deps`. The primary outputs of this package are described below. Intermediate models are used to create these output models.
 
-| **model**                  | **description**                                                                                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Zendesk\_issues             | Each record represents a Zendesk issue, enriched with data about it's assignees, milestones, and time comparisons.                                             |
-| Zendesk\_pull\_requests     | Each record represents a Zendesk pull request, enriched with data about it's repository, reviewers, and durations between review requests, merges and reviews. |
-| Zendesk\_daily\_metrics     | Each record represents a single day, enriched with metrics about PRs and issues that were created and closed during that period.                              |
-| Zendesk\_weekly\_metrics    | Each record represents a single week, enriched with metrics about PRs and issues that were created and closed during that period.                             |
-| Zendesk\_monthly\_metrics   | Each record represents a single month, enriched with metrics about PRs and issues that were created and closed during that period.                            |
-| Zendesk\_quarterly\_metrics | Each record represents a single quarter, enriched with metrics about PRs and issues that were created and closed during that period.                          |
-
+| **model**                    | **description**                                                                                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| zendesk_ticket_metrics       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported  |
+| zendesk_ticket_enhanced      | Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.                           |
+| zendesk_ticket_field_history | A daily historical view of the ticket field values defined in the ticket_field_history_columns variable                                                         |
+| zendesk_sla_breach           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
 ## Installation Instructions
 Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
@@ -37,7 +34,7 @@ vars:
 ```
 
 
-The `marketo__lead_history` model generates historical data for the columns specified by the `lead_history_columns` variable. By default, the columns tracked are `lead_status`, `urgency`, `priority`, `relative_score`, `relative_urgency`, `demographic_score_marketing` and `behavior_score_marketing`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file.  After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
+The `zendesk_ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority` and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file.  After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
 
 ```yml
 # dbt_project.yml
@@ -46,8 +43,8 @@ The `marketo__lead_history` model generates historical data for the columns spec
 config-version: 2
 
 vars:
-  marketo:
-    lead_history_columns: ['the','list','of','column','names']
+  zendesk:
+    ticket_field_history_columns: ['the','list','of','column','names']
 ```
 
 ## Contributions
@@ -58,6 +55,7 @@ or open PRs against `master`. Check out
 on the best workflow for contributing to a package.
 
 ## Resources:
+- Provide [feedback](https://www.surveymonkey.com/r/DQ7K7WW) on our existing dbt packages or what you'd like to see next
 - Learn more about Fivetran [here](https://fivetran.com/docs)
 - Check out [Fivetran's blog](https://fivetran.com/blog)
 - Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)

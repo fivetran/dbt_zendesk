@@ -4,76 +4,36 @@
 -- This is complicated, as SLAs minutes are only counted while the ticket is in 'new' or 'open' status.
 
 -- Additionally, for business hours, only 'new' or 'open' status hours are counted if they are also during business hours
-with sla_policy_applied as (
+with agent_work_time_filtered_statuses as (
 
   select *
-  from {{ ref('sla_policy_applied') }}
-
-), ticket_field_history as (
-
-  select * 
-  from {{ ref('stg_zendesk_ticket_field_history') }}
+  from {{ ref('agent_work_time_filtered_statuses') }}
+  where in_business_hours = 'true'
 
 ), schedule as (
 
   select * 
   from {{ ref('stg_zendesk_schedule') }}
 
-), agent_work_time_business_sla as (
-  select
-    *
-  from sla_policy_applied 
-  where metric = 'agent_work_time'
-    and in_business_hours = 'true'
+), ticket_schedules as (
 
--- Figure out when the ticket was in 'new' and 'open'
-), ticket_historical_status as (
-
-  select
-    ticket_id,
-    valid_starting_at,
-    coalesce(valid_ending_at, timestamp_add(current_timestamp, interval 30 day)) as valid_ending_at,
-    value as status,
-  from zendesk.ticket_field_history
-  where field_name = 'status'
-
-), ticket_agent_work_times as (
-
-  select  
-    ticket_historical_status.ticket_id,
-    agent_work_time_business_sla.ticket_created_at,
-    greatest(ticket_historical_status.valid_starting_at, agent_work_time_business_sla.sla_applied_at) as valid_starting_at,
-    ticket_historical_status.valid_ending_at,
-    agent_work_time_business_sla.sla_applied_at,
-    agent_work_time_business_sla.target,    
-  from ticket_historical_status
-  join agent_work_time_business_sla
-    on ticket_historical_status.ticket_id = agent_work_time_business_sla.ticket_id
-  where status in ('new', 'open') -- these are the only statuses that count as "agent work time"
-  and sla_applied_at < valid_ending_at
-
-), schedule as (
-
-    select
-      schedule_id,
-      start_time_utc,
-      end_time_utc
-    from schedule
-
+  select * 
+  from {{ ref('ticket_schedules') }}
+  
 -- cross schedules with work time
 ), ticket_status_crossed_with_schedule as (
   
     select
-      ticket_agent_work_times.ticket_id,
-      ticket_agent_work_times.sla_applied_at,
---       ticket_agent_work_times.ticket_created_at,
-      ticket_agent_work_times.target,      
-      ticket_schedule.schedule_id,
+      agent_work_time_filtered_statuses.ticket_id,
+      agent_work_time_filtered_statuses.sla_applied_at,
+--       agent_work_time_filtered_statuses.ticket_created_at,
+      agent_work_time_filtered_statuses.target,      
+      ticket_schedules.schedule_id,
       greatest(valid_starting_at, schedule_created_at) as valid_starting_at,
       least(valid_ending_at, schedule_invalidated_at) as valid_ending_at
-    from ticket_agent_work_times
-    left join ticket_schedule
-      on ticket_agent_work_times.ticket_id = ticket_schedule.ticket_id
+    from agent_work_time_filtered_statuses
+    left join ticket_schedules
+      on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
     where timestamp_diff(least(valid_ending_at, schedule_invalidated_at), greatest(valid_starting_at, schedule_created_at), second) > 0
 
 

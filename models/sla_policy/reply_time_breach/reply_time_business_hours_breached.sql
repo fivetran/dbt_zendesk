@@ -69,7 +69,7 @@ with ticket_schedules as (
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
-    and weekly_periods.schedule_id = schedule_id
+    and weekly_periods.schedule_id = schedule.schedule_id
   
 ), intercepted_periods_with_breach_flag as (
   
