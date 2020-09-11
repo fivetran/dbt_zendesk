@@ -1,6 +1,6 @@
 {% macro string_agg(field_to_agg, delimiter) -%}
 
-{{ adapter_macro('zendesk.string_agg', field_to_agg, delimiter) }}
+{{ adapter.dispatch('string_agg', packages = zendesk._get_utils_namespaces()) (field_to_agg, delimiter) }}
 
 {%- endmacro %}
 
