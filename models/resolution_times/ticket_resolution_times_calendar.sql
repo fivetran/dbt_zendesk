@@ -28,8 +28,14 @@ with historical_solved_status as (
     ticket.created_at,
     solved_times.first_solved_at,
     solved_times.last_solved_at,
-    timestamp_diff(solved_times.first_solved_at,ticket.created_at, minute) as first_resolution_calendar_minutes,
-    timestamp_diff(solved_times.last_solved_at,ticket.created_at, minute) as final_resolution_calendar_minutes
+    {{ timestamp_diff(
+        'ticket.created_at', 
+        'solved_times.first_solved_at',
+        'minute' ) }} as first_resolution_calendar_minutes,
+    {{ timestamp_diff(
+        'ticket.created_at', 
+        'solved_times.last_solved_at',
+        'minute') }} as final_resolution_calendar_minutes
 
   from ticket
   left join solved_times

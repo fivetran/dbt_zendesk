@@ -30,6 +30,9 @@ with ticket_public_comments as (
 
   select
     *,
-    timestamp_diff(agent_responded_at,end_user_comment_created_at, minute) as reply_time_calendar_minutes
+    {{ timestamp_diff(
+      'end_user_comment_created_at',
+      'agent_responded_at',
+      'minute') }} as reply_time_calendar_minutes
   from reply_timestamps
   order by 1,2

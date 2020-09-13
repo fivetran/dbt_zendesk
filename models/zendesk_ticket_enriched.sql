@@ -6,7 +6,7 @@ with ticket as (
     select *
     from {{ ref('stg_zendesk_ticket') }}
 
-), user as (
+), users as (
 
     select *
     from {{ ref('stg_zendesk_user') }}
@@ -47,13 +47,13 @@ with ticket as (
     
     from ticket
 
-    join user as requester
+    join users as requester
         on requester.user_id = ticket.requester_id
     
-    join user as submitter
+    join users as submitter
         on submitter.user_id = ticket.submitter_id
     
-    left join user as assignee
+    left join users as assignee
         on assignee.user_id = ticket.assignee_id
 
     left join ticket_group

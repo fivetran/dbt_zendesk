@@ -4,7 +4,7 @@ with public_ticket_comment as (
     from {{ ref('stg_zendesk_ticket_comment') }}
     where is_public
 
-), user as (
+), users as (
 
     select *
     from {{ ref('stg_zendesk_user') }}
@@ -20,7 +20,7 @@ with public_ticket_comment as (
     
     from public_ticket_comment
     
-    join user as commenter
+    join users as commenter
         on commenter.user_id = public_ticket_comment.user_id
 
 ), add_previous_commenter_role as (
@@ -30,7 +30,7 @@ with public_ticket_comment as (
         coalesce(
             lag(commenter_role) over (partition by ticket_id order by created_at)
             , 'first_comment') 
-            as previous_commenter_role,    
+            as previous_commenter_role
 
     from joined
 )

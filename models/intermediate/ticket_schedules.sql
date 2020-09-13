@@ -50,7 +50,7 @@ with ticket as (
   from ticket
   left join ticket_schedule as first_schedule
     on first_schedule.ticket_id = ticket.ticket_id
-    and timestamp_add(first_schedule.created_at, interval -5 second) <= ticket.created_at -- make cross-db compatible
+    and {{ timestamp_add('second', -5, 'first_schedule.created_at') }} <= ticket.created_at
     and first_schedule.created_at >= ticket.created_at    
   where first_schedule.ticket_id is null
 
@@ -75,7 +75,7 @@ with ticket as (
     schedule_id,
     schedule_created_at,
     coalesce(lead(schedule_created_at) over (partition by ticket_id order by schedule_created_at)
-            , timestamp("9999-12-31 01:01:01")) as schedule_invalidated_at --- make cross db compatible
+            , {{ timestamp_add("hour", 1000, "" ~ dbt_utils.current_timestamp() ~ "") }} ) as schedule_invalidated_at
   from schedule_events
 
 )

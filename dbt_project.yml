@@ -5,6 +5,7 @@ version: '0.0.1'
 
 profile: 'fivetran'
 
+require-dbt-version: '>=0.18.0'
 
 models:
     zendesk:
@@ -30,4 +31,6 @@ vars:
         
         field_history: "{{ ref('stg_zendesk_ticket_field_history') }}"
         ticket: "{{ ref('stg_zendesk_ticket') }}"
-        
+        dbt_utils_dispatch_list:
+            - zendesk 
+            - dbt_utils 

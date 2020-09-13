@@ -22,31 +22,48 @@ with ticket_resolution_times_calendar as (
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
-    round(
-      timestamp_diff(ticket_schedules.schedule_created_at, 
-        timestamp_trunc(ticket_schedules.schedule_created_at, week), second)/60
-      , 0) as start_time_in_minutes_from_week,
+    round({{ timestamp_diff(
+            "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
+            'ticket_schedules.schedule_created_at',
+            'second') }} /60,
+          0) as start_time_in_minutes_from_week,
     greatest(0,
       round(
-        timestamp_diff(
-          least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))
-        ,ticket_schedules.schedule_created_at, second)/60
+        {{ timestamp_diff(
+          'ticket_schedules.schedule_created_at',
+          'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))',
+          'second') }}/60
       , 0)) as raw_delta_in_minutes
+      
   from ticket_resolution_times_calendar
   join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
   group by 1, 2, 3, 4
 
+), weeks as (
+
+    {{ dbt_utils.generate_series(208) }}
+
+), weeks_cross_ticket_first_resolution_time as (
+
+    select 
+
+      ticket_first_resolution_time.*,
+      generated_number - 1 as week_number
+
+    from ticket_first_resolution_time
+    cross join weeks
+    where floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number - 1
+
+
 ), weekly_periods as (
   
-  select ticket_id,
-         start_time_in_minutes_from_week,
-         raw_delta_in_minutes,
-         week_number,
-         schedule_id,
-         greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
-         least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
-  from ticket_first_resolution_time, 
-  unnest(generate_array(0, floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)), 1)) as week_number
+    select 
+
+      weeks_cross_ticket_first_resolution_time.*,
+      greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
+      least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
+    
+    from weeks_cross_ticket_first_resolution_time
 
 ), intercepted_periods as (
 
@@ -65,7 +82,8 @@ with ticket_resolution_times_calendar as (
 
 )
 
-  select ticket_id,
-         sum(scheduled_minutes) as first_resolution_business_minutes
+  select 
+    ticket_id,
+    sum(scheduled_minutes) as first_resolution_business_minutes
   from intercepted_periods
   group by 1

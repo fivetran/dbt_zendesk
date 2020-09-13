@@ -26,39 +26,47 @@ with ticket_historical_status as (
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
-    where timestamp_diff(least(valid_ending_at, schedule_invalidated_at), greatest(valid_starting_at, schedule_created_at), second) > 0
+      where {{ timestamp_diff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
 
 ), ticket_full_solved_time as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-      round(timestamp_diff(
-              ticket_status_crossed_with_schedule.status_schedule_start, 
-              timestamp_trunc(
-                  ticket_status_crossed_with_schedule.status_schedule_start, 
-                  week), 
-              second)/60,
+      round({{ timestamp_diff(
+              "" ~ dbt_utils.date_trunc('week', 'ticket_status_crossed_with_schedule.status_schedule_start') ~ "", 
+              'ticket_status_crossed_with_schedule.status_schedule_start',
+              'second') }} /60,
             0) as start_time_in_minutes_from_week,
-      round(timestamp_diff(
-              ticket_status_crossed_with_schedule.status_schedule_end, 
-              ticket_status_crossed_with_schedule.status_schedule_start, 
-              second)/60,
+      round({{ timestamp_diff(
+              'ticket_status_crossed_with_schedule.status_schedule_start',
+              'ticket_status_crossed_with_schedule.status_schedule_end',
+              'second') }} /60,
             0) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
     group by 1, 2, 3, 4, 5
 
+), weeks as (
+
+    {{ dbt_utils.generate_series(208) }}
+
+), weeks_cross_ticket_full_solved_time as (
+    
+    select 
+      ticket_full_solved_time.*,
+      generated_number - 1 as week_number
+    from ticket_full_solved_time
+    cross join weeks
+    where floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number -1
+
 ), weekly_periods as (
 
-    select ticket_id,
-          start_time_in_minutes_from_week,
-          raw_delta_in_minutes,
-          week_number,
-          schedule_id,
-          ticket_status,
-          greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
-          least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
-    from ticket_full_solved_time,
-        unnest(generate_array(0, floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)), 1)) as week_number
+    select
+
+      weeks_cross_ticket_full_solved_time.*,
+      greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
+      least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
+    
+    from weeks_cross_ticket_full_solved_time
 
 ), intercepted_periods as (
   

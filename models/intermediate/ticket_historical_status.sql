@@ -1,3 +1,5 @@
+-- To do -- can we delete ticket_status_counter and unique_status_counter?
+
 with ticket_status_history as (
 
     select *
@@ -11,7 +13,10 @@ with ticket_status_history as (
     ticket_id,
     valid_starting_at,
     valid_ending_at,
-    timestamp_diff(coalesce(valid_ending_at,current_timestamp()),valid_starting_at, minute) as status_duration_calendar_minutes,
+    {{ timestamp_diff(
+        'valid_starting_at',
+        "coalesce(valid_ending_at, " ~ dbt_utils.current_timestamp() ~ ")",
+        'minute') }} as status_duration_calendar_minutes,
     value as status,
     -- MIGHT BE ABLE TO DELETE ROWS BELOW
     row_number() over (partition by ticket_id order by valid_starting_at) as ticket_status_counter,

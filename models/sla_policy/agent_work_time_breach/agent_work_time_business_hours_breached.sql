@@ -34,31 +34,48 @@ with agent_work_time_filtered_statuses as (
     from agent_work_time_filtered_statuses
     left join ticket_schedules
       on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
-    where timestamp_diff(least(valid_ending_at, schedule_invalidated_at), greatest(valid_starting_at, schedule_created_at), second) > 0
+    where {{ timestamp_diff(
+              'greatest(valid_starting_at, schedule_created_at)', 
+              'least(valid_ending_at, schedule_invalidated_at)', 
+              'second') }} > 0
 
 
 ), ticket_full_solved_time as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-      round(timestamp_diff(
-              ticket_status_crossed_with_schedule.valid_starting_at, 
-              timestamp_trunc(
-                  ticket_status_crossed_with_schedule.valid_starting_at, 
-                  week), 
-              second)/60,
+      round({{ timestamp_diff(
+              "" ~ dbt_utils.date_trunc(
+                  'week',
+                  'ticket_status_crossed_with_schedule.valid_starting_at') ~ "", 
+              'ticket_status_crossed_with_schedule.valid_starting_at', 
+              'second') }} /60,
             0) as valid_starting_at_in_minutes_from_week,
-      round(timestamp_diff(
-              ticket_status_crossed_with_schedule.valid_ending_at, 
-              ticket_status_crossed_with_schedule.valid_starting_at, 
-              second)/60,
+      round({{ timestamp_diff(
+              'ticket_status_crossed_with_schedule.valid_starting_at', 
+              'ticket_status_crossed_with_schedule.valid_ending_at',
+              'second') }} /60,
             0) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
     group by 1, 2, 3, 4, 5, 6, 7
 
+), weeks as (
+
+    {{ dbt_utils.generate_series(208) }}
+
+), weeks_cross_ticket_full_solved_time as (
+    
+    select 
+      ticket_full_solved_time.*,
+      generated_number - 1 as week_number
+    from ticket_full_solved_time
+    cross join weeks
+    where floor((valid_starting_at_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number -1
+
 ), weekly_period_agent_work_time as (
 
     select 
+
       ticket_id,
       sla_applied_at,
       valid_starting_at,
@@ -70,8 +87,8 @@ with agent_work_time_filtered_statuses as (
       schedule_id,
       greatest(0, valid_starting_at_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time_minute,
       least(valid_starting_at_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time_minute
-    from ticket_full_solved_time,
-        unnest(generate_array(0, floor((valid_starting_at_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)), 1)) as week_number
+    
+    from weeks_cross_ticket_full_solved_time
 
 ), intercepted_periods_agent as (
   
@@ -86,7 +103,7 @@ with agent_work_time_filtered_statuses as (
       weekly_period_agent_work_time.ticket_week_end_time_minute,
       schedule.start_time_utc as schedule_start_time,
       schedule.end_time_utc as schedule_end_time,
-      least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes,
+      least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes
     from weekly_period_agent_work_time
     join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
@@ -97,7 +114,9 @@ with agent_work_time_filtered_statuses as (
     select 
       *,
       sum(scheduled_minutes) over 
-        (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time)
+        (partition by ticket_id, sla_applied_at 
+          order by valid_starting_at, week_number, schedule_end_time
+          rows between unbounded preceding and current row)
         as running_total_scheduled_minutes
 
     from intercepted_periods_agent
@@ -133,9 +152,11 @@ with agent_work_time_filtered_statuses as (
   
   select 
     *,
-    timestamp_add(
-      timestamp_trunc(valid_starting_at, week),
-      interval cast(((7*24*60) * week_number) + breach_minutes_from_week as int64) minute) as breached_at
+    {{ timestamp_add(
+      "minute",
+      "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt_utils.type_int() ~ " )",
+      "" ~ dbt_utils.date_trunc('week', 'valid_starting_at') ~ "",
+      ) }} as breached_at
   from intercepted_periods_agent_filtered
 
 ) 

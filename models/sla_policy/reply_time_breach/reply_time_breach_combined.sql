@@ -24,7 +24,7 @@ with reply_time_calendar_hours_breached as (
   select *
   from {{ ref('stg_zendesk_ticket_comment') }}
 
-), user as (
+), users as (
  
   select *
   from {{ ref('stg_zendesk_user') }}
@@ -66,7 +66,7 @@ with reply_time_calendar_hours_breached as (
       ticket_comment.created_at as reply_at,
       commenter.role
     from ticket_comment
-    join user as commenter
+    join users as commenter
       on commenter.user_id = ticket_comment.user_id
     where ticket_comment.is_public
     and commenter.role in ('agent','admin')

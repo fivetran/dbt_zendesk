@@ -25,8 +25,8 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     ticket_field_history.valid_starting_at as sla_applied_at,
-    cast(json_extract(ticket_field_history.value, '$.minutes') as int64) as target,
-    json_extract(ticket_field_history.value, '$.in_business_hours') as in_business_hours,
+    cast({{ json_extract('ticket_field_history.value', 'minutes') }} as {{ dbt_utils.type_int() }} ) as target,
+    {{ json_extract('ticket_field_history.value', 'in_business_hours') }} as in_business_hours
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id

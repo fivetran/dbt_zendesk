@@ -1,6 +1,6 @@
 {% macro timestamp_add(datepart, interval, from_timestamp) -%}
 
-{{ adapter_macro('zendesk.timestamp_add', datepart, interval, from_timestamp) }}
+{{ adapter.dispatch('timestamp_add', packages = zendesk._get_utils_namespaces()) (datepart, interval, from_timestamp) }}
 
 {%- endmacro %}
 
