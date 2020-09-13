@@ -2,7 +2,11 @@
 
 This package models Zendesk data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://docs.google.com/presentation/d/1AQv77L9WlDXqRS0gkdQTmg1HSUo-Znlcoq7CHg0JrP8).
 
-The main focus of this package is to enable you to better understand the performance of your Support team. Metrics focused on response times, resolution times and work time are calculated for you. Optionally, these metrics can be converted to business times if you use Zendesk's scheduling feature.  Optionally, SLA policy breaches are also calculated.
+The main focus of this package is to enable you to better understand the performance of your Support team. Metrics focused on response times, resolution times and work time are calculated for you. 
+
+#### Optional features (for Zendesk Professional or Enterprise users)
+- Metrics can be converted to business hours
+- SLA policy breaches are calculated
 
 ## Models
 
@@ -19,7 +23,7 @@ This package contains transformation models, designed to work simultaneously wit
 Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
 
 ## Configuration
-By default this package will look for your Zendesk data in the `Zendesk` schema of your [target database](https://docs.getdbt.com/docs/running-a-dbt-project/using-the-command-line-interface/configure-your-profile). If this is not where your Zendesk data is (perhaps your Zendesk schema is `Zendesk_fivetran`), please add the following configuration to your `dbt_project.yml` file:
+By default this package will look for your Zendesk data in the `zendesk` schema of your [target database](https://docs.getdbt.com/docs/running-a-dbt-project/using-the-command-line-interface/configure-your-profile). If this is not where your Zendesk data is (perhaps your Zendesk schema is `zendesk_fivetran`), please add the following configuration to your `dbt_project.yml` file:
 
 ```yml
 # dbt_project.yml
@@ -28,9 +32,9 @@ By default this package will look for your Zendesk data in the `Zendesk` schema 
 config-version: 2
 
 vars:
-  Zendesk_source:
-    Zendesk_database: your_database_name
-    Zendesk_schema: your_schema_name 
+  zendesk_source:
+    zendesk_database: your_database_name
+    zendesk_schema: your_schema_name 
 ```
 
 
