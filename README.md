@@ -37,7 +37,6 @@ vars:
     zendesk_schema: your_schema_name 
 ```
 
-
 The `zendesk_ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file.  After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
 
 ```yml
@@ -49,6 +48,25 @@ config-version: 2
 vars:
   zendesk:
     ticket_field_history_columns: ['the','list','of','column','names']
+```
+
+### Disabling models
+
+When setting up your Zendesk Support connection in Fivetran, it is possible that not every table this package expects will be synced. This can occur because you either don't use that functionality in Zendesk Support or have actively decided to not sync some tables. In order to disable the relevant functionality in the package, you will need to add the relevant variables. By default, all variables are assumed to be `true`. You only need to add variables for the tables you would like to disable:  
+
+```yml
+# dbt_project.yml
+
+...
+config-version: 2
+
+vars:
+  zendesk_source:
+    using_schedules: false        # Disable if you do not have the schedule and ticket_schedule tables, or if you do not want metrics reported in business hours
+    using_sla_policy: false       # Disable if you are not using SLAs 
+  zendesk:
+    using_schedules: false
+    using_sla_policy: false
 ```
 
 ## Contributions
