@@ -68,6 +68,7 @@ vars:
   zendesk:
     using_schedules: false
     using_sla_policy: false
+```
 
 ## Contributions
 
