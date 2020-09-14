@@ -15,7 +15,7 @@ This package contains transformation models, designed to work simultaneously wit
 | **model**                    | **description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | zendesk_ticket_metrics       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported  |
-| zendesk_ticket_enhanced      | Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.                           |
+| zendesk_ticket_enriched      | Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.                           |
 | zendesk_ticket_field_history | A daily historical view of the ticket field values defined in the ticket_field_history_columns variable                                                         |
 | zendesk_sla_breach           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
@@ -50,6 +50,24 @@ vars:
   zendesk:
     ticket_field_history_columns: ['the','list','of','column','names']
 ```
+
+### Disabling models
+
+When setting up your Zendesk Support connection in Fivetran, it is possible that not every table this package expects will be synced. This can occur because you either don't use that functionality in Zendesk Support or have actively decided to not sync some tables. In order to disable the relevant functionality in the package, you will need to add the relevant variables. By default, all variables are assumed to be `true`. You only need to add variables for the tables you would like to disable:  
+
+```yml
+# dbt_project.yml
+
+...
+config-version: 2
+
+vars:
+  zendesk_source:
+    using_schedules: false        # Disable if you do not have the schedule and ticket_schedule tables, or if you do not want metrics reported in business hours
+    using_sla_policy: false       # Disable if you are not using SLAs 
+  zendesk:
+    using_schedules: false
+    using_sla_policy: false
 
 ## Contributions
 
