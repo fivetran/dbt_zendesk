@@ -52,7 +52,7 @@ vars:
 
 ### Disabling models
 
-When setting up your Zendesk Support connection in Fivetran, it is possible that not every table this package expects will be synced. This can occur because you either don't use that functionality in Zendesk Support or have actively decided to not sync some tables. In order to disable the relevant functionality in the package, you will need to add the relevant variables. By default, all variables are assumed to be `true`. You only need to add variables for the tables you would like to disable:  
+It's possible that your Zendesk Support connector does not sync every table that this package expects. If your syncs exclude certain tables, it is because you either don't use that functionality in Zendesk Support or actively excluded some tables from your syncs. To disable the corresponding functionality in the package, you must add the relevant variables. By default, all variables are assumed to be `true`. Add variables for only the tables you would like to disable:  
 
 ```yml
 # dbt_project.yml
