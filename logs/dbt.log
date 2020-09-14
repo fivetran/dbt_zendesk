@@ -1288,3 +1288,169 @@ There are 1 unused configuration paths:
 2020-06-24 19:53:56.753549 (MainThread): 12:53:56 | Done.
 2020-06-24 19:53:56.753946 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1136a4160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1138ccaf0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113a12a30>]}
 2020-06-24 19:53:56.754296 (MainThread): Flushing usage events
+2020-09-14 22:47:47.342700 (MainThread): Running with dbt=0.18.0
+2020-09-14 22:47:47.781494 (MainThread): running dbt with arguments Namespace(cls=<class 'dbt.task.run.RunTask'>, debug=False, defer=None, exclude=None, fail_fast=False, full_refresh=False, log_cache_events=False, log_format='default', models=None, partial_parse=None, profile=None, profiles_dir='/Users/kristin/.dbt', project_dir=None, record_timing_info=None, rpc_method='run', selector_name=None, single_threaded=False, state=None, strict=False, target=None, test_new_parser=False, threads=None, use_cache=True, use_colors=None, vars='{}', version_check=True, warn_error=False, which='run', write_json=True)
+2020-09-14 22:47:47.783153 (MainThread): Tracking: tracking
+2020-09-14 22:47:47.793312 (MainThread): Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f9474d10730>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f9474d1fa90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f9474d1fa60>]}
+2020-09-14 22:47:47.914500 (MainThread): Partial parsing not enabled
+2020-09-14 22:47:47.916082 (MainThread): Parsing macros/enabled_vars.sql
+2020-09-14 22:47:47.919072 (MainThread): Parsing macros/string_agg.sql
+2020-09-14 22:47:47.924485 (MainThread): Parsing macros/timestamp_diff.sql
+2020-09-14 22:47:47.929051 (MainThread): Parsing macros/json_extract.sql
+2020-09-14 22:47:47.932757 (MainThread): Parsing macros/timestamp_add.sql
+2020-09-14 22:47:47.938040 (MainThread): Parsing macros/ceiling.sql
+2020-09-14 22:47:47.940903 (MainThread): Parsing macros/_get_utils_namespaces.sql
+2020-09-14 22:47:47.943119 (MainThread): Parsing macros/ticket_field_history_columns_warning.sql
+2020-09-14 22:47:47.945937 (MainThread): Parsing macros/etc.sql
+2020-09-14 22:47:47.948507 (MainThread): Parsing macros/catalog.sql
+2020-09-14 22:47:47.961609 (MainThread): Parsing macros/adapters.sql
+2020-09-14 22:47:48.001376 (MainThread): Parsing macros/materializations/seed.sql
+2020-09-14 22:47:48.007106 (MainThread): Parsing macros/materializations/view.sql
+2020-09-14 22:47:48.012974 (MainThread): Parsing macros/materializations/table.sql
+2020-09-14 22:47:48.034010 (MainThread): Parsing macros/materializations/copy.sql
+2020-09-14 22:47:48.043304 (MainThread): Parsing macros/materializations/incremental.sql
+2020-09-14 22:47:48.069982 (MainThread): Parsing macros/materializations/snapshot.sql
+2020-09-14 22:47:48.077470 (MainThread): Parsing macros/core.sql
+2020-09-14 22:47:48.085137 (MainThread): Parsing macros/materializations/helpers.sql
+2020-09-14 22:47:48.103664 (MainThread): Parsing macros/materializations/snapshot/snapshot_merge.sql
+2020-09-14 22:47:48.107398 (MainThread): Parsing macros/materializations/snapshot/strategies.sql
+2020-09-14 22:47:48.143319 (MainThread): Parsing macros/materializations/snapshot/snapshot.sql
+2020-09-14 22:47:48.206095 (MainThread): Parsing macros/materializations/seed/seed.sql
+2020-09-14 22:47:48.250602 (MainThread): Parsing macros/materializations/incremental/helpers.sql
+2020-09-14 22:47:48.254543 (MainThread): Parsing macros/materializations/incremental/incremental.sql
+2020-09-14 22:47:48.267670 (MainThread): Parsing macros/materializations/common/merge.sql
+2020-09-14 22:47:48.296766 (MainThread): Parsing macros/materializations/table/table.sql
+2020-09-14 22:47:48.310986 (MainThread): Parsing macros/materializations/view/view.sql
+2020-09-14 22:47:48.324057 (MainThread): Parsing macros/materializations/view/create_or_replace_view.sql
+2020-09-14 22:47:48.334275 (MainThread): Parsing macros/etc/get_custom_alias.sql
+2020-09-14 22:47:48.336241 (MainThread): Parsing macros/etc/query.sql
+2020-09-14 22:47:48.338399 (MainThread): Parsing macros/etc/is_incremental.sql
+2020-09-14 22:47:48.341773 (MainThread): Parsing macros/etc/datetime.sql
+2020-09-14 22:47:48.360330 (MainThread): Parsing macros/etc/get_custom_schema.sql
+2020-09-14 22:47:48.364368 (MainThread): Parsing macros/etc/get_custom_database.sql
+2020-09-14 22:47:48.367893 (MainThread): Parsing macros/adapters/common.sql
+2020-09-14 22:47:48.457757 (MainThread): Parsing macros/schema_tests/relationships.sql
+2020-09-14 22:47:48.461661 (MainThread): Parsing macros/schema_tests/not_null.sql
+2020-09-14 22:47:48.464835 (MainThread): Parsing macros/schema_tests/unique.sql
+2020-09-14 22:47:48.468365 (MainThread): Parsing macros/schema_tests/accepted_values.sql
+2020-09-14 22:47:48.476812 (MainThread): Parsing macros/cross_db_utils/except.sql
+2020-09-14 22:47:48.479155 (MainThread): Parsing macros/cross_db_utils/replace.sql
+2020-09-14 22:47:48.481732 (MainThread): Parsing macros/cross_db_utils/concat.sql
+2020-09-14 22:47:48.526052 (MainThread): Parsing macros/cross_db_utils/identifer.sql
+2020-09-14 22:47:48.528878 (MainThread): Parsing macros/cross_db_utils/datatypes.sql
+2020-09-14 22:47:48.540278 (MainThread): Parsing macros/cross_db_utils/_is_relation.sql
+2020-09-14 22:47:48.542935 (MainThread): Parsing macros/cross_db_utils/length.sql
+2020-09-14 22:47:48.545625 (MainThread): Parsing macros/cross_db_utils/dateadd.sql
+2020-09-14 22:47:48.550531 (MainThread): Parsing macros/cross_db_utils/intersect.sql
+2020-09-14 22:47:48.552670 (MainThread): Parsing macros/cross_db_utils/right.sql
+2020-09-14 22:47:48.557495 (MainThread): Parsing macros/cross_db_utils/datediff.sql
+2020-09-14 22:47:48.577558 (MainThread): Parsing macros/cross_db_utils/safe_cast.sql
+2020-09-14 22:47:48.581452 (MainThread): Parsing macros/cross_db_utils/hash.sql
+2020-09-14 22:47:48.584575 (MainThread): Parsing macros/cross_db_utils/position.sql
+2020-09-14 22:47:48.587801 (MainThread): Parsing macros/cross_db_utils/literal.sql
+2020-09-14 22:47:48.589696 (MainThread): Parsing macros/cross_db_utils/current_timestamp.sql
+2020-09-14 22:47:48.596170 (MainThread): Parsing macros/cross_db_utils/width_bucket.sql
+2020-09-14 22:47:48.607483 (MainThread): Parsing macros/cross_db_utils/last_day.sql
+2020-09-14 22:47:48.613415 (MainThread): Parsing macros/cross_db_utils/split_part.sql
+2020-09-14 22:47:48.617264 (MainThread): Parsing macros/cross_db_utils/date_trunc.sql
+2020-09-14 22:47:48.620556 (MainThread): Parsing macros/materializations/insert_by_period_materialization.sql
+2020-09-14 22:47:48.670609 (MainThread): Parsing macros/logger/pretty_log_format.sql
+2020-09-14 22:47:48.672143 (MainThread): Parsing macros/logger/pretty_time.sql
+2020-09-14 22:47:48.673745 (MainThread): Parsing macros/logger/log_info.sql
+2020-09-14 22:47:48.675518 (MainThread): Parsing macros/datetime/date_spine.sql
+2020-09-14 22:47:48.682865 (MainThread): Parsing macros/web/get_url_host.sql
+2020-09-14 22:47:48.685745 (MainThread): Parsing macros/web/get_url_path.sql
+2020-09-14 22:47:48.690313 (MainThread): Parsing macros/web/get_url_parameter.sql
+2020-09-14 22:47:48.692778 (MainThread): Parsing macros/geo/haversine_distance.sql
+2020-09-14 22:47:48.694729 (MainThread): Parsing macros/schema_tests/equal_rowcount.sql
+2020-09-14 22:47:48.697420 (MainThread): Parsing macros/schema_tests/relationships_where.sql
+2020-09-14 22:47:48.701649 (MainThread): Parsing macros/schema_tests/recency.sql
+2020-09-14 22:47:48.704200 (MainThread): Parsing macros/schema_tests/not_constant.sql
+2020-09-14 22:47:48.706259 (MainThread): Parsing macros/schema_tests/at_least_one.sql
+2020-09-14 22:47:48.708335 (MainThread): Parsing macros/schema_tests/unique_combination_of_columns.sql
+2020-09-14 22:47:48.710979 (MainThread): Parsing macros/schema_tests/cardinality_equality.sql
+2020-09-14 22:47:48.714079 (MainThread): Parsing macros/schema_tests/expression_is_true.sql
+2020-09-14 22:47:48.716807 (MainThread): Parsing macros/schema_tests/equality.sql
+2020-09-14 22:47:48.722892 (MainThread): Parsing macros/schema_tests/mutually_exclusive_ranges.sql
+2020-09-14 22:47:48.735102 (MainThread): Parsing macros/sql/nullcheck_table.sql
+2020-09-14 22:47:48.737258 (MainThread): Parsing macros/sql/generate_series.sql
+2020-09-14 22:47:48.744199 (MainThread): Parsing macros/sql/get_relations_by_prefix.sql
+2020-09-14 22:47:48.751800 (MainThread): Parsing macros/sql/get_tables_by_prefix_sql.sql
+2020-09-14 22:47:48.757396 (MainThread): Parsing macros/sql/star.sql
+2020-09-14 22:47:48.762912 (MainThread): Parsing macros/sql/unpivot.sql
+2020-09-14 22:47:48.775230 (MainThread): Parsing macros/sql/union.sql
+2020-09-14 22:47:48.794737 (MainThread): Parsing macros/sql/groupby.sql
+2020-09-14 22:47:48.796777 (MainThread): Parsing macros/sql/surrogate_key.sql
+2020-09-14 22:47:48.802151 (MainThread): Parsing macros/sql/safe_add.sql
+2020-09-14 22:47:48.804319 (MainThread): Parsing macros/sql/nullcheck.sql
+2020-09-14 22:47:48.806865 (MainThread): Parsing macros/sql/get_column_values.sql
+2020-09-14 22:47:48.815512 (MainThread): Parsing macros/sql/pivot.sql
+2020-09-14 22:47:48.821033 (MainThread): Parsing macros/sql/get_query_results_as_dict.sql
+2020-09-14 22:47:48.835464 (MainThread): * Deprecation Warning: dbt v0.17.0 introduces a new config format for the
+dbt_project.yml file. Support for the existing version 1 format will be removed
+in a future release of dbt. The following packages are currently configured with
+config version 1:
+ - dbt_utils
+
+For upgrading instructions, consult the documentation:
+  https://docs.getdbt.com/docs/guides/migration-guide/upgrading-to-0-17-0
+
+2020-09-14 22:47:48.835768 (MainThread): Sending event: {'category': 'dbt', 'action': 'deprecation', 'label': '07f47af5-7397-43f9-a1cb-f061a5c76e34', 'property_': 'warn', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f9474dbe4c0>]}
+2020-09-14 22:47:48.836999 (MainThread): Partial parsing not enabled
+2020-09-14 22:47:48.928663 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_ticket_field_history".
+2020-09-14 22:47:48.975352 (MainThread): * Deprecation Warning: The "adapter_macro" macro has been deprecated. Instead,
+use the `adapter.dispatch` method to find a macro and call the result.
+adapter_macro was called for: dbt_utils.type_string
+2020-09-14 22:47:48.975634 (MainThread): Sending event: {'category': 'dbt', 'action': 'deprecation', 'label': '07f47af5-7397-43f9-a1cb-f061a5c76e34', 'property_': 'warn', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f94768f0be0>]}
+2020-09-14 22:47:49.015662 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_ticket_metrics".
+2020-09-14 22:47:49.053010 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_sla_breach".
+2020-09-14 22:47:49.081686 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_ticket_enriched".
+2020-09-14 22:47:49.110038 (MainThread): Acquiring new bigquery connection "model.zendesk.sla_policy_applied".
+2020-09-14 22:47:49.150818 (MainThread): Acquiring new bigquery connection "model.zendesk.reply_time_breach_combined".
+2020-09-14 22:47:49.182679 (MainThread): Acquiring new bigquery connection "model.zendesk.reply_time_calendar_hours_breached".
+2020-09-14 22:47:49.212678 (MainThread): Acquiring new bigquery connection "model.zendesk.reply_time_business_hours_breached".
+2020-09-14 22:47:49.278659 (MainThread): Acquiring new bigquery connection "model.zendesk.agent_work_time_filtered_statuses".
+2020-09-14 22:47:49.307761 (MainThread): Acquiring new bigquery connection "model.zendesk.agent_work_time_calendar_hours_breached".
+2020-09-14 22:47:49.334748 (MainThread): Acquiring new bigquery connection "model.zendesk.agent_work_time_business_hours_breached".
+2020-09-14 22:47:49.370313 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_one_touch_resolution".
+2020-09-14 22:47:49.391484 (MainThread): Acquiring new bigquery connection "model.zendesk.public_comments".
+2020-09-14 22:47:49.414467 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_reply_times".
+2020-09-14 22:47:49.436203 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_reply_time_business".
+2020-09-14 22:47:49.466870 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_reply_times_calendar".
+2020-09-14 22:47:49.489217 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_field_calendar_spine".
+2020-09-14 22:47:49.519523 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_field_history_pivot".
+2020-09-14 22:47:49.558456 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_field_history_scd".
+2020-09-14 22:47:49.587292 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_calendar".
+2020-09-14 22:47:49.608386 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_work_time_business".
+2020-09-14 22:47:49.640013 (MainThread): Acquiring new bigquery connection "model.zendesk.zendesk_calendar_spine".
+2020-09-14 22:47:49.686583 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_full_resolution_time_business".
+2020-09-14 22:47:49.718406 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_first_resolution_time_business".
+2020-09-14 22:47:49.748551 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_resolution_times_calendar".
+2020-09-14 22:47:49.774389 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_historical_status".
+2020-09-14 22:47:49.799195 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_tags".
+2020-09-14 22:47:49.827463 (MainThread): Acquiring new bigquery connection "model.zendesk.ticket_schedules".
+2020-09-14 22:47:49.869412 (MainThread): Acquiring new bigquery connection "operation.zendesk.zendesk-on-run-start-0".
+2020-09-14 22:47:50.579038 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_user".
+2020-09-14 22:47:50.605318 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_field_history".
+2020-09-14 22:47:50.631781 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_group".
+2020-09-14 22:47:50.657871 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_organization".
+2020-09-14 22:47:50.685068 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_schedule".
+2020-09-14 22:47:50.713797 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_tag".
+2020-09-14 22:47:50.740377 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket_comment".
+2020-09-14 22:47:50.766759 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_ticket".
+2020-09-14 22:47:50.793070 (MainThread): Acquiring new bigquery connection "model.zendesk_source.stg_zendesk_schedule".
+2020-09-14 22:47:52.171043 (MainThread): [WARNING]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 2 unused configuration paths:
+- models.zendesk.base
+- models.zendesk_source.vars
+
+2020-09-14 22:47:52.701277 (MainThread): Found 37 models, 24 tests, 0 snapshots, 0 analyses, 302 macros, 1 operation, 0 seed files, 9 sources
+2020-09-14 22:47:52.714571 (MainThread): 
+2020-09-14 22:47:52.715377 (MainThread): Acquiring new bigquery connection "master".
+2020-09-14 22:47:52.846863 (ThreadPoolExecutor-0_0): Acquiring new bigquery connection "list_digital-arbor-400".
+2020-09-14 22:47:52.850252 (ThreadPoolExecutor-0_0): Opening a new connection, currently in state init
+2020-09-14 22:47:52.852052 (ThreadPoolExecutor-0_0): Your application has authenticated using end user credentials from Google Cloud SDK. We recommend that most server applications use service accounts instead. If your application continues to use end user credentials from Cloud SDK, you might receive a "quota exceeded" or "API not enabled" error. For more information about service accounts, see https://cloud.google.com/docs/authentication/
+2020-09-14 22:47:54.887245 (MainThread): Connection 'master' was properly closed.
+2020-09-14 22:47:54.887565 (MainThread): Connection 'list_digital-arbor-400' was properly closed.
+2020-09-14 22:47:54.887750 (MainThread): Flushing usage events
+2020-09-14 22:47:55.313642 (MainThread): ctrl-c

@@ -18,6 +18,11 @@ with ticket_enriched as (
   select *
   from {{ ref('ticket_one_touch_resolution') }}
 
+), ticket_work_time_calendar as (
+
+  select *
+  from {{ ref('ticket_work_time_calendar') }}
+
 -- business hour CTEs
 {% if var('using_schedules', True) %}
 
@@ -30,6 +35,16 @@ with ticket_enriched as (
 
   select *
   from {{ ref('ticket_full_resolution_time_business') }}
+
+), ticket_work_time_business as (
+
+  select *
+  from {{ ref('ticket_work_time_business') }}
+
+), ticket_first_reply_time_business as (
+
+  select *
+  from {{ ref('ticket_first_reply_time_business') }}
 
 {% endif %}
 -- end business hour CTEs
@@ -44,6 +59,10 @@ select
   ticket_resolution_times_calendar.last_solved_at,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
+  ticket_work_time_calendar.agent_wait_time_in_calendar_minutes,
+  ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
+  ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
+  ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
   
   case when ticket_enriched.status in ('solved','closed') and is_one_touch_resolution then true
     else false end as is_one_touch_resolution
@@ -60,6 +79,9 @@ left join ticket_resolution_times_calendar
 left join ticket_one_touch_resolution
   using (ticket_id)
 
+left join ticket_work_time_calendar
+  using (ticket_id)
+
 {% if var('using_schedules', True) %}
 
 ), business_hour_metrics as (
@@ -67,7 +89,12 @@ left join ticket_one_touch_resolution
   select 
     ticket_enriched.ticket_id,
     ticket_first_resolution_time_business.first_resolution_business_minutes,
-    ticket_full_resolution_time_business.full_resolution_business_minutes
+    ticket_full_resolution_time_business.full_resolution_business_minutes,
+    ticket_first_reply_time_business.first_reply_time_business_minutes,
+    ticket_work_time_business.agent_wait_time_in_business_minutes,
+    ticket_work_time_business.requester_wait_time_in_business_minutes,
+    ticket_work_time_business.agent_work_time_in_business_minutes,
+    ticket_work_time_business.on_hold_time_in_business_minutes
 
   from ticket_enriched
 
@@ -75,6 +102,12 @@ left join ticket_one_touch_resolution
     using (ticket_id)
 
   left join ticket_full_resolution_time_business
+    using (ticket_id)
+  
+  left join ticket_first_reply_time_business
+    using (ticket_id)  
+  
+  left join ticket_work_time_business
     using (ticket_id)
 
 )

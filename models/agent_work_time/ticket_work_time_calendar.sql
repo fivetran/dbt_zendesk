@@ -22,9 +22,9 @@ with ticket_historical_status as (
 
 select 
   ticket_id,
-  sum(agent_wait_time_in_minutes) as agent_wait_time_in_minutes,
-  sum(requester_wait_time_in_minutes) as requester_wait_time_in_minutes,
-  sum(agent_work_time_in_minutes) as agent_work_time_in_minutes,
-  sum(on_hold_time_in_minutes) as on_hold_time_in_minutes
+  sum(agent_wait_time_in_minutes) as agent_wait_time_in_calendar_minutes,
+  sum(requester_wait_time_in_minutes) as requester_wait_time_in_calendar_minutes,
+  sum(agent_work_time_in_minutes) as agent_work_time_in_calendar_minutes,
+  sum(on_hold_time_in_minutes) as on_hold_time_in_calendar_minutes
 from calendar_minutes
 group by 1
