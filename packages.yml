@@ -1,4 +1,3 @@
 packages:
   - git: https://github.com/fivetran/dbt_zendesk_source.git
-    revision: fix_keyword
     warn-unpinned: false
