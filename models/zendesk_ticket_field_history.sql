@@ -6,12 +6,12 @@
         ) 
 }}
 
-{%- set change_data_columns = adapter.get_columns_in_relation(ref('zendesk_field_history_scd')) -%}
+{%- set change_data_columns = adapter.get_columns_in_relation(ref('zendesk_field_history_pivot')) -%}
 
 with change_data as (
 
     select *
-    from {{ ref('zendesk_field_history_scd') }}
+    from {{ ref('zendesk_field_history_pivot') }}
     {% if is_incremental() %}
     where valid_from >= (select max(date_day) from {{ this }})
     {% endif %}
