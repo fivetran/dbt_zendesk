@@ -1,6 +1,6 @@
 # Zendesk Support
 
-This package models Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://docs.google.com/presentation/d/1AQv77L9WlDXqRS0gkdQTmg1HSUo-Znlcoq7CHg0JrP8).
+This package models Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
 
 This package enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. 
 
