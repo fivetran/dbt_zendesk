@@ -15,7 +15,7 @@ This package contains transformation models, designed to work simultaneously wit
 | **model**                    | **description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | zendesk_ticket_metrics       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
-| zendesk_ticket_enhanced      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
+| zendesk_ticket_enriched      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
 | zendesk_ticket_field_history | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
 | zendesk_sla_breach           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
