@@ -1,7 +1,7 @@
 name: 'zendesk'
-version: '0.0.1'
+version: '0.1.2'
 config-version: 2
-require-dbt-version: '>=0.18.0'
+require-dbt-version: [">=0.18.0", "<0.20.0"]
 on-run-start: "{{ ticket_field_history_columns_warning() }}"
 
 models:
@@ -24,9 +24,18 @@ models:
 
 vars:
     zendesk:
-        ticket_field_history_columns: [ 'assignee_id', 'status', 'priority' ]
-        field_history: "{{ ref('stg_zendesk_ticket_field_history') }}"
-        ticket: "{{ ref('stg_zendesk_ticket') }}"
+        ticket_field_history_columns:   [ 'assignee_id', 'status', 'priority' ]
+        group:            "{{ ref('stg_zendesk__group) }}"
+        organization:     "{{ ref('stg_zendesk__organization') }}"
+        schedule:         "{{ ref('stg_zendesk__schedule') }}"
+        ticket:           "{{ ref('stg_zendesk__ticket') }}"
+        ticket_comment:   "{{ ref('stg_zendesk__ticket_comment') }}"
+        field_history:    "{{ ref('stg_zendesk__ticket_field_history') }}"
+        ticket_schedule:  "{{ ref('stg_zendesk__ticket_schedule') }}"
+        ticket_tag:       "{{ ref('stg_zendesk__ticket_tag') }}"
+        user:             "{{ ref('stg_zendesk__user') }}"
+        
+
         dbt_utils_dispatch_list:
             - zendesk 
-            - dbt_utils 
+            - dbt_utils

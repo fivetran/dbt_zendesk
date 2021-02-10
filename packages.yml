@@ -1,3 +1,7 @@
 packages:
-  - package: fivetran/zendesk_source
-    version: 0.1.1
+  # - package: fivetran/zendesk_source
+  #   version: 0.1.1
+  # - local: ../dbt_zendesk_source
+  - git: https://github.com/fivetran/dbt_zendesk_source.git
+    revision: feature/circle
+    warn-unpinned: false

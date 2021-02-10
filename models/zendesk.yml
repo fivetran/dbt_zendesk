@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: zendesk_ticket_enriched
+  - name: zendesk__ticket_enriched
     description: Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.  
     columns:
       - name: ticket_id
@@ -82,7 +82,7 @@ models:
       - name: ticket_tags
         description: A list of all tags assigned to this ticket
 
-  - name: zendesk_sla_breach
+  - name: zendesk__sla_breach
     description: Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported. Only SLAs that have been breached or may breach in the future are included.
     columns:
       - name: ticket_id
@@ -100,7 +100,7 @@ models:
       - name: is_upcoming_breach
         description: Boolean field indicating that the SLA breach event is in the future (true) or past (false)
       
-  - name: zendesk_ticket_field_history
+  - name: zendesk__ticket_field_history
     description: >
       A daily historical view of the ticket field values defined in the ticket_field_history_columns variable. 
       If variable values have changed more than once in a day, the latest value is displayed.
@@ -112,7 +112,7 @@ models:
       - name: ticket_day_id
         description: The unique key of the table, a surrogate key of date_day and ticket_id.
 
-  - name: zendesk_ticket_metrics
+  - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
     columns:
       - name: first_reply_time_calendar_minutes
