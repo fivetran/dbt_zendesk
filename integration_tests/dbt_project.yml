@@ -5,7 +5,7 @@ version: '0.1.2'
 
 require-dbt-version: [">=0.18.0", "<0.20.0"]
 profile: 'integration_tests'
-
+ 
 vars:
   zendesk:
     group:                  "{{ ref('stg_zendesk__group') }}"
