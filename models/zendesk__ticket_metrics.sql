@@ -63,9 +63,14 @@ select
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
+  ticket_one_touch_resolution.count_internal_comments as total_agent_replies,
   
-  case when ticket_enriched.status in ('solved','closed') and is_one_touch_resolution then true
-    else false end as is_one_touch_resolution
+  case when ticket_enriched.status in ('solved','closed') and ticket_one_touch_resolution.is_one_touch_resolution then true
+    else false end as is_one_touch_resolution,
+  case when ticket_enriched.status in ('solved','closed') and ticket_one_touch_resolution.is_two_touch_resolution then true
+    else false end as is_two_touch_resolution,
+  case when ticket_enriched.status in ('solved','closed') and not ticket_one_touch_resolution.is_one_touch_resolution then true
+    else false end as is_multi_touch_resolution
 
 
 from ticket_enriched

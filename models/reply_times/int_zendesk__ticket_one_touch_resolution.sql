@@ -16,7 +16,8 @@ with public_comments as (
 
   select 
     *,
-    count_internal_comments = 1 as is_one_touch_resolution
+    count_internal_comments = 1 as is_one_touch_resolution,
+    count_internal_comments = 2 as is_two_touch_resolution
   from internal_comments
 
 )
