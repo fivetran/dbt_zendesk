@@ -11,10 +11,10 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__latest_ticket_form') }}
 
-), satisfaction_ratings as (
+), latest_satisfaction_ratings as (
 
     select *
-    from {{ ref('stg_zendesk__satisfaction_rating') }}
+    from {{ ref('int_zendesk__latest_satisfaction_rating') }}
 
 ), users as (
 
@@ -39,17 +39,7 @@ with ticket as (
 ), organization as (
 
     select *
-    from {{ ref('stg_zendesk__organization') }}
-
-), organization_tags as (
-
-    select *
-    from {{ ref('int_zendesk__organization_tag_agg') }}
-
-), domain_names as (
-
-    select *
-    from {{ ref('stg_zendesk__domain_name') }}
+    from {{ ref('int_zendesk__organization_aggregates') }}
 
 ), ticket_tags as (
 
@@ -61,26 +51,31 @@ with ticket as (
     select 
 
         ticket.*,
+        case when lower(ticket.type) = 'incident'
+            then true
+            else false
+                end as is_incident,
         brands.name as ticket_brand_name,
         latest_ticket_form.name as ticket_form_name,
-        ticket_org_domain.domain_name as ticket_organization_domain_name,
-        satisfaction_ratings.score as ticket_satisfaction_rating,
-        satisfaction_ratings.comment as ticket_satisfaction_comment,
-        satisfaction_ratings.reason as ticket_satisfaction_reason,
+        organization.domain_names as ticket_organization_domain_names,
+        latest_satisfaction_ratings.score as ticket_satisfaction_rating,
+        latest_satisfaction_ratings.comment as ticket_satisfaction_comment,
+        latest_satisfaction_ratings.reason as ticket_satisfaction_reason,
         requester.external_id as requester_external_id,
         requester.created_at as requester_created_at,
         requester.updated_at as requester_updated_at,
         requester.role as requester_role,
         requester.email as requester_email,
         requester.name as requester_name,
+        requester.is_active as is_requester_active,
         requester_tag.tags as requester_tag,
         requester.locale as requester_locale,
         requester.time_zone as requester_time_zone,
         requester.last_login_at as requester_last_login_at,
         requester.organization_id as requester_organization_id,
         requester_org.name as requester_organization_name,
-        requester_org_domain.domain_name as requester_organization_domain_name,
-        requester_org_tag.organization_tags as requester_organization_tags,           --This field is a string_agg
+        requester_org.domain_names as requester_organization_domain_names,
+        requester_org.organization_tags as requester_organization_tags,
         requester_org.external_id as requester_organization_external_id,
         requester_org.created_at as requester_organization_created_at,
         requester_org.updated_at as requester_organization_updated_at,
@@ -92,6 +87,7 @@ with ticket as (
                 end as is_agent_submitted,
         submitter.email as submitter_email,
         submitter.name as submitter_name,
+        submitter.is_active as is_submitter_active,
         submitter_tag.tags as submitter_tag,
         submitter.locale as submitter_locale,
         submitter.time_zone as submitter_time_zone,
@@ -99,6 +95,7 @@ with ticket as (
         assignee.role as assignee_role,
         assignee.email as assignee_email,
         assignee.name as assignee_name,
+        assignee.is_active as is_assignee_active,
         assignee_tag.tags as assignee_tag,
         assignee.locale as assignee_locale,
         assignee.time_zone as assignee_time_zone,
@@ -114,23 +111,17 @@ with ticket as (
     join users as requester
         on requester.user_id = ticket.requester_id
     
-    join user_tags as requester_tag
+    left join user_tags as requester_tag
         on requester_tag.user_id = ticket.requester_id
 
     left join organization as requester_org
         on requester_org.organization_id = requester.organization_id
     
-    left join domain_names as requester_org_domain
-        on requester_org_domain.organization_id = requester_org.organization_id
-
-    left join organization_tags as requester_org_tag
-        on requester_org_tag.organization_id = requester_org.organization_id
-    
     --Submitter Joins
     join users as submitter
         on submitter.user_id = ticket.submitter_id
 
-    join user_tags as submitter_tag
+    left join user_tags as submitter_tag
         on submitter_tag.user_id = ticket.submitter_id
     
     --Assignee Joins
@@ -153,14 +144,8 @@ with ticket as (
     left join organization
         on organization.organization_id = ticket.organization_id
 
-    left join organization_tags as ticket_org_tag
-        on ticket_org_tag.organization_id = organization.organization_id
-
-    left join domain_names as ticket_org_domain
-        on ticket_org_domain.organization_id = organization.organization_id
-
-    left join satisfaction_ratings
-        on satisfaction_ratings.ticket_id = ticket.ticket_id
+    left join latest_satisfaction_ratings
+        on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
 
     left join ticket_tags
         on ticket_tags.ticket_id = ticket.ticket_id
