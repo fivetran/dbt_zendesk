@@ -7,6 +7,7 @@ require-dbt-version: [">=0.18.0", "<0.20.0"]
 profile: 'integration_tests'
  
 vars:
+  zendesk_schema: zendesk_integration_tests
   zendesk:
     group:                  "{{ ref('stg_zendesk__group') }}"
     organization:           "{{ ref('stg_zendesk__organization') }}"
@@ -83,6 +84,7 @@ seeds:
         requester_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         submitter_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         ticket_form_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        type: "{{ 'varchar(100)'  if target.type == 'redshift' else 'string'}}"
     ticket_field_history_data:
       +column_types:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -100,6 +102,7 @@ seeds:
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
+        last_login_at: timestamp
       +enabled: "{{ true if target.type != 'snowflake' else false }}"
     user_tag_data:
       +column_types:
@@ -132,4 +135,5 @@ seeds:
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
+        last_login_at: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"

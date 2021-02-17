@@ -1,28 +1,29 @@
-with user as (
+with calendar_spine as (
     select *
-    from {{ ref('stg_zendesk__user') }}
+    from {{ ref('int_zendesk__calendar_spine') }} 
+
 
 ), ticket_metrics as (
     select *
     from {{ ref('zendesk__ticket_metrics') }}
 
-), calendar_spine as (
+), user_table as (
     select *
-    from {{ ref('int_zendesk__calendar_spine') }}
+    from {{ ref('stg_zendesk__user') }}
 
 ), users as (
     select distinct
         user_id,
         {{ dbt_utils.date_trunc("day", "created_at") }} as created_at
-    from user
+    from user_table
 
     where is_active = true
 
 ), total_users as (
     select 
         created_at,
-        count(user_id) as user_count,
-    from users
+        count(user_id) as user_count
+    from user_table
 
     group by 1
 
@@ -30,7 +31,7 @@ with user as (
     select distinct
         user_id,
         {{ dbt_utils.date_trunc("day", "created_at") }} as created_at
-    from user
+    from user_table
 
     where lower(role) != 'end-user' and is_active = true
 
@@ -46,7 +47,7 @@ with user as (
     select distinct
         user_id,
         {{ dbt_utils.date_trunc("day", "created_at") }} as created_at
-    from user
+    from user_table
 
     where is_active = false
 
@@ -62,7 +63,7 @@ with user as (
     select distinct
         user_id,
         {{ dbt_utils.date_trunc("day", "created_at") }} as created_at
-    from user
+    from user_table
 
     where lower(role) = 'end-user' and is_active = true
 
@@ -78,7 +79,7 @@ with user as (
     select distinct 
         user_id,
         {{ dbt_utils.date_trunc("day", "created_at") }} as created_at
-    from user
+    from user_table
     
     where is_suspended = true
 

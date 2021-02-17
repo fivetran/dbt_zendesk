@@ -13,7 +13,6 @@ with ticket as (
 ), field_comment_union as (
     select 
         ticket_id,
-        "field_change" as type_update,
         user_id,
         valid_starting_at as updated_at
     from ticket_history
@@ -22,7 +21,6 @@ with ticket as (
 
     select
         ticket_id,
-        "comment" as type_update,
         user_id,
         created_at as updated_at
     from ticket_comment
@@ -31,7 +29,6 @@ with ticket as (
     select
         ticket.ticket_id,
         ticket.requester_id,
-        field_comment_union.type_update,
         field_comment_union.updated_at
 
     from ticket

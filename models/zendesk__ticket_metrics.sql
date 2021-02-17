@@ -75,10 +75,10 @@ select
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
   ticket_one_touch_resolution.count_internal_comments as total_agent_replies,
   
-  case when ticket_enriched.is_requester_active is true and ticket_enriched.requester_last_login_at is not null
+  case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
     then round(({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
       end as requester_last_login_age_minutes,
-  case when ticket_enriched.is_assignee_active is true and ticket_enriched.assignee_last_login_at is not null
+  case when ticket_enriched.is_assignee_active = true and ticket_enriched.assignee_last_login_at is not null
     then round(({{ dbt_utils.datediff("ticket_enriched.assignee_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
       end as assignee_last_login_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')

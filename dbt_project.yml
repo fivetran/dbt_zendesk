@@ -8,19 +8,21 @@ models:
     zendesk:
         +materialized: table
         agent_work_time:
-            +materialized: table
+            +materialized: ephemeral
+        enhancement_additions:
+            +materialized: ephemeral
         intermediate:
-            +materialized: table
+            +materialized: ephemeral
         reply_times:
-            +materialized: table
+            +materialized: ephemeral
         resolution_times:
-            +materialized: table
+            +materialized: ephemeral
         sla_policy:
-            +materialized: table
+            +materialized: ephemeral
         ticket_history:
-            +materialized: table
+            +materialized: ephemeral
         utils:
-            +materialized: table
+            +materialized: ephemeral
 
 vars:
     zendesk:
