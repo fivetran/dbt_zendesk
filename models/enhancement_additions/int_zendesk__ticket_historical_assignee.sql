@@ -19,6 +19,22 @@ with ticket_assignee_history as (
         value as assignee_id
     from ticket_assignee_history
 
+), unique_assignee_count as (
+    select distinct
+        ticket_id,
+        count(assignee_id) as unique_assignee_count
+    from assignee_breakdown
+
+    group by 1
+
+), assignee_station_count as (
+    select
+        ticket_id,
+        count(assignee_id) as assignee_stations_count
+    from assignee_breakdown
+
+    group by 1
+
 ), first_assignee_starter as (
     select 
         ticket_id,
@@ -60,6 +76,8 @@ with ticket_assignee_history as (
 ), final as (
     select
         first_assignee.ticket_id,
+        unique_assignee_count.unique_assignee_count,
+        assignee_station_count.assignee_stations_count,
         first_assignee.first_assignee_id,
         first_assignee.first_agent_assignment_date,
         last_assignee.last_assignee_id,
@@ -67,6 +85,12 @@ with ticket_assignee_history as (
     from first_assignee
 
     left join last_assignee
+        using(ticket_id)
+
+    left join unique_assignee_count
+        using(ticket_id)
+
+    left join assignee_station_count
         using(ticket_id)
 )
 

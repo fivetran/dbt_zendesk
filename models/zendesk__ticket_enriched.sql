@@ -21,6 +21,16 @@ with ticket as (
     select *
     from {{ ref('stg_zendesk__user') }}
 
+), requester_last_update as (
+
+    select *
+    from {{ ref('int_zendesk__requester_last_update') }}
+
+), assignee_last_update as (
+
+    select *
+    from {{ ref('int_zendesk__assignee_last_update') }}
+
 ), brands as (
 
     select *
@@ -71,11 +81,17 @@ with ticket as (
         requester_tag.tags as requester_tag,
         requester.locale as requester_locale,
         requester.time_zone as requester_time_zone,
+        requester_last_update.last_updated as requester_ticket_last_update_at,
         requester.last_login_at as requester_last_login_at,
         requester.organization_id as requester_organization_id,
         requester_org.name as requester_organization_name,
         requester_org.domain_names as requester_organization_domain_names,
+
+        --If you use organization tags this will be included, if not it will be ignored.
+        {% if var('using_organization_tags', True) %}
         requester_org.organization_tags as requester_organization_tags,
+        {% endif %}
+
         requester_org.external_id as requester_organization_external_id,
         requester_org.created_at as requester_organization_created_at,
         requester_org.updated_at as requester_organization_updated_at,
@@ -99,6 +115,7 @@ with ticket as (
         assignee_tag.tags as assignee_tag,
         assignee.locale as assignee_locale,
         assignee.time_zone as assignee_time_zone,
+        assignee_last_update.last_updated as assigneed_ticket_last_update_at,
         assignee.last_login_at as assignee_last_login_at,
         ticket_group.name as group_name,
         organization.name as organization_name,
@@ -116,6 +133,10 @@ with ticket as (
 
     left join organization as requester_org
         on requester_org.organization_id = requester.organization_id
+
+    left join requester_last_update
+        on requester_last_update.ticket_id = ticket.ticket_id
+            and requester_last_update.requester_id = ticket.requester_id
     
     --Submitter Joins
     join users as submitter
@@ -130,6 +151,10 @@ with ticket as (
 
     left join user_tags as assignee_tag
         on assignee_tag.user_id = ticket.assignee_id
+
+    left join assignee_last_update
+        on assignee_last_update.ticket_id = ticket.ticket_id
+            and assignee_last_update.assignee_id = ticket.assignee_id
 
     --Ticket, Org, and Brand Joins
     left join ticket_group

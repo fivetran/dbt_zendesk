@@ -16,6 +16,12 @@ vars:
     ticket_field_history:   "{{ ref('stg_zendesk__ticket_field_history') }}"
     ticket_schedule:        "{{ ref('stg_zendesk__ticket_schedule') }}"
     ticket_tag:             "{{ ref('stg_zendesk__ticket_tag') }}"
+    user_tag:               "{{ ref('stg_zendesk__user_tag') }}"
+    brand:                  "{{ ref('stg_zendesk__brand') }}"
+    ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
+    domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
+    organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
+    satisfaction_rating:    "{{ ref('stg_zendesk__satisfaction_rating') }}"
     user:                   "{{ ref('stg_zendesk__user') }}"
   zendesk_source:
     group:                  "{{ ref('group_data') }}"
@@ -24,8 +30,14 @@ vars:
     ticket:                 "{{ ref('ticket_data') }}"
     ticket_comment:         "{{ ref('ticket_comment_data') }}"
     ticket_field_history:   "{{ ref('ticket_field_history_data') }}"
-    ticket_schedule:        "{{ ref('ticket_schedule_data') }}"
+    ticket_schedule:        "{{ ref('ticket_schedule') }}"
     ticket_tag:             "{{ ref('ticket_tag_data') }}"
+    user_tag:               "{{ ref('user_tag_data') }}"
+    brand:                  "{{ ref('brand_data') }}"
+    ticket_form_history:    "{{ ref('ticket_form_history_data') }}"
+    domain_name:            "{{ ref('domain_name_data') }}"
+    organization_tag:       "{{ ref('organization_tag_data') }}"
+    satisfaction_rating:    "{{ ref('satisfaction_rating_data') }}"
     user:                   "{{ snowflake_seed_data('user_data') }}"
     
 seeds:
@@ -76,7 +88,7 @@ seeds:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         updated: timestamp
-    ticket_schedule_data:
+    ticket_schedule:
       +column_types:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -89,6 +101,30 @@ seeds:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
       +enabled: "{{ true if target.type != 'snowflake' else false }}"
+    user_tag_data:
+      +column_types:
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    brand_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    ticket_form_history_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    domain_name_data:
+      +column_types:
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    organization_tag_data:
+      +column_types:
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    satisfaction_rating_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
     user_data_snowflake:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
