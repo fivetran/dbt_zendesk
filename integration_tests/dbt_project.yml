@@ -30,7 +30,7 @@ vars:
     ticket:                 "{{ ref('ticket_data') }}"
     ticket_comment:         "{{ ref('ticket_comment_data') }}"
     ticket_field_history:   "{{ ref('ticket_field_history_data') }}"
-    ticket_schedule:        "{{ ref('ticket_schedule') }}"
+    ticket_schedule:        "{{ ref('ticket_schedule_data') }}"
     ticket_tag:             "{{ ref('ticket_tag_data') }}"
     user_tag:               "{{ ref('user_tag_data') }}"
     brand:                  "{{ ref('brand_data') }}"
@@ -88,7 +88,7 @@ seeds:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         updated: timestamp
-    ticket_schedule:
+    ticket_schedule_data:
       +column_types:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
