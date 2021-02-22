@@ -12,6 +12,7 @@ with change_data as (
 
     select *
     from {{ ref('int_zendesk__field_history_scd') }}
+  
     {% if is_incremental() %}
     where valid_from >= (select max(date_day) from {{ this }})
     {% endif %}
