@@ -3,7 +3,7 @@ with ticket_comments as (
     select *
     from {{ ref('stg_zendesk__ticket_comment') }}
 
-),  user as (
+),  user_table as (
 
     select *
     from {{ ref('stg_zendesk__user') }}
@@ -12,11 +12,11 @@ with ticket_comments as (
 comment_counts as (
     select
         ticket_comments.ticket_id,
-        sum(case when lower(user.role) != 'end-user'
+        sum(case when lower(user_table.role) != 'end-user'
             then 1
             else 0
                 end) as count_agent_comments,
-        sum(case when lower(user.role) = 'end-user'
+        sum(case when lower(user_table.role) = 'end-user'
             then 1
             else 0
                 end) as count_end_user_comments,
@@ -31,7 +31,7 @@ comment_counts as (
         count(*) as total_commments
     from ticket_comments
 
-    left join user
+    left join user_table
         using (user_id)
 
     group by 1
