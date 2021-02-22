@@ -28,7 +28,7 @@ comment_counts as (
             then 1
             else 0
                 end) as count_internal_comments,
-        count(*) as total_commments
+        count(*) as total_comments
     from ticket_comments
 
     left join user_table

@@ -64,7 +64,7 @@ select
   ticket_comments.count_end_user_comments,
   ticket_comments.count_internal_comments,
   ticket_comments.count_public_comments,
-  ticket_comments.total_commments,
+  ticket_comments.total_comments,
   ticket_resolution_times_calendar.unique_assignee_count,
   ticket_resolution_times_calendar.assignee_stations_count,
   ticket_resolution_times_calendar.group_stations_count,
