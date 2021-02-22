@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized='incremental',
-        partition_by = {'field': 'valid_from', 'data_type': 'date'},
+        partition_by = {'field': 'date_day', 'data_type': 'date'},
         unique_key='ticket_day_id'
         ) 
 }}
@@ -16,7 +16,7 @@ with field_history as (
     select *
     from {{ var('field_history') }}
     {% if is_incremental() %}
-    where cast({{ dbt_utils.dateadd('day', -1, 'valid_starting_at') }} as date) >= (select max(valid_from) from {{ this }})
+    where cast({{ dbt_utils.dateadd('day', -1, 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
 
 ), event_order as (
@@ -44,7 +44,7 @@ with field_history as (
 
     select 
         ticket_id,
-        cast({{ dbt_utils.dateadd('day', 0, 'valid_starting_at') }} as date) as valid_from
+        cast({{ dbt_utils.dateadd('day', 0, 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
         {% set col_xf = col|lower %}
@@ -59,7 +59,7 @@ with field_history as (
 
     select 
         *,
-        {{ dbt_utils.surrogate_key(['ticket_id','valid_from'])}} as ticket_day_id
+        {{ dbt_utils.surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
     from pivot
 
 )

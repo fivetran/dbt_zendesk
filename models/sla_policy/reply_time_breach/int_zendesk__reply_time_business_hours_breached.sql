@@ -1,4 +1,4 @@
-{{ config(enabled=enabled_vars(['using_sla_policy','using_schedules'])) }}
+{{ config(enabled=fivetran_utils.enabled_vars(['using_sla_policy','using_schedules'])) }}
 
 
 -- step 3, determine when an SLA will breach for SLAs that are in business hours

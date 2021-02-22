@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '0.1.2'
+version: '0.2.0'
 config-version: 2
 require-dbt-version: [">=0.18.0", "<0.20.0"]
 on-run-start: "{{ ticket_field_history_columns_warning() }}"
@@ -10,7 +10,7 @@ models:
         agent_work_time:
             +materialized: ephemeral
         enhancement_additions:
-            +materialized: ephemeral
+            +materialized: table
         intermediate:
             +materialized: ephemeral
         reply_times:
@@ -42,6 +42,13 @@ vars:
         ticket_tag:             "{{ ref('stg_zendesk__ticket_tag') }}"
         user_tag:               "{{ ref('stg_zendesk__user_tag') }}"
         user:                   "{{ ref('stg_zendesk__user') }}"
+
+        using_schedules:            True
+        using_domain_names:         True
+        using_user_tags:            True
+        using_ticket_form_history:  True
+        using_organization_tags:    True
+        using_satisfaction_ratings: True
 
         dbt_utils_dispatch_list:
             - zendesk 

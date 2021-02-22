@@ -17,7 +17,15 @@ with ticket_public_comments as (
 
   select 
     end_user_comments.*,
-    min(agent_comments.created_at) as agent_responded_at
+    min(agent_comments.created_at) as agent_responded_at,
+    sum(case when agent_comments.commenter_role = 'internal_comment'
+      then 1
+      else 0
+        end) as count_internal_comments,
+    sum(case when agent_comments.commenter_role != 'internal_comment'
+      then 1
+      else 0
+        end) as count_public_comments
   from end_user_comments
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id

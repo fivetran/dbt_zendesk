@@ -1,3 +1,6 @@
+--To disable this model, set the using_satisfaction_ratings variable within your dbt_project.yml file to False.
+{{ config(enabled=var('using_satisfaction_ratings', True)) }}
+
 with satisfaction_rating as (
   select *
   from {{ ref('stg_zendesk__satisfaction_rating') }}
@@ -21,10 +24,11 @@ final as (
         created_at,
         updated_at,
         comment,
-        reason
+        reason,
+        latest_satisfaction_index
     from latest_satisfaction_rating
 
-    where latest_satisfaction_index = 1
+    --where latest_satisfaction_index = 1
 )
 
 select *

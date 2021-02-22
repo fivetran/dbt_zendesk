@@ -20,6 +20,8 @@ with organizations as (
     group by 1
 {% endif %}
 
+--If you use using_domain_names tags this will be included, if not it will be ignored.
+{% if var('using_domain_names', True) %}
 ), domain_names as (
 
     select *
@@ -35,21 +37,30 @@ with organizations as (
         using(organization_id)
     
     group by 1
+{% endif %}
+
 
 ), final as (
     select
-        organizations.*,
+        organizations.*
 
         --If you use organization tags this will be included, if not it will be ignored.
         {% if var('using_organization_tags', True) %}
-        tag_aggregates.organization_tags,
+        ,tag_aggregates.organization_tags
         {% endif %}
-        
-        domain_aggregates.domain_names
+
+        --If you use using_domain_names tags this will be included, if not it will be ignored.
+        {% if var('using_domain_names', True) %}
+        ,domain_aggregates.domain_names
+        {% endif %}
+
     from organizations
 
+    --If you use using_domain_names tags this will be included, if not it will be ignored.
+    {% if var('using_domain_names', True) %}
     left join domain_aggregates
         using(organization_id)
+    {% endif %}
 
     --If you use organization tags this will be included, if not it will be ignored.
     {% if var('using_organization_tags', True) %}

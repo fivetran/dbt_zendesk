@@ -13,6 +13,11 @@ with ticket_enriched as (
   select *
   from {{ ref('int_zendesk__ticket_reply_times_calendar') }}
 
+), ticket_comments as (
+
+  select *
+  from {{ ref('int_zendesk__comment_metrics') }}
+
 ), ticket_one_touch_resolution as (
 
   select *
@@ -55,6 +60,11 @@ select
   ticket_enriched.*,
   ticket_reply_times_calendar.first_reply_time_calendar_minutes,
   ticket_reply_times_calendar.total_reply_time_calendar_minutes,
+  ticket_comments.count_agent_comments,
+  ticket_comments.count_end_user_comments,
+  ticket_comments.count_internal_comments,
+  ticket_comments.count_public_comments,
+  ticket_comments.total_commments,
   ticket_resolution_times_calendar.unique_assignee_count,
   ticket_resolution_times_calendar.assignee_stations_count,
   ticket_resolution_times_calendar.group_stations_count,
@@ -114,6 +124,9 @@ left join ticket_one_touch_resolution
 
 left join ticket_work_time_calendar
   using (ticket_id)
+
+left join ticket_comments
+  using(ticket_id)
 
 {% if var('using_schedules', True) %}
 

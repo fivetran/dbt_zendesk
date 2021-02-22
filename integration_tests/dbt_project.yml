@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.1.2'
+version: '0.2.0'
 
 require-dbt-version: [">=0.18.0", "<0.20.0"]
 profile: 'integration_tests'
@@ -33,13 +33,13 @@ vars:
     ticket_field_history:   "{{ ref('ticket_field_history_data') }}"
     ticket_schedule:        "{{ ref('ticket_schedule_data') }}"
     ticket_tag:             "{{ ref('ticket_tag_data') }}"
-    user_tag:               "{{ ref('user_tag_data') }}"
+    user_tag:               "{{ fivetran_utils.snowflake_seed_data('user_tag_data') }}" 
     brand:                  "{{ ref('brand_data') }}"
     ticket_form_history:    "{{ ref('ticket_form_history_data') }}"
     domain_name:            "{{ ref('domain_name_data') }}"
-    organization_tag:       "{{ ref('organization_tag_data') }}"
+    organization_tag:       "{{ fivetran_utils.snowflake_seed_data('organization_tag_data') }}" 
     satisfaction_rating:    "{{ ref('satisfaction_rating_data') }}"
-    user:                   "{{ snowflake_seed_data('user_data') }}"
+    user:                   "{{ fivetran_utils.snowflake_seed_data('user_data') }}" 
     
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"

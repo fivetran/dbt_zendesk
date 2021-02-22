@@ -219,6 +219,8 @@ with calendar_spine as (
 
     group by 1
 
+--If you use using_satisfaction_ratings this will be included, if not it will be ignored.
+{% if var('using_satisfaction_ratings', True) %}
 ), surveyed_satisfaction as (
     select distinct
         ticket_id,
@@ -234,6 +236,7 @@ with calendar_spine as (
     from surveyed_satisfaction
 
     group by 1
+{% endif %}
 
 ), unassigned_unsolved_ticket as (
     select distinct
@@ -315,7 +318,12 @@ with calendar_spine as (
         total_problem_tickets.problem_ticket_count,
         total_reassigned_tickets.reassigned_ticket_count,
         total_reopened_tickets.reopened_ticket_count,
+
+        --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
+        {% if var('using_satisfaction_ratings', True) %}
         total_surveyed_satisfaction_tickets.surveyed_satisfaction_ticket_count,
+        {% endif %}
+
         total_unassigned_unsolved_tickets.unassigned_unsolved_ticket_count,
         total_unreplied_tickets.unreplied_ticket_count,
         total_unreplied_unsolved_tickets.unreplied_unsolved_ticket_count,
@@ -361,8 +369,11 @@ with calendar_spine as (
     left join total_reopened_tickets
         on total_reopened_tickets.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})
 
+    --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
+    {% if var('using_satisfaction_ratings', True) %}
     left join total_surveyed_satisfaction_tickets
         on total_surveyed_satisfaction_tickets.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})
+    {% endif %}
 
     left join total_unassigned_unsolved_tickets
         on total_unassigned_unsolved_tickets.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})

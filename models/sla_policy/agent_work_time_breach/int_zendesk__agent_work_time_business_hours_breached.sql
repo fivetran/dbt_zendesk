@@ -1,4 +1,4 @@
-{{ config(enabled=enabled_vars(['using_sla_policy','using_schedules'])) }}
+{{ config(enabled=fivetran_utils.enabled_vars(['using_sla_policy','using_schedules'])) }}
 
 -- AGENT WORK TIME
 -- This is complicated, as SLAs minutes are only counted while the ticket is in 'new' or 'open' status.
