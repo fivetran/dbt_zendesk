@@ -52,7 +52,7 @@ vars:
 
 ### Disabling models
 
-It's possible that your Zendesk Support connector does not sync every table that this package expects. If your syncs exclude certain tables, it is because you either don't use that functionality in Zendesk Support or actively excluded some tables from your syncs. To disable the corresponding functionality in the package, you must add the relevant variables. By default, all variables are assumed to be `true`. Add variables for only the tables you would like to disable:  
+This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, `ticket_form_history`, or `satisfaction_rating` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
 
 ```yml
 # dbt_project.yml
@@ -62,11 +62,20 @@ config-version: 2
 
 vars:
   zendesk_source:
-    using_schedules: false        # Disable if you do not have the schedule and ticket_schedule tables, or if you do not want metrics reported in business hours
-    using_sla_policy: false       # Disable if you are not using SLAs 
+    using_schedules:            False         #Disable if you are not using schedules
+    using_domain_names:         False         #Disable if you are not using domain names
+    using_user_tags:            False         #Disable if you are not using user tags
+    using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_satisfaction_ratings: False         #Disable if you are not using satisfaction ratings
+
   zendesk:
-    using_schedules: false
-    using_sla_policy: false
+    using_schedules:            False         #Disable if you are not using schedules
+    using_domain_names:         False         #Disable if you are not using domain names
+    using_user_tags:            False         #Disable if you are not using user tags
+    using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_satisfaction_ratings: False         #Disable if you are not using satisfaction ratings
 ```
 
 ## Contributions

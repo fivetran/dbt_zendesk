@@ -10,7 +10,7 @@ models:
         agent_work_time:
             +materialized: ephemeral
         enhancement_additions:
-            +materialized: table
+            +materialized: ephemeral
         intermediate:
             +materialized: ephemeral
         reply_times:
