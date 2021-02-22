@@ -46,6 +46,7 @@ with historical_solved_status as (
     ticket_historical_assignee.last_assignee_id,
     ticket_historical_assignee.first_agent_assignment_date,
     ticket_historical_assignee.last_agent_assignment_date,
+    solved_times.solved_count as total_resolutions,
     case when solved_times.solved_count <= 1
       then 0
       else solved_times.solved_count - 1 --subtracting one as the first solve is not a reopen.

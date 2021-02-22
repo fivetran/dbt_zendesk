@@ -78,6 +78,7 @@ select
   ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
+  ticket_resolution_times_calendar.total_resolutions as count_resolutions,
   ticket_resolution_times_calendar.count_reopens,
   ticket_work_time_calendar.agent_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
