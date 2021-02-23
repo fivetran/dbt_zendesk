@@ -8,7 +8,7 @@ models:
         description: Automatically assigned when the ticket is created
         tests:
             - unique
-            - not_null  
+            - not_null
       - name: url
         description: The API url of this ticket
       - name: assignee_id

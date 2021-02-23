@@ -1,4 +1,4 @@
-# Zendesk Support
+# Zendesk Support ([Docs](https://dbt-zendesk.netlify.app/))
 
 This package models Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
 

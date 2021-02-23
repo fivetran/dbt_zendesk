@@ -1,8 +1,4 @@
-with calendar_spine as (
-    select *
-    from {{ ref('int_zendesk__calendar_spine') }} 
-
-), ticket_metrics as (
+with ticket_metrics as (
     select *
     from {{ ref('zendesk__ticket_metrics') }}
 
