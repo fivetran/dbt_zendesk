@@ -1,8 +1,7 @@
-with public_ticket_comment as (
+with ticket_comment as (
 
     select *
     from {{ ref('stg_zendesk__ticket_comment') }}
-    where is_public
 
 ), users as (
 
@@ -13,15 +12,15 @@ with public_ticket_comment as (
 
     select 
 
-        public_ticket_comment.*,
+        ticket_comment.*,
         case when commenter.role = 'end-user' then 'external_comment'
             when commenter.role in ('agent','admin') then 'internal_comment'
             else 'unknown' end as commenter_role
     
-    from public_ticket_comment
+    from ticket_comment
     
     join users as commenter
-        on commenter.user_id = public_ticket_comment.user_id
+        on commenter.user_id = ticket_comment.user_id
 
 ), add_previous_commenter_role as (
 

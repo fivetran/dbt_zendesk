@@ -24,7 +24,7 @@ final as (
         latest_form_index
     from latest_ticket_form
 
-    --where latest_form_index = 1
+    where latest_form_index = 1
 )
 
 select *

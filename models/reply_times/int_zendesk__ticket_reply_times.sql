@@ -1,7 +1,8 @@
 with ticket_public_comments as (
 
     select *
-    from {{ ref('int_zendesk__public_comments') }}
+    from {{ ref('int_zendesk__comments_enriched') }}
+    where is_public
 
 ), end_user_comments as (
   
@@ -15,17 +16,9 @@ with ticket_public_comments as (
 
 ), reply_timestamps as (  
 
-  select 
+  select
     end_user_comments.*,
-    min(agent_comments.created_at) as agent_responded_at,
-    sum(case when agent_comments.commenter_role = 'internal_comment'
-      then 1
-      else 0
-        end) as count_internal_comments,
-    sum(case when agent_comments.commenter_role != 'internal_comment'
-      then 1
-      else 0
-        end) as count_public_comments
+    min(agent_comments.created_at) as agent_responded_at
   from end_user_comments
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id

@@ -18,11 +18,6 @@ with ticket_enriched as (
   select *
   from {{ ref('int_zendesk__comment_metrics') }}
 
-), ticket_one_touch_resolution as (
-
-  select *
-  from {{ ref('int_zendesk__ticket_one_touch_resolution') }}
-
 ), ticket_work_time_calendar as (
 
   select *
@@ -76,15 +71,18 @@ select
   ticket_resolution_times_calendar.last_solved_at,
   ticket_resolution_times_calendar.first_assignment_to_resolution_calendar_minutes,
   ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes,
+  --ticket_resolution_times_calendar.last_assignee_duration_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
   ticket_resolution_times_calendar.total_resolutions as count_resolutions,
   ticket_resolution_times_calendar.count_reopens,
+  ticket_work_time_calendar.new_status_duration_in_calendar_minutes,
+  ticket_work_time_calendar.open_status_duration_in_calendar_minutes,
   ticket_work_time_calendar.agent_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
-  ticket_one_touch_resolution.count_internal_comments as total_agent_replies,
+  ticket_comments.count_internal_comments as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
     then round(({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
@@ -98,15 +96,15 @@ select
   case when lower(ticket_enriched.status) not in ('solved','closed')
     then round(({{ dbt_utils.datediff("ticket_enriched.updated_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
       end as unsolved_ticket_age_since_update_minutes,
-  case when lower(ticket_enriched.status) in ('solved','closed') and ticket_one_touch_resolution.is_one_touch_resolution 
+  case when lower(ticket_enriched.status) in ('solved','closed') and ticket_comments.is_one_touch_resolution 
     then true
     else false
       end as is_one_touch_resolution,
-  case when lower(ticket_enriched.status) in ('solved','closed') and ticket_one_touch_resolution.is_two_touch_resolution 
+  case when lower(ticket_enriched.status) in ('solved','closed') and ticket_comments.is_two_touch_resolution 
     then true
     else false 
       end as is_two_touch_resolution,
-  case when lower(ticket_enriched.status) in ('solved','closed') and not ticket_one_touch_resolution.is_one_touch_resolution 
+  case when lower(ticket_enriched.status) in ('solved','closed') and not ticket_comments.is_one_touch_resolution 
     then true
     else false 
       end as is_multi_touch_resolution
@@ -118,9 +116,6 @@ left join ticket_reply_times_calendar
   using (ticket_id)
 
 left join ticket_resolution_times_calendar
-  using (ticket_id)
-
-left join ticket_one_touch_resolution
   using (ticket_id)
 
 left join ticket_work_time_calendar

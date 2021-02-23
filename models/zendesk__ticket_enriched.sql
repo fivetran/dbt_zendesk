@@ -12,7 +12,6 @@ with ticket as (
 
     select *
     from {{ ref('int_zendesk__latest_ticket_form') }}
-    where latest_form_index = 1
 {% endif %}
 
 --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
@@ -20,7 +19,7 @@ with ticket as (
 ), latest_satisfaction_ratings as (
 
     select *
-    from {{ ref('int_zendesk__latest_satisfaction_rating') }}
+    from {{ ref('int_zendesk__satisfaction_rating') }}
     where latest_satisfaction_index = 1
 {% endif %}
 
@@ -105,7 +104,7 @@ with ticket as (
         requester.is_active as is_requester_active,
         requester.locale as requester_locale,
         requester.time_zone as requester_time_zone,
-        requester_updates.total_updates as requester_ticket_update_count,
+        coalesce(requester_updates.total_updates, 0) as requester_ticket_update_count,
         requester_updates.last_updated as requester_ticket_last_update_at,
         requester.last_login_at as requester_last_login_at,
         requester.organization_id as requester_organization_id,
@@ -122,7 +121,7 @@ with ticket as (
         submitter.role as submitter_role,
         case when submitter.role in ('Agent','Admin') 
             then true 
-            else false 
+            else false
                 end as is_agent_submitted,
         submitter.email as submitter_email,
         submitter.name as submitter_name,
@@ -136,7 +135,7 @@ with ticket as (
         assignee.is_active as is_assignee_active,
         assignee.locale as assignee_locale,
         assignee.time_zone as assignee_time_zone,
-        assignee_updates.total_updates as assignee_ticket_update_count,
+        coalesce(assignee_updates.total_updates, 0) as assignee_ticket_update_count,
         assignee_updates.last_updated as assigneed_ticket_last_update_at,
         assignee.last_login_at as assignee_last_login_at,
         ticket_group.name as group_name,
