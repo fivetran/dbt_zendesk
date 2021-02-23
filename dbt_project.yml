@@ -8,23 +8,23 @@ models:
     zendesk:
         +materialized: table
         agent_work_time:
-            +materialized: table
+            +materialized: ephemeral
         intermediate:
-            +materialized: table
+            +materialized: ephemeral
         reply_times:
-            +materialized: table
+            +materialized: ephemeral
         resolution_times:
-            +materialized: table
+            +materialized: ephemeral
         sla_policy:
-            +materialized: table
+            +materialized: ephemeral
         ticket_history:
-            +materialized: table
+            +materialized: ephemeral
         utils:
-            +materialized: table
+            +materialized: ephemeral
 
 vars:
     zendesk:
-        ticket_field_history_columns:   [ 'assignee_id', 'status', 'priority' ]
+        ticket_field_history_columns:   [ 'assignee_id', 'status', 'priority']
         group:                  "{{ ref('stg_zendesk__group) }}"
         brand:                  "{{ ref('stg_zendesk__brand') }}"
         domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
