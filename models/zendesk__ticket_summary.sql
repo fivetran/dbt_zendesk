@@ -2,7 +2,6 @@ with calendar_spine as (
     select *
     from {{ ref('int_zendesk__calendar_spine') }} 
 
-
 ), ticket_metrics as (
     select *
     from {{ ref('zendesk__ticket_metrics') }}
@@ -12,8 +11,8 @@ with calendar_spine as (
     from {{ ref('stg_zendesk__user') }}
 
 ), user_sum as (
-    select 
-        {{ dbt_utils.date_trunc("day", "created_at") }} as created_at,
+    select
+        cast(1 as {{ dbt_utils.type_int() }}) as summary_helper,
         sum(case when is_active = true
             then 1
             else 0
@@ -38,9 +37,9 @@ with calendar_spine as (
 
     group by 1
 
-), ticket_metric_sum_created as (
+), ticket_metric_sum as (
     select 
-        {{ dbt_utils.date_trunc("day", "created_at") }} as created_at,
+        cast(1 as {{ dbt_utils.type_int() }}) as summary_helper,
         sum(case when lower(status) = 'new'
             then 1
             else 0
@@ -94,60 +93,47 @@ with calendar_spine as (
             then 1
             else 0
                 end) as unsolved_ticket_count,
+        sum(case when lower(status) in ('solved', 'closed')
+            then 1
+            else 0
+                end) as solved_ticket_count,
         count(count_internal_comments) as total_internal_comments,
         count(count_public_comments) as total_public_comments,
         count(total_comments)
     from ticket_metrics
-
+    
     group by 1
 
-), ticket_metric_sum_solved as (
-    select 
-        coalesce({{ dbt_utils.date_trunc("day", "last_solved_at") }}, {{ dbt_utils.date_trunc("day", "updated_at") }}) as created_at,
-        sum(case when lower(status) in ('solved', 'closed')
-            then 1
-            else 0
-                end) as solved_ticket_count
-    from ticket_metrics
-
-    group by 1
 
 ), final as (
     select
-        calendar_spine.date_day,
         user_sum.user_count,
         user_sum.active_agent_count,
         user_sum.deleted_user_count,
         user_sum.end_user_count,
         user_sum.suspended_user_count,
-        ticket_metric_sum_created.new_ticket_count,
-        ticket_metric_sum_created.on_hold_ticket_count,
-        ticket_metric_sum_created.open_ticket_count,
-        ticket_metric_sum_created.pending_ticket_count,
-        ticket_metric_sum_solved.solved_ticket_count,
-        ticket_metric_sum_created.problem_ticket_count,
-        ticket_metric_sum_created.reassigned_ticket_count,
-        ticket_metric_sum_created.reopened_ticket_count,
+        ticket_metric_sum.new_ticket_count,
+        ticket_metric_sum.on_hold_ticket_count,
+        ticket_metric_sum.open_ticket_count,
+        ticket_metric_sum.pending_ticket_count,
+        ticket_metric_sum.solved_ticket_count,
+        ticket_metric_sum.problem_ticket_count,
+        ticket_metric_sum.reassigned_ticket_count,
+        ticket_metric_sum.reopened_ticket_count,
 
         --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
         {% if var('using_satisfaction_ratings', True) %}
-        ticket_metric_sum_created.surveyed_satisfaction_ticket_count,
+        ticket_metric_sum.surveyed_satisfaction_ticket_count,
         {% endif %}
 
-        ticket_metric_sum_created.unassigned_unsolved_ticket_count,
-        ticket_metric_sum_created.unreplied_ticket_count,
-        ticket_metric_sum_created.unreplied_unsolved_ticket_count,
-        ticket_metric_sum_created.unsolved_ticket_count
-    from calendar_spine
+        ticket_metric_sum.unassigned_unsolved_ticket_count,
+        ticket_metric_sum.unreplied_ticket_count,
+        ticket_metric_sum.unreplied_unsolved_ticket_count,
+        ticket_metric_sum.unsolved_ticket_count
+    from user_sum
 
-    left join user_sum
-        on user_sum.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})
-
-    left join ticket_metric_sum_created
-        on ticket_metric_sum_created.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})
-
-    left join ticket_metric_sum_solved
-        on ticket_metric_sum_solved.created_at = cast(calendar_spine.date_day as {{ dbt_utils.type_timestamp() }})
+    left join ticket_metric_sum
+        using(summary_helper)
 )
 
 select *

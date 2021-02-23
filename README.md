@@ -14,10 +14,11 @@ This package contains transformation models, designed to work simultaneously wit
 
 | **model**                    | **description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| zendesk_ticket_metrics       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
-| zendesk_ticket_enriched      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
-| zendesk_ticket_field_history | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
-| zendesk_sla_breach           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
+| [zendesk__ticket_metrics](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_metrics.sql)       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
+| [zendesk__ticket_enriched](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_enriched.sql)      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
+| [zendesk__ticket_summary](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_summary.sql)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
+| [zendesk__ticket_field_history](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_field_history.sql) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
+| [zendesk__sla_breach](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_breach.sql)           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
 ## Installation Instructions
 Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.

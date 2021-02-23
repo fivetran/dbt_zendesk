@@ -55,6 +55,8 @@ models:
         description: The organization of the requester
       - name: organization_name
         description: The name of the organization of the requester
+      - name: external_id
+        description: The external id of the ticket
       - name: group_id
         description: The group this ticket is assigned to
       - name: group_name
@@ -81,6 +83,84 @@ models:
         description: The name of the source the ticket was created from  
       - name: ticket_tags
         description: A list of all tags assigned to this ticket
+      - name: problem_id
+        description: The reference to the problem if the ticket is listed as a problem
+      - name: is_incident
+        description: Boolean indicating whether the ticket is listed as an incident
+      - name: ticket_brand_name
+        description: The brand name of with the ticket
+      - name: ticket_form_name
+        description: The form name of the ticket
+      - name: ticket_satisfaction_rating
+        description: The ticket satisfaction rating
+      - name: ticket_satisfaction_comment
+        description: The ticket satisfaction comment
+      - name: ticket_satisfaction_reason
+        description: The ticket satisfaction reason
+      - name: ticket_organization_domain_names
+        description: The organization associated with the ticket domain names
+      - name: requester_organization_domain_names
+        description: The ticket requesters organization domain names 
+      - name: requester_external_id
+        description: The ticket requester exeternal id
+      - name: requester_created_at
+        description: The date the ticket requester was created
+      - name: requester_updated_at
+        description: The date the ticket requester was last updated
+      - name: is_requester_active
+        description: Boolean indicating whether the requester is currently acitve
+      - name: requester_locale
+        description: The locale of the ticket requester
+      - name: requester_time_zone
+        description: The timezone of the ticket requester
+      - name: requester_ticket_update_count
+        description: The number of times the requester has updated the ticket
+      - name: requester_ticket_last_update_at
+        description: The last date the requester updated the ticket
+      - name: requester_last_login_at
+        description: The last login of the ticket requester
+      - name: requester_organization_id
+        description: The organization id of the ticket requester
+      - name: requester_organization_name
+        description: The organization name of the ticket requester
+      - name: requester_organization_tags
+        description: The organization tags of the ticket requester
+      - name: requester_organization_external_id
+        description: The organization external id of the ticket requester
+      - name: requester_organization_created_at
+        description: The date the ticket requesters organization was created
+      - name: requester_organization_updated_at
+        description: The date the ticket requesters organization was last updated
+      - name: submitter_external_id
+        description: The ticket submitter external id
+      - name: is_agent_submitted
+        description: Boolean indicating if the submitter has an agent role
+      - name: is_submitter_active
+        description: Boolean indicating if the ticket submitter is active
+      - name: submitter_locale
+        description: The locale of the ticket submitter
+      - name: submitter_time_zone
+        description: The time zone of the ticket submitter
+      - name: assignee_external_id
+        description: The external id of the ticket assignee
+      - name: is_assignee_active
+        description: Boolean indicating if the ticket assignee is active
+      - name: assignee_locale
+        description: The locale of the ticket assignee
+      - name: assignee_time_zone
+        description: The time zone of the ticket assignee
+      - name: assignee_ticket_update_count
+        description: The number of times the ticket assignee has updated the ticket
+      - name: assigneed_ticket_last_update_at
+        description: The last date the ticket assignee updated the ticket
+      - name: assignee_last_login_at
+        description: The date the ticket assignee last logged in
+      - name: requester_tag
+        description: The tags associated with the ticket requester.
+      - name: submitter_tag
+        description: The tags associated with the ticket submitter.
+      - name: assignee_tag
+        description: The tags associated with the ticket assignee.
 
   - name: zendesk__sla_breach
     description: Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported. Only SLAs that have been breached or may breach in the future are included.
@@ -111,6 +191,12 @@ models:
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: ticket_day_id
         description: The unique key of the table, a surrogate key of date_day and ticket_id.
+      - name: assignee_id
+        description: The assignee id assigned to the ticket
+      - name: status
+        description: The status of the ticket
+      - name: priority
+        description: The tickets priority ranking
 
   - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
@@ -202,6 +288,8 @@ models:
         description: The organization of the requester
       - name: organization_name
         description: The name of the organization of the requester
+      - name: external_id
+        description: The external id of the ticket
       - name: group_id
         description: The group this ticket is assigned to
       - name: group_name
@@ -228,3 +316,171 @@ models:
         description: The name of the source the ticket was created from  
       - name: ticket_tags
         description: A list of all tags assigned to this ticket
+      - name: problem_id
+        description: The reference to the problem if the ticket is listed as a problem
+      - name: is_incident
+        description: Boolean indicating whether the ticket is listed as an incident
+      - name: ticket_brand_name
+        description: The brand name of with the ticket
+      - name: ticket_form_name
+        description: The form name of the ticket
+      - name: ticket_satisfaction_rating
+        description: The ticket satisfaction rating
+      - name: ticket_satisfaction_comment
+        description: The ticket satisfaction comment
+      - name: ticket_satisfaction_reason
+        description: The ticket satisfaction reason
+      - name: ticket_organization_domain_names
+        description: The organization associated with the ticket domain names
+      - name: requester_organization_domain_names
+        description: The ticket requesters organization domain names 
+      - name: requester_external_id
+        description: The ticket requester exeternal id
+      - name: requester_created_at
+        description: The date the ticket requester was created
+      - name: requester_updated_at
+        description: The date the ticket requester was last updated
+      - name: is_requester_active
+        description: Boolean indicating whether the requester is currently acitve
+      - name: requester_locale
+        description: The locale of the ticket requester
+      - name: requester_time_zone
+        description: The timezone of the ticket requester
+      - name: requester_ticket_update_count
+        description: The number of times the requester has updated the ticket
+      - name: requester_ticket_last_update_at
+        description: The last date the requester updated the ticket
+      - name: requester_last_login_at
+        description: The last login of the ticket requester
+      - name: requester_organization_id
+        description: The organization id of the ticket requester
+      - name: requester_organization_name
+        description: The organization name of the ticket requester
+      - name: requester_organization_tags
+        description: The organization tags of the ticket requester
+      - name: requester_organization_external_id
+        description: The organization external id of the ticket requester
+      - name: requester_organization_created_at
+        description: The date the ticket requesters organization was created
+      - name: requester_organization_updated_at
+        description: The date the ticket requesters organization was last updated
+      - name: submitter_external_id
+        description: The ticket submitter external id
+      - name: is_agent_submitted
+        description: Boolean indicating if the submitter has an agent role
+      - name: is_submitter_active
+        description: Boolean indicating if the ticket submitter is active
+      - name: submitter_locale
+        description: The locale of the ticket submitter
+      - name: submitter_time_zone
+        description: The time zone of the ticket submitter
+      - name: assignee_external_id
+        description: The external id of the ticket assignee
+      - name: is_assignee_active
+        description: Boolean indicating if the ticket assignee is active
+      - name: assignee_locale
+        description: The locale of the ticket assignee
+      - name: assignee_time_zone
+        description: The time zone of the ticket assignee
+      - name: assignee_ticket_update_count
+        description: The number of times the ticket assignee has updated the ticket
+      - name: assigneed_ticket_last_update_at
+        description: The last date the ticket assignee updated the ticket
+      - name: assignee_last_login_at
+        description: The date the ticket assignee last logged in
+      - name: requester_tag
+        description: The tags associated with the ticket requester.
+      - name: submitter_tag
+        description: The tags associated with the ticket submitter.
+      - name: assignee_tag
+        description: The tags associated with the ticket assignee.
+      - name: count_agent_comments
+        description: Count of agent comments within the ticket
+      - name: count_end_user_comments
+        description: Count of end user comments within the ticket
+      - name: count_internal_comments
+        description: Count of internal comments within the ticket
+      - name: count_public_comments
+        description: Count of public comments within the ticket
+      - name: total_comments
+        description: Total count of all comments within the ticket
+      - name: unique_assignee_count
+        description: The count of unique assignees that were assigned to the ticket
+      - name: assignee_stations_count
+        description: The total number of assignees that were assigned to the ticket
+      - name: group_stations_count
+        description: The total count of group stations within the ticket
+      - name: first_assignee_id
+        description: Assignee id of the first agent assigned to the ticket
+      - name: last_assignee_id
+        description: Assignee id of the last agent assigned to the ticket
+      - name: first_agent_assignment_date
+        description: The date the first agent was assigned to the ticket
+      - name: last_agent_assignment_date
+        description: The date the last agent was assigned to the ticket
+      - name: first_assignment_to_resolution_calendar_minutes
+        description: The time in calendar minutes between the first assignment and resolution of the ticket
+      - name: last_assignment_to_resolution_calendar_minutes
+        description: The time in calendar minutes between the last assignment and resolution of the ticket
+      - name: count_resolutions
+        description: The count of ticket resolutions
+      - name: count_reopens
+        description: The count of ticket reopen events
+      - name: new_status_duration_in_calendar_minutes
+        description: The duration in calendar minutes the ticket was in the "new" status
+      - name: open_status_duration_in_calendar_minutes
+        description: The duration in calendar minutes the ticket was in the "open" status
+      - name: total_agent_replies
+        description: The total number of agent replies within the ticket
+      - name: requester_last_login_age_minutes
+        description: The time in minutes since the ticket requester was last logged in
+      - name: assignee_last_login_age_minutes
+        description: The time in minutes since the ticket assignee was last logged in
+      - name: unsolved_ticket_age_minutes
+        description: The time in minutes the ticket has been in an unsolved state
+      - name: unsolved_ticket_age_since_update_minutes
+        description: The time in minutes the ticket has been unsolved since the last update
+      - name: is_two_touch_resolution
+        description: Boolean indicating if the ticket was resolved in two comments
+      - name: is_multi_touch_resolution
+        description: Boolean indicating if the ticket was resolved in more than two comments
+
+  - name: zendesk__ticket_summary
+    description: A single record table containing Zendesk ticket and user summary metrics. These metrics are updated for the current day the model is run.
+    columns:
+      - name: user_count
+        description: Total count of users created
+      - name: active_agent_count
+        description: Total count of agents
+      - name: deleted_user_count
+        description: Total deleted user count
+      - name: end_user_count
+        description: Total end user count
+      - name: suspended_user_count
+        description: Total count of users in a suspended state
+      - name: new_ticket_count
+        description: Total count of tickets in the "new" status
+      - name: on_hold_ticket_count
+        description: Total count of tickets in the "hold" status
+      - name: open_ticket_count
+        description: Total count of tickets in the "open" status
+      - name: pending_ticket_count
+        description: Total count of tickets in the "pending" status
+      - name: solved_ticket_count
+        description: Total count of solved tickets
+      - name: problem_ticket_count
+        description: Total count of tickets labeled as problems
+      - name: reassigned_ticket_count
+        description: Total count of tickets that have been reassinged
+      - name: reopened_ticket_count
+        description: Total count of tickets that have been reopened
+      - name: surveyed_satisfaction_ticket_count
+        description: Total count of tickets that have been surveyed for a satisfaction response
+      - name: unassigned_unsolved_ticket_count
+        description: Total count of tickets that are unassigned and unsolved
+      - name: unreplied_ticket_count
+        description: Total count of tickets that have not had a reply
+      - name: unreplied_unsolved_ticket_count
+        description: Total count of tickets that have not had a reply and are unsolved
+      - name: unsolved_ticket_count
+        description: Total count of unsolved tickets

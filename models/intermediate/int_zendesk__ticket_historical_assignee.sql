@@ -4,32 +4,34 @@ with assignee_updates as (
     from {{ ref('stg_zendesk__ticket_field_history') }}
     where field_name = 'assignee_id'
 
-), assignee_duration as (
-    select
-        *,
-        {{ timestamp_diff(
-            'valid_starting_at',
-            "coalesce(valid_ending_at, " ~ dbt_utils.current_timestamp() ~ ")",
-            'minute') }} as assignee_duration_calendar_minutes
-    from assignee_updates
-
 ), calculate_metrics as (
     select
         ticket_id,
-        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at) as first_agent_assignment_date,
-        first_value(value) over (partition by ticket_id order by valid_starting_at) as first_assignee_id,
-        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc) as last_agent_assignment_date,
-        first_value(value) over (partition by ticket_id order by valid_starting_at desc) as last_assignee_id,
-        --first_value(assignee_duration_calendar_minutes) over (partition by ticket_id order by valid_starting_at desc) as last_assignee_duration_calendar_minutes,
-        count(distinct value) over (partition by ticket_id) as unique_assignee_count,
+        {{ fivetran_utils.first_value("valid_starting_at", "ticket_id", "valid_starting_at") }} as first_agent_assignment_date,
+        {{ fivetran_utils.first_value("value", "ticket_id", "valid_starting_at") }} as first_assignee_id,
+        {{ fivetran_utils.first_value("valid_starting_at", "ticket_id", "valid_starting_at", "desc") }} as last_agent_assignment_date,
+        {{ fivetran_utils.first_value("value", "ticket_id", "valid_starting_at", "desc") }} as last_assignee_id,
         count(value) over (partition by ticket_id) as assignee_stations_count
-    from assignee_duration
+    from assignee_updates
+
+), distinct_count as (
+    select distinct
+        ticket_id,
+        count(distinct value) as unique_assignee_count
+    from assignee_updates
+
+    group by 1
 
 ), final as (
-    select * 
+    select 
+        calculate_metrics.*,
+        distinct_count.unique_assignee_count
     from calculate_metrics
 
-    group by 1, 2, 3, 4, 5, 6, 7, 8
+    left join distinct_count
+        using(ticket_id)
+
+    group by 1, 2, 3, 4, 5, 6, 7
 )
 
 select *
