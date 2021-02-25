@@ -159,7 +159,12 @@ left join ticket_comments
 select
   calendar_hour_metrics.*,
   business_hour_metrics.first_resolution_business_minutes,
-  business_hour_metrics.full_resolution_business_minutes
+  business_hour_metrics.full_resolution_business_minutes,
+  business_hour_metrics.first_reply_time_business_minutes,
+  business_hour_metrics.agent_wait_time_in_business_minutes,
+  business_hour_metrics.requester_wait_time_in_business_minutes,
+  business_hour_metrics.agent_work_time_in_business_minutes,
+  business_hour_metrics.on_hold_time_in_business_minutes
 
 from calendar_hour_metrics
 
