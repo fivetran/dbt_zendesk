@@ -16,7 +16,6 @@ with change_data as (
     {% if is_incremental() %}
     where valid_from >= (select max(date_day) from {{ this }})
 
-),
 -- If no issue fields have been updated since the last incremental run, the pivoted_daily_history CTE will return no record/rows.
 -- When this is the case, we need to grab the most recent day's records from the previously built table so that we can persist 
 -- those values into the future.
@@ -44,10 +43,18 @@ with change_data as (
     select 
         calendar.date_day,
         calendar.ticket_id
-        {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
-        , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
-        , {{ col.name }}
-        {% endfor %}
+
+        {% if is_incremental() %}    
+            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
+            , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
+            {% endfor %}
+        
+        {% else %}
+            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
+            , {{ col.name }}
+            {% endfor %}
+        {% endif %}
+
     from calendar
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
@@ -75,13 +82,26 @@ with change_data as (
 
     from joined
 
-), surrogate_key as (
+), fix_null_values as (
 
-    select 
-        *,
-        {{ dbt_utils.surrogate_key(['date_day','ticket_id'] )}} as ticket_day_id
+    select  
+        date_day,
+        ticket_id
+        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
+
+        -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled
+        , case when {{ col.name }} = 'is_null' then null else {{ col.name }} end as {{ col.name }}
+        {% endfor %}
+
     from fill_values
 
+), surrogate_key as (
+
+    select
+        *,
+        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
+
+    from fix_null_values
 )
 
 select *
