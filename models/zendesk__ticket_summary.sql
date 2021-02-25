@@ -65,13 +65,10 @@ with ticket_metrics as (
             else 0
                 end) as reopened_ticket_count,
 
-        --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
-        {% if var('using_satisfaction_ratings', True) %}
-        sum(case when lower(ticket_satisfaction_rating) in ('offered', 'good', 'bad')
+        sum(case when lower(ticket_satisfaction_score) in ('offered', 'good', 'bad')
             then 1
             else 0
                 end) as surveyed_satisfaction_ticket_count,
-        {% endif %}
 
         sum(case when assignee_id is null and lower(status) not in ('solved', 'closed')
             then 1
@@ -125,12 +122,7 @@ with ticket_metrics as (
         ticket_metric_sum.assigned_ticket_count,
         ticket_metric_sum.reassigned_ticket_count,
         ticket_metric_sum.reopened_ticket_count,
-
-        --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
-        {% if var('using_satisfaction_ratings', True) %}
         ticket_metric_sum.surveyed_satisfaction_ticket_count,
-        {% endif %}
-
         ticket_metric_sum.unassigned_unsolved_ticket_count,
         ticket_metric_sum.unreplied_ticket_count,
         ticket_metric_sum.unreplied_unsolved_ticket_count,

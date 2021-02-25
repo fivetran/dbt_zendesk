@@ -22,7 +22,6 @@ vars:
     ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
     domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
     organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
-    satisfaction_rating:    "{{ ref('stg_zendesk__satisfaction_rating') }}"
     user:                   "{{ ref('stg_zendesk__user') }}"
   zendesk_source:
     group:                  "{{ ref('group_data') }}"
@@ -38,7 +37,6 @@ vars:
     ticket_form_history:    "{{ ref('ticket_form_history_data') }}"
     domain_name:            "{{ ref('domain_name_data') }}"
     organization_tag:       "{{ fivetran_utils.snowflake_seed_data('organization_tag_data') }}" 
-    satisfaction_rating:    "{{ ref('satisfaction_rating_data') }}"
     user:                   "{{ fivetran_utils.snowflake_seed_data('user_data') }}" 
     
 seeds:
@@ -123,10 +121,6 @@ seeds:
     organization_tag_data:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        _fivetran_synced: timestamp
-    satisfaction_rating_data:
-      +column_types:
-        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
     user_data_snowflake:
       +column_types:
