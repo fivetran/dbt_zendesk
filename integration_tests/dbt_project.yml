@@ -1,0 +1,139 @@
+config-version: 2
+
+name: 'zendesk_integration_tests'
+version: '0.2.0'
+
+require-dbt-version: [">=0.18.0", "<0.20.0"]
+profile: 'integration_tests'
+ 
+vars:
+  zendesk_schema: zendesk_integration_tests
+  zendesk:
+    group:                  "{{ ref('stg_zendesk__group') }}"
+    organization:           "{{ ref('stg_zendesk__organization') }}"
+    schedule:               "{{ ref('stg_zendesk__schedule') }}"
+    ticket:                 "{{ ref('stg_zendesk__ticket') }}"
+    ticket_comment:         "{{ ref('stg_zendesk__ticket_comment') }}"
+    ticket_field_history:   "{{ ref('stg_zendesk__ticket_field_history') }}"
+    ticket_schedule:        "{{ ref('stg_zendesk__ticket_schedule') }}"
+    ticket_tag:             "{{ ref('stg_zendesk__ticket_tag') }}"
+    user_tag:               "{{ ref('stg_zendesk__user_tag') }}"
+    brand:                  "{{ ref('stg_zendesk__brand') }}"
+    ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
+    domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
+    organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
+    satisfaction_rating:    "{{ ref('stg_zendesk__satisfaction_rating') }}"
+    user:                   "{{ ref('stg_zendesk__user') }}"
+  zendesk_source:
+    group:                  "{{ ref('group_data') }}"
+    organization:           "{{ ref('organization_data') }}"
+    schedule:               "{{ ref('schedule_data') }}"
+    ticket:                 "{{ ref('ticket_data') }}"
+    ticket_comment:         "{{ ref('ticket_comment_data') }}"
+    ticket_field_history:   "{{ ref('ticket_field_history_data') }}"
+    ticket_schedule:        "{{ ref('ticket_schedule_data') }}"
+    ticket_tag:             "{{ ref('ticket_tag_data') }}"
+    user_tag:               "{{ fivetran_utils.snowflake_seed_data('user_tag_data') }}" 
+    brand:                  "{{ ref('brand_data') }}"
+    ticket_form_history:    "{{ ref('ticket_form_history_data') }}"
+    domain_name:            "{{ ref('domain_name_data') }}"
+    organization_tag:       "{{ fivetran_utils.snowflake_seed_data('organization_tag_data') }}" 
+    satisfaction_rating:    "{{ ref('satisfaction_rating_data') }}"
+    user:                   "{{ fivetran_utils.snowflake_seed_data('user_data') }}" 
+    
+seeds:
+  +quote_columns: "{{ true if target.type == 'redshift' else false }}"
+  zendesk_integration_tests:
+    +column_types:
+      _fivetran_synced: timestamp
+    group_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        updated_at: timestamp
+    organization_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        updated_at: timestamp
+    schedule_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        end_time: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        start_time: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        end_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        start_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+    ticket_comment_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created: timestamp
+    ticket_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        due_at: timestamp
+        assignee_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        brand_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        forum_topic_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        group_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        problem_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        requester_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        submitter_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        ticket_form_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        type: "{{ 'varchar(100)'  if target.type == 'redshift' else 'string'}}"
+    ticket_field_history_data:
+      +column_types:
+        ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        updated: timestamp
+    ticket_schedule_data:
+      +column_types:
+        ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+    user_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        last_login_at: timestamp
+      +enabled: "{{ true if target.type != 'snowflake' else false }}"
+    user_tag_data:
+      +column_types:
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    brand_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    ticket_form_history_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    domain_name_data:
+      +column_types:
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    organization_tag_data:
+      +column_types:
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    satisfaction_rating_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+    user_data_snowflake:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        last_login_at: timestamp
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"

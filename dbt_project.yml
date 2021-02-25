@@ -1,7 +1,7 @@
 name: 'zendesk'
-version: '0.0.1'
+version: '0.2.0'
 config-version: 2
-require-dbt-version: '>=0.18.0'
+require-dbt-version: [">=0.18.0", "<0.20.0"]
 on-run-start: "{{ ticket_field_history_columns_warning() }}"
 
 models:
@@ -10,7 +10,7 @@ models:
         agent_work_time:
             +materialized: ephemeral
         intermediate:
-            +materialized: ephemeral
+            +materialized: table
         reply_times:
             +materialized: ephemeral
         resolution_times:
@@ -24,9 +24,30 @@ models:
 
 vars:
     zendesk:
-        ticket_field_history_columns: [ 'assignee_id', 'status', 'priority' ]
-        field_history: "{{ ref('stg_zendesk_ticket_field_history') }}"
-        ticket: "{{ ref('stg_zendesk_ticket') }}"
+        ticket_field_history_columns:   [ 'assignee_id', 'status', 'priority']
+        group:                  "{{ ref('stg_zendesk__group) }}"
+        brand:                  "{{ ref('stg_zendesk__brand') }}"
+        domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
+        organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
+        organization:           "{{ ref('stg_zendesk__organization') }}"
+        schedule:               "{{ ref('stg_zendesk__schedule') }}"
+        satisfaction_rating:    "{{ ref('stg_zendesk__satisfaction_rating') }}"
+        ticket:                 "{{ ref('stg_zendesk__ticket') }}"
+        ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
+        ticket_comment:         "{{ ref('stg_zendesk__ticket_comment') }}"
+        field_history:          "{{ ref('stg_zendesk__ticket_field_history') }}"
+        ticket_schedule:        "{{ ref('stg_zendesk__ticket_schedule') }}"
+        ticket_tag:             "{{ ref('stg_zendesk__ticket_tag') }}"
+        user_tag:               "{{ ref('stg_zendesk__user_tag') }}"
+        user:                   "{{ ref('stg_zendesk__user') }}"
+
+        using_schedules:            True
+        using_domain_names:         True
+        using_user_tags:            True
+        using_ticket_form_history:  True
+        using_organization_tags:    True
+        using_satisfaction_ratings: True
+
         dbt_utils_dispatch_list:
             - zendesk 
-            - dbt_utils 
+            - dbt_utils

@@ -1,4 +1,4 @@
-# Zendesk Support
+# Zendesk Support ([Docs](https://dbt-zendesk.netlify.app/))
 
 This package models Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
 
@@ -14,10 +14,11 @@ This package contains transformation models, designed to work simultaneously wit
 
 | **model**                    | **description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| zendesk_ticket_metrics       | Each record represents a Zendesk ticket, enhriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
-| zendesk_ticket_enriched      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
-| zendesk_ticket_field_history | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
-| zendesk_sla_breach           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
+| [zendesk__ticket_metrics](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_metrics.sql)       | Each record represents a Zendesk ticket, enriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
+| [zendesk__ticket_enriched](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_enriched.sql)      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
+| [zendesk__ticket_summary](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_summary.sql)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
+| [zendesk__ticket_field_history](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_field_history.sql) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
+| [zendesk__sla_breach](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_breach.sql)           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
 ## Installation Instructions
 Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
@@ -52,7 +53,7 @@ vars:
 
 ### Disabling models
 
-It's possible that your Zendesk Support connector does not sync every table that this package expects. If your syncs exclude certain tables, it is because you either don't use that functionality in Zendesk Support or actively excluded some tables from your syncs. To disable the corresponding functionality in the package, you must add the relevant variables. By default, all variables are assumed to be `true`. Add variables for only the tables you would like to disable:  
+This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, `ticket_form_history`, or `satisfaction_rating` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
 
 ```yml
 # dbt_project.yml
@@ -62,11 +63,20 @@ config-version: 2
 
 vars:
   zendesk_source:
-    using_schedules: false        # Disable if you do not have the schedule and ticket_schedule tables, or if you do not want metrics reported in business hours
-    using_sla_policy: false       # Disable if you are not using SLAs 
+    using_schedules:            False         #Disable if you are not using schedules
+    using_domain_names:         False         #Disable if you are not using domain names
+    using_user_tags:            False         #Disable if you are not using user tags
+    using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_satisfaction_ratings: False         #Disable if you are not using satisfaction ratings
+
   zendesk:
-    using_schedules: false
-    using_sla_policy: false
+    using_schedules:            False         #Disable if you are not using schedules
+    using_domain_names:         False         #Disable if you are not using domain names
+    using_user_tags:            False         #Disable if you are not using user tags
+    using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_satisfaction_ratings: False         #Disable if you are not using satisfaction ratings
 ```
 
 ## Contributions
