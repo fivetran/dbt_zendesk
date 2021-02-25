@@ -15,7 +15,20 @@ with change_data as (
   
     {% if is_incremental() %}
     where valid_from >= (select max(date_day) from {{ this }})
-    {% endif %}
+
+),
+-- If no issue fields have been updated since the last incremental run, the pivoted_daily_history CTE will return no record/rows.
+-- When this is the case, we need to grab the most recent day's records from the previously built table so that we can persist 
+-- those values into the future.
+
+), most_recent_data as ( 
+
+    select 
+        *
+    from {{ this }}
+    where date_day = (select max(date_day) from {{ this }} )
+
+{% endif %}
 
 ), calendar as (
 
@@ -32,12 +45,19 @@ with change_data as (
         calendar.date_day,
         calendar.ticket_id
         {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
+        , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
         , {{ col.name }}
         {% endfor %}
     from calendar
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
         and calendar.date_day = change_data.valid_from
+    
+    {% if is_incremental() %}
+    left join most_recent_data
+        on calendar.ticket_id = most_recent_data.ticket_id
+        and calendar.date_day = most_recent_data.date_day
+    {% endif %}
 
 ), fill_values as (
 

@@ -1,10 +1,5 @@
-{{
-    config(
-        materialized='incremental',
-        partition_by = {'field': 'valid_from', 'data_type': 'date'},
-        unique_key='ticket_day_id'
-        ) 
-}}
+-- model needs to materialize as a table to avoid erroneous null values
+{{ config( materialized='table') }} 
 
 {%- set ticket_columns = adapter.get_columns_in_relation(ref('int_zendesk__field_history_pivot')) -%}
 
@@ -12,12 +7,11 @@ with change_data as (
 
     select *
     from {{ ref('int_zendesk__field_history_pivot') }}
-    {% if is_incremental() %}
-    where date_day >= (select max(valid_from) from {{ this }})
-    {% endif %}
 
 ), fill_values as (
 
+-- each row of the pivoted table includes field values if that field was updated on that day
+-- we need to backfill to persist values that have been previously updated and are still valid 
     select 
         date_day as valid_from, 
         ticket_id,
