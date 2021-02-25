@@ -27,8 +27,6 @@ final as (
         reason,
         latest_satisfaction_index
     from latest_satisfaction_rating
-
-    --where latest_satisfaction_index = 1
 )
 
 select *

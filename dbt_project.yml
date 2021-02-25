@@ -10,7 +10,7 @@ models:
         agent_work_time:
             +materialized: ephemeral
         intermediate:
-            +materialized: ephemeral
+            +materialized: table
         reply_times:
             +materialized: ephemeral
         resolution_times:

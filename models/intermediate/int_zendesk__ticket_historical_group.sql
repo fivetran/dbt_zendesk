@@ -1,7 +1,7 @@
 with ticket_group_history as (
 
     select *
-    from {{ ref('stg_zendesk__ticket_field_history') }}
+    from {{ ref('int_zendesk__updates') }}
     where field_name = 'group_id'
 
 ), group_breakdown as (

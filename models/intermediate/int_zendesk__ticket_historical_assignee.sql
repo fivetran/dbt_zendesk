@@ -1,37 +1,57 @@
 with assignee_updates as (
 
     select *
-    from {{ ref('stg_zendesk__ticket_field_history') }}
+    from {{ ref('int_zendesk__updates') }}
     where field_name = 'assignee_id'
 
 ), calculate_metrics as (
     select
         ticket_id,
-        {{ fivetran_utils.first_value("valid_starting_at", "ticket_id", "valid_starting_at") }} as first_agent_assignment_date,
-        {{ fivetran_utils.first_value("value", "ticket_id", "valid_starting_at") }} as first_assignee_id,
-        {{ fivetran_utils.first_value("valid_starting_at", "ticket_id", "valid_starting_at", "desc") }} as last_agent_assignment_date,
-        {{ fivetran_utils.first_value("value", "ticket_id", "valid_starting_at", "desc") }} as last_assignee_id,
+        field_name as assignee_id,
+        value,
+        valid_starting_at,
+        lag(valid_starting_at) over (partition by ticket_id order by valid_starting_at) as previous_update,
+        lag(value) over (partition by ticket_id order by valid_starting_at) as previous_assignee,
+        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at, ticket_id rows unbounded preceding) as first_agent_assignment_date,
+        first_value(value) over (partition by ticket_id order by valid_starting_at, ticket_id rows unbounded preceding) as first_assignee_id,
+        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_agent_assignment_date,
+        first_value(value) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_assignee_id,
         count(value) over (partition by ticket_id) as assignee_stations_count
     from assignee_updates
 
-), distinct_count as (
-    select distinct
+), unassigned_time as (
+    select
         ticket_id,
+        sum(case when assignee_id is not null and previous_assignee is null 
+            then round(({{ dbt_utils.datediff("previous_update", "valid_starting_at", 'second') }} /60),2)
+            else 0
+                end) as ticket_unassigned_duration_calendar_minutes,
         count(distinct value) as unique_assignee_count
-    from assignee_updates
+    from calculate_metrics
 
     group by 1
 
-), final as (
-    select 
-        calculate_metrics.*,
-        distinct_count.unique_assignee_count
+), window_group as (
+    select
+        calculate_metrics.ticket_id,
+        calculate_metrics.first_agent_assignment_date,
+        calculate_metrics.first_assignee_id,
+        calculate_metrics.last_agent_assignment_date,
+        calculate_metrics.last_assignee_id,
+        calculate_metrics.assignee_stations_count
     from calculate_metrics
 
-    left join distinct_count
-        using(ticket_id)
+    group by 1, 2, 3, 4, 5, 6
 
-    group by 1, 2, 3, 4, 5, 6, 7
+), final as (
+    select
+        window_group.*,
+        unassigned_time.unique_assignee_count,
+        unassigned_time.ticket_unassigned_duration_calendar_minutes
+    from window_group
+
+    left join unassigned_time
+        using(ticket_id)
 )
 
 select *

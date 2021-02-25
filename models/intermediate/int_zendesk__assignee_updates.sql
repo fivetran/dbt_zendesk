@@ -10,7 +10,7 @@ with ticket_updates as (
     select
         ticket.ticket_id,
         ticket.assignee_id,
-        ticket_updates.updated_at
+        ticket_updates.valid_starting_at
 
     from ticket
 
@@ -22,7 +22,7 @@ with ticket_updates as (
     select 
         ticket_id,
         assignee_id,
-        max(updated_at) as last_updated,
+        max(valid_starting_at) as last_updated,
         count(*) as total_updates
     from ticket_requester
 

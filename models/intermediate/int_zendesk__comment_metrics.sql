@@ -7,6 +7,7 @@ with ticket_comments as (
 comment_counts as (
     select
         ticket_id,
+        last_comment_added_at,
         sum(case when commenter_role = 'internal_comment'
             then 1
             else 0
@@ -26,7 +27,7 @@ comment_counts as (
         count(*) as total_comments
     from ticket_comments
 
-    group by 1
+    group by 1, 2
 ),
 
 final as (

@@ -19,7 +19,8 @@ with ticket_historical_status as (
         case when status = 'new' then status_duration_calendar_minutes
             else 0 end as new_status_duration_minutes,
         case when status = 'open' then status_duration_calendar_minutes
-            else 0 end as open_status_duration_minutes
+            else 0 end as open_status_duration_minutes,
+        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_status_assignment_date
 
     from ticket_historical_status
 
@@ -27,6 +28,7 @@ with ticket_historical_status as (
 
 select 
   ticket_id,
+  last_status_assignment_date,
   sum(agent_wait_time_in_minutes) as agent_wait_time_in_calendar_minutes,
   sum(requester_wait_time_in_minutes) as requester_wait_time_in_calendar_minutes,
   sum(agent_work_time_in_minutes) as agent_work_time_in_calendar_minutes,
@@ -34,4 +36,4 @@ select
   sum(new_status_duration_minutes) as new_status_duration_in_calendar_minutes,
   sum(open_status_duration_minutes) as open_status_duration_in_calendar_minutes
 from calendar_minutes
-group by 1
+group by 1, 2

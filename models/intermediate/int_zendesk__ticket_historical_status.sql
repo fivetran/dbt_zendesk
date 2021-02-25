@@ -3,7 +3,7 @@
 with ticket_status_history as (
 
     select *
-    from {{ ref('stg_zendesk__ticket_field_history') }}
+    from {{ ref('int_zendesk__updates') }}
     where field_name = 'status'
 
 )

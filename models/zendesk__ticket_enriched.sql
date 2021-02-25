@@ -136,7 +136,7 @@ with ticket as (
         assignee.locale as assignee_locale,
         assignee.time_zone as assignee_time_zone,
         coalesce(assignee_updates.total_updates, 0) as assignee_ticket_update_count,
-        assignee_updates.last_updated as assigneed_ticket_last_update_at,
+        assignee_updates.last_updated as assignee_ticket_last_update_at,
         assignee.last_login_at as assignee_last_login_at,
         ticket_group.name as group_name,
         organization.name as organization_name,

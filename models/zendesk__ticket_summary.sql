@@ -93,6 +93,14 @@ with ticket_metrics as (
             then 1
             else 0
                 end) as solved_ticket_count,
+        sum(case when lower(status) in ('deleted')
+            then 1
+            else 0
+                end) as deleted_ticket_count,
+        sum(case when assignee_stations_count > 0
+            then 1
+            else 0
+                end) as assigned_ticket_count,
         count(count_internal_comments) as total_internal_comments,
         count(count_public_comments) as total_public_comments,
         count(total_comments)
@@ -114,6 +122,7 @@ with ticket_metrics as (
         ticket_metric_sum.pending_ticket_count,
         ticket_metric_sum.solved_ticket_count,
         ticket_metric_sum.problem_ticket_count,
+        ticket_metric_sum.assigned_ticket_count,
         ticket_metric_sum.reassigned_ticket_count,
         ticket_metric_sum.reopened_ticket_count,
 
@@ -125,7 +134,8 @@ with ticket_metrics as (
         ticket_metric_sum.unassigned_unsolved_ticket_count,
         ticket_metric_sum.unreplied_ticket_count,
         ticket_metric_sum.unreplied_unsolved_ticket_count,
-        ticket_metric_sum.unsolved_ticket_count
+        ticket_metric_sum.unsolved_ticket_count,
+        ticket_metric_sum.deleted_ticket_count
     from user_sum
 
     left join ticket_metric_sum

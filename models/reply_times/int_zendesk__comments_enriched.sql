@@ -1,7 +1,8 @@
 with ticket_comment as (
 
     select *
-    from {{ ref('stg_zendesk__ticket_comment') }}
+    from {{ ref('int_zendesk__updates') }}
+    where field_name = 'comment'
 
 ), users as (
 
@@ -27,9 +28,10 @@ with ticket_comment as (
     select
         *,
         coalesce(
-            lag(commenter_role) over (partition by ticket_id order by created_at)
+            lag(commenter_role) over (partition by ticket_id order by valid_starting_at)
             , 'first_comment') 
-            as previous_commenter_role
+            as previous_commenter_role,
+        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_comment_added_at
 
     from joined
 )
