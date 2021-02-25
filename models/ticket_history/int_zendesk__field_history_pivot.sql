@@ -13,10 +13,17 @@
 
 with field_history as (
 
-    select *
+    select 
+        ticket_id,
+        field_name,
+        valid_starting_at,
+        valid_ending_at,
+        -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
+        case when value is null then 'is_null' else value end as value
+
     from {{ var('field_history') }}
     {% if is_incremental() %}
-    where cast({{ dbt_utils.dateadd('day', -1, 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
+    where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
 
 ), event_order as (
@@ -44,7 +51,7 @@ with field_history as (
 
     select 
         ticket_id,
-        cast({{ dbt_utils.dateadd('day', 0, 'valid_starting_at') }} as date) as date_day
+        cast({{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
         {% set col_xf = col|lower %}
@@ -52,7 +59,6 @@ with field_history as (
         {% endfor %}
     
     from filtered
-    where cast(valid_starting_at as date) < current_date
     group by 1,2
 
 ), surrogate_key as (
