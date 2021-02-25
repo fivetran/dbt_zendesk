@@ -31,7 +31,6 @@ vars:
         organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
         organization:           "{{ ref('stg_zendesk__organization') }}"
         schedule:               "{{ ref('stg_zendesk__schedule') }}"
-        satisfaction_rating:    "{{ ref('stg_zendesk__satisfaction_rating') }}"
         ticket:                 "{{ ref('stg_zendesk__ticket') }}"
         ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
         ticket_comment:         "{{ ref('stg_zendesk__ticket_comment') }}"
@@ -46,7 +45,6 @@ vars:
         using_user_tags:            True
         using_ticket_form_history:  True
         using_organization_tags:    True
-        using_satisfaction_ratings: True
 
         dbt_utils_dispatch_list:
             - zendesk 

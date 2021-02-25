@@ -14,14 +14,10 @@ with ticket as (
     from {{ ref('int_zendesk__latest_ticket_form') }}
 {% endif %}
 
---If you use using_satisfaction_ratings this will be included, if not it will be ignored.
-{% if var('using_satisfaction_ratings', True) %}
 ), latest_satisfaction_ratings as (
 
     select *
-    from {{ ref('int_zendesk__satisfaction_rating') }}
-    where latest_satisfaction_index = 1
-{% endif %}
+    from {{ ref('int_zendesk__ticket_historical_satisfaction') }}
 
 ), users as (
 
@@ -82,12 +78,9 @@ with ticket as (
         latest_ticket_form.name as ticket_form_name,
         {% endif %}
 
-        --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
-        {% if var('using_satisfaction_ratings', True) %}
-        latest_satisfaction_ratings.score as ticket_satisfaction_rating,
-        latest_satisfaction_ratings.comment as ticket_satisfaction_comment,
-        latest_satisfaction_ratings.reason as ticket_satisfaction_reason,
-        {% endif %}
+        latest_satisfaction_ratings.latest_satisfaction_score as ticket_satisfaction_score,
+        latest_satisfaction_ratings.latest_satisfaction_comment as ticket_satisfaction_comment,
+        latest_satisfaction_ratings.latest_satisfaction_reason as ticket_satisfaction_reason,
 
         --If you use using_domain_names tags this will be included, if not it will be ignored.
         {% if var('using_domain_names', True) %}
@@ -205,11 +198,9 @@ with ticket as (
     left join organization
         on organization.organization_id = ticket.organization_id
 
-    --If you use using_satisfaction_ratings this will be included, if not it will be ignored.
-    {% if var('using_satisfaction_ratings', True) %}
     left join latest_satisfaction_ratings
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
-    {% endif %}
+
     left join ticket_tags
         on ticket_tags.ticket_id = ticket.ticket_id
 )
