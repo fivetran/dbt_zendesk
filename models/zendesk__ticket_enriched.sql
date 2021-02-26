@@ -78,9 +78,13 @@ with ticket as (
         latest_ticket_form.name as ticket_form_name,
         {% endif %}
 
+        latest_satisfaction_ratings.count_satisfaction_scores as ticket_total_satisfaction_scores,
+        latest_satisfaction_ratings.first_satisfaction_score as ticket_first_satisfaction_score,
         latest_satisfaction_ratings.latest_satisfaction_score as ticket_satisfaction_score,
         latest_satisfaction_ratings.latest_satisfaction_comment as ticket_satisfaction_comment,
         latest_satisfaction_ratings.latest_satisfaction_reason as ticket_satisfaction_reason,
+        latest_satisfaction_ratings.is_good_to_bad_satisfaction_score,
+        latest_satisfaction_ratings.is_bad_to_good_satisfaction_score,
 
         --If you use using_domain_names tags this will be included, if not it will be ignored.
         {% if var('using_domain_names', True) %}

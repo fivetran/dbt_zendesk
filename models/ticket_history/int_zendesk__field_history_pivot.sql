@@ -16,6 +16,7 @@ with field_history as (
     select 
         ticket_id,
         field_name,
+        user_id,
         valid_starting_at,
         valid_ending_at,
         -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
@@ -55,7 +56,9 @@ with field_history as (
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
         {% set col_xf = col|lower %}
-        , min(case when lower(field_name) = '{{ col|lower }}' then value end) as {{ col_xf }}
+        {% set col_updater = (col|lower + "_updater_id") %}
+        ,min(case when lower(field_name) = '{{ col|lower }}' then value end) as {{ col_xf }}
+        ,min(case when lower(field_name) = '{{ col|lower }}' then user_id end) as {{ col_updater }}
         {% endfor %}
     
     from filtered

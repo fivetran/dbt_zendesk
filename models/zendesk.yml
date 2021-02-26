@@ -182,8 +182,8 @@ models:
       
   - name: zendesk__ticket_field_history
     description: >
-      A daily historical view of the ticket field values defined in the ticket_field_history_columns variable. 
-      If variable values have changed more than once in a day, the latest value is displayed.
+      A daily historical view of the ticket field values defined in the ticket_field_history_columns variable and
+      the corresponding updater_id. If variable values have changed more than once in a day, the latest value is displayed.
     columns:
       - name: date_day
         description: The date of the day associated with the field values.
@@ -193,10 +193,16 @@ models:
         description: The unique key of the table, a surrogate key of date_day and ticket_id.
       - name: assignee_id
         description: The assignee id assigned to the ticket
+      - name: assignee_id_updater_id
+        description: The user_id of the individual who updated the assignee_id field. This field can be joined to stg_zendesk__user and stg_zendesk__user_tag on user_id for additional information.
       - name: status
         description: The status of the ticket
+      - name: status_updater_id
+        description: The user_id of the individual who updated the status field. This field can be joined to stg_zendesk__user and stg_zendesk__user_tag on user_id for additional information.
       - name: priority
         description: The tickets priority ranking
+      - name: priority_updater_id
+        description: The user_id of the individual who updated the priority field. This field can be joined to stg_zendesk__user and stg_zendesk__user_tag on user_id for additional information.
 
   - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
@@ -494,3 +500,5 @@ models:
         description: Total count of assigned tickets
       - name: deleted_ticket_count
         description: Total count of deleted tickets
+      - name: recovered_ticket_count
+        description: Total count of tickets that were deleted then reopened
