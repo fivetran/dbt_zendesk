@@ -44,7 +44,7 @@ with ticket as (
 ), user_tags as (
 
     select *
-    from {{ ref('stg_zendesk__user_tag') }}
+    from {{ ref('int_zendesk__user_tags') }}
 {% endif %}
 
 ), ticket_group as (
