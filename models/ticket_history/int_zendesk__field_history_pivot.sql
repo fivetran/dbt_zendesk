@@ -1,3 +1,4 @@
+-- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
 {{ 
     config(
         materialized='incremental',
@@ -17,12 +18,13 @@ with field_history as (
         ticket_id,
         field_name,
         user_id,
+        user_name,
         valid_starting_at,
         valid_ending_at,
         -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
         case when value is null then 'is_null' else value end as value
 
-    from {{ var('field_history') }}
+    from {{ ref('int_zendesk__field_history_enriched') }}
     {% if is_incremental() %}
     where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
@@ -56,9 +58,13 @@ with field_history as (
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
         {% set col_xf = col|lower %}
-        {% set col_updater = (col|lower + "_updater_id") %}
+        {% set col_updater_id = (col|lower + "_updater_id") %}
+        {% set col_updater_name = (col|lower + "_updater_name") %}
+
         ,min(case when lower(field_name) = '{{ col|lower }}' then value end) as {{ col_xf }}
-        ,min(case when lower(field_name) = '{{ col|lower }}' then user_id end) as {{ col_updater }}
+        ,min(case when lower(field_name) = '{{ col|lower }}' then user_id end) as {{ col_updater_id }}
+        ,min(case when lower(field_name) = '{{ col|lower }}' then user_name end) as {{ col_updater_name }}
+
         {% endfor %}
     
     from filtered
