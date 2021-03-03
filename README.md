@@ -18,6 +18,7 @@ This package contains transformation models, designed to work simultaneously wit
 | [zendesk__ticket_enriched](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_enriched.sql)      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
 | [zendesk__ticket_summary](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_summary.sql)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
 | [zendesk__ticket_field_history](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_field_history.sql) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable .                                                        |
+| [zendesk__ticket_backlog](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_backlog.sql)           | A daily historical count of the tickets grouped by the ticket channel and defined `ticket_field_history_columns` variable.                                                             |
 | [zendesk__sla_breach](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_breach.sql)           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
 
 ## Installation Instructions

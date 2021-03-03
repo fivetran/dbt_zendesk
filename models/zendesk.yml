@@ -494,3 +494,21 @@ models:
         description: Total count of assigned tickets
       - name: deleted_ticket_count
         description: Total count of deleted tickets
+
+  - name: zendesk__ticket_backlog
+    description: >
+      A daily historical count of the tickets grouped by the ticket channel and 
+      defined ticket_field_history_columns.
+    columns:
+      - name: date_day
+        description: The date of the day associated with the field values
+      - name: created_channel
+        description: The channel where the ticket was created
+      - name: assignee_id
+        description: The assignee id assigned to the ticket
+      - name: status
+        description: The status of the ticket
+      - name: priority
+        description: The tickets priority ranking
+      - name: ticket_count
+        description: The total count tickets grouped by the date, channel, and designated ticket_field_history_columns
