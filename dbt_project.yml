@@ -18,7 +18,7 @@ models:
         sla_policy:
             +materialized: ephemeral
         ticket_history:
-            +materialized: ephemeral
+            +materialized: table
         utils:
             +materialized: ephemeral
 

@@ -1,4 +1,5 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+{% set updater_fields = [] %}
 {{ 
     config(
         materialized='incremental',
@@ -14,15 +15,36 @@
 
 with field_history as (
 
-    select 
+    select
         ticket_id,
         field_name,
-        user_id,
-        user_name,
-        valid_starting_at,
         valid_ending_at,
+        valid_starting_at
+
+        {% if var('ticket_field_history_updater_user_columns') != []%}       
+            {% for col in var('ticket_field_history_updater_user_columns') %}
+                {% set col_upd = ("updater_" + col|lower) %}
+                ,{{ col_upd }}
+                {% do updater_fields.append(col_upd) %}
+            {% endfor %}
+        {% endif %}
+
+        {% if var('ticket_field_history_updater_organization_columns') != []%}       
+            {% for col in var('ticket_field_history_updater_organization_columns') %}
+                {% set col_upd = ("updater_organization_" + col|lower) %}
+                {% if col in ['organization_id'] %}
+                    {% set col_upd = 'updater_organization_id' %}
+                    ,{{ col_upd }}
+                    {% do updater_fields.append(col_upd) %}
+                {% else %}
+                    ,{{ col_upd }}
+                    {% do updater_fields.append(col_upd) %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
         -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
-        case when value is null then 'is_null' else value end as value
+        ,case when value is null then 'is_null' else value end as value
 
     from {{ ref('int_zendesk__field_history_enriched') }}
     {% if is_incremental() %}
@@ -57,14 +79,14 @@ with field_history as (
         cast({{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
-        {% set col_xf = col|lower %}
-        {% set col_updater_id = (col|lower + "_updater_id") %}
-        {% set col_updater_name = (col|lower + "_updater_name") %}
+            {% set col_xf = col|lower %}
+            ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
-        ,min(case when lower(field_name) = '{{ col|lower }}' then value end) as {{ col_xf }}
-        ,min(case when lower(field_name) = '{{ col|lower }}' then user_id end) as {{ col_updater_id }}
-        ,min(case when lower(field_name) = '{{ col|lower }}' then user_name end) as {{ col_updater_name }}
-
+            {% for upd in updater_fields %}
+                {% set upd_xf = (col|lower + '_' + upd ) %}
+                ,min(case when lower(field_name) = '{{ col|lower }}' then {{ upd }} end) as {{ upd_xf }}
+       
+            {% endfor %}
         {% endfor %}
     
     from filtered
