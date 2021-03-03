@@ -1,3 +1,6 @@
+--This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
+{{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
+
 with ticket_field_history as (
     select *
     from {{ ref('zendesk__ticket_field_history') }}
@@ -22,7 +25,7 @@ with ticket_field_history as (
 {% if 'ticket_form_id' in var('ticket_field_history_columns') %}
 ), ticket_forms as (
     select *
-    from {{ ref('stg_zendesk__ticket_form_history') }}
+    from {{ ref('int_zendesk__latest_ticket_form') }}
 {% endif %}
 
 ), organizations as (
@@ -32,9 +35,10 @@ with ticket_field_history as (
 ), backlog as (
     select
         ticket_field_history.date_day
+        ,ticket_field_history.ticket_id
+        ,ticket_field_history.status
         ,tickets.created_channel
-        {% set field_count = var('ticket_field_history_columns')|length + 2 %} --Adding 2 in order to include date_day and created_channel in group by
-        {% for col in var('ticket_field_history_columns') %} --Looking at all history fields the users passed through in their dbt_project.yml file
+        {% for col in var('ticket_field_history_columns') if col != 'status' %} --Looking at all history fields the users passed through in their dbt_project.yml file
             {% if col in ['assignee_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,users.name as assignee_name
 
@@ -61,11 +65,10 @@ with ticket_field_history as (
             {% endif %}
         {% endfor %}
 
-        ,count(*) as ticket_count
     from ticket_field_history
 
     left join tickets
-        using(ticket_id)
+        on tickets.ticket_id = ticket_field_history.ticket_id
 
     {% if 'ticket_form_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join ticket_forms
@@ -92,7 +95,7 @@ with ticket_field_history as (
         on organizations.organization_id = cast(ticket_field_history.organization_id as {{ dbt_utils.type_int() }})
     {% endif %}
 
-    {{ dbt_utils.group_by(n=field_count) }}
+    where ticket_field_history.status not in ('closed', 'solved', 'deleted')
 )
 
 select *
