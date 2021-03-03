@@ -68,16 +68,16 @@ with satisfaction_updates as (
     from satisfaction_updates
 
     left join latest_reason
-        using(ticket_id)
+        on satisfaction_updates.ticket_id = latest_reason.ticket_id
 
     left join latest_comment
-        using(ticket_id)
+        on satisfaction_updates.ticket_id = latest_comment.ticket_id
 
     left join first_and_latest_score
-        using(ticket_id)
+        on satisfaction_updates.ticket_id = first_and_latest_score.ticket_id
 
     left join score_group
-        using(ticket_id)
+        on satisfaction_updates.ticket_id = score_group.ticket_id
 
     group by 1, 2, 3, 4, 5, 6, 7, 8
 
