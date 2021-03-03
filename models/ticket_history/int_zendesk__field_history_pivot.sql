@@ -70,9 +70,8 @@ with field_history as (
             --Only runs if the user passes updater fields through the final ticket field history model
             {% if var('ticket_field_history_updater_columns') %}
                 {% for upd in var('ticket_field_history_updater_columns') %}
-                    {% set upd_xf = (col|lower + '_' + upd ) %}
+                    {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
                     ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
-            
                 {% endfor %}
             {% endif %}
         {% endfor %}
