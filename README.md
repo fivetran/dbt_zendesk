@@ -38,7 +38,7 @@ vars:
     zendesk_schema: your_schema_name 
 ```
 
-The `zendesk_ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file.  After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
+The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models. 
 
 ```yml
 # dbt_project.yml
@@ -49,8 +49,13 @@ config-version: 2
 vars:
   zendesk:
     ticket_field_history_columns: ['the','list','of','column','names']
+    ticket_field_history_updater_columns: [
+                                            'updater_user_id', 'updater_name', 'updater_role', 'updater_email', 'updater_external_id', 'updater_locale', 
+                                            'updater_is_active', 'updater_user_tags', 'updater_last_login_at', 'updater_time_zone', 
+                                            'updater_organization_id', 'updater_organization_domain_names' , 'updater_organization_organization_tags'
+                                          ]
 ```
-
+*Note: This package only integrates the above ticket_field_history_updater_columns values. If you'd like to include additional updater fields, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 ### Disabling models
 
 This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
@@ -62,21 +67,13 @@ This package takes into consideration that not every Zendesk account utilizes th
 config-version: 2
 
 vars:
-  zendesk_source:
-    using_schedules:            False         #Disable if you are not using schedules
-    using_domain_names:         False         #Disable if you are not using domain names
-    using_user_tags:            False         #Disable if you are not using user tags
-    using_ticket_form_history:  False         #Disable if you are not using ticket form history
-    using_organization_tags:    False         #Disable if you are not using organization tags
-
-  zendesk:
-    using_schedules:            False         #Disable if you are not using schedules
-    using_domain_names:         False         #Disable if you are not using domain names
-    using_user_tags:            False         #Disable if you are not using user tags
-    using_ticket_form_history:  False         #Disable if you are not using ticket form history
-    using_organization_tags:    False         #Disable if you are not using organization tags
+  using_schedules:            False         #Disable if you are not using schedules
+  using_domain_names:         False         #Disable if you are not using domain names
+  using_user_tags:            False         #Disable if you are not using user tags
+  using_ticket_form_history:  False         #Disable if you are not using ticket form history
+  using_organization_tags:    False         #Disable if you are not using organization tags
 ```
-
+*Note: This package only integrates the above variables. If you'd like to disable other models, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 ## Contributions
 
 Additional contributions to this package are very welcome! Please create issues

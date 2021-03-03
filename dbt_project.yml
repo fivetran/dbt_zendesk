@@ -18,15 +18,14 @@ models:
         sla_policy:
             +materialized: ephemeral
         ticket_history:
-            +materialized: table
+            +materialized: ephemeral
         utils:
             +materialized: ephemeral
 
 vars:
     zendesk:
         ticket_field_history_columns:   [ 'assignee_id', 'status', 'priority']
-        ticket_field_history_updater_user_columns: ['user_id', 'name', 'role', 'email', 'external_id', 'locale', 'is_active', 'user_tags', 'last_login_at', 'time_zone']
-        ticket_field_history_updater_organization_columns: [ 'name', 'organization_id', 'domain_names' , 'organization_tags']
+        ticket_field_history_updater_columns: []
         group:                  "{{ ref('stg_zendesk__group) }}"
         brand:                  "{{ ref('stg_zendesk__brand') }}"
         domain_name:            "{{ ref('stg_zendesk__domain_name') }}"

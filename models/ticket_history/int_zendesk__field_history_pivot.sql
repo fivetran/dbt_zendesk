@@ -1,5 +1,5 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
-{% set updater_fields = [] %}
+
 {{ 
     config(
         materialized='incremental',
@@ -21,26 +21,11 @@ with field_history as (
         valid_ending_at,
         valid_starting_at
 
-        {% if var('ticket_field_history_updater_user_columns') != []%}       
-            {% for col in var('ticket_field_history_updater_user_columns') %}
-                {% set col_upd = ("updater_" + col|lower) %}
-                ,{{ col_upd }}
-                {% do updater_fields.append(col_upd) %}
-            {% endfor %}
-        {% endif %}
+        --Only runs if the user passes updater fields through the final ticket field history model
+        {% if var('ticket_field_history_updater_columns') %}
+        ,
+        {{ var('ticket_field_history_updater_columns') | join (", ")}}
 
-        {% if var('ticket_field_history_updater_organization_columns') != []%}       
-            {% for col in var('ticket_field_history_updater_organization_columns') %}
-                {% set col_upd = ("updater_organization_" + col|lower) %}
-                {% if col in ['organization_id'] %}
-                    {% set col_upd = 'updater_organization_id' %}
-                    ,{{ col_upd }}
-                    {% do updater_fields.append(col_upd) %}
-                {% else %}
-                    ,{{ col_upd }}
-                    {% do updater_fields.append(col_upd) %}
-                {% endif %}
-            {% endfor %}
         {% endif %}
 
         -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
@@ -82,11 +67,14 @@ with field_history as (
             {% set col_xf = col|lower %}
             ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
-            {% for upd in updater_fields %}
-                {% set upd_xf = (col|lower + '_' + upd ) %}
-                ,min(case when lower(field_name) = '{{ col|lower }}' then {{ upd }} end) as {{ upd_xf }}
-       
-            {% endfor %}
+            --Only runs if the user passes updater fields through the final ticket field history model
+            {% if var('ticket_field_history_updater_columns') %}
+                {% for upd in var('ticket_field_history_updater_columns') %}
+                    {% set upd_xf = (col|lower + '_' + upd ) %}
+                    ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
+            
+                {% endfor %}
+            {% endif %}
         {% endfor %}
     
     from filtered
