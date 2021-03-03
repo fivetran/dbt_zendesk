@@ -40,10 +40,10 @@ with ticket_field_history as (
         ,tickets.created_channel
         {% for col in var('ticket_field_history_columns') if col != 'status' %} --Looking at all history fields the users passed through in their dbt_project.yml file
             {% if col in ['assignee_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,users.name as assignee_name
+                ,assignee.name as assignee_name
 
             {% elif col in ['requester_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,users.name as requester_name
+                ,requester.name as requester_name
 
             {% elif col in ['ticket_form_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,ticket_forms.name as ticket_form_name
@@ -58,7 +58,7 @@ with ticket_field_history as (
                 ,group_names.name as group_name
 
             {% elif col in ['locale_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,users.locale as local_name
+                ,assignee.locale as local_name
 
             {% else %} --All other fields are not ID's and can simply be included in the query.
                 ,ticket_field_history.{{ col }}
@@ -81,8 +81,13 @@ with ticket_field_history as (
     {% endif %}
 
     {% if 'assignee_id' in var('ticket_field_history_columns') or 'requester_id' in var('ticket_field_history_columns') or 'locale_id' in var('ticket_field_history_columns')%} --Join not needed if fields is not located in variable, otherwise it is included.
-    left join users
-        on users.user_id = cast(ticket_field_history.assignee_id as {{ dbt_utils.type_int() }})
+    left join users as assignee
+        on assignee.user_id = cast(ticket_field_history.assignee_id as {{ dbt_utils.type_int() }})
+    {% endif %}
+
+    {% if 'requester_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
+    left join users as requester
+        on requester.user_id = cast(ticket_field_history.requester_id as {{ dbt_utils.type_int() }})
     {% endif %}
 
     {% if 'brand_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
