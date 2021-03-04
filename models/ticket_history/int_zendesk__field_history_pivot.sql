@@ -1,3 +1,5 @@
+-- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+
 {{ 
     config(
         materialized='incremental',
@@ -13,15 +15,23 @@
 
 with field_history as (
 
-    select 
+    select
         ticket_id,
         field_name,
-        valid_starting_at,
         valid_ending_at,
-        -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
-        case when value is null then 'is_null' else value end as value
+        valid_starting_at
 
-    from {{ var('field_history') }}
+        --Only runs if the user passes updater fields through the final ticket field history model
+        {% if var('ticket_field_history_updater_columns') %}
+        ,
+        {{ var('ticket_field_history_updater_columns') | join (", ")}}
+
+        {% endif %}
+
+        -- doing this to figure out what values are actually null and what needs to be backfilled in zendesk__ticket_field_history
+        ,case when value is null then 'is_null' else value end as value
+
+    from {{ ref('int_zendesk__field_history_enriched') }}
     {% if is_incremental() %}
     where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
@@ -54,8 +64,16 @@ with field_history as (
         cast({{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
-        {% set col_xf = col|lower %}
-        , min(case when lower(field_name) = '{{ col|lower }}' then value end) as {{ col_xf }}
+            {% set col_xf = col|lower %}
+            ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
+
+            --Only runs if the user passes updater fields through the final ticket field history model
+            {% if var('ticket_field_history_updater_columns') %}
+                {% for upd in var('ticket_field_history_updater_columns') %}
+                    {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
+                    ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
+                {% endfor %}
+            {% endif %}
         {% endfor %}
     
     from filtered

@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.2.0'
+version: '0.2.1'
 
 require-dbt-version: [">=0.18.0", "<0.20.0"]
 profile: 'integration_tests'
@@ -96,7 +96,7 @@ seeds:
     user_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'varchar(100)'  if target.type == 'redshift' else 'string'}}"
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
@@ -125,7 +125,7 @@ seeds:
     user_data_snowflake:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'varchar(100)'  if target.type == 'redshift' else 'string'}}"
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp

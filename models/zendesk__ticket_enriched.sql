@@ -4,7 +4,7 @@
 with ticket as (
 
     select *
-    from {{ ref('stg_zendesk__ticket') }}
+    from {{ ref('int_zendesk__ticket_aggregates') }}
 
 --If you use using_ticket_form_history this will be included, if not it will be ignored.
 {% if var('using_ticket_form_history', True) %}
@@ -22,7 +22,7 @@ with ticket as (
 ), users as (
 
     select *
-    from {{ ref('stg_zendesk__user') }}
+    from {{ ref('int_zendesk__user_aggregates') }}
 
 ), requester_updates as (
 
@@ -34,19 +34,6 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__assignee_updates') }}
 
-), brands as (
-
-    select *
-    from {{ ref('stg_zendesk__brand') }}
-
---If you use using_user_tags this will be included, if not it will be ignored.
-{% if var('using_user_tags', True) %}
-), user_tags as (
-
-    select *
-    from {{ ref('stg_zendesk__user_tag') }}
-{% endif %}
-
 ), ticket_group as (
     
     select *
@@ -57,30 +44,24 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__organization_aggregates') }}
 
-), ticket_tags as (
-
-    select *
-    from {{ ref('int_zendesk__ticket_tags') }}
-
 ), joined as (
 
     select 
 
         ticket.*,
-        case when lower(ticket.type) = 'incident'
-            then true
-            else false
-                end as is_incident,
-        brands.name as ticket_brand_name,
 
         --If you use using_ticket_form_history this will be included, if not it will be ignored.
         {% if var('using_ticket_form_history', True) %}
         latest_ticket_form.name as ticket_form_name,
         {% endif %}
 
+        latest_satisfaction_ratings.count_satisfaction_scores as ticket_total_satisfaction_scores,
+        latest_satisfaction_ratings.first_satisfaction_score as ticket_first_satisfaction_score,
         latest_satisfaction_ratings.latest_satisfaction_score as ticket_satisfaction_score,
         latest_satisfaction_ratings.latest_satisfaction_comment as ticket_satisfaction_comment,
         latest_satisfaction_ratings.latest_satisfaction_reason as ticket_satisfaction_reason,
+        latest_satisfaction_ratings.is_good_to_bad_satisfaction_score,
+        latest_satisfaction_ratings.is_bad_to_good_satisfaction_score,
 
         --If you use using_domain_names tags this will be included, if not it will be ignored.
         {% if var('using_domain_names', True) %}
@@ -136,12 +117,10 @@ with ticket as (
 
         --If you use using_user_tags this will be included, if not it will be ignored.
         {% if var('using_user_tags', True) %}
-        requester_tag.tags as requester_tag,
-        submitter_tag.tags as submitter_tag,
-        assignee_tag.tags as assignee_tag,
+        requester.user_tags as requester_tag,
+        submitter.user_tags as submitter_tag,
+        assignee.user_tags as assignee_tag
         {% endif %}
-
-        ticket_tags.ticket_tags
 
     
     from ticket
@@ -165,19 +144,6 @@ with ticket as (
     left join users as assignee
         on assignee.user_id = ticket.assignee_id
 
-    --user tags
-    --If you use using_user_tags this will be included, if not it will be ignored.
-    {% if var('using_user_tags', True) %}
-    left join user_tags as requester_tag
-        on requester_tag.user_id = ticket.requester_id
-
-    left join user_tags as submitter_tag
-        on submitter_tag.user_id = ticket.submitter_id
-
-    left join user_tags as assignee_tag
-        on assignee_tag.user_id = ticket.assignee_id
-    {% endif %}
-
     left join assignee_updates
         on assignee_updates.ticket_id = ticket.ticket_id
             and assignee_updates.assignee_id = ticket.assignee_id
@@ -192,17 +158,11 @@ with ticket as (
         on latest_ticket_form.ticket_form_id = ticket.ticket_form_id
     {% endif %}
 
-    left join brands
-        on brands.brand_id = ticket.brand_id
-
     left join organization
         on organization.organization_id = ticket.organization_id
 
     left join latest_satisfaction_ratings
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
-
-    left join ticket_tags
-        on ticket_tags.ticket_id = ticket.ticket_id
 )
 
 select *

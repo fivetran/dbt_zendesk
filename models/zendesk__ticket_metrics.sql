@@ -77,6 +77,8 @@ select
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
   ticket_resolution_times_calendar.total_resolutions as count_resolutions,
   ticket_resolution_times_calendar.count_reopens,
+  ticket_work_time_calendar.ticket_deleted_count,
+  ticket_work_time_calendar.total_ticket_recoveries,
   ticket_work_time_calendar.last_status_assignment_date,
   ticket_work_time_calendar.new_status_duration_in_calendar_minutes,
   ticket_work_time_calendar.open_status_duration_in_calendar_minutes,

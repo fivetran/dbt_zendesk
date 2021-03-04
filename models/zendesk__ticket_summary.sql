@@ -94,6 +94,10 @@ with ticket_metrics as (
             then 1
             else 0
                 end) as deleted_ticket_count,
+        sum(case when total_ticket_recoveries > 0
+            then 1
+            else 0
+                end) as recovered_ticket_count,
         sum(case when assignee_stations_count > 0
             then 1
             else 0
@@ -127,6 +131,7 @@ with ticket_metrics as (
         ticket_metric_sum.unreplied_ticket_count,
         ticket_metric_sum.unreplied_unsolved_ticket_count,
         ticket_metric_sum.unsolved_ticket_count,
+        ticket_metric_sum.recovered_ticket_count,
         ticket_metric_sum.deleted_ticket_count
     from user_sum
 
