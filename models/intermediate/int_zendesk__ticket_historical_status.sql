@@ -13,7 +13,7 @@ with ticket_status_history as (
     ticket_id,
     valid_starting_at,
     valid_ending_at,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'valid_starting_at',
         "coalesce(valid_ending_at, " ~ dbt_utils.current_timestamp() ~ ")",
         'minute') }} as status_duration_calendar_minutes,

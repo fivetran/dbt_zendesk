@@ -33,7 +33,7 @@ with ticket_schedules as (
     sla_policy_applied.*,
     ticket_schedules.schedule_id,
     round(
-      {{ timestamp_diff(
+      {{ fivetran_utils.timestamp_diff(
         "" ~ dbt_utils.date_trunc('week', 'sla_policy_applied.sla_applied_at') ~ "",
         'sla_policy_applied.sla_applied_at', 
         'second') }}/60
@@ -41,8 +41,8 @@ with ticket_schedules as (
       schedule_business_hours.total_schedule_weekly_business_minutes
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
-    and {{ timestamp_add('second', -1, 'ticket_schedules.schedule_created_at') }} <= sla_policy_applied.sla_applied_at
-    and {{ timestamp_add('second', -1, 'ticket_schedules.schedule_invalidated_at') }} > sla_policy_applied.sla_applied_at
+    and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_created_at') }} <= sla_policy_applied.sla_applied_at
+    and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_invalidated_at') }} > sla_policy_applied.sla_applied_at
   left join schedule_business_hours 
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
   where sla_policy_applied.in_business_hours = 'true'
@@ -108,7 +108,7 @@ with ticket_schedules as (
     *,
     schedule_end_time + remaining_minutes as breached_at_minutes,
     {{ dbt_utils.date_trunc('week', 'sla_applied_at') }} as starting_point,
-    {{ timestamp_add(
+    {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt_utils.type_int() ~ " )",
         "" ~ dbt_utils.date_trunc('week', 'sla_applied_at') ~ "" ) }} as breached_at
