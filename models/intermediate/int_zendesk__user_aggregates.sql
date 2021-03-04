@@ -1,5 +1,3 @@
---To disable this model, set the using_user_tags variable within your dbt_project.yml file to False.
-{{ config(enabled=var('using_user_tags', True)) }}
 with users as (
   select *
   from {{ ref('stg_zendesk__user') }}
@@ -30,8 +28,11 @@ with users as (
     {% endif %}
   from users
 
+  --If you use user tags this will be included, if not it will be ignored.
+  {% if var('using_user_tags', True) %}
   left join user_tag_aggregate
     using(user_id)
+  {% endif %}
 )
 
 select *
