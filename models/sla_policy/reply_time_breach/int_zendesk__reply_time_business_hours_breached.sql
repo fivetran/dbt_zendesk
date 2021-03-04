@@ -61,7 +61,7 @@ with ticket_schedules as (
 
     from ticket_sla_applied_with_schedules
     cross join weeks
-    where {{ ceiling('target/total_schedule_weekly_business_minutes') }} >= generated_number - 1
+    where {{ fivetran_utils.ceiling('target/total_schedule_weekly_business_minutes') }} >= generated_number - 1
 
 ), weekly_periods as (
   
