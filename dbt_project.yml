@@ -25,6 +25,8 @@ models:
 vars:
     zendesk:
         ticket_field_history_columns:   ['assignee_id', 'status', 'priority']
+        ticket_field_history_updater_columns: []
+        
         group:                  "{{ ref('stg_zendesk__group) }}"
         brand:                  "{{ ref('stg_zendesk__brand') }}"
         domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
