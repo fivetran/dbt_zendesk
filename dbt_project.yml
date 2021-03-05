@@ -1,8 +1,8 @@
 name: 'zendesk'
-version: '0.2.1'
+version: '0.3.0'
 config-version: 2
 require-dbt-version: [">=0.18.0", "<0.20.0"]
-on-run-start: "{{ ticket_field_history_columns_warning() }}"
+on-run-start: '{{ fivetran_utils.empty_variable_warning("ticket_field_history_columns", "zendesk_ticket_field_history") }}'
 
 models:
     zendesk:
@@ -10,14 +10,17 @@ models:
         agent_work_time:
             +materialized: ephemeral
         intermediate:
+            +schema: zendesk_intermediate
             +materialized: table
         reply_times:
             +materialized: ephemeral
         resolution_times:
             +materialized: ephemeral
         sla_policy:
-            +materialized: ephemeral
+            +schema: zendesk_intermediate
+            +materialized: table
         ticket_history:
+            +schema: zendesk_intermediate
             +materialized: ephemeral
         utils:
             +materialized: ephemeral
@@ -48,5 +51,5 @@ vars:
         using_organization_tags:    True
 
         dbt_utils_dispatch_list:
-            - zendesk 
+            - fivetran_utils
             - dbt_utils

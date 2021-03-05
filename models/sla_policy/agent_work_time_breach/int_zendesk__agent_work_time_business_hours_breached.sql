@@ -34,7 +34,7 @@ with agent_work_time_filtered_statuses as (
     from agent_work_time_filtered_statuses
     left join ticket_schedules
       on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
-    where {{ timestamp_diff(
+    where {{ fivetran_utils.timestamp_diff(
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
               'second') }} > 0
@@ -44,14 +44,14 @@ with agent_work_time_filtered_statuses as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-      round({{ timestamp_diff(
+      round({{ fivetran_utils.timestamp_diff(
               "" ~ dbt_utils.date_trunc(
                   'week',
                   'ticket_status_crossed_with_schedule.valid_starting_at') ~ "", 
               'ticket_status_crossed_with_schedule.valid_starting_at', 
               'second') }} /60,
             0) as valid_starting_at_in_minutes_from_week,
-      round({{ timestamp_diff(
+      round({{ fivetran_utils.timestamp_diff(
               'ticket_status_crossed_with_schedule.valid_starting_at', 
               'ticket_status_crossed_with_schedule.valid_ending_at',
               'second') }} /60,
@@ -152,7 +152,7 @@ with agent_work_time_filtered_statuses as (
   
   select 
     *,
-    {{ timestamp_add(
+    {{ fivetran_utils.timestamp_add(
       "minute",
       "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt_utils.type_int() ~ " )",
       "" ~ dbt_utils.date_trunc('week', 'valid_starting_at') ~ "",

@@ -53,19 +53,19 @@ with historical_solved_status as (
       else solved_times.solved_count - 1 --subtracting one as the first solve is not a reopen.
         end as count_reopens,
 
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'ticket_historical_assignee.first_agent_assignment_date', 
         'solved_times.first_solved_at',
         'minute' ) }} as first_assignment_to_resolution_calendar_minutes,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'ticket_historical_assignee.last_agent_assignment_date', 
         'solved_times.first_solved_at',
         'minute' ) }} as last_assignment_to_resolution_calendar_minutes,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'ticket.created_at', 
         'solved_times.first_solved_at',
         'minute' ) }} as first_resolution_calendar_minutes,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'ticket.created_at', 
         'solved_times.last_solved_at',
         'minute') }} as final_resolution_calendar_minutes
