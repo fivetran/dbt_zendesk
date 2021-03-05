@@ -11,11 +11,11 @@ with agent_work_time_filtered_statuses as (
 
   select 
     *,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
         'valid_starting_at',
         'valid_ending_at',
         'minute' )}} as calendar_minutes,
-    sum({{ timestamp_diff(
+    sum({{ fivetran_utils.timestamp_diff(
             'valid_starting_at', 
             'valid_ending_at', 
             'minute') }} ) 
@@ -43,7 +43,7 @@ from  agent_work_time_calendar_minutes
   select
     *,
     (remaining_target_minutes + calendar_minutes) as breach_minutes,
-    {{ timestamp_add(
+    {{ fivetran_utils.timestamp_add(
       'minute',
       '(remaining_target_minutes + calendar_minutes)',
       'valid_starting_at', 

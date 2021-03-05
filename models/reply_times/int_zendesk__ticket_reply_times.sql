@@ -31,7 +31,7 @@ with ticket_public_comments as (
 
   select
     *,
-    {{ timestamp_diff(
+    {{ fivetran_utils.timestamp_diff(
       'end_user_comment_created_at',
       'agent_responded_at',
       'minute') }} as reply_time_calendar_minutes

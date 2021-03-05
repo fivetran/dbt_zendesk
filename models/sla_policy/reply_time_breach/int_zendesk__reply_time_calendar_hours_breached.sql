@@ -12,7 +12,7 @@ with sla_policy_applied as (
 
   select
     *,
-    {{ timestamp_add(
+    {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(target as " ~ dbt_utils.type_int() ~ " )",
         "sla_applied_at" ) }} as breached_at

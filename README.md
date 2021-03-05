@@ -57,6 +57,26 @@ vars:
                                           ]
 ```
 *Note: This package only integrates the above ticket_field_history_updater_columns values. If you'd like to include additional updater fields, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
+
+### Changing the Build Schema
+By default this package will build the Zendesk Support intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`)  and the Zendesk Support final models within your <target_schema> in your target database. If this is not where you would like you Zendesk Support intermediate and final models to be written to, add the following configuration to your `dbt_project.yml` file:
+
+```yml
+# dbt_project.yml
+
+...
+models:
+  zendesk:
+    +schema: my_new_final_models_schema
+    intermediate:
+      +schema: my_new_intermediate_models_schema
+    sla_policy:
+      +schema: my_new_intermediate_models_schema
+    ticket_history:
+      +schema: my_new_intermediate_models_schema
+
+```
+
 ### Disabling models
 
 This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
