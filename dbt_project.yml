@@ -11,16 +11,22 @@ models:
             +materialized: ephemeral
         intermediate:
             +materialized: table
+            +schema: zendesk_intermediate
         reply_times:
             +materialized: ephemeral
+            +schema: zendesk_intermediate
         resolution_times:
             +materialized: ephemeral
+            +schema: zendesk_intermediate
         sla_policy:
             +materialized: ephemeral
+            +schema: zendesk_intermediate
         ticket_history:
             +materialized: ephemeral
+            +schema: zendesk_intermediate
         utils:
             +materialized: ephemeral
+            +schema: zendesk_intermediate
 
 vars:
     zendesk:

@@ -6,10 +6,14 @@ version: '0.2.1'
 require-dbt-version: [">=0.18.0", "<0.20.0"]
 profile: 'integration_tests'
 
+models:
+  zendesk:
+    sla_policy:
+      +materialized: table
+
 vars:
   zendesk_schema: zendesk_integration_tests
   zendesk:
-    ticket_field_history_columns:   [status', 'priority']
     group:                  "{{ ref('stg_zendesk__group') }}"
     organization:           "{{ ref('stg_zendesk__organization') }}"
     schedule:               "{{ ref('stg_zendesk__schedule') }}"

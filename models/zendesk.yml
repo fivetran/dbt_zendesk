@@ -499,18 +499,18 @@ models:
 
   - name: zendesk__ticket_backlog
     description: >
-      A daily historical count of the tickets grouped by the ticket channel and 
-      defined ticket_field_history_columns.
+      A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable 
+      for all backlog tickets. Backlog tickets being defined as any ticket not a 'closed', 'deleted', or 'solved' status.
     columns:
       - name: date_day
         description: The date of the day associated with the field values
+      - name: ticket_id
+        description: A ticket's unique identifier, it is automatically assigned when the ticket is created
+      - name: status
+        description: The status of the ticket
       - name: created_channel
         description: The channel where the ticket was created
       - name: assignee_id
         description: The assignee id assigned to the ticket
-      - name: status
-        description: The status of the ticket
       - name: priority
         description: The tickets priority ranking
-      - name: ticket_count
-        description: The total count tickets grouped by the date, channel, and designated ticket_field_history_columns
