@@ -1,8 +1,3 @@
 packages:
   - package: fivetran/zendesk_source
     version: [">=0.3.0","<0.4.0"]
-
-  # To be removed after dbt_fivetran_utils PR #17 is approved.
-  - git: https://github.com/fivetran/dbt_fivetran_utils.git
-    revision: max-bool-macro
-    warn-unpinned: false
