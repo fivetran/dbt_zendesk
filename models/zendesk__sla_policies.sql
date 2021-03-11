@@ -1,4 +1,4 @@
---final step where we union together all of the reply time and agent work time breaches
+--final step where we union together all of the reply time, agent work time, and requester wait time sla's
 
 with reply_time_sla as (
 
