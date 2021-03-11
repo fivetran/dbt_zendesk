@@ -1,4 +1,4 @@
-{{ config(enabled=fivetran_utils.enabled_vars(['using_sla_policy','using_schedules'])) }}
+{{ config(enabled=var('using_schedules', True)) }}
 
 -- AGENT WORK TIME
 -- This is complicated, as SLAs minutes are only counted while the ticket is in 'new' or 'open' status.
@@ -26,8 +26,8 @@ with agent_work_time_filtered_statuses as (
     select
       agent_work_time_filtered_statuses.ticket_id,
       agent_work_time_filtered_statuses.sla_applied_at,
---       agent_work_time_filtered_statuses.ticket_created_at,
-      agent_work_time_filtered_statuses.target,      
+      agent_work_time_filtered_statuses.target,    
+      agent_work_time_filtered_statuses.sla_policy_name,    
       ticket_schedules.schedule_id,
       greatest(valid_starting_at, schedule_created_at) as valid_starting_at,
       least(valid_ending_at, schedule_invalidated_at) as valid_ending_at
@@ -38,7 +38,6 @@ with agent_work_time_filtered_statuses as (
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
               'second') }} > 0
-
 
 ), ticket_full_solved_time as (
 
@@ -57,7 +56,7 @@ with agent_work_time_filtered_statuses as (
               'second') }} /60,
             0) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
-    group by 1, 2, 3, 4, 5, 6, 7
+    group by 1, 2, 3, 4, 5, 6, 7, 8
 
 ), weeks as (
 
@@ -81,6 +80,7 @@ with agent_work_time_filtered_statuses as (
       valid_starting_at,
       valid_ending_at,
       target,
+      sla_policy_name,
       valid_starting_at_in_minutes_from_week,
       raw_delta_in_minutes,
       week_number,
@@ -96,6 +96,7 @@ with agent_work_time_filtered_statuses as (
       weekly_period_agent_work_time.ticket_id,
       weekly_period_agent_work_time.sla_applied_at,
       weekly_period_agent_work_time.target,
+      weekly_period_agent_work_time.sla_policy_name,
       weekly_period_agent_work_time.valid_starting_at,
       weekly_period_agent_work_time.valid_ending_at,
       weekly_period_agent_work_time.week_number,
@@ -121,10 +122,13 @@ with agent_work_time_filtered_statuses as (
 
     from intercepted_periods_agent
 
+
 ), intercepted_periods_agent_with_breach_flag as (
   select 
     intercepted_periods_with_running_total.*,
     target - running_total_scheduled_minutes as remaining_target_minutes,
+    lag(target - running_total_scheduled_minutes) over
+          (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
        when (target - running_total_scheduled_minutes) < 0 
         and 
@@ -144,10 +148,7 @@ with agent_work_time_filtered_statuses as (
     (remaining_target_minutes + scheduled_minutes) as breach_minutes,
     greatest(ticket_week_start_time_minute, schedule_start_time) + (remaining_target_minutes + scheduled_minutes) as breach_minutes_from_week
   from intercepted_periods_agent_with_breach_flag
-  where is_breached_during_schedule
   
--- Now we have agent work time business hours breached_at timestamps. Only SLAs that have been breached will appear in this list, otherwise
--- would be filtered out in the above
 ), agent_work_business_breach as (
   
   select 
@@ -156,10 +157,10 @@ with agent_work_time_filtered_statuses as (
       "minute",
       "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt_utils.type_int() ~ " )",
       "" ~ dbt_utils.date_trunc('week', 'valid_starting_at') ~ "",
-      ) }} as breached_at
+      ) }} as sla_breach_at
   from intercepted_periods_agent_filtered
 
-) 
+)
 
 select * 
 from agent_work_business_breach

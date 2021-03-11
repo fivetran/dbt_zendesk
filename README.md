@@ -19,7 +19,7 @@ This package contains transformation models, designed to work simultaneously wit
 | [zendesk__ticket_summary](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_summary.sql)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
 | [zendesk__ticket_backlog](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_backlog.sql)           | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable for all backlog tickets. Backlog tickets being defined as any ticket not in a 'closed', 'deleted', or 'solved' status.                                                             |
 | [zendesk__ticket_field_history](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_field_history.sql) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable and the corresponding updater fields defined in the `ticket_field_history_updater_columns` variable.                                                        |
-| [zendesk__sla_breach](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_breach.sql)           | Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported.                                                              |
+| [zendesk__sla_policies](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_policies.sql)           | Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.                                                              |
 
 ## Installation Instructions
 Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
@@ -95,6 +95,10 @@ vars:
   using_organization_tags:    False         #Disable if you are not using organization tags
 ```
 *Note: This package only integrates the above variables. If you'd like to disable other models, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
+
+## Database support
+This package is compatible with BigQuery, Snowflake, Redshift and Postgres.
+
 ## Contributions
 
 Additional contributions to this package are very welcome! Please create issues

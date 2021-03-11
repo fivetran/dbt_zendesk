@@ -1,5 +1,3 @@
-{{ config(enabled=var('using_sla_policy', True)) }}
-
 with agent_work_time_sla as (
 
   select *
@@ -11,6 +9,7 @@ with agent_work_time_sla as (
   select *
   from {{ ref('int_zendesk__ticket_historical_status') }}
     
+--This captures the statuses of the ticket while the agent work time sla was active for the ticket.
 ), agent_work_time_filtered_statuses as (
 
   select  
@@ -22,6 +21,7 @@ with agent_work_time_sla as (
     ticket_historical_status.status as ticket_status,
     agent_work_time_sla.sla_applied_at,
     agent_work_time_sla.target,    
+    agent_work_time_sla.sla_policy_name,
     agent_work_time_sla.ticket_created_at,
     agent_work_time_sla.in_business_hours
   from ticket_historical_status

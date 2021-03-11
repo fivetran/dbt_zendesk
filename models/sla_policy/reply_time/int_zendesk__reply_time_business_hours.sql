@@ -1,5 +1,4 @@
-{{ config(enabled=fivetran_utils.enabled_vars(['using_sla_policy','using_schedules'])) }}
-
+{{ config(enabled=var('using_schedules', True)) }}
 
 -- step 3, determine when an SLA will breach for SLAs that are in business hours
 
@@ -111,22 +110,23 @@ with ticket_schedules as (
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt_utils.type_int() ~ " )",
-        "" ~ dbt_utils.date_trunc('week', 'sla_applied_at') ~ "" ) }} as breached_at
+        "" ~ dbt_utils.date_trunc('week', 'sla_applied_at') ~ "" ) }} as sla_breach_at
   from intercepted_periods_with_breach_flag
-  where is_breached_during_schedule
 
-), reply_time_business_hours_breached as (
+), reply_time_business_hours_sla as (
 
   select
     ticket_id,
+    sla_policy_name,
     metric,
     sla_applied_at,
     target,
     in_business_hours,
-    breached_at
+    sla_breach_at,
+    is_breached_during_schedule
   from intercepted_periods_with_breach_flag_calculated
 
 ) 
 
 select * 
-from reply_time_business_hours_breached
+from reply_time_business_hours_sla

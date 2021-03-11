@@ -162,23 +162,33 @@ models:
       - name: assignee_tag
         description: The tags associated with the ticket assignee.
 
-  - name: zendesk__sla_breach
-    description: Each record represents an SLA breach event. Calendar and business hour SLA breaches are supported. Only SLAs that have been breached or may breach in the future are included.
+  - name: zendesk__sla_policies
+    description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.
     columns:
+      - name: sla_event_id
+        description: A surrogate key generated from the combination of ticket_id, metric, and sla_applied_at fields
+        tests:
+          - unique
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
+      - name: sla_policy_name
+        description: The name of the SLA policy associated with the SLA metric
       - name: metric
-        description: The SLA metric, either agent_work_time, first_reply_time or next_reply_time
+        description: The SLA metric, either agent_work_time, requester_wait_time, first_reply_time or next_reply_time
       - name: sla_applied_at
         description: When the SLA target was triggered. This is the starting time
       - name: target
         description: The SLA target, in minutes 
       - name: in_business_hours
         description: Boolean field indicating if the SLA target is in business hours (true) or calendar hours (false)
-      - name: breached_at
+      - name: sla_breach_at
         description: The time or expected time of the SLA breach event
-      - name: is_upcoming_breach
-        description: Boolean field indicating that the SLA breach event is in the future (true) or past (false)
+      - name: sla_elapsed_time
+        description: The total elapsed time to achieve the SLA metric whether breached or achieved
+      - name: is_active_sla
+        description: Boolean field indicating that the SLA event is currently active and not breached (true) or past (false)
+      - name: is_sla_breach
+        description: Boolean field indicating if the SLA has been breached (true) or was achieved (false)
       
   - name: zendesk__ticket_field_history
     description: >
