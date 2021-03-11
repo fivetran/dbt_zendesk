@@ -151,7 +151,7 @@ models:
         description: The time zone of the ticket assignee
       - name: assignee_ticket_update_count
         description: The number of times the ticket assignee has updated the ticket
-      - name: assigneed_ticket_last_update_at
+      - name: assignee_ticket_last_update_at
         description: The last date the ticket assignee updated the ticket
       - name: assignee_last_login_at
         description: The date the ticket assignee last logged in
@@ -161,6 +161,16 @@ models:
         description: The tags associated with the ticket submitter.
       - name: assignee_tag
         description: The tags associated with the ticket assignee.
+      - name: ticket_total_satisfaction_scores
+        description: The total number of satisfaction scores the ticket received.
+      - name: ticket_first_satisfaction_score
+        description: The first satisfaction score the ticket received.
+      - name: ticket_satisfaction_score
+        description: The latest satisfaction score the ticket received.
+      - name: is_good_to_bad_satisfaction_score
+        description: Boolean indicating if the ticket had a satisfaction score went from good to bad.
+      - name: is_bad_to_good_satisfaction_score
+        description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.
@@ -394,7 +404,7 @@ models:
         description: The time zone of the ticket assignee
       - name: assignee_ticket_update_count
         description: The number of times the ticket assignee has updated the ticket
-      - name: assigneed_ticket_last_update_at
+      - name: assignee_ticket_last_update_at
         description: The last date the ticket assignee updated the ticket
       - name: assignee_last_login_at
         description: The date the ticket assignee last logged in
@@ -404,6 +414,16 @@ models:
         description: The tags associated with the ticket submitter.
       - name: assignee_tag
         description: The tags associated with the ticket assignee.
+      - name: ticket_total_satisfaction_scores
+        description: The total number of satisfaction scores the ticket received.
+      - name: ticket_first_satisfaction_score
+        description: The first satisfaction score the ticket received.
+      - name: ticket_satisfaction_score
+        description: The latest satisfaction score the ticket received.
+      - name: is_good_to_bad_satisfaction_score
+        description: Boolean indicating if the ticket had a satisfaction score went from good to bad.
+      - name: is_bad_to_good_satisfaction_score
+        description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
       - name: count_agent_comments
         description: Count of agent comments within the ticket
       - name: count_end_user_comments
@@ -520,7 +540,7 @@ models:
         description: The status of the ticket
       - name: created_channel
         description: The channel where the ticket was created
-      - name: assignee_id
-        description: The assignee id assigned to the ticket
+      - name: assignee_name
+        description: The assignee name assigned to the ticket
       - name: priority
         description: The tickets priority ranking
