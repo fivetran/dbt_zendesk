@@ -1,13 +1,11 @@
-{{ config(enabled=var('using_sla_policy', True)) }}
-
--- Calculate breach time for agent work time, calendar hours
-with agent_work_time_filtered_statuses as (
+-- Calculate breach time for requester wait time, calendar hours
+with requester_wait_time_filtered_statuses as (
 
   select *
-  from {{ ref('int_zendesk__agent_work_time_filtered_statuses') }}
-  where in_business_hours = 'false'
+  from {{ ref('int_zendesk__requester_wait_time_filtered_statuses') }}
+  where not in_business_hours
 
-), agent_work_time_calendar_minutes as (
+), requester_wait_time_calendar_minutes as (
 
   select 
     *,
@@ -20,12 +18,12 @@ with agent_work_time_filtered_statuses as (
             'valid_ending_at', 
             'minute') }} ) 
       over (partition by ticket_id, sla_applied_at order by valid_starting_at rows between unbounded preceding and current row) as running_total_calendar_minutes
-  from agent_work_time_filtered_statuses
+  from requester_wait_time_filtered_statuses
 
-), agent_work_time_calendar_minutes_flagged as (
+), requester_wait_time_calendar_minutes_flagged as (
 
 select 
-  agent_work_time_calendar_minutes.*,
+  requester_wait_time_calendar_minutes.*,
   target - running_total_calendar_minutes as remaining_target_minutes,
   case when (target - running_total_calendar_minutes) < 0 
       and 
@@ -36,10 +34,9 @@ select
         (partition by ticket_id, sla_applied_at order by valid_starting_at) is null) 
         then true else false end as is_breached_during_schedule
         
-from  agent_work_time_calendar_minutes
+from  requester_wait_time_calendar_minutes
 
-)
-
+), final as (
   select
     *,
     (remaining_target_minutes + calendar_minutes) as breach_minutes,
@@ -47,6 +44,10 @@ from  agent_work_time_calendar_minutes
       'minute',
       '(remaining_target_minutes + calendar_minutes)',
       'valid_starting_at', 
-      ) }} as breached_at
-  from agent_work_time_calendar_minutes_flagged
-  where is_breached_during_schedule
+      ) }} as sla_breach_at
+  from requester_wait_time_calendar_minutes_flagged
+
+)
+
+select *
+from final
