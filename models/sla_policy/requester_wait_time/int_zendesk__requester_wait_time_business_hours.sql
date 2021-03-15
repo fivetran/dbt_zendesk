@@ -8,7 +8,7 @@ with requester_wait_time_filtered_statuses as (
 
   select *
   from {{ ref('int_zendesk__requester_wait_time_filtered_statuses') }}
-  where in_business_hours = 'true'
+  where in_business_hours
 
 ), schedule as (
 

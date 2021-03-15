@@ -14,7 +14,7 @@ with sla_policy_applied as (
         "cast(target as " ~ dbt_utils.type_int() ~ " )",
         "sla_applied_at" ) }} as sla_breach_at
   from sla_policy_applied
-  where in_business_hours = 'false'
+  where not in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
 
 )

@@ -49,7 +49,7 @@ union all
     'agent_work_time' as metric,
     sla_applied_at,
     target,
-    'false' as in_business_hours,
+    false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     sum(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
@@ -65,7 +65,7 @@ union all
     'requester_wait_time' as metric,
     sla_applied_at,
     target,
-    'false' as in_business_hours,
+    false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     sum(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
@@ -84,7 +84,7 @@ union all
     'agent_work_time' as metric,
     sla_applied_at,
     target,
-    'true' as in_business_hours,
+    true as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     sum(running_total_scheduled_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
@@ -100,7 +100,7 @@ union all
     'requester_wait_time' as metric,
     sla_applied_at,
     target,
-    'true' as in_business_hours,
+    true as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     sum(running_total_scheduled_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}

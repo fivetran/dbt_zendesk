@@ -44,7 +44,7 @@ with ticket_schedules as (
     and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_invalidated_at') }} > sla_policy_applied.sla_applied_at
   left join schedule_business_hours 
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
-  where sla_policy_applied.in_business_hours = 'true'
+  where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
   
 ), weeks as (

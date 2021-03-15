@@ -3,7 +3,7 @@ with agent_work_time_filtered_statuses as (
 
   select *
   from {{ ref('int_zendesk__agent_work_time_filtered_statuses') }}
-  where in_business_hours = 'false'
+  where not in_business_hours
 
 ), agent_work_time_calendar_minutes as (
 

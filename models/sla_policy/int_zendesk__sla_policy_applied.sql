@@ -29,7 +29,7 @@ with ticket_field_history as (
     ticket_field_history.field_name as metric,
     ticket_field_history.valid_starting_at as sla_applied_at,
     cast({{ fivetran_utils.json_extract('ticket_field_history.value', 'minutes') }} as {{ dbt_utils.type_int() }} ) as target,
-    {{ fivetran_utils.json_extract('ticket_field_history.value', 'in_business_hours') }} as in_business_hours
+    {{ fivetran_utils.json_extract('ticket_field_history.value', 'in_business_hours') }} = 'true' as in_business_hours
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
