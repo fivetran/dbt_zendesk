@@ -71,7 +71,13 @@ with field_history as (
             {% if var('ticket_field_history_updater_columns') %}
                 {% for upd in var('ticket_field_history_updater_columns') %}
                     {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
-                    ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
+                    {% if upd == 'updater_is_active' and target.type in ('postgres', 'redshift') %}
+                        ,bool_or(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
+
+                    {% else %}
+                        ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.{{ upd }} end) as {{ upd_xf }}
+
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endfor %}

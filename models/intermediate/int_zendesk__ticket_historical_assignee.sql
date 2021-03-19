@@ -23,7 +23,7 @@ with assignee_updates as (
     select
         ticket_id,
         sum(case when assignee_id is not null and previous_assignee is null 
-            then round(({{ dbt_utils.datediff("previous_update", "valid_starting_at", 'second') }} /60),2)
+            then {{ dbt_utils.datediff("previous_update", "valid_starting_at", 'second') }} / 60
             else 0
                 end) as ticket_unassigned_duration_calendar_minutes,
         count(distinct value) as unique_assignee_count
