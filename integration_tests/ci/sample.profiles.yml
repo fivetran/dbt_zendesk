@@ -24,7 +24,7 @@ integration_tests:
       user: "{{ env_var('CI_POSTGRES_DBT_USER') }}"
       pass: "{{ env_var('CI_POSTGRES_DBT_PASS') }}"
       dbname: "{{ env_var('CI_POSTGRES_DBT_DBNAME') }}"
-      port: 5439
+      port: 5432
       schema: zendesk_integration_tests
       threads: 8
     bigquery:

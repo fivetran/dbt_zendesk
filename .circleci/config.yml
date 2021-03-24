@@ -40,7 +40,7 @@ jobs:
             dbt deps
             dbt seed --target postgres --full-refresh
             dbt run --target postgres --full-refresh
-            dbt test --target redshift
+            dbt test --target postgres
       - run:
           name: "Run Tests - Snowflake"
           command: |
