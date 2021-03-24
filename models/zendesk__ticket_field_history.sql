@@ -74,10 +74,16 @@ with change_data as (
         -- For each ticket on each day, find the state of each column from the last record where a change occurred,
         -- identified by the presence of a record from the SCD table on that day
         {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
-        
-        ,last_value({{ col.name }} ignore nulls) over 
-          (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
 
+            {% if target.type == 'postgres' %}
+                ,last_value(coalesce({{ col.name }})) over 
+                (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }} 
+
+            {% else %}
+                ,last_value({{ col.name }} ignore nulls) over 
+                (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+
+            {% endif %}
         {% endfor %}
 
     from joined

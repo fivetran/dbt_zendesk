@@ -1,3 +1,7 @@
 packages:
   - package: fivetran/zendesk_source
     version: [">=0.3.0","<0.4.0"]
+
+  - git: https://github.com/fivetran/dbt_fivetran_utils.git
+    revision: postgres-seed_macro
+    warn-unpinned: false

@@ -28,23 +28,17 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     ticket_field_history.valid_starting_at as sla_applied_at,
-    {{ fivetran_utils.json_extract('ticket_field_history.value', 'minutes') }} as target,
+    cast({{ fivetran_utils.json_extract('ticket_field_history.value', 'minutes') }} as {{ dbt_utils.type_int() }} ) as target,
     {{ fivetran_utils.json_extract('ticket_field_history.value', 'in_business_hours') }} = 'true' as in_business_hours
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
   where ticket_field_history.value is not null
-    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
+    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time') --('periodic_update_time')
 
 ), final as (
   select
-    sla_policy_applied.ticket_id,
-    ticket_created_at,
-    ticket_current_status,
-    metric,
-    sla_applied_at,
-    cast(target as {{ dbt_utils.type_int() }} ) as target,
-    in_business_hours,
+    sla_policy_applied.*,
     sla_policy_name.value as sla_policy_name
   from sla_policy_applied
   left join sla_policy_name

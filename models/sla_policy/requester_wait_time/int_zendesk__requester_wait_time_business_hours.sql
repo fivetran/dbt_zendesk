@@ -43,18 +43,18 @@ with requester_wait_time_filtered_statuses as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-      round({{ fivetran_utils.timestamp_diff(
+      ({{ fivetran_utils.timestamp_diff(
               "" ~ dbt_utils.date_trunc(
                   'week',
                   'ticket_status_crossed_with_schedule.valid_starting_at') ~ "", 
               'ticket_status_crossed_with_schedule.valid_starting_at', 
-              'second') }} /60,
-            0) as valid_starting_at_in_minutes_from_week,
-      round({{ fivetran_utils.timestamp_diff(
+              'second') }} /60
+            ) as valid_starting_at_in_minutes_from_week,
+      ({{ fivetran_utils.timestamp_diff(
               'ticket_status_crossed_with_schedule.valid_starting_at', 
               'ticket_status_crossed_with_schedule.valid_ending_at',
-              'second') }} /60,
-            0) as raw_delta_in_minutes
+              'second') }} /60
+            ) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
     group by 1, 2, 3, 4, 5, 6, 7, 8
 
