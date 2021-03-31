@@ -4,5 +4,4 @@ packages:
 
   # To be removed after the fivetran_utils PR is approved and merged
   - git: https://github.com/fivetran/dbt_fivetran_utils.git
-    revision: postgres-seed_macro
     warn-unpinned: false
