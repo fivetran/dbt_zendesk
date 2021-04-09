@@ -113,11 +113,11 @@ with ticket as (
         assignee_updates.last_updated as assignee_ticket_last_update_at,
         assignee.last_login_at as assignee_last_login_at,
         ticket_group.name as group_name,
-        organization.name as organization_name,
+        organization.name as organization_name
 
         --If you use using_user_tags this will be included, if not it will be ignored.
         {% if var('using_user_tags', True) %}
-        requester.user_tags as requester_tag,
+        ,requester.user_tags as requester_tag,
         submitter.user_tags as submitter_tag,
         assignee.user_tags as assignee_tag
         {% endif %}
