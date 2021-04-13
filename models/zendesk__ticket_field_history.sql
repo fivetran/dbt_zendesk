@@ -66,6 +66,19 @@ with change_data as (
         and calendar.date_day = most_recent_data.date_day
     {% endif %}
 
+), ticket_field_value_partition as (
+    select
+        *
+        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
+        ,sum(case when {{ col.name }} is null 
+            then 0 
+            else 1 
+                end) over (order by ticket_id, date_day rows unbounded preceding) as {{ col.name }}_field_patition
+        {% endfor %}
+    from joined
+
+
+
 ), fill_values as (
 
     select
@@ -75,18 +88,12 @@ with change_data as (
         -- identified by the presence of a record from the SCD table on that day
         {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
 
-            {% if target.type == 'postgres' %}
-                ,last_value(coalesce({{ col.name }})) over 
-                (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }} 
-
-            {% else %}
-                ,last_value({{ col.name }} ignore nulls) over 
-                (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
-
-            {% endif %}
+        ,first_value( {{ col.name }} ) over 
+            (partition by {{ col.name }}_field_patition order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+        
         {% endfor %}
 
-    from joined
+    from ticket_field_value_partition
 
 ), fix_null_values as (
 
