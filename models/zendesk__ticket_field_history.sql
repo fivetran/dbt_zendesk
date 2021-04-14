@@ -47,11 +47,19 @@ with change_data as (
         {% if is_incremental() %}    
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
             , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
+            ,sum(case when coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) is null 
+                then 0 
+                else 1 
+                    end) over (order by calendar.ticket_id, calendar.date_day rows unbounded preceding) as {{ col.name }}_field_patition
             {% endfor %}
         
         {% else %}
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
             , {{ col.name }}
+            ,sum(case when {{ col.name }} is null 
+                then 0 
+                else 1 
+                    end) over (order by calendar.ticket_id, calendar.date_day rows unbounded preceding) as {{ col.name }}_field_patition
             {% endfor %}
         {% endif %}
 
@@ -66,56 +74,25 @@ with change_data as (
         and calendar.date_day = most_recent_data.date_day
     {% endif %}
 
-), ticket_field_value_partition as (
-    select
-        *
-        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
-        ,sum(case when {{ col.name }} is null 
-            then 0 
-            else 1 
-                end) over (order by ticket_id, date_day rows unbounded preceding) as {{ col.name }}_field_patition
-        {% endfor %}
-    from joined
-
-
-
-), fill_values as (
+), fill_values_fix_null as (
 
     select
+        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id,
         date_day,
         ticket_id    
         -- For each ticket on each day, find the state of each column from the last record where a change occurred,
         -- identified by the presence of a record from the SCD table on that day
         {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
 
-        ,first_value( {{ col.name }} ) over 
-            (partition by {{ col.name }}_field_patition order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+        ,case when cast(first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_patition order by date_day asc rows between unbounded preceding and current row) as {{ dbt_utils.type_string() }} ) = 'is_null' 
+            then null 
+            else first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_patition order by date_day asc rows between unbounded preceding and current row)
+                end as {{ col.name }}
         
         {% endfor %}
 
-    from ticket_field_value_partition
-
-), fix_null_values as (
-
-    select  
-        date_day,
-        ticket_id
-        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
-
-        -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled
-        , case when  cast( {{ col.name }} as {{ dbt_utils.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
-        {% endfor %}
-
-    from fill_values
-
-), surrogate_key as (
-
-    select
-        *,
-        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
-
-    from fix_null_values
+    from joined
 )
 
 select *
-from surrogate_key
+from fill_values_fix_null
