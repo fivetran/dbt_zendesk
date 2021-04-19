@@ -77,7 +77,7 @@ with change_data as (
         , case when  cast( {{ col.name }} as {{ dbt_utils.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
         {% endfor %}
 
-    from fill_values
+    from joined
 
 ), surrogate_key as (
 
