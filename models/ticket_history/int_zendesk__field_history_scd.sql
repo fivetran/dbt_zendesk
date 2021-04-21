@@ -14,7 +14,7 @@ with change_data as (
 -- we need to backfill to persist values that have been previously updated and are still valid 
     select 
         date_day as valid_from, 
-        ending_day as valid_to,
+        cast({{ dbt_utils.date_trunc('day', 'ending_day') }} as date) as valid_to,
         ticket_id,
         ticket_day_id
 
