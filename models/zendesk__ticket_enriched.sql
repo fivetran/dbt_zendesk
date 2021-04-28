@@ -117,7 +117,7 @@ with ticket as (
 
         --If you use using_user_tags this will be included, if not it will be ignored.
         {% if var('using_user_tags', True) %}
-        requester.user_tags as requester_tag,
+        ,requester.user_tags as requester_tag,
         submitter.user_tags as submitter_tag,
         assignee.user_tags as assignee_tag
         {% endif %}
