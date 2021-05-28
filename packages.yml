@@ -1,7 +1,3 @@
 packages:
   - package: fivetran/zendesk_source
     version: [">=0.3.0","<0.4.0"]
-
-  # To be removed after the fivetran_utils PR is approved and merged
-  - git: https://github.com/fivetran/dbt_fivetran_utils.git
-    warn-unpinned: false
