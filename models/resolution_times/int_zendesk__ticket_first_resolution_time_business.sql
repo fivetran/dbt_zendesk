@@ -22,18 +22,18 @@ with ticket_resolution_times_calendar as (
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
-    round({{ fivetran_utils.timestamp_diff(
+    ({{ fivetran_utils.timestamp_diff(
             "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
             'ticket_schedules.schedule_created_at',
-            'second') }} /60,
-          0) as start_time_in_minutes_from_week,
+            'second') }} /60
+          ) as start_time_in_minutes_from_week,
     greatest(0,
-      round(
+      (
         {{ fivetran_utils.timestamp_diff(
           'ticket_schedules.schedule_created_at',
           'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))',
           'second') }}/60
-      , 0)) as raw_delta_in_minutes
+        )) as raw_delta_in_minutes
       
   from ticket_resolution_times_calendar
   join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id

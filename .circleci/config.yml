@@ -30,7 +30,19 @@ jobs:
             dbt deps
             dbt seed --target redshift --full-refresh
             dbt run --target redshift --full-refresh
+            dbt run --vars '{using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target redshift
             dbt test --target redshift
+      - run:
+          name: "Run Tests - Postgres"
+          command: |
+            . venv/bin/activate
+            echo `pwd`
+            cd integration_tests
+            dbt deps
+            dbt seed --target postgres --full-refresh
+            dbt run --target postgres --full-refresh
+            dbt run --vars '{using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target postgres
+            dbt test --target postgres
       - run:
           name: "Run Tests - Snowflake"
           command: |
@@ -40,6 +52,7 @@ jobs:
             dbt deps
             dbt seed --target snowflake --full-refresh
             dbt run --target snowflake --full-refresh
+            dbt run --vars '{using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target snowflake
             dbt test --target snowflake
       - run:
           name: "Run Tests - BigQuery"
@@ -53,6 +66,7 @@ jobs:
             dbt deps
             dbt seed --target bigquery --full-refresh
             dbt run --target bigquery --full-refresh
+            dbt run --vars '{using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target bigquery
             dbt test --target bigquery
       - save_cache:
           key: deps2-{{ .Branch }}

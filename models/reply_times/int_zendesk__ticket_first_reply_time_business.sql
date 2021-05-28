@@ -32,18 +32,18 @@ with ticket_reply_times as (
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
-    round({{ fivetran_utils.timestamp_diff(
+    ({{ fivetran_utils.timestamp_diff(
             "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
             'ticket_schedules.schedule_created_at',
-            'second') }} /60,
-          0) as start_time_in_minutes_from_week,
+            'second') }} /60
+          ) as start_time_in_minutes_from_week,
     greatest(0,
-      round(
+      (
         {{ fivetran_utils.timestamp_diff(
           'ticket_schedules.schedule_created_at',
           'least(ticket_schedules.schedule_invalidated_at, min(first_reply_time.agent_responded_at))',
           'second') }}/60
-      , 0)) as raw_delta_in_minutes
+        )) as raw_delta_in_minutes
   
   from first_reply_time
   join ticket_schedules on first_reply_time.ticket_id = ticket_schedules.ticket_id

@@ -43,14 +43,17 @@ with change_data as (
     select 
         calendar.date_day,
         calendar.ticket_id
-
         {% if is_incremental() %}    
-            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
+            ,most_recent_data.valid_from
+            ,most_recent_data.valid_to
+            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
             {% endfor %}
         
         {% else %}
-            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','ticket_day_id'] %} 
+            ,change_data.valid_from
+            ,change_data.valid_to
+            {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , {{ col.name }}
             {% endfor %}
         {% endif %}
@@ -58,48 +61,34 @@ with change_data as (
     from calendar
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
-        and calendar.date_day = change_data.valid_from
+        and (calendar.date_day >= change_data.valid_from and calendar.date_day < change_data.valid_to)
     
     {% if is_incremental() %}
     left join most_recent_data
         on calendar.ticket_id = most_recent_data.ticket_id
-        and calendar.date_day = most_recent_data.date_day
+        and (calendar.date_day >= most_recent_data.valid_from and calendar.date_day < most_recent_data.valid_to)
     {% endif %}
-
-), fill_values as (
-
-    select
-        date_day,
-        ticket_id    
-        -- For each ticket on each day, find the state of each column from the last record where a change occurred,
-        -- identified by the presence of a record from the SCD table on that day
-        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
-        
-        ,last_value({{ col.name }} ignore nulls) over 
-          (partition by ticket_id order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
-
-        {% endfor %}
-
-    from joined
 
 ), fix_null_values as (
 
     select  
         date_day,
-        ticket_id
-        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','ticket_day_id'] %} 
+        ticket_id,
+        valid_from,
+        valid_to
+        {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
 
         -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled
         , case when  cast( {{ col.name }} as {{ dbt_utils.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
         {% endfor %}
 
-    from fill_values
+    from joined
 
 ), surrogate_key as (
 
     select
-        *,
-        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
+        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id,
+        *
 
     from fix_null_values
 )
