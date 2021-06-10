@@ -98,7 +98,7 @@ select
     then({{ dbt_utils.datediff("ticket_enriched.created_at", dbt_utils.current_timestamp(), 'second') }} /60)
       end as unsolved_ticket_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
-    then round(({{ dbt_utils.datediff("ticket_enriched.updated_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
+    then({{ dbt_utils.datediff("ticket_enriched.updated_at", dbt_utils.current_timestamp(), 'second') }} /60)
       end as unsolved_ticket_age_since_update_minutes,
   case when lower(ticket_enriched.status) in ('solved','closed') and ticket_comments.is_one_touch_resolution 
     then true
