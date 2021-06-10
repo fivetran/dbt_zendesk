@@ -92,7 +92,7 @@ select
     then({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
       end as requester_last_login_age_minutes,
   case when ticket_enriched.is_assignee_active = true and ticket_enriched.assignee_last_login_at is not null
-    then round(({{ dbt_utils.datediff("ticket_enriched.assignee_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
+    then({{ dbt_utils.datediff("ticket_enriched.assignee_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
       end as assignee_last_login_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
     then round(({{ dbt_utils.datediff("ticket_enriched.created_at", dbt_utils.current_timestamp(), 'second') }} /60),2)
