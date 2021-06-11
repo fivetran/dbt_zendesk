@@ -12,6 +12,10 @@ comment_counts as (
             then 1
             else 0
                 end) as count_public_agent_comments,
+        sum(case when commenter_role = 'internal_comment'
+            then 1
+            else 0
+                end) as count_agent_comments,
         sum(case when commenter_role = 'external_comment'
             then 1
             else 0

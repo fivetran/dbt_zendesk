@@ -426,6 +426,8 @@ models:
         description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
       - name: count_agent_comments
         description: Count of agent comments within the ticket
+      - name: count_public_agent_comments
+        description: Count of public agent comments within the ticket
       - name: count_end_user_comments
         description: Count of end user comments within the ticket
       - name: count_internal_comments
@@ -471,9 +473,9 @@ models:
       - name: unsolved_ticket_age_since_update_minutes
         description: The time in minutes the ticket has been unsolved since the last update
       - name: is_two_touch_resolution
-        description: Boolean indicating if the ticket was resolved in two comments
+        description: Boolean indicating if the ticket was resolved in two public comments
       - name: is_multi_touch_resolution
-        description: Boolean indicating if the ticket was resolved in more than two comments
+        description: Boolean indicating if the ticket was resolved in more than two public comments
       - name: ticket_last_comment_date
         description: The time the last comment was applied to the ticket
       - name: ticket_unassigned_duration_calendar_minutes

@@ -55,6 +55,7 @@ select
   ticket_enriched.*,
   ticket_reply_times_calendar.first_reply_time_calendar_minutes,
   ticket_reply_times_calendar.total_reply_time_calendar_minutes,
+  coalesce(ticket_comments.count_agent_comments, 0) as count_agent_comments,
   coalesce(ticket_comments.count_public_agent_comments, 0) as count_public_agent_comments,
   coalesce(ticket_comments.count_end_user_comments, 0) as count_end_user_comments,
   coalesce(ticket_comments.count_public_comments, 0) as count_public_comments,
