@@ -475,7 +475,7 @@ models:
       - name: is_two_touch_resolution
         description: Boolean indicating if the ticket was resolved in two public comments
       - name: is_multi_touch_resolution
-        description: Boolean indicating if the ticket was resolved in more than two public comments
+        description: Boolean indicating if the ticket was resolved in two or more public comments
       - name: ticket_last_comment_date
         description: The time the last comment was applied to the ticket
       - name: ticket_unassigned_duration_calendar_minutes
