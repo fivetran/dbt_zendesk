@@ -90,7 +90,7 @@ select
   ticket_comments.count_internal_comments as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
-    then({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
+    then ({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
       end as requester_last_login_age_minutes,
   case when ticket_enriched.is_assignee_active = true and ticket_enriched.assignee_last_login_at is not null
     then({{ dbt_utils.datediff("ticket_enriched.assignee_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
