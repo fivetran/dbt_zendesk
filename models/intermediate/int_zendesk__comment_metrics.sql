@@ -8,6 +8,10 @@ comment_counts as (
     select
         ticket_id,
         last_comment_added_at,
+        sum(case when commenter_role = 'internal_comment' and is_public = true
+            then 1
+            else 0
+                end) as count_public_agent_comments,
         sum(case when commenter_role = 'internal_comment'
             then 1
             else 0
@@ -33,8 +37,8 @@ comment_counts as (
 final as (
     select
         *,
-        count_internal_comments = 1 as is_one_touch_resolution,
-        count_internal_comments = 2 as is_two_touch_resolution
+        count_public_agent_comments = 1 as is_one_touch_resolution,
+        count_public_agent_comments = 2 as is_two_touch_resolution
     from comment_counts
 )
 
