@@ -55,11 +55,11 @@ with historical_solved_status as (
 
     {{ fivetran_utils.timestamp_diff(
         'ticket_historical_assignee.first_agent_assignment_date', 
-        'solved_times.first_solved_at',
+        'solved_times.last_solved_at',
         'minute' ) }} as first_assignment_to_resolution_calendar_minutes,
     {{ fivetran_utils.timestamp_diff(
         'ticket_historical_assignee.last_agent_assignment_date', 
-        'solved_times.first_solved_at',
+        'solved_times.last_solved_at',
         'minute' ) }} as last_assignment_to_resolution_calendar_minutes,
     {{ fivetran_utils.timestamp_diff(
         'ticket.created_at', 

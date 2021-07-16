@@ -53,8 +53,14 @@ with ticket_enriched as (
 
 select
   ticket_enriched.*,
-  ticket_reply_times_calendar.first_reply_time_calendar_minutes,
-  ticket_reply_times_calendar.total_reply_time_calendar_minutes,
+  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0 and ticket_enriched.status = 'solved'
+    then null
+    else ticket_reply_times_calendar.first_reply_time_calendar_minutes
+      end as first_reply_time_calendar_minutes,
+  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0 and ticket_enriched.status = 'solved'
+    then null
+    else ticket_reply_times_calendar.total_reply_time_calendar_minutes
+      end as total_reply_time_calendar_minutes,
   coalesce(ticket_comments.count_agent_comments, 0) as count_agent_comments,
   coalesce(ticket_comments.count_public_agent_comments, 0) as count_public_agent_comments,
   coalesce(ticket_comments.count_end_user_comments, 0) as count_end_user_comments,
@@ -71,8 +77,14 @@ select
   ticket_resolution_times_calendar.last_agent_assignment_date,
   ticket_resolution_times_calendar.first_solved_at,
   ticket_resolution_times_calendar.last_solved_at,
-  ticket_resolution_times_calendar.first_assignment_to_resolution_calendar_minutes,
-  ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes,
+  case when ticket_enriched.status != 'solved' 
+    then null
+    else ticket_resolution_times_calendar.first_assignment_to_resolution_calendar_minutes
+      end as first_assignment_to_resolution_calendar_minutes,
+  case when ticket_enriched.status != 'solved'
+    then null
+    else ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes
+      end as last_assignment_to_resolution_calendar_minutes,
   ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
@@ -163,7 +175,10 @@ select
   calendar_hour_metrics.*,
   business_hour_metrics.first_resolution_business_minutes,
   business_hour_metrics.full_resolution_business_minutes,
-  business_hour_metrics.first_reply_time_business_minutes,
+  case when calendar_hour_metrics.status = 'solved' and calendar_hour_metrics.count_public_agent_comments = 0
+    then null
+    else business_hour_metrics.first_reply_time_business_minutes
+      end as first_reply_time_business_minutes,
   business_hour_metrics.agent_wait_time_in_business_minutes,
   business_hour_metrics.requester_wait_time_in_business_minutes,
   business_hour_metrics.agent_work_time_in_business_minutes,

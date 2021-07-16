@@ -28,7 +28,14 @@ with ticket_history as (
         created_at as valid_starting_at,
         lead(created_at) over (partition by ticket_id order by created_at) as valid_ending_at
     from ticket_comment
+
+), final as (
+    select
+        *,
+        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at rows unbounded preceding) as ticket_created_date
+    from updates_union
+
 )
 
 select *
-from updates_union
+from final
