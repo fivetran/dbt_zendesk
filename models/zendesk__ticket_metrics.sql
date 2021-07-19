@@ -53,11 +53,11 @@ with ticket_enriched as (
 
 select
   ticket_enriched.*,
-  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0 and ticket_enriched.status = 'solved'
+  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
     else ticket_reply_times_calendar.first_reply_time_calendar_minutes
       end as first_reply_time_calendar_minutes,
-  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0 and ticket_enriched.status = 'solved'
+  case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
     else ticket_reply_times_calendar.total_reply_time_calendar_minutes
       end as total_reply_time_calendar_minutes,
@@ -173,9 +173,15 @@ left join ticket_comments
 
 select
   calendar_hour_metrics.*,
-  business_hour_metrics.first_resolution_business_minutes,
-  business_hour_metrics.full_resolution_business_minutes,
-  case when calendar_hour_metrics.status = 'solved' and calendar_hour_metrics.count_public_agent_comments = 0
+  case when calendar_hour_metrics.status != 'solved'
+    then null
+    else business_hour_metrics.first_resolution_business_minutes
+      end as first_resolution_business_minutes,
+  case when calendar_hour_metrics.status != 'solved'
+    then null
+    else business_hour_metrics.full_resolution_business_minutes
+      end as full_resolution_business_minutes,
+  case when calendar_hour_metrics.count_public_agent_comments = 0
     then null
     else business_hour_metrics.first_reply_time_business_minutes
       end as first_reply_time_business_minutes,
