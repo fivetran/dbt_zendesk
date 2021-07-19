@@ -181,7 +181,7 @@ select
     then null
     else business_hour_metrics.full_resolution_business_minutes
       end as full_resolution_business_minutes,
-  case when calendar_hour_metrics.count_public_agent_comments = 0
+  case when coalesce(calendar_hour_metrics.count_public_agent_comments, 0) = 0
     then null
     else business_hour_metrics.first_reply_time_business_minutes
       end as first_reply_time_business_minutes,
