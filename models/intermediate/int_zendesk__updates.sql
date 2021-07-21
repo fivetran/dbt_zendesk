@@ -6,6 +6,10 @@ with ticket_history as (
     select *
     from {{ ref('stg_zendesk__ticket_comment') }}
 
+), tickets as (
+    select *
+    from {{ ref('stg_zendesk__ticket') }}
+
 ), updates_union as (
     select 
         ticket_id,
@@ -31,10 +35,12 @@ with ticket_history as (
 
 ), final as (
     select
-        *,
-        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at rows unbounded preceding) as ticket_created_date
+        updates_union.*,
+        tickets.created_at as ticket_created_date
     from updates_union
 
+    left join tickets
+        on tickets.ticket_id = updates_union.ticket_id
 )
 
 select *
