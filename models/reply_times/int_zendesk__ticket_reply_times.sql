@@ -23,7 +23,7 @@ with ticket_public_comments as (
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id
     and agent_comments.commenter_role = 'internal_comment'
-    and agent_comments.previous_commenter_role != 'internal_comment' -- we only care about net new agent comments
+    and agent_comments.previous_commenter_role != 'first_comment' -- we only care about net new agent comments
     and agent_comments.valid_starting_at > end_user_comments.end_user_comment_created_at
   group by 1,2,3
 
@@ -31,9 +31,9 @@ with ticket_public_comments as (
 
   select
     *,
-    {{ fivetran_utils.timestamp_diff(
+    ({{ fivetran_utils.timestamp_diff(
       'end_user_comment_created_at',
       'agent_responded_at',
-      'minute') }} as reply_time_calendar_minutes
+      'second') }} / 60) as reply_time_calendar_minutes
   from reply_timestamps
   order by 1,2
