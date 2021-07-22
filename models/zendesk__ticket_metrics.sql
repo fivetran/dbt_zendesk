@@ -77,13 +77,13 @@ select
   ticket_resolution_times_calendar.last_agent_assignment_date,
   ticket_resolution_times_calendar.first_solved_at,
   ticket_resolution_times_calendar.last_solved_at,
-  case when ticket_enriched.status not in ('solved', 'closed')
-    then null
-    else ticket_resolution_times_calendar.first_assignment_to_resolution_calendar_minutes
+  case when ticket_enriched.status in ('solved', 'closed')
+    then ticket_resolution_times_calendar.first_assignment_to_resolution_calendar_minutes
+    else null
       end as first_assignment_to_resolution_calendar_minutes,
-  case when ticket_enriched.status not in ('solved', 'closed')
-    then null
-    else ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes
+  case when ticket_enriched.status in ('solved', 'closed')
+    then ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes
+    else null
       end as last_assignment_to_resolution_calendar_minutes,
   ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
@@ -173,13 +173,13 @@ left join ticket_comments
 
 select
   calendar_hour_metrics.*,
-  case when calendar_hour_metrics.status not in ('solved', 'closed')
-    then null
-    else business_hour_metrics.first_resolution_business_minutes
+  case when calendar_hour_metrics.status in ('solved', 'closed')
+    then business_hour_metrics.first_resolution_business_minutes
+    else null
       end as first_resolution_business_minutes,
-  case when calendar_hour_metrics.status not in ('solved', 'closed')
-    then null
-    else business_hour_metrics.full_resolution_business_minutes
+  case when calendar_hour_metrics.status in ('solved', 'closed')
+    then business_hour_metrics.full_resolution_business_minutes
+    else null
       end as full_resolution_business_minutes,
   case when coalesce(calendar_hour_metrics.count_public_agent_comments, 0) = 0
     then null
