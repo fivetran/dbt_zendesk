@@ -2,8 +2,7 @@ name: 'zendesk'
 version: '0.6.0'
 config-version: 2
 require-dbt-version: [">=0.20.0"]
-on-run-start: '{{ fivetran_utils.empty_variable_warning("ticket_field_history_columns",
-  "zendesk_ticket_field_history") }}'
+on-run-start: '{{ fivetran_utils.empty_variable_warning("ticket_field_history_columns", "zendesk_ticket_field_history") }}'
 models:
   zendesk:
     +schema: zendesk
