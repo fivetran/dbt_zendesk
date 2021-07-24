@@ -47,6 +47,4 @@ vars:
     using_user_tags: true
     using_ticket_form_history: true
     using_organization_tags: true
-    dbt_utils_dispatch_list:
-    - fivetran_utils
-    - dbt_utils
+
