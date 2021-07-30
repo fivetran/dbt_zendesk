@@ -1,2 +1,6 @@
 packages:
- - local: ../
+  - local: ../
+  
+  - git: https://github.com/fivetran/dbt_fivetran_utils.git
+    revision: fix/postgres-timstamp-add
+    warn-unpinned: false
