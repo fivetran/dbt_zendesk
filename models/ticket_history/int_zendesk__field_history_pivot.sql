@@ -4,7 +4,8 @@
     config(
         materialized='incremental',
         partition_by = {'field': 'date_day', 'data_type': 'date', 'granularity': 'month'},
-        unique_key='ticket_day_id'
+        unique_key='ticket_day_id',
+        cluster_by='ticket_id'
         ) 
 }}
 
