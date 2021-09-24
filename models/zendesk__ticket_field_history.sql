@@ -12,22 +12,6 @@ with change_data as (
 
     select *
     from {{ ref('int_zendesk__field_history_scd') }}
-  
-    {% if is_incremental() %}
-    where valid_from >= (select max(date_day) from {{ this }})
-
--- If no issue fields have been updated since the last incremental run, the pivoted_daily_history CTE will return no record/rows.
--- When this is the case, we need to grab the most recent day's records from the previously built table so that we can persist 
--- those values into the future.
-
-), most_recent_data as ( 
-
-    select 
-        *
-    from {{ this }}
-    where date_day = (select max(date_day) from {{ this }} )
-
-{% endif %}
 
 ), calendar as (
 
