@@ -107,6 +107,8 @@ vars:
 ```
 *Note: This package only integrates the above variables. If you'd like to disable other models, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 
+### Limiting Ticket Field History Date Range
+[] todo after approving the code!
 ## Database support
 This package is compatible with BigQuery, Snowflake, Redshift and Postgres.
 

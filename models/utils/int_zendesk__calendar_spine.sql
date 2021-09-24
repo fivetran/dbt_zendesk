@@ -33,6 +33,9 @@ with spine as (
     select cast(date_day as date) as date_day
     from spine
 
+    -- by default take all the data 
+    where date_day >= {{ dbt_utils.dateadd('year', - var('ticket_field_history_timeframe', 50), dbt_utils.current_timestamp() ) }}
+
 )
 
 select *

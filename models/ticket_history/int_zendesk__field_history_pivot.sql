@@ -3,7 +3,7 @@
 {{ 
     config(
         materialized='incremental',
-        partition_by = {'field': 'date_day', 'data_type': 'date', 'granularity': var('partition_by_granularity', 'month')},
+        partition_by = {'field': 'date_day', 'data_type': 'date'},
         unique_key='ticket_day_id'
         ) 
 }}
