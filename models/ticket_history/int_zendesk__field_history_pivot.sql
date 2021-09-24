@@ -32,9 +32,6 @@ with field_history as (
         ,case when value is null then 'is_null' else value end as value
 
     from {{ ref('int_zendesk__field_history_enriched') }}
-    {% if is_incremental() %}
-    where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
-    {% endif %}
 
 ), event_order as (
 
