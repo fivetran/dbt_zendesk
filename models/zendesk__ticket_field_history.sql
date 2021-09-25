@@ -46,12 +46,6 @@ with change_data as (
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
         and (calendar.date_day >= change_data.valid_from and calendar.date_day < change_data.valid_to)
-    
-    {% if is_incremental() %}
-    left join most_recent_data
-        on calendar.ticket_id = most_recent_data.ticket_id
-        and (calendar.date_day >= most_recent_data.valid_from and calendar.date_day < most_recent_data.valid_to)
-    {% endif %}
 
 ), fix_null_values as (
 
