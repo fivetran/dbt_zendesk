@@ -95,3 +95,4 @@ with change_data as (
 
 select *
 from surrogate_key
+

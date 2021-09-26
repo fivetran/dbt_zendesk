@@ -19,7 +19,8 @@ with field_history as (
         ticket_id,
         field_name,
         valid_ending_at,
-        valid_starting_at
+        valid_starting_at,
+        max(cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date)) over (partition by ticket_id) as latest_change
 
         --Only runs if the user passes updater fields through the final ticket field history model
         {% if var('ticket_field_history_updater_columns') %}
@@ -32,9 +33,6 @@ with field_history as (
         ,case when value is null then 'is_null' else value end as value
 
     from {{ ref('int_zendesk__field_history_enriched') }}
-    {% if is_incremental() %}
-    where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
-    {% endif %}
 
 ), event_order as (
 
@@ -88,6 +86,12 @@ with field_history as (
         {% endfor %}
     
     from filtered
+
+    --Only pull through the latest date the ticket was changed
+    {% if is_incremental() %}
+    where latest_change = cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date)
+    {% endif %}
+
     group by 1,2
 
 ), surrogate_key as (
