@@ -1,12 +1,6 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
 
-{{ 
-    config(
-        materialized='incremental',
-        partition_by = {'field': 'date_day', 'data_type': 'date'},
-        unique_key='ticket_day_id'
-        ) 
-}}
+{{ config(materialized='table') }}
 
 {% if execute -%}
     {% set results = run_query('select distinct field_name from ' ~ var('field_history')) %}
@@ -32,9 +26,9 @@ with field_history as (
         ,case when value is null then 'is_null' else value end as value
 
     from {{ ref('int_zendesk__field_history_enriched') }}
-    {% if is_incremental() %}
+    {# {% if is_incremental() %}
     where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
-    {% endif %}
+    {% endif %} #}
 
 ), event_order as (
 
