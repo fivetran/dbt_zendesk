@@ -14,7 +14,7 @@ with change_data as (
     from {{ ref('int_zendesk__field_history_scd') }}
   
     {% if is_incremental() %}
-    where valid_from >= (select max(date_day) from {{ this }})
+    where valid_to >= (select max(date_day) from {{ this }})
 
 -- If no issue fields have been updated since the last incremental run, the pivoted_daily_history CTE will return no record/rows.
 -- When this is the case, we need to grab the most recent day's records from the previously built table so that we can persist 
@@ -25,7 +25,7 @@ with change_data as (
     select 
         *
     from {{ this }}
-    where date_day = (select max(date_day) from {{ this }} )
+    where date_day > (select max(date_day) from {{ this }} )
 
 {% endif %}
 
@@ -44,8 +44,8 @@ with change_data as (
         calendar.date_day,
         calendar.ticket_id
         {% if is_incremental() %}    
-            ,most_recent_data.valid_from
-            ,most_recent_data.valid_to
+            ,coalesce(change_data.valid_from, most_recent_data.valid_from) as valid_from
+            ,coalesce(change_data.valid_to, most_recent_data.valid_to) as valid_to
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
             {% endfor %}
