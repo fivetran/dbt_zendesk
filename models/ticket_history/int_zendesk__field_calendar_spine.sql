@@ -1,6 +1,6 @@
 {{
     config(
-        materialized='incremental',
+        materialized='table',
         partition_by = {'field': 'date_day', 'data_type': 'date'},
         unique_key='ticket_day_id'
     )
@@ -10,9 +10,6 @@ with calendar as (
 
     select *
     from {{ ref('int_zendesk__calendar_spine') }}
-    {% if is_incremental() %}
-    where date_day >= (select max(date_day) from {{ this }})
-    {% endif %}
 
 ), ticket as (
 
