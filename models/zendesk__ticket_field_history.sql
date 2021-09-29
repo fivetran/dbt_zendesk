@@ -14,7 +14,7 @@ with change_data as (
     from {{ ref('int_zendesk__field_history_scd') }}
   
     {% if is_incremental() %}
-    where valid_to >= (select max(date_day) from {{ this }})
+    where valid_from >= (select max(date_day) from {{ this }})
 
 -- If no issue fields have been updated since the last incremental run, the pivoted_daily_history CTE will return no record/rows.
 -- When this is the case, we need to grab the most recent day's records from the previously built table so that we can persist 
@@ -25,7 +25,7 @@ with change_data as (
     select 
         *
     from {{ this }}
-    where date_day > (select max(date_day) from {{ this }} )
+    where date_day = (select max(date_day) from {{ this }} )
 
 {% endif %}
 
@@ -61,13 +61,63 @@ with change_data as (
     from calendar
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
-        and (calendar.date_day >= change_data.valid_from and calendar.date_day < change_data.valid_to)
+        and calendar.date_day = change_data.valid_from
     
     {% if is_incremental() %}
     left join most_recent_data
         on calendar.ticket_id = most_recent_data.ticket_id
-        and (calendar.date_day >= most_recent_data.valid_from and calendar.date_day < most_recent_data.valid_to)
+        and calendar.date_day = most_recent_data.date_day
     {% endif %}
+
+), set_values as (
+
+    select
+        date_day,
+        ticket_id
+
+        , valid_to
+        -- create a batch/partition once a new value is provided
+        , sum( case when valid_to is null then 0 else 1 end) over ( partition by ticket_id
+            order by date_day rows unbounded preceding) as valid_to_field_partition
+        
+        , valid_from
+        -- create a batch/partition once a new value is provided
+        , sum( case when valid_from is null then 0 else 1 end) over ( partition by ticket_id
+            order by date_day rows unbounded preceding) as valid_from_field_partition
+
+        {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        , {{ col.name }}
+        -- create a batch/partition once a new value is provided
+        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by ticket_id
+            order by date_day rows unbounded preceding) as {{ col.name }}_field_partition
+
+        {% endfor %}
+
+    from joined
+),
+
+fill_values as (
+
+    select  
+        date_day,
+        ticket_id
+
+        , first_value( valid_to ) over (
+            partition by ticket_id, valid_to_field_partition 
+            order by date_day asc rows between unbounded preceding and current row) as valid_to
+        
+        , first_value( valid_from ) over (
+            partition by ticket_id, valid_from_field_partition 
+            order by date_day asc rows between unbounded preceding and current row) as valid_from
+
+        {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        -- grab the value that started this batch/partition
+        , first_value( {{ col.name }} ) over (
+            partition by ticket_id, {{ col.name }}_field_partition 
+            order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+        {% endfor %}
+
+    from set_values
 
 ), fix_null_values as (
 
@@ -82,7 +132,7 @@ with change_data as (
         , case when  cast( {{ col.name }} as {{ dbt_utils.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
         {% endfor %}
 
-    from joined
+    from fill_values
 
 ), surrogate_key as (
 
@@ -95,4 +145,3 @@ with change_data as (
 
 select *
 from surrogate_key
-
