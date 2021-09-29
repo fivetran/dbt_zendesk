@@ -1,10 +1,4 @@
-{{
-    config(
-        materialized='table',
-        partition_by = {'field': 'date_day', 'data_type': 'date'},
-        unique_key='ticket_day_id'
-    )
-}}
+{{ config(materialized='table') }}
 
 with calendar as (
 
