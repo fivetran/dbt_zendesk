@@ -44,15 +44,11 @@ with change_data as (
         calendar.date_day,
         calendar.ticket_id
         {% if is_incremental() %}    
-            ,coalesce(change_data.valid_from, most_recent_data.valid_from) as valid_from
-            ,coalesce(change_data.valid_to, most_recent_data.valid_to) as valid_to
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
             {% endfor %}
         
         {% else %}
-            ,change_data.valid_from
-            ,change_data.valid_to
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , {{ col.name }}
             {% endfor %}
@@ -75,16 +71,6 @@ with change_data as (
         date_day,
         ticket_id
 
-        , valid_to
-        -- create a batch/partition once a new value is provided
-        , sum( case when valid_to is null then 0 else 1 end) over ( partition by ticket_id
-            order by date_day rows unbounded preceding) as valid_to_field_partition
-        
-        , valid_from
-        -- create a batch/partition once a new value is provided
-        , sum( case when valid_from is null then 0 else 1 end) over ( partition by ticket_id
-            order by date_day rows unbounded preceding) as valid_from_field_partition
-
         {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
         , {{ col.name }}
         -- create a batch/partition once a new value is provided
@@ -102,14 +88,6 @@ fill_values as (
         date_day,
         ticket_id
 
-        , first_value( valid_to ) over (
-            partition by ticket_id, valid_to_field_partition 
-            order by date_day asc rows between unbounded preceding and current row) as valid_to
-        
-        , first_value( valid_from ) over (
-            partition by ticket_id, valid_from_field_partition 
-            order by date_day asc rows between unbounded preceding and current row) as valid_from
-
         {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
         -- grab the value that started this batch/partition
         , first_value( {{ col.name }} ) over (
@@ -123,9 +101,7 @@ fill_values as (
 
     select  
         date_day,
-        ticket_id,
-        valid_from,
-        valid_to
+        ticket_id
         {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
 
         -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled

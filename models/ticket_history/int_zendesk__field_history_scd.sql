@@ -13,8 +13,7 @@ with change_data as (
 -- each row of the pivoted table includes field values if that field was updated on that day
 -- we need to backfill to persist values that have been previously updated and are still valid 
     select 
-        date_day as valid_from, 
-        cast({{ dbt_utils.date_trunc('day', 'ending_day') }} as date) as valid_to,
+        date_day as valid_from,
         ticket_id,
         ticket_day_id
 
@@ -32,7 +31,6 @@ with change_data as (
 ), fill_values as (
     select
         valid_from, 
-        valid_to,
         ticket_id,
         ticket_day_id
 
