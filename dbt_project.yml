@@ -48,3 +48,5 @@ vars:
     using_ticket_form_history: true
     using_organization_tags: true
 
+    ticket_field_history_extension_months: 0 # how long to extend a ticket's field history past its closure date
+    ticket_field_history_timeframe_years: 50 # how far back to pull tickets' field histories. default is everything

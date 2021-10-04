@@ -34,7 +34,7 @@ with spine as (
     from spine
 
     -- by default take all the data 
-    where date_day >= {{ dbt_utils.dateadd('year', - var('ticket_field_history_timeframe', 50), dbt_utils.current_timestamp() ) }}
+    where date_day >= {{ dbt_utils.dateadd('year', - var('ticket_field_history_timeframe_years', 50), dbt_utils.current_timestamp() ) }}
 
 )
 
