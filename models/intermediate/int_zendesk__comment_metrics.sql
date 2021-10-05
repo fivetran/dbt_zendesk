@@ -28,7 +28,10 @@ comment_counts as (
             then 1
             else 0
                 end) as count_internal_comments,
-        count(*) as total_comments
+        count(*) as total_comments,
+        count(distinct case when commenter_role = 'internal_comment'
+            then user_id
+                end) as count_ticket_handoffs
     from ticket_comments
 
     group by 1, 2
