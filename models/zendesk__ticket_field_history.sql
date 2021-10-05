@@ -44,15 +44,11 @@ with change_data as (
         calendar.date_day,
         calendar.ticket_id
         {% if is_incremental() %}    
-            ,most_recent_data.valid_from
-            ,most_recent_data.valid_to
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
             {% endfor %}
         
         {% else %}
-            ,change_data.valid_from
-            ,change_data.valid_to
             {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
             , {{ col.name }}
             {% endfor %}
@@ -61,28 +57,58 @@ with change_data as (
     from calendar
     left join change_data
         on calendar.ticket_id = change_data.ticket_id
-        and (calendar.date_day >= change_data.valid_from and calendar.date_day < change_data.valid_to)
+        and calendar.date_day = change_data.valid_from
     
     {% if is_incremental() %}
     left join most_recent_data
         on calendar.ticket_id = most_recent_data.ticket_id
-        and (calendar.date_day >= most_recent_data.valid_from and calendar.date_day < most_recent_data.valid_to)
+        and calendar.date_day = most_recent_data.date_day
     {% endif %}
+
+), set_values as (
+
+    select
+        date_day,
+        ticket_id
+
+        {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        , {{ col.name }}
+        -- create a batch/partition once a new value is provided
+        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by ticket_id
+            order by date_day rows unbounded preceding) as {{ col.name }}_field_partition
+
+        {% endfor %}
+
+    from joined
+),
+
+fill_values as (
+
+    select  
+        date_day,
+        ticket_id
+
+        {% for col in change_data_columns if col.name|lower not in ['ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        -- grab the value that started this batch/partition
+        , first_value( {{ col.name }} ) over (
+            partition by ticket_id, {{ col.name }}_field_partition 
+            order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+        {% endfor %}
+
+    from set_values
 
 ), fix_null_values as (
 
     select  
         date_day,
-        ticket_id,
-        valid_from,
-        valid_to
+        ticket_id
         {% for col in change_data_columns if col.name|lower not in  ['ticket_id','valid_from','valid_to','ticket_day_id'] %} 
 
         -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled
         , case when  cast( {{ col.name }} as {{ dbt_utils.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
         {% endfor %}
 
-    from joined
+    from fill_values
 
 ), surrogate_key as (
 
