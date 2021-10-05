@@ -5,7 +5,10 @@ with spine as (
     {% if execute %}
     {% set first_date_query %}
         select  min( created_at ) as min_date from {{ ref('stg_zendesk__ticket') }}
+        -- by default take all the data 
+        where cast(created_at as date) >= {{ dbt_utils.dateadd('year', - var('ticket_field_history_timeframe_years', 50), dbt_utils.current_timestamp() ) }}
     {% endset %}
+
     {% set first_date = run_query(first_date_query).columns[0][0]|string %}
     
         {% if target.type == 'postgres' %}

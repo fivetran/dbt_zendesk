@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '0.6.1'
+version: '0.7.0'
 config-version: 2
 require-dbt-version: [">=0.20.0"]
 on-run-start: '{{ fivetran_utils.empty_variable_warning("ticket_field_history_columns", "zendesk_ticket_field_history") }}'
@@ -48,3 +48,5 @@ vars:
     using_ticket_form_history: true
     using_organization_tags: true
 
+    ticket_field_history_extension_months: 0 # how long to extend a ticket's field history past its closure date
+    ticket_field_history_timeframe_years: 50 # how far back to pull tickets' field histories. default is everything

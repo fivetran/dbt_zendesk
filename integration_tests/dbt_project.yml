@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.6.1'
+version: '0.7.0'
 
 profile: 'integration_tests'
 
@@ -71,6 +71,7 @@ seeds:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         due_at: timestamp
+        updated_at: timestamp
         assignee_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         brand_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
