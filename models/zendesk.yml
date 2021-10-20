@@ -436,6 +436,8 @@ models:
         description: Count of public comments within the ticket
       - name: total_comments
         description: Total count of all comments within the ticket
+      - name: count_ticket_handoffs
+        dev_snowflake: Count of distinct internal users who have touched/commented on the ticket.
       - name: unique_assignee_count
         description: The count of unique assignees that were assigned to the ticket
       - name: assignee_stations_count

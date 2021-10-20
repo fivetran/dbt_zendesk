@@ -67,6 +67,7 @@ select
   coalesce(ticket_comments.count_public_comments, 0) as count_public_comments,
   coalesce(ticket_comments.count_internal_comments, 0) as count_internal_comments,
   coalesce(ticket_comments.total_comments, 0) as total_comments,
+  coalesce(ticket_comments.count_ticket_handoffs, 0) as count_ticket_handoffs, -- the number of distinct internal users who commented on the ticket
   ticket_comments.last_comment_added_at as ticket_last_comment_date,
   ticket_resolution_times_calendar.unique_assignee_count,
   ticket_resolution_times_calendar.assignee_stations_count,
@@ -99,7 +100,7 @@ select
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
-  ticket_comments.count_internal_comments as total_agent_replies,
+  coalesce(ticket_comments.count_agent_comments, 0) as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
     then ({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)

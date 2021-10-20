@@ -94,7 +94,6 @@ with field_history as (
 
     select 
         *,
-        coalesce(lead(date_day) over (partition by ticket_id order by date_day), {{ dbt_utils.dateadd("day", 1, "current_date") }}) as ending_day,
         {{ dbt_utils.surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
     from pivot
 

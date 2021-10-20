@@ -75,13 +75,13 @@ with ticket_reply_times as (
 ), intercepted_periods as (
 
   select ticket_id,
-         week_number,
-         weekly_periods.schedule_id,
-         ticket_week_start_time,
-         ticket_week_end_time,
-         schedule.start_time_utc as schedule_start_time,
-         schedule.end_time_utc as schedule_end_time,
-         least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
+      week_number,
+      weekly_periods.schedule_id,
+      ticket_week_start_time,
+      ticket_week_end_time,
+      schedule.start_time_utc as schedule_start_time,
+      schedule.end_time_utc as schedule_end_time,
+      least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
