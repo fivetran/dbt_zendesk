@@ -13,7 +13,7 @@
 - Add the number of ticket handoffs metric as `count_ticket_handoffs` to the `zendesk__ticket_metrics` model which is a distinct count of all internal users who have touched/commented on the ticket. ([#42](https://github.com/fivetran/dbt_zendesk/pull/42))
 - Ticket field history calendar limit variables ([#47](https://github.com/fivetran/dbt_zendesk/pull/47)): 
   - Added `ticket_field_history_timeframe_years` variable to limit the ticket field history model to X number of years (default is 50).
-  - Limited by default the last ticket calendar date as it's close date.
+  - Limited by default the last ticket calendar date as it's close date. This highly reduces the query cost of the `zendesk__ticket_field_history` query and takes advantage of the Zendesk functionality of not being able to change a ticket after the close date.
   - Added `ticket_field_history_extension_months` variable to extend field history past Y months from ticket close (for reporting purposes).
   - Refer to the README for more details.
 
