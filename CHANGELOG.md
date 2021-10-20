@@ -1,7 +1,7 @@
 # dbt_zendesk v0.7.0
 
 ## 🚨 Breaking Changes
-- Fix incremental logic bug introduced in v0.4.0 which caused the `zendesk__ticket_field_history` model to not be properly incrementally updated. ([#44](https://github.com/fivetran/dbt_zendesk/pull/44))
+- Fix incremental logic bug introduced in v0.5.0 which caused the `zendesk__ticket_field_history` model to not be properly incrementally updated. ([#44](https://github.com/fivetran/dbt_zendesk/pull/44))
   - The above fix resulted in the removal of the `valid_from` and `valid_to` fields in the final model.
 
 ## Bug Fixes
