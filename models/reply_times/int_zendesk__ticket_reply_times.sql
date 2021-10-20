@@ -9,21 +9,35 @@ with ticket_public_comments as (
   select 
     ticket_id,
     valid_starting_at as end_user_comment_created_at,
+    ticket_created_date,
+    commenter_role,
     previous_commenter_role = 'first_comment' as is_first_comment
   from ticket_public_comments 
-  where commenter_role = 'external_comment'
-    and ticket_public_comments.previous_commenter_role != 'external_comment' -- we only care about net new end user comments
+  where (commenter_role = 'external_comment'
+    and ticket_public_comments.previous_commenter_role != 'external_comment') -- we only care about net new end user comments
+    or previous_commenter_role = 'first_comment' -- We also want to take into consideration internal first comment replies
 
 ), reply_timestamps as (  
 
   select
-    end_user_comments.*,
-    min(agent_comments.valid_starting_at) as agent_responded_at
+    end_user_comments.ticket_id,
+    -- If the commentor was internal and a first comment then we want the ticket created date to be the end user comment created date
+    -- Otherwise we will want to end user comment created date
+    case when end_user_comments.is_first_comment
+      then end_user_comments.ticket_created_date
+      else end_user_comments.end_user_comment_created_at
+        end as end_user_comment_created_at,
+    end_user_comments.is_first_comment,
+    -- If the commentor was internal and is the first comment then we want the end user comment to be the responded at date as this is the date the agent responded following the ticket created date
+    -- Otherwise we want the agent responded at date
+    min(case when end_user_comments.commenter_role = 'internal_comment' and end_user_comments.is_first_comment
+          then end_user_comments.end_user_comment_created_at
+          else agent_comments.valid_starting_at
+            end) as agent_responded_at
   from end_user_comments
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id
     and agent_comments.commenter_role = 'internal_comment'
-    and agent_comments.previous_commenter_role != 'first_comment' -- we only care about net new agent comments
     and agent_comments.valid_starting_at > end_user_comments.end_user_comment_created_at
   group by 1,2,3
 
