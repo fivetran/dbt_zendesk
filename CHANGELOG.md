@@ -1,5 +1,7 @@
+# dbt_zendesk v0.7.1
+## Bug Fixes
+- Updated logic within `int_zendesk__sla_policy_applied` to more accurately reflect the `sla_applied_at` time for `first_reply_time` sla's. Per [Zendesk's documentation](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time) the `first_reply_time` sla is set at the creation of the ticket, even if the sla is applied after creation.
 # dbt_zendesk v0.7.0
-
 ## 🚨 Breaking Changes
 - Fix incremental logic bug introduced in v0.5.0 which caused the `zendesk__ticket_field_history` model to not be properly incrementally updated. ([#44](https://github.com/fivetran/dbt_zendesk/pull/44))
   - The above fix resulted in the removal of the `valid_from` and `valid_to` fields in the final model.

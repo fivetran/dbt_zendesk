@@ -27,14 +27,14 @@ with ticket_field_history as (
     ticket.created_at as ticket_created_at,
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
-    ticket_field_history.valid_starting_at as sla_applied_at,
+    case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
     cast({{ fivetran_utils.json_extract('ticket_field_history.value', 'minutes') }} as {{ dbt_utils.type_int() }} ) as target,
     {{ fivetran_utils.json_extract('ticket_field_history.value', 'in_business_hours') }} = 'true' as in_business_hours
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
   where ticket_field_history.value is not null
-    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time') --('periodic_update_time')
+    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
 
 ), final as (
   select
