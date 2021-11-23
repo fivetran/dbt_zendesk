@@ -12,7 +12,6 @@ with ticket_public_comments as (
     ticket_created_date,
     commenter_role,
     previous_internal_comment_count,
-    external_comment_count,
     previous_commenter_role = 'first_comment' as is_first_comment
   from ticket_public_comments 
   where (commenter_role = 'external_comment'
