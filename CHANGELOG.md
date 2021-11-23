@@ -1,3 +1,7 @@
+# dbt_zendesk v0.7.1
+
+## Bug Fixes
+- tbd
 # dbt_zendesk v0.7.0
 
 ## 🚨 Breaking Changes
