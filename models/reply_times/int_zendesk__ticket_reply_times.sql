@@ -23,7 +23,7 @@ with ticket_public_comments as (
 
   select
     end_user_comments.ticket_id,
-    -- If the commentor was internal and a first comment then we want the ticket created date to be the end user comment created date
+    -- If the commentor was internal, a first comment, and had previous non public internal comments then we want the ticket created date to be the end user comment created date
     -- Otherwise we will want to end user comment created date
     case when is_first_comment then end_user_comments.ticket_created_date else end_user_comments.end_user_comment_created_at end as end_user_comment_created_at,
     end_user_comments.is_first_comment,

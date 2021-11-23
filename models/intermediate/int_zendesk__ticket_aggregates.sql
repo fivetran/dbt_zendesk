@@ -7,10 +7,10 @@ with tickets as (
   select *
   from {{ ref('stg_zendesk__ticket_tag') }}
 
-), brands as (
+{# ), brands as (
 
   select *
-  from {{ ref('stg_zendesk__brand') }}
+  from {{ ref('stg_zendesk__brand') }} #}
   
 ), ticket_tag_aggregate as (
   select
@@ -26,15 +26,15 @@ with tickets as (
       then true
       else false
         end as is_incident,
-    brands.name as ticket_brand_name,
+    {# brands.name as ticket_brand_name, #}
     ticket_tag_aggregate.ticket_tags
   from tickets
 
   left join ticket_tag_aggregate
     using(ticket_id)
 
-  left join brands
-    on brands.brand_id = tickets.brand_id
+  {# left join brands
+    on brands.brand_id = tickets.brand_id #}
 )
 
 select *
