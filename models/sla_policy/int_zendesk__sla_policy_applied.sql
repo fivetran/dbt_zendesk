@@ -43,7 +43,7 @@ with ticket_field_history as (
   from sla_policy_applied
   left join sla_policy_name
     on sla_policy_name.ticket_id = sla_policy_applied.ticket_id
-      and sla_policy_applied.sla_applied_at >= sla_policy_name.valid_starting_at
+      and sla_policy_applied.sla_applied_at >= {{ fivetran_utils.timestamp_add(datepart='second', interval='-5', from_timestamp='sla_policy_name.valid_starting_at') }}
       and sla_policy_applied.sla_applied_at < coalesce(sla_policy_name.valid_ending_at, {{ dbt_utils.current_timestamp() }}) 
 )
 
