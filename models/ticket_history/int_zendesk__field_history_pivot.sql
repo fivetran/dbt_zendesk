@@ -54,7 +54,7 @@ with field_history as (
     from event_order
     where row_num = 1
 
-), pivot as (
+), pivots as (
 
     -- For each column that is in both the ticket_field_history_columns variable and the field_history table,
     -- pivot out the value into it's own column. This will feed the daily slowly changing dimension model.
@@ -96,7 +96,7 @@ with field_history as (
         *,
         coalesce(lead(date_day) over (partition by ticket_id order by date_day), {{ dbt_utils.dateadd("day", 1, "current_date") }}) as ending_day,
         {{ dbt_utils.surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
-    from pivot
+    from pivots
 
 )
 
