@@ -102,12 +102,12 @@ with agent_work_time_filtered_statuses as (
       weekly_period_agent_work_time.week_number,
       weekly_period_agent_work_time.ticket_week_start_time_minute,
       weekly_period_agent_work_time.ticket_week_end_time_minute,
-      schedule.start_time_utc as schedule_start_time,
-      schedule.end_time_utc as schedule_end_time,
-      least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes
+      schedule.start_time as schedule_start_time,
+      schedule.end_time as schedule_end_time,
+      least(ticket_week_end_time_minute, schedule.end_time) - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time) as scheduled_minutes
     from weekly_period_agent_work_time
-    join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
-      and ticket_week_end_time_minute >= schedule.start_time_utc
+    join schedule on ticket_week_start_time_minute <= schedule.end_time 
+      and ticket_week_end_time_minute >= schedule.start_time
       and weekly_period_agent_work_time.schedule_id = schedule.schedule_id
 
 ), intercepted_periods_with_running_total as (

@@ -22,7 +22,7 @@ with ticket_schedules as (
   
   select 
     schedule_id,
-    sum(end_time_utc - start_time_utc) as total_schedule_weekly_business_minutes
+    sum(end_time - start_time) as total_schedule_weekly_business_minutes
   from schedule
   group by 1
 
@@ -74,16 +74,16 @@ with ticket_schedules as (
 
   select 
     weekly_periods.*,
-    schedule.start_time_utc as schedule_start_time,
-    schedule.end_time_utc as schedule_end_time,
-    (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
-    sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
+    schedule.start_time as schedule_start_time,
+    schedule.end_time as schedule_end_time,
+    (schedule.end_time - greatest(ticket_week_start_time,schedule.start_time)) as lapsed_business_minutes,
+    sum(schedule.end_time - greatest(ticket_week_start_time,schedule.start_time)) over 
       (partition by ticket_id, metric, sla_applied_at 
-        order by week_number, schedule.start_time_utc
+        order by week_number, schedule.start_time
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
   from weekly_periods
-  join schedule on ticket_week_start_time <= schedule.end_time_utc 
-    and ticket_week_end_time >= schedule.start_time_utc
+  join schedule on ticket_week_start_time <= schedule.end_time 
+    and ticket_week_end_time >= schedule.start_time
     and weekly_periods.schedule_id = schedule.schedule_id
   
 ), intercepted_periods_with_breach_flag as (

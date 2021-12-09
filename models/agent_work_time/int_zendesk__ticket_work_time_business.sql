@@ -77,12 +77,12 @@ with ticket_historical_status as (
       weekly_periods.ticket_status,
       weekly_periods.ticket_week_start_time,
       weekly_periods.ticket_week_end_time,
-      schedule.start_time_utc as schedule_start_time,
-      schedule.end_time_utc as schedule_end_time,
-      least(ticket_week_end_time, schedule.end_time_utc) - greatest(weekly_periods.ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
+      schedule.start_time as schedule_start_time,
+      schedule.end_time as schedule_end_time,
+      least(ticket_week_end_time, schedule.end_time) - greatest(weekly_periods.ticket_week_start_time, schedule.start_time) as scheduled_minutes
     from weekly_periods
-    join schedule on ticket_week_start_time <= schedule.end_time_utc 
-      and ticket_week_end_time >= schedule.start_time_utc
+    join schedule on ticket_week_start_time <= schedule.end_time 
+      and ticket_week_end_time >= schedule.start_time
       and weekly_periods.schedule_id = schedule.schedule_id
 
 ), business_minutes as (
