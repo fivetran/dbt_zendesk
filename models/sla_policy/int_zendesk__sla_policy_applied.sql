@@ -11,7 +11,8 @@ with ticket_field_history as (
 
 ), sla_policy_name as (
 
-  select *
+  select 
+    *
   from {{ ref('int_zendesk__updates') }}
   where field_name = ('sla_policy')
 
@@ -27,6 +28,7 @@ with ticket_field_history as (
     ticket.created_at as ticket_created_at,
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
+    case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
     case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
     cast({{ fivetran_utils.json_extract('ticket_field_history.value', 'minutes') }} as {{ dbt_utils.type_int() }} ) as target,
     {{ fivetran_utils.json_extract('ticket_field_history.value', 'in_business_hours') }} = 'true' as in_business_hours
@@ -45,6 +47,7 @@ with ticket_field_history as (
     on sla_policy_name.ticket_id = sla_policy_applied.ticket_id
       and sla_policy_applied.sla_applied_at >= {{ fivetran_utils.timestamp_add(datepart='second', interval='-5', from_timestamp='sla_policy_name.valid_starting_at') }}
       and sla_policy_applied.sla_applied_at < coalesce(sla_policy_name.valid_ending_at, {{ dbt_utils.current_timestamp() }}) 
+  where sla_policy_applied.latest_sla = 1
 )
 
 select *
