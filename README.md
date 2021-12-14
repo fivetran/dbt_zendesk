@@ -110,19 +110,6 @@ vars:
 ```
 *Note: This package only integrates the above variables. If you'd like to disable other models, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 
-### Changing the Business Time Metrics Logic
-This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](/DECISIONLOG.md). However, if you want to use the Zendesk business time metrics then you can add the below variable to override the default logic.
-
-```yml
-# dbt_project.yml
-
-...
-config-version: 2
-
-vars:
-  using_zendesk_business_metrics_logic:    True         #False by default
-```
-
 ### Extending and Limiting the Ticket Field History
 
 This package will create a row in `zendesk__ticket_field_history` for each day that a ticket is open, starting at its creation date. A Zendesk ticket cannot be altered after being closed, so its field values will not change after this date. However, you may want to extend a ticket's history past its closure date for easier reporting and visualizing. To do so, add the following configuration to your `dbt_project.yml` file:
@@ -150,7 +137,9 @@ vars:
   zendesk:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
 ```
-
+## Opinionated Modelling Decisions
+### Changing the Business Time Metrics Logic
+This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](/DECISIONLOG.md).
 ## Database support
 This package is compatible with BigQuery, Snowflake, Redshift and Postgres.
 

@@ -3,9 +3,6 @@
 ## Business Time Metrics
 When developing this package we noticed Zendesk reported ticket response times in business minutes based on the last schedule which is applied to the ticket. However, we felt this is not an accurate representation of the true ticket elapsed time in business minutes. Therefore, we took the opinionated decision to apply logic within our transformations to calculate the cumulative elapsed time in business minutes of a ticket across **all** schedules which the ticket was assigned during it's lifetime.
 
-While we have taken the liberty of using our derived logic to calculate the Business Time Metrics, we do understand the importance of some users to match the metrics to the Zendesk UI. As such, if you read through the below transformation logic and determine you do in fact want to use the logic used by Zendesk then you may do so by setting the `using_zendesk_business_metrics_logic` to `True` in your `dbt_project.yml` to override our opinionated business metrics logic.
-> Please note, the `using_zendesk_business_metrics_logic` is `False` by default.
-
 Below is a quick explanation of how this is calculated within the dbt package for **first_reply_time_business_minutes** as well as how this differs from Zendesk's logic:
 > Note: While this is an example of `first_reply_time_business_minutes`, the logic is the same for other business minute metrics.
 
