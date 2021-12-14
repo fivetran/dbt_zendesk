@@ -1,3 +1,7 @@
+# dbt_zendesk v0.7.1
+
+## Under the Hood
+- Redshift recently included `pivot` as a reserved word within the warehouse. As such, the `pivot` CTE within the `int_zendesk__field_history_pivot` model has been changed to `pivots` to avoid the Redshift error. ([#57](https://github.com/fivetran/dbt_zendesk/pull/57/files))
 # dbt_zendesk v0.7.0
 
 ## 🚨 Breaking Changes
