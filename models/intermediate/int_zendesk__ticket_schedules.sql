@@ -79,5 +79,6 @@ with ticket as (
   from schedule_events
 
 )
+
 select *
 from ticket_schedules
