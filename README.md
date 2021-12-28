@@ -30,7 +30,7 @@ Include in your `packages.yml` to stay up to date with the latest release!
 ```yaml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.8.0", "<0.9.0"]
+    version: 0.8.0-b1
 ```
 ## Package Maintenance
 The Fivetran team maintaining this package **only** maintains the latest version. We highly recommend you keep your `packages.yml` updated with the [dbt hub latest version](https://hub.getdbt.com/fivetran/zendesk/latest/). You may refer to the [CHANGELOG](/CHANGELOG.md) and release notes for more information on changes across versions.
