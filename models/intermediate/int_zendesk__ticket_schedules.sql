@@ -79,6 +79,16 @@ with ticket as (
   from schedule_events
 
 )
-
-select *
+select
+--The below conditional is only used for testing purposes. 
+{% if var('using_zendesk_business_metrics_logic',false) %}
+  ticket_id,
+  max(schedule_id) as schedule_id,
+  min(schedule_created_at) as schedule_created_at,
+  max(schedule_invalidated_at) as schedule_invalidated_at
 from ticket_schedules
+group by 1
+{% else %}
+  *
+from ticket_schedules
+{% endif %}
