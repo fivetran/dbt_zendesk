@@ -1,4 +1,8 @@
 # dbt_zendesk v0.8.0
+# Features
+- Addition of the [DECISIONLOG.md](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md). This file contains detailed explanations for the opinionated transformation logic found within this dbt package. ((#59)[https://github.com/fivetran/dbt_zendesk/pull/59])
+# Bug Fixes
+- Added logic required to account for the `first_reply_time` when the first commenter is an internal comment and there are no previous external comments applied to the ticket. ((#59)[https://github.com/fivetran/dbt_zendesk/pull/59])
 
 ## Under the Hood
 - Updated the incremental logic within `int_zendesk__field_history_scd` to include an additional partition for `ticket_id`. This allows for a more accurate generation of ticket backlog records. ((#61)[https://github.com/fivetran/dbt_zendesk/pull/61])
