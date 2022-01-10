@@ -1,3 +1,4 @@
+# dbt_zendesk v0.8.0
 # dbt_zendesk v0.8.0-b1
 🎉 dbt v1.0.0 Compatibility Pre Release 🎉 An official dbt v1.0.0 compatible version of the package will be released once existing feature/bug PRs are merged.
 ## 🚨 Breaking Changes 🚨
