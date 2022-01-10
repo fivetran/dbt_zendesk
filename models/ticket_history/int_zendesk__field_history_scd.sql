@@ -23,7 +23,7 @@ with change_data as (
         ,sum(case when {{ col.name }} is null 
                 then 0 
                 else 1 
-                    end) over (order by ticket_id, date_day rows unbounded preceding) as {{ col.name }}_field_patition
+                    end) over (order by ticket_id, date_day rows unbounded preceding) as {{ col.name }}_field_partition
         {% endfor %}
 
     from change_data
@@ -36,7 +36,7 @@ with change_data as (
 
         {% for col in ticket_columns if col.name|lower not in ['date_day','ending_day','ticket_id','ticket_day_id'] %} 
 
-        ,first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_patition order by valid_from asc rows between unbounded preceding and current row) as {{ col.name }}
+        ,first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_partition, ticket_id order by valid_from asc rows between unbounded preceding and current row) as {{ col.name }}
         
         {% endfor %}
     from set_values
