@@ -1,4 +1,6 @@
 packages:
 # - package: fivetran/zendesk_source
 #   version: [">=0.5.0", "<0.6.0"]
-  - local: ../dbt_zendesk_source
+  # - local: ../dbt_zendesk_source
+  - git: https://github.com/fivetran/dbt_zendesk_source.git
+    revision: timezone-tables
