@@ -19,13 +19,11 @@ with ticket_schedules as (
 
 
 ), schedule_business_hours as (
-  -- oy this is different from the others...
-  -- the total minutes should be the same across schedules....
-  -- option 1: use stg schedule table just for this...
-  -- option 2: do a row_number thing for schedule spine 
+
   select 
     schedule_id,
     sum(end_time - start_time) as total_schedule_weekly_business_minutes
+  -- referrinng to stg_zendesk__schedule instead of int_zendesk__schedule_spine just to calculcate total minutes
   from {{ ref('stg_zendesk__schedule') }}
   group by 1
 
@@ -88,6 +86,9 @@ with ticket_schedules as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+    and weekly_periods.sla_applied_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+    and weekly_periods.sla_applied_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }})
   
 ), intercepted_periods_with_breach_flag as (
   

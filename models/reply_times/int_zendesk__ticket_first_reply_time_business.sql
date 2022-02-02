@@ -32,7 +32,10 @@ with ticket_reply_times as (
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
-    min(first_reply_time.agent_responded_at) as agent_responded_at, -- or should this be least(ticket_schedules.schedule_invalidated_at, min(first_reply_time.agent_responded_at)) ....? this is to compare to schedule.valid_from
+
+    -- bringing this in the determine which schedule (Daylight Savings vs Standard time) to use
+    min(first_reply_time.agent_responded_at) as agent_responded_at,
+
     ({{ fivetran_utils.timestamp_diff(
             "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
             'ticket_schedules.schedule_created_at',
@@ -87,6 +90,7 @@ with ticket_reply_times as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    -- this chooses the Daylight Savings Time or Standard Time version of the schedule
     and weekly_periods.agent_responded_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
     and weekly_periods.agent_responded_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
 
