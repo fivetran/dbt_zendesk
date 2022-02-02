@@ -8,15 +8,15 @@ models:
   zendesk:
     +schema: zendesk
     +materialized: table
-    agent_work_time:
-      +materialized: ephemeral
+    # agent_work_time:
+    #   +materialized: ephemeral
     intermediate:
       +schema: zendesk_intermediate
       +materialized: table
-    reply_times:
-      +materialized: ephemeral
-    resolution_times:
-      +materialized: ephemeral
+    # reply_times:
+    #   +materialized: ephemeral
+    # resolution_times:
+    #   +materialized: ephemeral
     sla_policy:
       +schema: zendesk_intermediate
       +materialized: table

@@ -81,15 +81,15 @@ with timezone as (
         schedule.end_time,
         schedule.created_at,
         schedule.schedule_name,
-        schedule.start_time - split_timezones.offset_minutes as start_time_utc,
-        schedule.end_time - split_timezones.offset_minutes as end_time_utc,
+        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
+        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
 
         -- we'll use these to determine which schedule version to associate tickets with
         split_timezones.valid_from,
         split_timezones.valid_until
 
-    from split_timezones
-    join schedule
+    from schedule
+    left join split_timezones
         on split_timezones.time_zone = schedule.time_zone
 
 ), final as (

@@ -13,7 +13,7 @@ with ticket_historical_status as (
 ), schedule as (
 
     select *
-    from {{ ref('stg_zendesk__schedule') }}
+    from {{ ref('int_zendesk__schedule_spine') }}
 
 ), ticket_status_crossed_with_schedule as (
   
@@ -23,6 +23,10 @@ with ticket_historical_status as (
       ticket_schedules.schedule_id,
       greatest(valid_starting_at, schedule_created_at) as status_schedule_start,
       least(valid_ending_at, schedule_invalidated_at) as status_schedule_end
+      -- should i bring in the below to compare to the schedule.valid_from? 
+      -- because we are comparing INTERVALS (status <> schedule) instead of one-off events (ie reply time <> schedule), this case is different from the other models
+      {# ticket_historical_status.valid_starting_at as status_valid_starting_at,
+      ticket_historical_status.valid_ending_at as status_valid_ending_at #}
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
@@ -84,7 +88,9 @@ with ticket_historical_status as (
     join schedule on ticket_week_start_time <= schedule.end_time_utc 
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
-
+      and weekly_periods.status_schedule_end >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+      and weekly_periods.status_schedule_start < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+  
 ), business_minutes as (
   
     select 

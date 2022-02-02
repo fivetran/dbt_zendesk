@@ -10,7 +10,7 @@ with ticket_schedules as (
 ), schedule as (
  
   select *
-  from {{ ref('stg_zendesk__schedule') }}
+  from {{ ref('int_zendesk__schedule_spine') }}
 
 ), sla_policy_applied as (
  
@@ -19,11 +19,14 @@ with ticket_schedules as (
 
 
 ), schedule_business_hours as (
-  
+  -- oy this is different from the others...
+  -- the total minutes should be the same across schedules....
+  -- option 1: use stg schedule table just for this...
+  -- option 2: do a row_number thing for schedule spine 
   select 
     schedule_id,
-    sum(end_time_utc - start_time_utc) as total_schedule_weekly_business_minutes
-  from schedule
+    sum(end_time - start_time) as total_schedule_weekly_business_minutes
+  from {{ ref('stg_zendesk__schedule') }}
   group by 1
 
 ), ticket_sla_applied_with_schedules as (

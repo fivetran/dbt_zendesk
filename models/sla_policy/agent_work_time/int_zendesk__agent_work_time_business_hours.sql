@@ -13,7 +13,7 @@ with agent_work_time_filtered_statuses as (
 ), schedule as (
 
   select * 
-  from {{ ref('stg_zendesk__schedule') }}
+  from {{ ref('int_zendesk__schedule_spine') }}
 
 ), ticket_schedules as (
 
@@ -109,7 +109,9 @@ with agent_work_time_filtered_statuses as (
     join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_agent_work_time.schedule_id = schedule.schedule_id
-
+      and weekly_period_agent_work_time.valid_ending_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+      and weekly_period_agent_work_time.valid_starting_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+  
 ), intercepted_periods_with_running_total as (
   
     select 
