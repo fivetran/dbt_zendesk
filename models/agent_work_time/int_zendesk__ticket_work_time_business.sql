@@ -21,6 +21,8 @@ with ticket_historical_status as (
       ticket_historical_status.ticket_id,
       ticket_historical_status.status as ticket_status,
       ticket_schedules.schedule_id,
+
+      -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
       greatest(valid_starting_at, schedule_created_at) as status_schedule_start,
       least(valid_ending_at, schedule_invalidated_at) as status_schedule_end,
 
