@@ -70,7 +70,7 @@ with requester_wait_time_filtered_statuses as (
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_full_solved_time as (
-    
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
       ticket_full_solved_time.*,
       generated_number - 1 as week_number

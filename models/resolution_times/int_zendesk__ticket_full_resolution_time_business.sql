@@ -48,7 +48,7 @@ with ticket_resolution_times_calendar as (
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_full_resolution_time as (
-
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
 
       ticket_full_resolution_time.*,

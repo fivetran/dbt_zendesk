@@ -53,7 +53,7 @@ with ticket_schedules as (
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_sla_applied as (
-
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
 
       ticket_sla_applied_with_schedules.*,
