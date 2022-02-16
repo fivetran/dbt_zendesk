@@ -13,7 +13,7 @@ with ticket_historical_status as (
 ), schedule as (
 
     select *
-    from {{ ref('stg_zendesk__schedule') }}
+    from {{ ref('int_zendesk__schedule_spine') }}
 
 ), ticket_status_crossed_with_schedule as (
   
@@ -21,8 +21,15 @@ with ticket_historical_status as (
       ticket_historical_status.ticket_id,
       ticket_historical_status.status as ticket_status,
       ticket_schedules.schedule_id,
+
+      -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
       greatest(valid_starting_at, schedule_created_at) as status_schedule_start,
-      least(valid_ending_at, schedule_invalidated_at) as status_schedule_end
+      least(valid_ending_at, schedule_invalidated_at) as status_schedule_end,
+
+      -- bringing the following in the determine which schedule (Daylight Savings vs Standard time) to use
+      ticket_historical_status.valid_starting_at as status_valid_starting_at,
+      ticket_historical_status.valid_ending_at as status_valid_ending_at
+
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
@@ -43,14 +50,14 @@ with ticket_historical_status as (
               'second') }} /60
             ) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
-    group by 1, 2, 3, 4, 5
+    {{ dbt_utils.group_by(n=7) }}
 
 ), weeks as (
 
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_full_solved_time as (
-    
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
       ticket_full_solved_time.*,
       generated_number - 1 as week_number
@@ -84,7 +91,10 @@ with ticket_historical_status as (
     join schedule on ticket_week_start_time <= schedule.end_time_utc 
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
-
+      -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+      and weekly_periods.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+      and weekly_periods.status_valid_starting_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+  
 ), business_minutes as (
   
     select 

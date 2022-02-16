@@ -13,7 +13,7 @@ with ticket_resolution_times_calendar as (
 ), schedule as (
 
     select *
-    from {{ ref('stg_zendesk__schedule') }}
+    from {{ ref('int_zendesk__schedule_spine') }}
 
 ), ticket_first_resolution_time as (
 
@@ -22,6 +22,10 @@ with ticket_resolution_times_calendar as (
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
+
+    -- bringing this in the determine which schedule (Daylight Savings vs Standard time) to use
+    min(ticket_resolution_times_calendar.first_solved_at) as first_solved_at,
+    
     ({{ fivetran_utils.timestamp_diff(
             "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
             'ticket_schedules.schedule_created_at',
@@ -44,7 +48,7 @@ with ticket_resolution_times_calendar as (
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_first_resolution_time as (
-
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
 
       ticket_first_resolution_time.*,
@@ -79,7 +83,10 @@ with ticket_resolution_times_calendar as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
-
+    -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+    and weekly_periods.first_solved_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+    and weekly_periods.first_solved_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+    
 )
 
   select 

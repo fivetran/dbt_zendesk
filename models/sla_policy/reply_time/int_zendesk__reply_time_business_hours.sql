@@ -10,7 +10,7 @@ with ticket_schedules as (
 ), schedule as (
  
   select *
-  from {{ ref('stg_zendesk__schedule') }}
+  from {{ ref('int_zendesk__schedule_spine') }}
 
 ), sla_policy_applied as (
  
@@ -19,11 +19,12 @@ with ticket_schedules as (
 
 
 ), schedule_business_hours as (
-  
+
   select 
     schedule_id,
-    sum(end_time_utc - start_time_utc) as total_schedule_weekly_business_minutes
-  from schedule
+    sum(end_time - start_time) as total_schedule_weekly_business_minutes
+  -- referrinng to stg_zendesk__schedule instead of int_zendesk__schedule_spine just to calculcate total minutes
+  from {{ ref('stg_zendesk__schedule') }}
   group by 1
 
 ), ticket_sla_applied_with_schedules as (
@@ -52,7 +53,7 @@ with ticket_schedules as (
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_sla_applied as (
-
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
 
       ticket_sla_applied_with_schedules.*,
@@ -85,6 +86,9 @@ with ticket_schedules as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+    and weekly_periods.sla_applied_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+    and weekly_periods.sla_applied_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }})
   
 ), intercepted_periods_with_breach_flag as (
   
