@@ -13,7 +13,7 @@ with requester_wait_time_filtered_statuses as (
 ), schedule as (
 
   select * 
-  from {{ ref('stg_zendesk__schedule') }}
+  from {{ ref('int_zendesk__schedule_spine') }}
 
 ), ticket_schedules as (
 
@@ -29,8 +29,15 @@ with requester_wait_time_filtered_statuses as (
       requester_wait_time_filtered_statuses.target,
       requester_wait_time_filtered_statuses.sla_policy_name,
       ticket_schedules.schedule_id,
+
+      -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
       greatest(valid_starting_at, schedule_created_at) as valid_starting_at,
-      least(valid_ending_at, schedule_invalidated_at) as valid_ending_at
+      least(valid_ending_at, schedule_invalidated_at) as valid_ending_at,
+
+      -- bringing the following in the determine which schedule (Daylight Savings vs Standard time) to use
+      valid_starting_at as status_valid_starting_at,
+      valid_ending_at as status_valid_ending_at
+
     from requester_wait_time_filtered_statuses
     left join ticket_schedules
       on requester_wait_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
@@ -56,14 +63,14 @@ with requester_wait_time_filtered_statuses as (
               'second') }} /60
             ) as raw_delta_in_minutes
     from ticket_status_crossed_with_schedule
-    group by 1, 2, 3, 4, 5, 6, 7, 8
+    {{ dbt_utils.group_by(n=10) }}
 
 ), weeks as (
 
     {{ dbt_utils.generate_series(208) }}
 
 ), weeks_cross_ticket_full_solved_time as (
-    
+    -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
       ticket_full_solved_time.*,
       generated_number - 1 as week_number
@@ -79,6 +86,8 @@ with requester_wait_time_filtered_statuses as (
       sla_applied_at,
       valid_starting_at,
       valid_ending_at,
+      status_valid_starting_at,
+      status_valid_ending_at,
       target,
       sla_policy_name,
       valid_starting_at_in_minutes_from_week,
@@ -109,6 +118,9 @@ with requester_wait_time_filtered_statuses as (
     join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_requester_wait_time.schedule_id = schedule.schedule_id
+      -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+      and weekly_period_requester_wait_time.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
+      and weekly_period_requester_wait_time.status_valid_starting_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
 
 ), intercepted_periods_with_running_total as (
   

@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.7.1'
+version: '0.8.0'
 
 profile: 'integration_tests'
 
@@ -22,6 +22,8 @@ vars:
     domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
     organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
     user:                   "{{ ref('stg_zendesk__user') }}"
+    daylight_time:          "{{ ref('stg_zendesk__daylight_time') }}"
+    time_zone:              "{{ ref('stg_zendesk__time_zone') }}"
   zendesk_source:
     group:                  "{{ ref('group_data') }}"
     organization:           "{{ ref('organization_data') }}"
@@ -37,7 +39,9 @@ vars:
     domain_name:            "{{ ref('domain_name_data') }}"
     organization_tag:       "{{ fivetran_utils.seed_data_helper('organization_tag_data',['snowflake']) }}" 
     user:                   "{{ fivetran_utils.seed_data_helper('user_data',['snowflake']) }}" 
-    
+    daylight_time:          "{{ ref('daylight_time_data') }}"
+    time_zone:              "{{ ref('time_zone_data') }}"
+
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
