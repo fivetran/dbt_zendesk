@@ -30,7 +30,7 @@ Include in your `packages.yml` to stay up to date with the latest release!
 ```yaml
 packages:
   - package: fivetran/zendesk
-    version: 0.8.0-b1
+    version: [">=0.8.0", "<0.9.0"]
 ```
 ## Package Maintenance
 The Fivetran team maintaining this package **only** maintains the latest version. We highly recommend you keep your `packages.yml` updated with the [dbt hub latest version](https://hub.getdbt.com/fivetran/zendesk/latest/). You may refer to the [CHANGELOG](/CHANGELOG.md) and release notes for more information on changes across versions.
@@ -138,7 +138,7 @@ vars:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
 ```
 ## Opinionated Modelling Decisions
-### Changing the Business Time Metrics Logic
+### Business Time Metrics Logic
 This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](/DECISIONLOG.md).
 ## Database support
 This package is compatible with BigQuery, Snowflake, Redshift and Postgres.

@@ -1,4 +1,6 @@
 # dbt_zendesk v0.8.0
+# 🚨 Breaking Changes 🚨
+- The logic used to generate the `zendesk__ticket_backlog` model was updated to more accurately map backlog changes to tickets. As the underlying `zendesk__ticket_field_history` model is incremental, we recommend a `--full-refresh` after installing this latest version of the package. ([#61](https://github.com/fivetran/dbt_zendesk/pull/61))
 # Features
 - Addition of the [DECISIONLOG.md](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md). This file contains detailed explanations for the opinionated transformation logic found within this dbt package. ([#59](https://github.com/fivetran/dbt_zendesk/pull/59))
 # Bug Fixes
