@@ -3,6 +3,7 @@
 - Addition of the [DECISIONLOG.md](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md). This file contains detailed explanations for the opinionated transformation logic found within this dbt package. ((#59)[https://github.com/fivetran/dbt_zendesk/pull/59])
 # Bug Fixes
 - Added logic required to account for the `first_reply_time` when the first commenter is an internal comment and there are no previous external comments applied to the ticket. ((#59)[https://github.com/fivetran/dbt_zendesk/pull/59])
+- For those using schedules, incorporates Daylight Savings Time to use the proper timezone offsets for calculating UTC timestamps. Business minute metrics are more accurately calculated, as previously the package did not acknowledge daylight time and only used the standard time offsets ((#62)[https://github.com/fivetran/dbt_zendesk/issues/62]).
 
 ## Under the Hood
 - Updated the incremental logic within `int_zendesk__field_history_scd` to include an additional partition for `ticket_id`. This allows for a more accurate generation of ticket backlog records. ((#61)[https://github.com/fivetran/dbt_zendesk/pull/61])
