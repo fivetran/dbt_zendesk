@@ -1,3 +1,6 @@
+# dbt_zendesk v0.8.1
+## Fixes
+- The `0.7.1` release of the zendesk package introduced a bug within the `zendesk__sla_policy` model that caused duplicate sla records via a [join condition](https://github.com/fivetran/dbt_zendesk/blob/v0.7.1/models/sla_policy/int_zendesk__sla_policy_applied.sql#L48). This join condition has been modified to leverage the more accurate `sla_policy_applied.valid_starting_at` field instead of the `sla_policy_applied.sla_applied_at` which changes for `first_reply_time` slas. ([#67](https://github.com/fivetran/dbt_zendesk/pull/67))
 # dbt_zendesk v0.8.0
 ## 🚨 Breaking Changes 🚨
 - The logic used to generate the `zendesk__ticket_backlog` model was updated to more accurately map backlog changes to tickets. As the underlying `zendesk__ticket_field_history` model is incremental, we recommend a `--full-refresh` after installing this latest version of the package. ([#61](https://github.com/fivetran/dbt_zendesk/pull/61))
