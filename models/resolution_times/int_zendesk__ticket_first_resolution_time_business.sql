@@ -25,10 +25,10 @@ with ticket_resolution_times_calendar as (
 
     -- bringing this in the determine which schedule (Daylight Savings vs Standard time) to use
     min(ticket_resolution_times_calendar.first_solved_at) as first_solved_at,
-    
+
     ({{ fivetran_utils.timestamp_diff(
-            "" ~ dbt_utils.date_trunc('week', 'ticket_schedules.schedule_created_at') ~ "", 
-            'ticket_schedules.schedule_created_at',
+            "cast(" ~ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
+            "cast(ticket_schedules.schedule_created_at as " ~ dbt_utils.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
     greatest(0,

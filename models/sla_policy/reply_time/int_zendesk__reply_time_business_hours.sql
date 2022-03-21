@@ -32,12 +32,11 @@ with ticket_schedules as (
   select 
     sla_policy_applied.*,
     ticket_schedules.schedule_id,
-    (
-      {{ fivetran_utils.timestamp_diff(
-        "" ~ dbt_utils.date_trunc('week', 'sla_policy_applied.sla_applied_at') ~ "",
-        'sla_policy_applied.sla_applied_at', 
-        'second') }} /60
-      ) as start_time_in_minutes_from_week,
+    ({{ fivetran_utils.timestamp_diff(
+            "cast(" ~ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
+            "cast(sla_policy_applied.sla_applied_at as " ~ dbt_utils.type_timestamp() ~ ")",
+            'second') }} /60
+          ) as start_time_in_minutes_from_week,
       schedule_business_hours.total_schedule_weekly_business_minutes
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
