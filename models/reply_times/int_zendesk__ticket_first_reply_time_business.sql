@@ -32,7 +32,6 @@ with ticket_reply_times as (
     first_reply_time.ticket_id,
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
-    cast({{ dbt_date.week_start("ticket_schedules.schedule_created_at","UTC") }} as {{ dbt_utils.type_timestamp() }}) as week_start,
     ticket_schedules.schedule_id,
 
     -- bringing this in the determine which schedule (Daylight Savings vs Standard time) to use
