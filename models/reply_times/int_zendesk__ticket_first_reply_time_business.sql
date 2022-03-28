@@ -52,7 +52,7 @@ with ticket_reply_times as (
   
   from first_reply_time
   join ticket_schedules on first_reply_time.ticket_id = ticket_schedules.ticket_id
-  group by 1, 2, 3, 4, 5
+  group by 1, 2, 3, 4
 
 ), weeks as (
 
