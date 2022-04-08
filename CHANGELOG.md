@@ -1,6 +1,6 @@
 # dbt_zendesk v0.8.3
 ## Features
-- The `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models now allow passthrough columns to be included through the use of the `zendesk__ticket_passthrough_columns` variable! ([]())
+- The `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models now allow passthrough columns to be included through the use of the `zendesk__ticket_passthrough_columns` variable! ([#70](https://github.com/fivetran/dbt_zendesk/pull/70))
 # dbt_zendesk v0.8.2
 ## Fixes
 - It was brought to our attention that the `dbt_utils.date_trunc` macro only leverages the default arguments of the date_trunc function in the various warehouses. For example, `date_trunc` in Snowflake for the `week` argument produces the starting Monday, while BigQuery produces the starting Sunday. For this package, we want to leverage the start of the week as Sunday. Therefore, logic within the business metric intermediate models has been adjusted to capture the start of the week as Sunday. This was done by leveraging the `week_start` macro within the `dbt-date` package. ([#68](https://github.com/fivetran/dbt_zendesk/pull/68))
