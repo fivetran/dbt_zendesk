@@ -49,7 +49,15 @@ vars:
     zendesk_database: your_database_name
     zendesk_schema: your_schema_name 
 ```
+### Adding Passthrough Columns
+This [Zendesk Source package](https://github.com/fivetran/dbt_zendesk_source) allows for custom fields to be added to the `stg_zendesk__ticket` model. These custom fields will also persist downstream to the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models. You may add your own customer fields to these models by leveraging the below variable.
+```yml
+# dbt_project.yml
 
+...
+vars:
+  zendesk__ticket_passthrough_columns: ['account_custom_field_1', 'account_custom_field_2']
+```
 ### Tracking Ticket Field History Columns
 The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models. 
 
