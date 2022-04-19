@@ -50,7 +50,7 @@ vars:
     zendesk_schema: your_schema_name 
 ```
 ### Adding Passthrough Columns
-This package includes all source columns defined in the [Zendesk Source package](https://github.com/fivetran/dbt_zendesk_source) staging models to be present within the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models. However, you may also include your own custom columns to these two end models by leveraging our passthrough variable. 
+This [Zendesk Source package](https://github.com/fivetran/dbt_zendesk_source) allows for custom fields to be added to the `stg_zendesk__ticket` model. These custom fields will also persist downstream to the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models. You may add your own customer fields to these models by leveraging the below variable.
 ```yml
 # dbt_project.yml
 
