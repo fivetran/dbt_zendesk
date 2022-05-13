@@ -1,4 +1,7 @@
 packages:
+  ## WILL SWITCH TO THE BELOW
+  # - package: fivetran/zendesk_source
+  #   version: [">=0.7.0","<0.8.0"] 
   - package: fivetran/zendesk_source
     version: [">=0.6.0","<0.7.0"] 
   - package: calogica/dbt_date
