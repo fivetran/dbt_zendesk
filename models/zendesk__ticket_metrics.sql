@@ -122,7 +122,8 @@ select
     then true
     else false 
       end as is_two_touch_resolution,
-  case when lower(ticket_enriched.status) in ('solved','closed') and not ticket_comments.is_one_touch_resolution 
+  case when lower(ticket_enriched.status) in ('solved','closed') and not ticket_comments.is_one_touch_resolution
+      and not ticket_comments.is_two_touch_resolution 
     then true
     else false 
       end as is_multi_touch_resolution
