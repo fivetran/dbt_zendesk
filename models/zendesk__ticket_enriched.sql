@@ -93,7 +93,7 @@ with ticket as (
         requester_org.updated_at as requester_organization_updated_at,
         submitter.external_id as submitter_external_id,
         submitter.role as submitter_role,
-        case when submitter.role in ('Agent','Admin') 
+        case when submitter.role in ('agent','admin') 
             then true 
             else false
                 end as is_agent_submitted,
