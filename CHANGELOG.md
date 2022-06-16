@@ -1,6 +1,8 @@
 # dbt_zendesk v0.8.4
 ## Bug Fix
 - Quick fix on missing logic in the case statement for determining multi-touch resolution metrics.
+## Contributors
+- @tonytusharjr ([#7](https://github.com/fivetran/dbt_zendesk/pull/74)).
 # dbt_zendesk v0.8.3
 ## Features
 - This [Zendesk Source package](https://github.com/fivetran/dbt_zendesk_source) now allows for custom fields to be added to the `stg_zendesk__ticket` model. These custom fields will also persist downstream to the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models. You may now add your own customer fields to these models by leveraging the `zendesk__ticket_passthrough_columns` variable. ([#70](https://github.com/fivetran/dbt_zendesk/pull/70))
