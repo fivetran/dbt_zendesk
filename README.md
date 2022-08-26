@@ -1,126 +1,103 @@
-[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-# Zendesk Support
+<p align="center">
+    <a alt="License"
+        href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
+        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
+    <a alt="Fivetran-Release"
+        href="https://fivetran.com/docs/getting-started/core-concepts#releasephases">
+        <img src="https://img.shields.io/badge/Fivetran Release Phase-_Beta-orange.svg" /></a>
+    <a alt="dbt-core">
+        <img src="https://img.shields.io/badge/dbt_Core™_version->=1.0.0_,<2.0.0-orange.svg" /></a>
+    <a alt="Maintained?">
+        <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" /></a>
+    <a alt="PRs">
+        <img src="https://img.shields.io/badge/Contributions-welcome-blueviolet" /></a>
+</p>
 
-This package models Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk). It uses data in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
+# Zendesk Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
+# 📣 What does this dbt package do?
+- Produces modeled tables that leverage Zendesk data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation) and build off the output of our [zendesk source package](https://github.com/fivetran/dbt_zendesk_source).
+- Enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It performs the following actions:
+  - Creates an enriched ticket model with relevant resolution, response time, and other metrics
+  - Produces a historical ticket field history model to see velocity of your tickets over time
+  - Converts metrics to business hours for Zendesk Professional or Enterprise users
+  - Calculates SLA policy breaches for Zendesk Professional or Enterprise users
+- Generates a comprehensive data dictionary of your source and modeled Zendesk data through the [dbt docs site](https://fivetran.github.io/dbt_zendesk/).
 
-This package enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. 
-
-### Optional features (for Zendesk Professional or Enterprise users)
-- Package converts metrics to business hours
-- Package calculates SLA policy breaches
-
-## Models
-
-This package contains transformation models, designed to work simultaneously with our [Zendesk Support source package](https://github.com/fivetran/dbt_zendesk_source). A dependency on the source package is declared in this package's `packages.yml` file, so it will automatically download when you run `dbt deps`. The primary outputs of this package are described below. Intermediate models are used to create these output models.
+The following table provides a detailed list of final models materialized within this package by default. 
+> TIP: See more details about these models in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
 
 | **model**                    | **description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [zendesk__ticket_metrics](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_metrics.sql)       | Each record represents a Zendesk ticket, enriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
-| [zendesk__ticket_enriched](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_enriched.sql)      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
-| [zendesk__ticket_summary](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_summary.sql)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
-| [zendesk__ticket_backlog](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_backlog.sql)           | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable for all backlog tickets. Backlog tickets being defined as any ticket not in a 'closed', 'deleted', or 'solved' status.                                                             |
-| [zendesk__ticket_field_history](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__ticket_field_history.sql) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable and the corresponding updater fields defined in the `ticket_field_history_updater_columns` variable.                                                        |
-| [zendesk__sla_policies](https://github.com/fivetran/dbt_zendesk/blob/master/models/zendesk__sla_policies.sql)           | Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.                                                              |
+| [zendesk__ticket_metrics](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)       | Each record represents a Zendesk ticket, enriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
+| [zendesk__ticket_enriched](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched)      | Each record represents a Zendesk ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
+| [zendesk__ticket_summary](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_summary)           | A single record table containing Zendesk ticket and user summary metrics.                                                              |
+| [zendesk__ticket_backlog](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog)           | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable for all backlog tickets. Backlog tickets being defined as any ticket not in a 'closed', 'deleted', or 'solved' status.                                                             |
+| [zendesk__ticket_field_history](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_field_history) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable and the corresponding updater fields defined in the `ticket_field_history_updater_columns` variable.                                                        |
+| [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)           | Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.    
 
-## Installation Instructions
-Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
+# 🎯 How do I use the dbt package?
 
-Include in your `packages.yml` to stay up to date with the latest release!
+## Step 1: Prerequisites
+To use this dbt package, you must have the following:
 
+- At least one Fivetran zendesk connector syncing data into your destination.
+- A **BigQuery**, **Snowflake**, **Redshift**, or **PostgreSQL** destination.
+
+## Step 2: Install the package
+Include the following zendesk_source package version in your `packages.yml` file:
+> TIP: Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions or [read the dbt docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
 ```yaml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.8.0", "<0.9.0"]
-```
-## Package Maintenance
-The Fivetran team maintaining this package **only** maintains the latest version. We highly recommend you keep your `packages.yml` updated with the [dbt hub latest version](https://hub.getdbt.com/fivetran/zendesk/latest/). You may refer to the [CHANGELOG](/CHANGELOG.md) and release notes for more information on changes across versions.
+    version: [">=0.9.0", "<0.10.0"]
 
-## Configuration
-By default, this package looks for your Zendesk Support data in the `zendesk` schema of your [target database](https://docs.getdbt.com/docs/running-a-dbt-project/using-the-command-line-interface/configure-your-profile). If this is not where your Zendesk Support data is, add the following configuration to your `dbt_project.yml` file:
+```
+## Step 3: Define database and schema variables
+By default, this package runs using your destination and the `zendesk` schema. If this is not where your zendesk data is (for example, if your zendesk schema is named `zendesk_fivetran`), add the following configuration to your root `dbt_project.yml` file:
 
 ```yml
-# dbt_project.yml
-
-...
-config-version: 2
-
 vars:
-  zendesk_source:
-    zendesk_database: your_database_name
+    zendesk_database: your_destination_name
     zendesk_schema: your_schema_name 
 ```
-### Adding Passthrough Columns
-This [Zendesk Source package](https://github.com/fivetran/dbt_zendesk_source) allows for custom fields to be added to the `stg_zendesk__ticket` model. These custom fields will also persist downstream to the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models. You may add your own customer fields to these models by leveraging the below variable.
-```yml
-# dbt_project.yml
 
-...
+## Step 4: Disable models for non-existent sources
+This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
+```yml
 vars:
-  zendesk__ticket_passthrough_columns: ['account_custom_field_1', 'account_custom_field_2']
+    using_schedules:            False         #Disable if you are not using schedules
+    using_domain_names:         False         #Disable if you are not using domain names
+    using_user_tags:            False         #Disable if you are not using user tags
+    using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_organization_tags:    False         #Disable if you are not using organization tags
 ```
+
+## (Optional) Step 5: Additional configurations
+<details><summary>Expand for configurations</summary>
+
+### Adding passthrough columns
+This package includes all source columns defined in the staging models. However, the `stg_zendesk__ticket` model allows for additional columns to be added using a pass-through column variable. This is extremely useful if you'd like to include custom fields to the package.
+```yml
+vars:
+  zendesk__ticket_passthrough_columns: [account_custom_field_1, account_custom_field_2]
+```
+
 ### Tracking Ticket Field History Columns
-The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models. 
+The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your root `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models. 
 
 ```yml
-# dbt_project.yml
-
-...
-config-version: 2
-
 vars:
-  zendesk:
     ticket_field_history_columns: ['the','list','of','column','names']
     ticket_field_history_updater_columns: [
                                             'updater_user_id', 'updater_name', 'updater_role', 'updater_email', 'updater_external_id', 'updater_locale', 
                                             'updater_is_active', 'updater_user_tags', 'updater_last_login_at', 'updater_time_zone', 
                                             'updater_organization_id', 'updater_organization_domain_names' , 'updater_organization_organization_tags'
-                                          ]
+                                            ]
 ```
 *Note: This package only integrates the above ticket_field_history_updater_columns values. If you'd like to include additional updater fields, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 
-### Changing the Build Schema
-By default this package will build the Zendesk staging models within a schema titled (<target_schema> + `_zendesk_staging`), the Zendesk intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`), and the Zendesk final models within a schema titled (<target_schema> + `_zendesk`) in your target database. If this is not where you would like your modeled Zendesk data to be written to, add the following configuration to your `dbt_project.yml` file:
-
-```yml
-# dbt_project.yml
-
-...
-models:
-  zendesk:
-    +schema: my_new_schema_name # leave blank for just the target_schema
-    intermediate:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    sla_policy:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    ticket_history:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-  zendesk_source:
-    +schema: my_new_schema_name # leave blank for just the target_schema
-
-```
-
-### Disabling Models
-
-This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
-
-```yml
-# dbt_project.yml
-
-...
-config-version: 2
-
-vars:
-  using_schedules:            False         #Disable if you are not using schedules
-  using_domain_names:         False         #Disable if you are not using domain names
-  using_user_tags:            False         #Disable if you are not using user tags
-  using_ticket_form_history:  False         #Disable if you are not using ticket form history
-  using_organization_tags:    False         #Disable if you are not using organization tags
-```
-*Note: This package only integrates the above variables. If you'd like to disable other models, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
-
 ### Extending and Limiting the Ticket Field History
-
-This package will create a row in `zendesk__ticket_field_history` for each day that a ticket is open, starting at its creation date. A Zendesk ticket cannot be altered after being closed, so its field values will not change after this date. However, you may want to extend a ticket's history past its closure date for easier reporting and visualizing. To do so, add the following configuration to your `dbt_project.yml` file:
+This package will create a row in `zendesk__ticket_field_history` for each day that a ticket is open, starting at its creation date. A Zendesk ticket cannot be altered after being closed, so its field values will not change after this date. However, you may want to extend a ticket's history past its closure date for easier reporting and visualizing. To do so, add the following configuration to your root `dbt_project.yml` file:
 
 ```yml
 # dbt_project.yml
@@ -133,7 +110,7 @@ vars:
     ticket_field_history_extension_months: integer_number_of_months # default = 0 
 ```
 
-Conversely, you may want to only track the past X years of ticket field history. This could be for cost reasons, or because you have a BigQuery destination and have over 4,000 days (10-11 years) of data, leading to a `too many partitions` error in the package's incremental models. To limit the ticket field history to the most recent X years, add the following configuration to your `dbt_project.yml` file:
+Conversely, you may want to only track the past X years of ticket field history. This could be for cost reasons, or because you have a BigQuery destination and have over 4,000 days (10-11 years) of data, leading to a `too many partitions` error in the package's incremental models. To limit the ticket field history to the most recent X years, add the following configuration to your root `dbt_project.yml` file:
 
 ```yml
 # dbt_project.yml
@@ -145,27 +122,70 @@ vars:
   zendesk:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
 ```
-## Opinionated Modelling Decisions
-### Business Time Metrics Logic
-This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md).
-## Database support
-This package is compatible with BigQuery, Snowflake, Redshift and Postgres.
+
+### Changing the Build Schema
+By default this package will build the Zendesk staging models within a schema titled (<target_schema> + `_zendesk_staging`), the Zendesk intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`), and the Zendesk final models within a schema titled (<target_schema> + `_zendesk`) in your target database. If this is not where you would like your modeled Zendesk data to be written to, add the following configuration to your root `dbt_project.yml` file:
+
+```yml
+models:
+  zendesk:
+    +schema: my_new_schema_name # leave blank for just the target_schema
+    intermediate:
+      +schema: my_new_schema_name # leave blank for just the target_schema
+    sla_policy:
+      +schema: my_new_schema_name # leave blank for just the target_schema
+    ticket_history:
+      +schema: my_new_schema_name # leave blank for just the target_schema
+  zendesk_source:
+    +schema: my_new_schema_name # leave blank for just the target_schema
+```
+    
+### Change the source table references
+If an individual source table has a different name than the package expects, add the table name as it appears in your destination to the respective variable:
+
+> IMPORTANT: See this project's [`dbt_project.yml`](https://github.com/fivetran/dbt_zendesk_source/blob/main/dbt_project.yml) variable declarations to see the expected names.
+
+```yml
+vars:
+    zendesk_<default_source_table_name>_identifier: your_table_name 
+```
+</details>
+
+## (Optional) Step 6: Orchestrate your models with Fivetran Transformations for dbt Core™
+<details><summary>Expand for details</summary>
+<br>
+    
+Fivetran offers the ability for you to orchestrate your dbt project through [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt). Learn how to set up your project for orchestration through Fivetran in our [Transformations for dbt Core setup guides](https://fivetran.com/docs/transformations/dbt#setupguide).
+</details>
+
+# 🔍 Does this package have dependencies?
+This dbt package is dependent on the following dbt packages. Please be aware that these dependencies are installed by default within this package. For more information on the following packages, refer to the [dbt hub](https://hub.getdbt.com/) site.
+> IMPORTANT: If you have any of these dependent packages in your own `packages.yml` file, we highly recommend that you remove them from your root `packages.yml` to avoid package version conflicts.
+    
+```yml
+packages:
+    - package: fivetran/zendesk_source
+      version: [">=0.7.0", "<0.8.0"]
+
+    - package: fivetran/fivetran_utils
+      version: [">=0.3.0", "<0.4.0"]
+
+    - package: dbt-labs/dbt_utils
+      version: [">=0.8.0", "<0.9.0"]
+```
+# 🙌 How is this package maintained and can I contribute?
+## Package Maintenance
+The Fivetran team maintaining this package _only_ maintains the latest version of the package. We highly recommend you stay consistent with the [latest version](https://hub.getdbt.com/fivetran/zendesk/latest/) of the package and refer to the [CHANGELOG](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md) and release notes for more information on changes across versions.
 
 ## Contributions
+A small team of analytics engineers at Fivetran develops these dbt packages. However, the packages are made better by community contributions! 
 
-Additional contributions to this package are very welcome! Please create issues
-or open PRs against `main`. Check out 
-[this post](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657) 
-on the best workflow for contributing to a package.
+We highly encourage and welcome contributions to this package. Check out [this dbt Discourse article](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657) on the best workflow for contributing to a package!
 
-## Resources:
-- Find all of Fivetran's pre-built dbt packages in our [dbt hub](https://hub.getdbt.com/fivetran/)
-- Provide [feedback](https://www.surveymonkey.com/r/DQ7K7WW) on our existing dbt packages or what you'd like to see next
-- Learn more about Fivetran [here](https://fivetran.com/docs)
-- Learn how to orchestrate your models with [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt)
-- Check out [Fivetran's blog](https://fivetran.com/blog)
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](http://slack.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+## Opinionated Modelling Decisions
+This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md).
+
+# 🏪 Are there any resources available?
+- If you have questions or want to reach out for help, please refer to the [GitHub Issue](https://github.com/fivetran/dbt_zendesk/issues/new/choose) section to find the right avenue of support for you.
+- If you would like to provide feedback to the dbt package team at Fivetran or would like to request a new dbt package, fill out our [Feedback Form](https://www.surveymonkey.com/r/DQ7K7WW).
+- Have questions or want to just say hi? Book a time during our office hours [on Calendly](https://calendly.com/fivetran-solutions-team/fivetran-solutions-team-office-hours) or email us at solutions@fivetran.com.

@@ -1,3 +1,8 @@
+# dbt_zendesk v0.9.0
+## 🎉 Documentation and Feature Updates
+- Updated README documentation updates for easier navigation and setup of the dbt package
+- Added `zendesk_[source_table_name]_identifier` variables to allow for easier flexibility of the package to refer to source tables with different names.
+
 # dbt_zendesk v0.8.4
 ## Bug Fix
 - Quick fix on missing logic in the case statement for determining multi-touch resolution metrics.
