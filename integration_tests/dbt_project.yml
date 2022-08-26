@@ -1,11 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-<<<<<<< HEAD
-version: '0.8.4'
-=======
 version: '0.9.0'
->>>>>>> 5cc47b7a7f3ad5859d10c25d74aedc4f47a209fc
 
 profile: 'integration_tests'
 
@@ -128,3 +124,7 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
+
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['spark_utils', 'dbt_utils']
