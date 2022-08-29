@@ -37,14 +37,14 @@ with ticket_reply_times as (
     -- bringing this in the determine which schedule (Daylight Savings vs Standard time) to use
     min(first_reply_time.agent_responded_at) as agent_responded_at,
 
-    ({{ fivetran_utils.timestamp_diff(
+    ({{ dbt_utils.datediff(
             "cast(" ~ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
             "cast(ticket_schedules.schedule_created_at as " ~ dbt_utils.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
     greatest(0,
       (
-        {{ fivetran_utils.timestamp_diff(
+        {{ dbt_utils.datediff(
           'ticket_schedules.schedule_created_at',
           'least(ticket_schedules.schedule_invalidated_at, min(first_reply_time.agent_responded_at))',
           'second') }}/60

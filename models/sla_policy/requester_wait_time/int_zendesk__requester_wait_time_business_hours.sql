@@ -41,7 +41,7 @@ with requester_wait_time_filtered_statuses as (
     from requester_wait_time_filtered_statuses
     left join ticket_schedules
       on requester_wait_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
-    where {{ fivetran_utils.timestamp_diff(
+    where {{ dbt_utils.datediff(
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
               'second') }} > 0
@@ -50,12 +50,12 @@ with requester_wait_time_filtered_statuses as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-      ({{ fivetran_utils.timestamp_diff(
+      ({{ dbt_utils.datediff(
             "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
             "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt_utils.type_timestamp() ~ ")",
             'second') }} /60
           ) as valid_starting_at_in_minutes_from_week,
-      ({{ fivetran_utils.timestamp_diff(
+      ({{ dbt_utils.datediff(
               'ticket_status_crossed_with_schedule.valid_starting_at', 
               'ticket_status_crossed_with_schedule.valid_ending_at',
               'second') }} /60

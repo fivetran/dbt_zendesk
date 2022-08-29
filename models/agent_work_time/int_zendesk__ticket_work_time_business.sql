@@ -33,18 +33,18 @@ with ticket_historical_status as (
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
-      where {{ fivetran_utils.timestamp_diff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
+      where {{ dbt_utils.datediff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
 
 ), ticket_full_solved_time as (
 
     select 
       ticket_status_crossed_with_schedule.*,
-    ({{ fivetran_utils.timestamp_diff(
+    ({{ dbt_utils.datediff(
             "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
             "cast(ticket_status_crossed_with_schedule.status_schedule_start as " ~ dbt_utils.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
-      ({{ fivetran_utils.timestamp_diff(
+      ({{ dbt_utils.datediff(
               'ticket_status_crossed_with_schedule.status_schedule_start',
               'ticket_status_crossed_with_schedule.status_schedule_end',
               'second') }} /60
