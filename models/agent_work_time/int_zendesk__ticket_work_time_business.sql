@@ -38,7 +38,13 @@ with ticket_historical_status as (
 ), ticket_full_solved_time as (
 
     select 
-      ticket_status_crossed_with_schedule.*,
+      ticket_id,
+      ticket_status,
+      schedule_id,
+      status_schedule_start,
+      status_schedule_end,
+      status_valid_starting_at,
+      status_valid_ending_at,
     ({{ dbt_utils.datediff(
             "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
             "cast(ticket_status_crossed_with_schedule.status_schedule_start as " ~ dbt_utils.type_timestamp() ~ ")",
