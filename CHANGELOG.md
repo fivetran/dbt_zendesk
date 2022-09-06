@@ -1,4 +1,4 @@
-# dbt_zendesk_source v0.9.1
+# dbt_zendesk v0.9.0
 ## 🎉 Documentation and Feature Updates
 - Databricks compatibility 🧱 ([#74](https://github.com/fivetran/dbt_zendesk/pull/74))
 - README clarifications on installing the source and transform Zendesk packages together.
