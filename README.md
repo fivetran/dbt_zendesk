@@ -54,7 +54,7 @@ dispatch:
 ## Step 2: Install the package
 Include the following zendesk_source package version in your `packages.yml` file:
 > TIP: Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions or [read the dbt docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
-```yaml
+```yml
 packages:
   - package: fivetran/zendesk
     version: [">=0.9.0", "<0.10.0"]
@@ -134,7 +134,7 @@ vars:
 ```
 
 ### Changing the Build Schema
-By default this package will build the Zendesk staging models within a schema titled (<target_schema> + `_zendesk_staging`), the Zendesk intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`), and the Zendesk final models within a schema titled (<target_schema> + `_zendesk`) in your target database. If this is not where you would like your modeled Zendesk data to be written to, add the following configuration to your root `dbt_project.yml` file:
+By default this package will build the Zendesk staging models within a schema titled (<target_schema> + `_zendsk_source`), the Zendesk intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`), and the Zendesk final models within a schema titled (<target_schema> + `_zendesk`) in your target database. If this is not where you would like your modeled Zendesk data to be written to, add the following configuration to your root `dbt_project.yml` file:
 
 ```yml
 models:
@@ -182,6 +182,9 @@ packages:
 
     - package: dbt-labs/dbt_utils
       version: [">=0.8.0", "<0.9.0"]
+
+    - package: dbt-labs/spark_utils
+      version: [">=0.3.0", "<0.4.0"]
 ```
 # 🙌 How is this package maintained and can I contribute?
 ## Package Maintenance

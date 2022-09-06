@@ -49,7 +49,6 @@ with agent_work_time_filtered_statuses as (
 ), ticket_full_solved_time as (
 
     select 
-      {# ticket_status_crossed_with_schedule.*, --here #}
       ticket_id,
       sla_applied_at,
       target,    
