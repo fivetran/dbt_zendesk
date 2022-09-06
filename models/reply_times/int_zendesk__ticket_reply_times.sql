@@ -42,7 +42,7 @@ with ticket_public_comments as (
 
   select
     *,
-    ({{ fivetran_utils.timestamp_diff(
+    ({{ dbt_utils.datediff(
       'end_user_comment_created_at',
       'agent_responded_at',
       'second') }} / 60) as reply_time_calendar_minutes

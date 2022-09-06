@@ -9,11 +9,11 @@ with agent_work_time_filtered_statuses as (
 
   select 
     *,
-    {{ fivetran_utils.timestamp_diff(
+    {{ dbt_utils.datediff(
         'valid_starting_at',
         'valid_ending_at',
         'minute' )}} as calendar_minutes,
-    sum({{ fivetran_utils.timestamp_diff(
+    sum({{ dbt_utils.datediff(
             'valid_starting_at', 
             'valid_ending_at', 
             'minute') }} ) 

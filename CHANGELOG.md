@@ -1,3 +1,15 @@
+# dbt_zendesk v0.9.0
+🚨 This includes Breaking Changes! 🚨
+
+## 🎉 Documentation and Feature Updates
+- Databricks compatibility 🧱 ([#74](https://github.com/fivetran/dbt_zendesk/pull/74)).
+- Updated README documentation updates for easier navigation and setup of the dbt package ([#73](https://github.com/fivetran/dbt_zendesk/pull/73)).
+- Added `zendesk_[source_table_name]_identifier` variables to allow for easier flexibility of the package to refer to source tables with different names ([#73](https://github.com/fivetran/dbt_zendesk/pull/73)).
+- By default, this package now builds the Zendesk staging models within a schema titled (`<target_schema>` + `_zendesk_source`) in your target database. This was previously `<target_schema>` + `_zendesk_staging`, but we have changed it to maintain consistency with our other packges. See the README for instructions on how to configure the build schema differently. 
+
+## Under the Hood
+- Swapped references to the `fivetran_utils.timestamp_diff` macro with `dbt_utils.datediff` macro. The dbt-utils macro previously did not support Redshift.
+
 # dbt_zendesk v0.8.4
 ## Bug Fix
 - Quick fix on missing logic in the case statement for determining multi-touch resolution metrics.

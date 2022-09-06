@@ -1,46 +1,29 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.8.4'
+version: '0.9.0'
 
 profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests
-  zendesk:
-    group:                  "{{ ref('stg_zendesk__group') }}"
-    organization:           "{{ ref('stg_zendesk__organization') }}"
-    schedule:               "{{ ref('stg_zendesk__schedule') }}"
-    ticket:                 "{{ ref('stg_zendesk__ticket') }}"
-    ticket_comment:         "{{ ref('stg_zendesk__ticket_comment') }}"
-    ticket_field_history:   "{{ ref('stg_zendesk__ticket_field_history') }}"
-    ticket_schedule:        "{{ ref('stg_zendesk__ticket_schedule') }}"
-    ticket_tag:             "{{ ref('stg_zendesk__ticket_tag') }}"
-    user_tag:               "{{ ref('stg_zendesk__user_tag') }}"
-    brand:                  "{{ ref('stg_zendesk__brand') }}"
-    ticket_form_history:    "{{ ref('stg_zendesk__ticket_form_history') }}"
-    domain_name:            "{{ ref('stg_zendesk__domain_name') }}"
-    organization_tag:       "{{ ref('stg_zendesk__organization_tag') }}"
-    user:                   "{{ ref('stg_zendesk__user') }}"
-    daylight_time:          "{{ ref('stg_zendesk__daylight_time') }}"
-    time_zone:              "{{ ref('stg_zendesk__time_zone') }}"
   zendesk_source:
-    group:                  "{{ ref('group_data') }}"
-    organization:           "{{ ref('organization_data') }}"
-    schedule:               "{{ ref('schedule_data') }}"
-    ticket:                 "{{ ref('ticket_data') }}"
-    ticket_comment:         "{{ ref('ticket_comment_data') }}"
-    ticket_field_history:   "{{ ref('ticket_field_history_data') }}"
-    ticket_schedule:        "{{ ref('ticket_schedule_data') }}"
-    ticket_tag:             "{{ ref('ticket_tag_data') }}"
-    user_tag:               "{{ fivetran_utils.seed_data_helper('user_tag_data',['snowflake']) }}" 
-    brand:                  "{{ fivetran_utils.seed_data_helper('brand_data',['postgres']) }}"
-    ticket_form_history:    "{{ ref('ticket_form_history_data') }}"
-    domain_name:            "{{ ref('domain_name_data') }}"
-    organization_tag:       "{{ fivetran_utils.seed_data_helper('organization_tag_data',['snowflake']) }}" 
-    user:                   "{{ fivetran_utils.seed_data_helper('user_data',['snowflake']) }}" 
-    daylight_time:          "{{ ref('daylight_time_data') }}"
-    time_zone:              "{{ ref('time_zone_data') }}"
+    zendesk_organization_identifier:           "organization_data"
+    zendesk_schedule_identifier:               "schedule_data"
+    zendesk_ticket_identifier:                 "ticket_data"
+    zendesk_ticket_comment_identifier:         "ticket_comment_data"
+    zendesk_ticket_field_history_identifier:   "ticket_field_history_data"
+    zendesk_ticket_schedule_identifier:        "ticket_schedule_data"
+    zendesk_ticket_tag_identifier:             "ticket_tag_data"
+    zendesk_ticket_form_history_identifier:    "ticket_form_history_data"
+    zendesk_domain_name_identifier:            "domain_name_data"
+    zendesk_time_zone_identifier:              "time_zone_data"
+    zendesk_daylight_time_identifier:          "daylight_time_data"
+    group:                                     "{{ ref('group_data') }}" 
+    brand:                                     "{{ fivetran_utils.seed_data_helper('brand_data',['postgres']) }}" 
+    user_tag:                                  "{{ fivetran_utils.snowflake_seed_data('user_tag_data') }}" 
+    organization_tag:                          "{{ fivetran_utils.snowflake_seed_data('organization_tag_data') }}" 
+    user:                                      "{{ fivetran_utils.snowflake_seed_data('user_data') }}" 
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
@@ -141,3 +124,7 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
+
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['spark_utils', 'dbt_utils']

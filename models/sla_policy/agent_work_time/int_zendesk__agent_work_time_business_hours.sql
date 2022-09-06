@@ -41,7 +41,7 @@ with agent_work_time_filtered_statuses as (
     from agent_work_time_filtered_statuses
     left join ticket_schedules
       on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
-    where {{ fivetran_utils.timestamp_diff(
+    where {{ dbt_utils.datediff(
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
               'second') }} > 0
@@ -49,17 +49,26 @@ with agent_work_time_filtered_statuses as (
 ), ticket_full_solved_time as (
 
     select 
-      ticket_status_crossed_with_schedule.*,
-    ({{ fivetran_utils.timestamp_diff(
-            "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
-            "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt_utils.type_timestamp() ~ ")",
-            'second') }} /60
-          ) as valid_starting_at_in_minutes_from_week,
-      ({{ fivetran_utils.timestamp_diff(
-              'ticket_status_crossed_with_schedule.valid_starting_at', 
-              'ticket_status_crossed_with_schedule.valid_ending_at',
+      ticket_id,
+      sla_applied_at,
+      target,    
+      sla_policy_name,    
+      schedule_id,
+      valid_starting_at,
+      valid_ending_at,
+      status_valid_starting_at,
+      status_valid_ending_at,
+      ({{ dbt_utils.datediff(
+              "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
+              "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt_utils.type_timestamp() ~ ")",
               'second') }} /60
-            ) as raw_delta_in_minutes
+            ) as valid_starting_at_in_minutes_from_week,
+        ({{ dbt_utils.datediff(
+                'ticket_status_crossed_with_schedule.valid_starting_at', 
+                'ticket_status_crossed_with_schedule.valid_ending_at',
+                'second') }} /60
+              ) as raw_delta_in_minutes
+              
     from ticket_status_crossed_with_schedule
     {{ dbt_utils.group_by(n=10) }}
 
