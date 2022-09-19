@@ -21,7 +21,7 @@ with calendar as (
     select 
         *,
         -- closed tickets cannot be re-opened or updated, and solved tickets are automatically closed after a pre-defined number of days configured in your Zendesk settings
-        cast( {{ dbt_utils.date_trunc('day', "case when status != 'closed' then " ~ dbt_utils.current_timestamp() ~ " else updated_at end") }} as date) as open_until
+        cast( {{ dbt.date_trunc('day', "case when status != 'closed' then " ~ dbt_utils.current_timestamp() ~ " else updated_at end") }} as date) as open_until
     from {{ var('ticket') }}
     
 ), joined as (
@@ -33,7 +33,7 @@ with calendar as (
     inner join ticket
         on calendar.date_day >= cast(ticket.created_at as date)
         -- use this variable to extend the ticket's history past its close date (for reporting/data viz purposes :-)
-        and {{ dbt_utils.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} >= calendar.date_day
+        and {{ dbt.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} >= calendar.date_day
 
 ), surrogate_key as (
 

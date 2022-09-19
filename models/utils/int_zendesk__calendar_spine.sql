@@ -6,7 +6,7 @@ with spine as (
     {% set first_date_query %}
         select  min( created_at ) as min_date from {{ ref('stg_zendesk__ticket') }}
         -- by default take all the data 
-        where cast(created_at as date) >= {{ dbt_utils.dateadd('year', - var('ticket_field_history_timeframe_years', 50), dbt_utils.current_timestamp() ) }}
+        where cast(created_at as date) >= {{ dbt.dateadd('year', - var('ticket_field_history_timeframe_years', 50), dbt_utils.current_timestamp() ) }}
     {% endset %}
 
     {% set first_date = run_query(first_date_query).columns[0][0]|string %}
@@ -27,7 +27,7 @@ with spine as (
     dbt_utils.date_spine(
         datepart = "day", 
         start_date = first_date_adjust,
-        end_date = dbt_utils.dateadd("week", 1, "current_date")
+        end_date = dbt.dateadd("week", 1, "current_date")
     )   
 }}
 

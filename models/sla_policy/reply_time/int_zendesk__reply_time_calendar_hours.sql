@@ -11,7 +11,7 @@ with sla_policy_applied as (
     *,
     {{ fivetran_utils.timestamp_add(
         "minute",
-        "cast(target as " ~ dbt_utils.type_int() ~ " )",
+        "cast(target as " ~ dbt.type_int() ~ " )",
         "sla_applied_at" ) }} as sla_breach_at
   from sla_policy_applied
   where not in_business_hours

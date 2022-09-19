@@ -8,7 +8,7 @@ with ticket_metrics as (
 
 ), user_sum as (
     select
-        cast(1 as {{ dbt_utils.type_int() }}) as summary_helper,
+        cast(1 as {{ dbt.type_int() }}) as summary_helper,
         sum(case when is_active = true
             then 1
             else 0
@@ -35,7 +35,7 @@ with ticket_metrics as (
 
 ), ticket_metric_sum as (
     select 
-        cast(1 as {{ dbt_utils.type_int() }}) as summary_helper,
+        cast(1 as {{ dbt.type_int() }}) as summary_helper,
         sum(case when lower(status) = 'new'
             then 1
             else 0

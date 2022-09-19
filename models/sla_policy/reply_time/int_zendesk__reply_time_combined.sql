@@ -109,7 +109,7 @@ with reply_time_calendar_hours_sla as (
 ), reply_time_breach as (
   select 
     *,
-    {{ dbt_utils.datediff("sla_applied_at", "agent_reply_at", 'minute') }} as sla_elapsed_time
+    {{ dbt.datediff("sla_applied_at", "agent_reply_at", 'minute') }} as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla
 )
 

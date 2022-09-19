@@ -35,7 +35,7 @@ with field_history as (
 
     from {{ ref('int_zendesk__field_history_enriched') }}
     {% if is_incremental() %}
-    where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
+    where cast( {{ dbt.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
 
 ), event_order as (
@@ -63,7 +63,7 @@ with field_history as (
 
     select 
         ticket_id,
-        cast({{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) as date_day
+        cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
             {% set col_xf = col|lower %}

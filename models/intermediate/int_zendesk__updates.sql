@@ -25,7 +25,7 @@ with ticket_history as (
 
     select
         ticket_id,
-        cast('comment' as {{ dbt_utils.type_string() }}) as field_name,
+        cast('comment' as {{ dbt.type_string() }}) as field_name,
         body as value,
         is_public,
         user_id,
