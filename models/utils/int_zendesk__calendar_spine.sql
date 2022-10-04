@@ -1,4 +1,4 @@
--- depends_on: {{ ref('stg_zendesk__ticket') }}
+-- depends_on: {{ var('ticket') }}
 
 with spine as (
 
