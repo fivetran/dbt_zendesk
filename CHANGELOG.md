@@ -1,3 +1,8 @@
+# dbt_zendesk v0.9.1
+## Bugfix: 
+- finish
+## Contributors
+[@fbertsch](https://github.com/fbertsch) ([#71](https://github.com/fivetran/dbt_zendesk/issues/71))
 # dbt_zendesk v0.9.0
 🚨 This includes Breaking Changes! 🚨
 
