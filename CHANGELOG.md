@@ -1,6 +1,6 @@
 # dbt_zendesk v0.9.1
 ## Bugfix: dbt compile failing if prior to dbt run
-- If doing a _dbt_compile_ prior to _dbt_run_, it fails at `int_zendesk__calendar_spine` and `int_zendesk__field_history_pivot` because the staging models they reference are not built yet (`stg_zendesk__ticket` and `stg_zendesk__ticket_field_history`). This PR therefore updates those intermediate models to reference source tables instead (`ticket` and `ticket_field_history` respectively). ([#79](https://github.com/fivetran/dbt_zendesk/pull/79))
+- If doing a _dbt_compile_ prior to _dbt_run_, it fails at `int_zendesk__calendar_spine` and `int_zendesk__field_history_pivot` because the staging models they reference are not built yet (`stg_zendesk__ticket` and `stg_zendesk__ticket_field_history`). This release therefore updates those intermediate models to reference source tables instead (`ticket` and `ticket_field_history` respectively). ([#79](https://github.com/fivetran/dbt_zendesk/pull/79))
 
 # dbt_zendesk v0.9.0
 🚨 This includes Breaking Changes! 🚨
