@@ -15,7 +15,7 @@ with ticket_status_history as (
     valid_ending_at,
     {{ dbt.datediff(
         'valid_starting_at',
-        "coalesce(valid_ending_at, " ~ dbt_utils.current_timestamp() ~ ")",
+        "coalesce(valid_ending_at, " ~ dbt.current_timestamp_backcompat() ~ ")",
         'minute') }} as status_duration_calendar_minutes,
     value as status,
     -- MIGHT BE ABLE TO DELETE ROWS BELOW

@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized='incremental',
-        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type != 'spark' else ['date_day'],
+        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type not in ['spark', 'databricks'] else ['date_day'],
         unique_key='ticket_day_id',
         incremental_strategy='merge',
         file_format='delta'
@@ -115,7 +115,7 @@ fill_values as (
 ), surrogate_key as (
 
     select
-        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id,
+        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id']) }} as ticket_day_id,
         *
 
     from fix_null_values

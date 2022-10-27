@@ -17,7 +17,7 @@ with requester_wait_time_sla as (
     greatest(ticket_historical_status.valid_starting_at, requester_wait_time_sla.sla_applied_at) as valid_starting_at,
     coalesce(
       ticket_historical_status.valid_ending_at, 
-      {{ fivetran_utils.timestamp_add('day', 30, "" ~ dbt_utils.current_timestamp() ~ "") }} ) as valid_ending_at, --assumes current status continues into the future. This is necessary to predict future SLA breaches (not just past).
+      {{ fivetran_utils.timestamp_add('day', 30, "" ~ dbt.current_timestamp_backcompat() ~ "") }} ) as valid_ending_at, --assumes current status continues into the future. This is necessary to predict future SLA breaches (not just past).
     ticket_historical_status.status as ticket_status,
     requester_wait_time_sla.sla_applied_at,
     requester_wait_time_sla.target,
