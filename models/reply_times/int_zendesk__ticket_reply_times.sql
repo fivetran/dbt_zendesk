@@ -8,6 +8,7 @@ with ticket_public_comments as (
   
   select 
     ticket_id,
+    user_id,
     valid_starting_at as end_user_comment_created_at,
     ticket_created_date,
     commenter_role,
@@ -30,7 +31,8 @@ with ticket_public_comments as (
         and end_user_comments.commenter_role != 'external_comment' 
         and (end_user_comments.previous_internal_comment_count > 0)
           then end_user_comments.end_user_comment_created_at 
-        else agent_comments.valid_starting_at end) as agent_responded_at
+        else agent_comments.valid_starting_at end) as agent_responded_at,
+    min(agent_comments.user_id) as responding_agent_user_id
   from end_user_comments
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id
