@@ -548,3 +548,23 @@ models:
         description: The assignee name assigned to the ticket
       - name: priority
         description: The tickets priority ranking
+
+  - name: zendesk__reply_metrics
+    description: Each record represents an end user comment and the responding agent reply time  
+    columns:
+      - name: ticket_id
+        description: A ticket's unique identifier, it is automatically assigned when the ticket is created
+      - name: end_user_comment_created_at
+        description: The time the end user created the comment
+      - name: agent_responded_at
+        description: Time the agent reponded to that end user comment
+      - name: responding_agent_user_id
+        description: User ID of responding agent
+      - name: reply_time_calendar_minutes
+        description: Time from end user comment created to agent response in calendar minutes
+      - name: reply_time_business_minutes
+        description: Time from end user comment created to agent response in business minutes
+      - name: responding_agent_name
+        description: Name of responding agent
+      - name: responding_agent_email
+        description: Email of responding agent

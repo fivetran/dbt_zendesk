@@ -85,8 +85,7 @@ with commenter as (
 
 )
 
-  select {{ dbt_utils.surrogate_key(['ticket_id', 'end_user_comment_created_at']) }} as reply_id
-    , aggregated.*
+  select aggregated.*
     , commenter.name as responding_agent_name
     , commenter.email as responding_agent_email
   from aggregated
