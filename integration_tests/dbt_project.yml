@@ -6,7 +6,7 @@ version: '0.10.0'
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests
+  zendesk_schema: zendesk_integrations_tests
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
