@@ -1,7 +1,7 @@
 # dbt_zendesk v0.9.1
 
 ## Create zendesk__reply_metrics model
-- Creates a new end model called `zendesk__reply_metrics` to surface data at the reply granularity, which none of the existing end models do. It is a modified version of the `int_zendesk__ticket_first_reply_time_business` model.
+- Creates a new end model called `zendesk__reply_metrics` to surface data at the reply granularity, which none of the existing end models do. It is a modified version of the `int_zendesk__ticket_first_reply_time_business` model, with that logic centered in `int_zendesk__ticket_reply_time_metrics`.
 - There are minimal changes to existing models, just including the `user_id` field in the `int_zendesk__ticket_reply_times` model
 ## Contributiors
 - [zhoward101](https://github.com/zhoward101)

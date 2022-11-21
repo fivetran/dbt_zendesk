@@ -551,6 +551,13 @@ models:
 
   - name: zendesk__reply_metrics
     description: Each record represents an end user comment and the responding agent reply time  
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - ticket_id
+            - end_user_comment_created_at
+            - agent_responded_at
+            
     columns:
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created

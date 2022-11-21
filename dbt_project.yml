@@ -14,7 +14,7 @@ models:
       +schema: zendesk_intermediate
       +materialized: table
     reply_times:
-      # +materialized: ephemeral
+      +materialized: ephemeral
     resolution_times:
       +materialized: ephemeral
     sla_policy:
