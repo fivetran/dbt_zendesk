@@ -1,5 +1,9 @@
 name: 'zendesk'
+<<<<<<< HEAD
 version: '0.10.0'
+=======
+version: '0.9.1'
+>>>>>>> 7217033b4b868ac61c935378cab6008731a11d5a
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
