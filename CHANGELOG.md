@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # dbt_zendesk v0.10.0
 
 ## 🚨 Breaking Changes 🚨:
@@ -39,13 +38,12 @@
 - `dbt_utils.surrogate_key` has also been updated to `dbt_utils.generate_surrogate_key`. Since the method for creating surrogate keys differ, we suggest all users do a `full-refresh` for the most accurate data. For more information, please refer to dbt-utils [release notes](https://github.com/dbt-labs/dbt-utils/releases) for this update.
 - Dependencies on `fivetran/fivetran_utils` have been upgraded, previously `[">=0.3.0", "<0.4.0"]` now `[">=0.4.0", "<0.5.0"]`.
 
-=======
 # dbt_zendesk v0.9.1
 ## Bugfix: 
 - If doing a _dbt_compile_ prior to _dbt_run_, it fails at `int_zendesk__calendar_spine` because the staging model it references is not built yet. This PR changes the intermediate models to reference source tables instead of staging models. ([#79](https://github.com/fivetran/dbt_zendesk/pull/79))
 ## Contributors
 - [@fbertsch](https://github.com/fbertsch) ([#71](https://github.com/fivetran/dbt_zendesk/issues/71))
->>>>>>> 7217033b4b868ac61c935378cab6008731a11d5a
+
 # dbt_zendesk v0.9.0
 🚨 This includes Breaking Changes! 🚨
 
