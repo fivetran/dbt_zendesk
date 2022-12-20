@@ -58,7 +58,7 @@ with timezone as (
         coalesce(last_daylight_end_utc, cast('1970-01-01' as date)) as valid_from,
 
         -- daylight_start_utc is null for timezones that don't use DT
-        coalesce(daylight_start_utc, cast( {{ dbt_utils.dateadd('year', 1, dbt_utils.current_timestamp()) }} as date)) as valid_until
+        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date)) as valid_until
 
     from order_timezone_dt
 
@@ -102,7 +102,7 @@ with timezone as (
     select 
         *,
         -- might remove this but for testing this is nice to have
-        {{ dbt_utils.surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
+        {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
     
     from calculate_schedules
 )

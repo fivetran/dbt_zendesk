@@ -1,9 +1,9 @@
 {{
     config(
         materialized='incremental',
-        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type != 'spark' else ['date_day'],
+        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type not in ['spark', 'databricks'] else ['date_day'],
         unique_key='ticket_day_id',
-        incremental_strategy='merge',
+        incremental_strategy = 'merge' if target.type not in ('snowflake', 'postgres', 'redshift') else 'delete+insert',
         file_format='delta'
     )
 }}
@@ -21,7 +21,7 @@ with calendar as (
     select 
         *,
         -- closed tickets cannot be re-opened or updated, and solved tickets are automatically closed after a pre-defined number of days configured in your Zendesk settings
-        cast( {{ dbt_utils.date_trunc('day', "case when status != 'closed' then " ~ dbt_utils.current_timestamp() ~ " else updated_at end") }} as date) as open_until
+        cast( {{ dbt.date_trunc('day', "case when status != 'closed' then " ~ dbt.current_timestamp_backcompat() ~ " else updated_at end") }} as date) as open_until
     from {{ var('ticket') }}
     
 ), joined as (
@@ -33,13 +33,13 @@ with calendar as (
     inner join ticket
         on calendar.date_day >= cast(ticket.created_at as date)
         -- use this variable to extend the ticket's history past its close date (for reporting/data viz purposes :-)
-        and {{ dbt_utils.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} >= calendar.date_day
+        and {{ dbt.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} >= calendar.date_day
 
 ), surrogate_key as (
 
     select
         *,
-        {{ dbt_utils.surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
+        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
     from joined
 
 )

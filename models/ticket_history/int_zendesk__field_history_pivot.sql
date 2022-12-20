@@ -3,9 +3,9 @@
 {{ 
     config(
         materialized='incremental',
-        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type != 'spark' else ['date_day'],
+        partition_by = {'field': 'date_day', 'data_type': 'date'} if target.type not in ['spark', 'databricks'] else ['date_day'],
         unique_key='ticket_day_id',
-        incremental_strategy='merge',
+        incremental_strategy = 'merge' if target.type not in ('snowflake', 'postgres', 'redshift') else 'delete+insert',
         file_format='delta'
         ) 
 }}
@@ -35,7 +35,7 @@ with field_history as (
 
     from {{ ref('int_zendesk__field_history_enriched') }}
     {% if is_incremental() %}
-    where cast( {{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
+    where cast( {{ dbt.date_trunc('day', 'valid_starting_at') }} as date) >= (select max(date_day) from {{ this }})
     {% endif %}
 
 ), event_order as (
@@ -63,7 +63,7 @@ with field_history as (
 
     select 
         ticket_id,
-        cast({{ dbt_utils.date_trunc('day', 'valid_starting_at') }} as date) as date_day
+        cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
             {% set col_xf = col|lower %}
@@ -96,7 +96,7 @@ with field_history as (
 
     select 
         *,
-        {{ dbt_utils.surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
+        {{ dbt_utils.generate_surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
     from pivots
 
 )
