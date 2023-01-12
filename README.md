@@ -2,7 +2,6 @@
     <a alt="License"
         href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
-        <img src="https://img.shields.io/badge/Fivetran Release Phase-_Beta-orange.svg" /></a>
     <a alt="dbt-core">
         <img src="https://img.shields.io/badge/dbt_Core™_version->=1.3.0_,<2.0.0-orange.svg" /></a>
     <a alt="Maintained?">
