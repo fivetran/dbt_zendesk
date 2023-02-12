@@ -103,16 +103,16 @@ select
   coalesce(ticket_comments.count_agent_comments, 0) as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
-    then ({{ dbt_utils.datediff("ticket_enriched.requester_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
+    then ({{ dbt.datediff("ticket_enriched.requester_last_login_at", dbt.current_timestamp_backcompat(), 'second') }} /60)
       end as requester_last_login_age_minutes,
   case when ticket_enriched.is_assignee_active = true and ticket_enriched.assignee_last_login_at is not null
-    then ({{ dbt_utils.datediff("ticket_enriched.assignee_last_login_at", dbt_utils.current_timestamp(), 'second') }} /60)
+    then ({{ dbt.datediff("ticket_enriched.assignee_last_login_at", dbt.current_timestamp_backcompat(), 'second') }} /60)
       end as assignee_last_login_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
-    then ({{ dbt_utils.datediff("ticket_enriched.created_at", dbt_utils.current_timestamp(), 'second') }} /60)
+    then ({{ dbt.datediff("ticket_enriched.created_at", dbt.current_timestamp_backcompat(), 'second') }} /60)
       end as unsolved_ticket_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
-    then ({{ dbt_utils.datediff("ticket_enriched.updated_at", dbt_utils.current_timestamp(), 'second') }} /60)
+    then ({{ dbt.datediff("ticket_enriched.updated_at", dbt.current_timestamp_backcompat(), 'second') }} /60)
       end as unsolved_ticket_age_since_update_minutes,
   case when lower(ticket_enriched.status) in ('solved','closed') and ticket_comments.is_one_touch_resolution 
     then true

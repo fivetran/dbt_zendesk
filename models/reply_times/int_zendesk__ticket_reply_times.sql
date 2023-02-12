@@ -44,7 +44,7 @@ with ticket_public_comments as (
 
   select
     *,
-    ({{ dbt_utils.datediff(
+    ({{ dbt.datediff(
       'end_user_comment_created_at',
       'agent_responded_at',
       'second') }} / 60) as reply_time_calendar_minutes

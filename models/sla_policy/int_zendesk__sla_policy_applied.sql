@@ -31,7 +31,7 @@ with ticket_field_history as (
     ticket_field_history.field_name as metric,
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
     case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
-    cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt_utils.type_int() }} ) as target,
+    cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours
   from ticket_field_history
   join ticket
@@ -47,7 +47,7 @@ with ticket_field_history as (
   left join sla_policy_name
     on sla_policy_name.ticket_id = sla_policy_applied.ticket_id
       and sla_policy_applied.valid_starting_at >= sla_policy_name.valid_starting_at
-      and sla_policy_applied.valid_starting_at < coalesce(sla_policy_name.valid_ending_at, {{ dbt_utils.current_timestamp() }}) 
+      and sla_policy_applied.valid_starting_at < coalesce(sla_policy_name.valid_ending_at, {{ dbt.current_timestamp_backcompat() }}) 
   where sla_policy_applied.latest_sla = 1
 )
 

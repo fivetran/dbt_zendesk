@@ -33,7 +33,7 @@ with ticket_historical_status as (
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
-      where {{ dbt_utils.datediff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
+      where {{ dbt.datediff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
 
 ), ticket_full_solved_time as (
 
@@ -45,12 +45,12 @@ with ticket_historical_status as (
       status_schedule_end,
       status_valid_starting_at,
       status_valid_ending_at,
-    ({{ dbt_utils.datediff(
-            "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
-            "cast(ticket_status_crossed_with_schedule.status_schedule_start as " ~ dbt_utils.type_timestamp() ~ ")",
+    ({{ dbt.datediff(
+            "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
+            "cast(ticket_status_crossed_with_schedule.status_schedule_start as " ~ dbt.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
-      ({{ dbt_utils.datediff(
+      ({{ dbt.datediff(
               'ticket_status_crossed_with_schedule.status_schedule_start',
               'ticket_status_crossed_with_schedule.status_schedule_end',
               'second') }} /60
@@ -98,8 +98,8 @@ with ticket_historical_status as (
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-      and weekly_periods.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
-      and weekly_periods.status_valid_starting_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+      and weekly_periods.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+      and weekly_periods.status_valid_starting_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
   
 ), business_minutes as (
   

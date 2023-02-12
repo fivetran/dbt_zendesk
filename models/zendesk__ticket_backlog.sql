@@ -72,32 +72,32 @@ with ticket_field_history as (
 
     {% if 'ticket_form_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join ticket_forms
-        on ticket_forms.ticket_form_id = cast(ticket_field_history.ticket_form_id as {{ dbt_utils.type_bigint() }})
+        on ticket_forms.ticket_form_id = cast(ticket_field_history.ticket_form_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     {% if 'group_id' in var('ticket_field_history_columns') %}--Join not needed if field is not located in variable, otherwise it is included.
     left join group_names
-        on group_names.group_id = cast(ticket_field_history.group_id as {{ dbt_utils.type_bigint() }})
+        on group_names.group_id = cast(ticket_field_history.group_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     {% if 'assignee_id' in var('ticket_field_history_columns') or 'requester_id' in var('ticket_field_history_columns') or 'locale_id' in var('ticket_field_history_columns')%} --Join not needed if fields is not located in variable, otherwise it is included.
     left join users as assignee
-        on assignee.user_id = cast(ticket_field_history.assignee_id as {{ dbt_utils.type_bigint() }})
+        on assignee.user_id = cast(ticket_field_history.assignee_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     {% if 'requester_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join users as requester
-        on requester.user_id = cast(ticket_field_history.requester_id as {{ dbt_utils.type_bigint() }})
+        on requester.user_id = cast(ticket_field_history.requester_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     {% if 'brand_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join brands
-        on brands.brand_id = cast(ticket_field_history.brand_id as {{ dbt_utils.type_bigint() }})
+        on brands.brand_id = cast(ticket_field_history.brand_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     {% if 'organization_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join organizations
-        on organizations.organization_id = cast(ticket_field_history.organization_id as {{ dbt_utils.type_bigint() }})
+        on organizations.organization_id = cast(ticket_field_history.organization_id as {{ dbt.type_bigint() }})
     {% endif %}
 
     where ticket_field_history.status not in ('closed', 'solved', 'deleted')
