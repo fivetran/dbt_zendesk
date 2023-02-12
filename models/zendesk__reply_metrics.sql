@@ -1,8 +1,4 @@
-with commenter as (
-
-    select * from {{ ref('stg_zendesk__user') }}
-
-), ticket_reply_times as (
+with ticket_reply_times as (
   
     select * from {{ ref('int_zendesk__ticket_reply_times') }}
 
@@ -19,21 +15,22 @@ with commenter as (
   select ticket_reply_times.ticket_id
     , ticket_reply_times.end_user_comment_created_at
     , ticket_reply_times.agent_responded_at
-    , ticket_reply_times.responding_agent_user_id
+    , ticket_reply_times.responding_agent_name
+    , ticket_reply_times.responding_agent_email
     , ticket_reply_times.reply_time_calendar_minutes
     , ticket_schedules.schedule_created_at
     , ticket_schedules.schedule_invalidated_at
     , ticket_schedules.schedule_id
 
     , ({{ fivetran_utils.timestamp_diff(
-            "cast(" ~ dbt_date.week_start('ticket_reply_times.end_user_comment_created_at','UTC') ~ "as " ~ dbt_utils.type_timestamp() ~ ")", 
-            "cast(ticket_reply_times.end_user_comment_created_at as " ~ dbt_utils.type_timestamp() ~ ")",
+            "cast(" ~ dbt_date.week_start('ticket_reply_times.end_user_comment_created_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
+            "cast(ticket_reply_times.end_user_comment_created_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} / 60.0
           ) as start_time_in_minutes_from_week
   
   from ticket_reply_times
   join ticket_schedules on ticket_reply_times.ticket_id = ticket_schedules.ticket_id
-  group by 1,2,3,4,5,6,7,8
+  group by 1,2,3,4,5,6,7,8,9
 
 ), weeks as (
 
@@ -68,26 +65,22 @@ with commenter as (
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-    and weekly_periods.agent_responded_at >= cast(schedule.valid_from as {{ dbt_utils.type_timestamp() }})
-    and weekly_periods.agent_responded_at < cast(schedule.valid_until as {{ dbt_utils.type_timestamp() }}) 
+    and weekly_periods.agent_responded_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+    and weekly_periods.agent_responded_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
 
 ), aggregated as (
 
   select ticket_id
     , end_user_comment_created_at
     , agent_responded_at
-    , responding_agent_user_id
+    , responding_agent_name
+    , responding_agent_email
     , reply_time_calendar_minutes
     , sum(scheduled_minutes) as reply_time_business_minutes
 
   from intercepted_periods
-  group by 1,2,3,4,5
+  group by 1,2,3,4,5,6
 
 )
 
-  select aggregated.*
-    , commenter.name as responding_agent_name
-    , commenter.email as responding_agent_email
-  from aggregated
-  left join commenter
-    on commenter.user_id = aggregated.responding_agent_user_id
+  select * from aggregated

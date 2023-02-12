@@ -558,13 +558,11 @@ models:
         description: The time the end user created the comment
       - name: agent_responded_at
         description: Time the agent reponded to that end user comment
-      - name: responding_agent_user_id
-        description: User ID of responding agent
-      - name: reply_time_calendar_minutes
-        description: Time from end user comment created to agent response in calendar minutes
-      - name: reply_time_business_minutes
-        description: Time from end user comment created to agent response in business minutes
       - name: responding_agent_name
         description: Name of responding agent
       - name: responding_agent_email
         description: Email of responding agent
+      - name: reply_time_calendar_minutes
+        description: Time from end user comment created to agent response in calendar minutes
+      - name: reply_time_business_minutes
+        description: Time from end user comment created to agent response in business minutes
