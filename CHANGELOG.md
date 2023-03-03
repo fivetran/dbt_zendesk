@@ -1,3 +1,7 @@
+# dbt_zendesk v0.10.1
+## Bug Fixes
+- Modified the `int_zendesk__ticket_schedules` model to have the execute statement reference the source `schedule` table as opposed to the `stg_zendesk__schedule` model so the package may successfully compile before being run for the first time.
+
 # dbt_zendesk v0.10.0
 
 ## 🚨 Breaking Changes 🚨:
