@@ -29,11 +29,11 @@ with ticket as (
         with set_default_schedule_flag as (
           select 
             row_number() over (order by created_at) = 1 as is_default_schedule,
-            schedule_id
-          from {{ ref('stg_zendesk__schedule') }}
+            id
+          from {{ source('zendesk','schedule') }}
         )
         select 
-          schedule_id
+          id
         from set_default_schedule_flag
         where is_default_schedule
 
