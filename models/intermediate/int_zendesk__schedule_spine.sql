@@ -20,6 +20,11 @@ with timezone as (
     select *
     from {{ var('schedule') }}   
 
+), schedule_holiday as (
+
+    select *
+    from {{ var('schedule_holiday') }}   
+
 ), timezone_with_dt as (
 
     select 
@@ -89,11 +94,21 @@ with timezone as (
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
 
+        schedule_holiday.holiday_id,
+        schedule_holiday.holiday_name,
+        schedule_holiday.holiday_start_date_at,
+        schedule_holiday.holiday_end_date_at,
+
+        -- calculate holiday start date/ end dates utc version 
+        -- first need to convert the timestamp to integer before  - coalesce(split_timezones.offset_minutes, 0)
+
         -- we'll use these to determine which schedule version to associate tickets with
         split_timezones.valid_from,
-        split_timezones.valid_until
+        split_timezones.valid_until,
 
     from schedule
+    join schedule_holiday
+        on schedule.schedule_id = schedule_holiday.schedule_id
     left join split_timezones
         on split_timezones.time_zone = schedule.time_zone
 
