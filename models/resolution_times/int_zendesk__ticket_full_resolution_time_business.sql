@@ -93,9 +93,8 @@ with ticket_resolution_times_calendar as (
     and weekly_periods.last_solved_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
     and weekly_periods.last_solved_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
     -- only join the row from schedule with the relevant holiday if any exist. This is because a given schedule can have more than 1 holiday, and we want to limit fanouts. Therefore we want to only include any holidays that may overlap with ticket times.
-    and (ticket_week_start_time <= holiday_start_time_from_week_utc and ticket_week_start_time not >= holiday_end_time_from_week_utc)
-    or (ticket_week_start_time >= holiday_start_time_from_week_utc and ticket_week_start_time not <= holiday_end_time_from_week_utc)
-
+    and (ticket_week_start_time <= holiday_start_time_from_week_utc and ticket_week_end_time >= holiday_end_time_from_week_utc)
+    or (ticket_week_start_time >= holiday_start_time_from_week_utc and ticket_week_end_time <= holiday_end_time_from_week_utc)
 
 )
 
