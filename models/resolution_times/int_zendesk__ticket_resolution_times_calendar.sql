@@ -133,24 +133,28 @@ select
   count_reopens,
 
   case 
-    when schedule_holiday.holiday_start_date_at >= first_agent_assignment_date
-    and schedule_holiday.holiday_start_date_at <= last_solved_at
-    and schedule_holiday.holiday_end_date_at <= last_solved_at
-  then (first_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) as first_assignment_to_resolution_calendar_minutes,
+    when holiday_start_date_at >= first_agent_assignment_date
+    and holiday_start_date_at <= last_solved_at
+    and holiday_end_date_at <= last_solved_at
+  then (first_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) 
+  end as first_assignment_to_resolution_calendar_minutes,
   case 
-    when schedule_holiday.holiday_start_date_at >= last_agent_assignment_date
-    and schedule_holiday.holiday_start_date_at <= last_solved_at
-    and schedule_holiday.holiday_end_date_at <= last_solved_at
-  then (last_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) as last_assignment_to_resolution_calendar_minutes,
+    when holiday_start_date_at >= last_agent_assignment_date
+    and holiday_start_date_at <= last_solved_at
+    and holiday_end_date_at <= last_solved_at
+  then (last_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) 
+  end as last_assignment_to_resolution_calendar_minutes,
+  case
+    when holiday_start_date_at >= created_at
+    and holiday_start_date_at <= first_solved_at
+    and holiday_end_date_at <= first_solved_at
+  then (first_resolution_calendar_minutes - holiday_duration_minutes) 
+  end as first_resolution_calendar_minutes,
   case 
-    when schedule_holiday.holiday_start_date_at >= created_at
-    and schedule_holiday.holiday_start_date_at <= first_solved_at
-    and schedule_holiday.holiday_end_date_at <= first_solved_at
-  then (first_resolution_calendar_minutes - holiday_duration_minutes) as first_resolution_calendar_minutes,
-  case 
-    when schedule_holiday.holiday_start_date_at >= created_at
-    and schedule_holiday.holiday_start_date_at <= last_solved_at
-    and schedule_holiday.holiday_end_date_at <= last_solved_at
-  then (final_resolution_calendar_minutes - holiday_duration_minutes) as final_resolution_calendar_minutes
+    when holiday_start_date_at >= created_at
+    and holiday_start_date_at <= last_solved_at
+    and holiday_end_date_at <= last_solved_at
+  then (final_resolution_calendar_minutes - holiday_duration_minutes) 
+  end as final_resolution_calendar_minutes
 
 from resolution_times

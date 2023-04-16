@@ -89,7 +89,7 @@ with ticket_resolution_times_calendar as (
     
 )
 
-  select 
+  select
     ticket_id,
     sum(scheduled_minutes) as first_resolution_business_minutes
   from intercepted_periods

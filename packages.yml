@@ -5,3 +5,4 @@ packages:
   - package: calogica/dbt_date
     version: [">=0.7.0", "<0.8.0"]
   - local: ../dbt_zendesk_source
+
