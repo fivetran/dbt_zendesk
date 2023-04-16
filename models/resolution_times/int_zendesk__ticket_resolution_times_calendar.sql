@@ -131,30 +131,63 @@ select
   ticket_unassigned_duration_calendar_minutes,
   total_resolutions,
   count_reopens,
-
   case 
-    when holiday_start_date_at >= first_agent_assignment_date
-    and holiday_start_date_at <= last_solved_at
-    and holiday_end_date_at <= last_solved_at
-  then (first_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) 
-  end as first_assignment_to_resolution_calendar_minutes,
+    when holiday_id is null 
+    then first_assignment_to_resolution_calendar_minutes
+    else
+      (case -- calculate time between first agent assignment date and last solved time
+        when holiday_start_date_at <= first_agent_assignment_date -- for when first agent gets assigned during a holiday period
+          and holiday_end_date_at >= first_agent_assignment_date
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+          then {{ dbt.datediff('holiday_end_date_at','last_solved_at', 'minute') }} 
+        when holiday_start_date_at >= first_agent_assignment_date
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+          then (first_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) end)
+      end as first_assignment_to_resolution_calendar_minutes,
   case 
-    when holiday_start_date_at >= last_agent_assignment_date
-    and holiday_start_date_at <= last_solved_at
-    and holiday_end_date_at <= last_solved_at
-  then (last_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) 
-  end as last_assignment_to_resolution_calendar_minutes,
-  case
-    when holiday_start_date_at >= created_at
-    and holiday_start_date_at <= first_solved_at
-    and holiday_end_date_at <= first_solved_at
-  then (first_resolution_calendar_minutes - holiday_duration_minutes) 
+    when holiday_id is null 
+    then last_assignment_to_resolution_calendar_minutes
+    else
+      (case -- calculate time between last agent assignment date and last solved time
+        when holiday_start_date_at <= last_agent_assignment_date -- for when last agent gets assigned during a holiday period
+          and holiday_end_date_at >= last_agent_assignment_date
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+          then {{ dbt.datediff('holiday_end_date_at','last_solved_at', 'minute') }} 
+        when holiday_start_date_at >= last_agent_assignment_date
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+          then (last_assignment_to_resolution_calendar_minutes - holiday_duration_minutes) end)
+    end as last_assignment_to_resolution_calendar_minutes,
+  case 
+    when holiday_id is null 
+    then first_resolution_calendar_minutes
+    else
+      (case -- calculate time in between ticket creation time and first solved time
+        when holiday_start_date_at <= created_at -- for when ticket was created in between a holiday period
+          and holiday_end_date_at >= created_at
+          and holiday_end_date_at <= first_solved_at
+          then {{ dbt.datediff('holiday_end_date_at','first_solved_at', 'minute') }} 
+        when holiday_start_date_at >= created_at -- for when there was a holiday period in between when ticket was created and first solved
+          and holiday_start_date_at <= first_solved_at
+          and holiday_end_date_at <= first_solved_at
+          then (first_resolution_calendar_minutes - holiday_duration_minutes) end)
   end as first_resolution_calendar_minutes,
   case 
-    when holiday_start_date_at >= created_at
-    and holiday_start_date_at <= last_solved_at
-    and holiday_end_date_at <= last_solved_at
-  then (final_resolution_calendar_minutes - holiday_duration_minutes) 
+    when holiday_id is null 
+    then final_resolution_calendar_minutes
+    else
+      (case -- calculate time in between  time and final resolution time
+        when holiday_start_date_at <= created_at -- for when ticket is created between a holiday period
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+          then {{ dbt.datediff('holiday_end_date_at','last_solved_at', 'minute') }} 
+        when holiday_start_date_at >= created_at
+          and holiday_start_date_at <= last_solved_at
+          and holiday_end_date_at <= last_solved_at
+        then (final_resolution_calendar_minutes - holiday_duration_minutes) end)
   end as final_resolution_calendar_minutes
 
 from resolution_times

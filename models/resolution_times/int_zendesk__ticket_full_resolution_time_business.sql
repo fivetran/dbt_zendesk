@@ -77,15 +77,26 @@ with ticket_resolution_times_calendar as (
     ticket_week_end_time,
     schedule.start_time_utc as schedule_start_time,
     schedule.end_time_utc as schedule_end_time,
-    least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
+    schedule.holiday_start_date_at,
+    schedule.holiday_end_date_at,
+    schedule.holiday_start_time_from_week,
+    schedule.holiday_end_time_from_week,
+    schedule.holiday_start_time_from_week_utc as holiday_start_time,
+    schedule.holiday_end_time_from_week_utc as holiday_end_time,
+
+    least(schedule.holiday_start_time_from_week_utc,ticket_week_end_time, schedule.end_time_utc) - greatest(schedule.holiday_end_time_from_week_utc, ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
-    and ticket_week_end_time >= schedule.start_time_utc
+    and weekly_periods.ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
     and weekly_periods.last_solved_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
     and weekly_periods.last_solved_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
-    
+    -- only join the row from schedule with the relevant holiday if any exist. This is because a given schedule can have more than 1 holiday, and we want to limit fanouts. Therefore we want to only include any holidays that may overlap with ticket times.
+    and (ticket_week_start_time <= holiday_start_time_from_week_utc and ticket_week_start_time not >= holiday_end_time_from_week_utc)
+    or (ticket_week_start_time >= holiday_start_time_from_week_utc and ticket_week_start_time not <= holiday_end_time_from_week_utc)
+
+
 )
 
   select 
