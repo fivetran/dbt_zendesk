@@ -1,3 +1,0 @@
-id,schedule_id,_fivetran_deleted,_fivetran_synced,end_date,name,start_date
-11630286047764,11630270684308,FALSE,2023-01-19 21:53:06.281 UTC,2022-12-27,Test Holiday,2022-12-26
-11630270740884,11630270684308,FALSE,2023-01-19 21:53:06.281 UTC,2022-12-29,Test Holiday 2,2022-12-29
