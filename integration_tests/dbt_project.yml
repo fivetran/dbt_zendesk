@@ -50,6 +50,10 @@ seeds:
         end_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         start_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
+    schedule_holiday_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_comment_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
