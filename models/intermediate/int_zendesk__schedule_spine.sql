@@ -143,7 +143,7 @@ with timezone as (
         valid_until,
 
         -- might remove this but for testing this is nice to have
-        {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
+        {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unique_schedule_spine_key
     
     from calculate_schedules
 )
