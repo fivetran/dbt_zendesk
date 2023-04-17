@@ -1,3 +1,5 @@
+{{ config(enabled=var('using_schedules', True)) }}
+
 with historical_solved_status as (
 
     select *
