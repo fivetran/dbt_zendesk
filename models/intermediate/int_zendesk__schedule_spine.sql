@@ -112,7 +112,7 @@ with timezone as (
 
         -- we'll use these to determine which schedule version to associate tickets with
         split_timezones.valid_from,
-        split_timezones.valid_until,
+        split_timezones.valid_until
 
     from schedule
     join schedule_holiday
@@ -140,7 +140,7 @@ with timezone as (
         holiday_start_time_from_week - coalesce(offset_minutes, 0) as holiday_start_time_from_week_utc,
         holiday_end_time_from_week - coalesce(offset_minutes, 0) as holiday_end_time_from_week_utc,
         valid_from,
-        valid_until,
+        valid_until
 
         -- might remove this but for testing this is nice to have
         {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
