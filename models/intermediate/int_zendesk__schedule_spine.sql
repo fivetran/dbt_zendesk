@@ -98,14 +98,14 @@ with timezone as (
         schedule_holiday.holiday_start_date_at,
         schedule_holiday.holiday_end_date_at,
         ( {{ dbt.datediff(
-            "cast(" ~ dbt_date.week_start('schedule_holiday.holiday_start_date_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
-            "cast(schedule_holiday.holiday_start_date_at as " ~ dbt.type_timestamp() ~ ")",
+            dbt_date.week_start('schedule_holiday.holiday_start_date_at'), 
+            'schedule_holiday.holiday_start_date_at',
             'second') }} /60
         ) as holiday_start_time_from_week, -- number of minutes since the start of the week, where Sunday is the first day of the week
 
         ( {{ dbt.datediff(
-            "cast(" ~ dbt_date.week_start('schedule_holiday.holiday_end_date_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
-            "cast(schedule_holiday.holiday_end_date_at as " ~ dbt.type_timestamp() ~ ")",
+            dbt_date.week_start('schedule_holiday.holiday_end_date_at'), 
+            'schedule_holiday.holiday_end_date_at',
             'second') }} /60
         ) as holiday_end_time_from_week,
         split_timezones.offset_minutes,
@@ -140,7 +140,7 @@ with timezone as (
         holiday_start_time_from_week - coalesce(offset_minutes, 0) as holiday_start_time_from_week_utc,
         holiday_end_time_from_week - coalesce(offset_minutes, 0) as holiday_end_time_from_week_utc,
         valid_from,
-        valid_until
+        valid_until,
 
         -- might remove this but for testing this is nice to have
         {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
