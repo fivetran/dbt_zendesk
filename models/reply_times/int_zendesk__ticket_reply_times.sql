@@ -13,7 +13,7 @@ with ticket_public_comments as (
     commenter_role,
     previous_internal_comment_count,
     previous_commenter_role = 'first_comment' as is_first_comment
-  from ticket_public_comments 
+  from ticket_public_comments
   where (commenter_role = 'external_comment'
     and ticket_public_comments.previous_commenter_role != 'external_comment') -- we only care about net new end user comments
     or previous_commenter_role = 'first_comment' -- We also want to take into consideration internal first comment replies
