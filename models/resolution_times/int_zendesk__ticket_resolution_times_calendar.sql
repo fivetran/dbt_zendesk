@@ -33,7 +33,7 @@ with historical_solved_status as (
 
 )
 
-select
+  select
 
     ticket.ticket_id,
     ticket.created_at,
