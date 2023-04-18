@@ -2,9 +2,9 @@
 # dbt_zendesk v0.11.0
 ## Bug Fixes
 
-- With the update in Dec 2022 to sync the [`schedule_holiday` table](https://fivetran.com/docs/applications/zendesk/changelog#december2022), we have adjusted the following resolution time - related fields to account for holidays overlapping with ticket timelines ([#94](https://github.com/fivetran/dbt_zendesk/pull/94))
+- With the update in Dec 2022 to sync the [`schedule_holiday` table](https://fivetran.com/docs/applications/zendesk/changelog#december2022), we have adjusted the following business time - related fields to account for holidays overlapping with ticket timelines ([#94](https://github.com/fivetran/dbt_zendesk/pull/94))
 
-- `first_resolution_business_minutes`, `full_resolution_business_minutes`, `first_assignment_to_resolution_calendar_minutes`, `last_assignment_to_resolution_calendar_minutes`,` first_resolution_calendar_minutes`, and `final_resolution_calendar_minutes` fields
+- This includes the `first_resolution_business_minutes`, `full_resolution_business_minutes`, `first_reply_time_business_minutes` fields. 
 
 # dbt_zendesk v0.10.1
 ## Bug Fixes
