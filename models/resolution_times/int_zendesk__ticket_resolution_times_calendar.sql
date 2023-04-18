@@ -23,7 +23,7 @@ with historical_solved_status as (
   
   select
   
-    historical_solved_status.ticket_id,
+    ticket_id,
     min(valid_starting_at) as first_solved_at,
     max(valid_starting_at) as last_solved_at,
     count(status) as solved_count 
@@ -31,9 +31,9 @@ with historical_solved_status as (
   from historical_solved_status
   group by 1
 
-), resolution_times as (
+)
 
-  select
+select
 
     ticket.ticket_id,
     ticket.created_at,
@@ -80,28 +80,3 @@ with historical_solved_status as (
 
   left join solved_times
     using(ticket_id)
-
-)
-
-select
-
-  ticket_id,
-  created_at,
-  first_solved_at,
-  last_solved_at,
-  unique_assignee_count,
-  assignee_stations_count,
-  group_stations_count,
-  first_assignee_id,
-  last_assignee_id,
-  first_agent_assignment_date,
-  last_agent_assignment_date,
-  ticket_unassigned_duration_calendar_minutes,
-  total_resolutions,
-  count_reopens,
-  first_assignment_to_resolution_calendar_minutes,
-  last_assignment_to_resolution_calendar_minutes,
-  first_resolution_calendar_minutes,
-  final_resolution_calendar_minutes
-
-from resolution_times
