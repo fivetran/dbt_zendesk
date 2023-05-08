@@ -20,6 +20,11 @@ with timezone as (
     select *
     from {{ var('schedule') }}   
 
+), schedule_holiday as (
+
+    select *
+    from {{ var('schedule_holiday') }}   
+
 ), timezone_with_dt as (
 
     select 
@@ -88,21 +93,57 @@ with timezone as (
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
+        schedule_holiday.holiday_id,
+        schedule_holiday.holiday_name,
+        schedule_holiday.holiday_start_date_at,
+        schedule_holiday.holiday_end_date_at,
+        ( {{ dbt.datediff(
+            dbt_date.week_start('schedule_holiday.holiday_start_date_at'), 
+            'schedule_holiday.holiday_start_date_at',
+            'second') }} /60
+        ) as holiday_start_time_from_week, -- number of minutes since the start of the week, where Sunday is the first day of the week
+
+        ( {{ dbt.datediff(
+            dbt_date.week_start('schedule_holiday.holiday_end_date_at'), 
+            'schedule_holiday.holiday_end_date_at',
+            'second') }} /60
+        ) as holiday_end_time_from_week,
+        split_timezones.offset_minutes,
 
         -- we'll use these to determine which schedule version to associate tickets with
         split_timezones.valid_from,
         split_timezones.valid_until
 
     from schedule
+    join schedule_holiday
+        on schedule.schedule_id = schedule_holiday.schedule_id
     left join split_timezones
         on split_timezones.time_zone = schedule.time_zone
 
 ), final as (
 
-    select 
-        *,
+    select
+        schedule_id,
+        time_zone,
+        start_time,
+        end_time,
+        created_at,
+        schedule_name,
+        start_time_utc,
+        end_time_utc,
+        holiday_id,
+        holiday_name,
+        holiday_start_date_at,
+        holiday_end_date_at,
+        holiday_start_time_from_week,
+        holiday_end_time_from_week,
+        holiday_start_time_from_week - coalesce(offset_minutes, 0) as holiday_start_time_from_week_utc,
+        holiday_end_time_from_week - coalesce(offset_minutes, 0) as holiday_end_time_from_week_utc,
+        valid_from,
+        valid_until,
+
         -- might remove this but for testing this is nice to have
-        {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unqiue_schedule_spine_key
+        {{ dbt_utils.generate_surrogate_key(['schedule_id', 'time_zone','start_time', 'valid_from']) }} as unique_schedule_spine_key
     
     from calculate_schedules
 )

@@ -1,9 +1,14 @@
-# dbt_zendesk v0.UPDATE.UPDATE
+# dbt_zendesk v0.11.0
+## Bug Fixes
 
- ## Under the Hood:
+- With the update in Dec 2022 to sync the [`schedule_holiday` table](https://fivetran.com/docs/applications/zendesk/changelog#december2022), we have adjusted the following business time - related fields to account for holidays overlapping with ticket timelines ([#94](https://github.com/fivetran/dbt_zendesk/pull/94))
+- This includes the `first_resolution_business_minutes`, `full_resolution_business_minutes`, `first_reply_time_business_minutes` fields. 
 
-- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job.
-- Updated the pull request [templates](/.github).
+## Under the Hood:
+
+- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #95](https://github.com/fivetran/dbt_zendesk/pull/95))
+- Updated the pull request [templates](/.github). ([PR #95](https://github.com/fivetran/dbt_zendesk/pull/95))
+
 # dbt_zendesk v0.10.1
 ## Bug Fixes
 - Modified the `int_zendesk__ticket_schedules` model to have the execute statement reference the source `schedule` table as opposed to the `stg_zendesk__schedule` model so the package may successfully compile before being run for the first time. ([#90](https://github.com/fivetran/dbt_zendesk/pull/90))

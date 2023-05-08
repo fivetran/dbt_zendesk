@@ -35,9 +35,9 @@ with ticket_resolution_times_calendar as (
       (
         {{ dbt.datediff(
           'ticket_schedules.schedule_created_at',
-          'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))',
+          'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))', 
           'second') }}/60
-        )) as raw_delta_in_minutes
+        )) as raw_delta_in_minutes -- pick earliest out of when schedule ended or ticket was solved
       
   from ticket_resolution_times_calendar
   join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
@@ -72,13 +72,23 @@ with ticket_resolution_times_calendar as (
 ), intercepted_periods as (
 
   select ticket_id,
-         week_number,
-         weekly_periods.schedule_id,
-         ticket_week_start_time,
-         ticket_week_end_time,
-         schedule.start_time_utc as schedule_start_time,
-         schedule.end_time_utc as schedule_end_time,
-         least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
+        week_number,
+        weekly_periods.schedule_id,
+        ticket_week_start_time,
+        ticket_week_end_time,
+        schedule.start_time_utc as schedule_start_time,
+        schedule.end_time_utc as schedule_end_time,
+        schedule.holiday_start_date_at,
+        schedule.holiday_end_date_at,
+        schedule.holiday_start_time_from_week,
+        schedule.holiday_end_time_from_week,
+        schedule.holiday_start_time_from_week_utc as holiday_start_time,
+        schedule.holiday_end_time_from_week_utc as holiday_end_time,
+
+        least(schedule.holiday_start_time_from_week_utc,ticket_week_end_time, schedule.end_time_utc) -- earliest end time
+        - greatest(schedule.holiday_end_time_from_week_utc, ticket_week_start_time, schedule.start_time_utc) -- the latest start time
+        as scheduled_minutes
+
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
@@ -86,10 +96,16 @@ with ticket_resolution_times_calendar as (
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
     and weekly_periods.first_solved_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
     and weekly_periods.first_solved_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
-    
+    -- only join the row from schedule with the relevant holiday if any exist. This is because a given schedule can have more than 1 holiday, and we want to limit fanouts. Therefore we want to only include any holidays that may overlap with ticket times.
+    and (
+      (ticket_week_start_time <= holiday_start_time_from_week_utc and ticket_week_end_time >= holiday_start_time_from_week_utc)
+      or (ticket_week_start_time >= holiday_start_time_from_week_utc and ticket_week_end_time <= holiday_start_time_from_week_utc)
+      or (ticket_week_start_time >= holiday_start_time_from_week_utc and ticket_week_end_time <= holiday_end_time_from_week_utc)
+    )
+
 )
 
-  select 
+  select
     ticket_id,
     sum(scheduled_minutes) as first_resolution_business_minutes
   from intercepted_periods

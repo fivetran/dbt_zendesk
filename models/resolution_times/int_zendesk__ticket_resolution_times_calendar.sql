@@ -80,4 +80,3 @@ with historical_solved_status as (
 
   left join solved_times
     using(ticket_id)
-
