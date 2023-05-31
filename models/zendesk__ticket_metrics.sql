@@ -155,7 +155,9 @@ left join ticket_comments
     ticket_work_time_business.agent_wait_time_in_business_minutes,
     ticket_work_time_business.requester_wait_time_in_business_minutes,
     ticket_work_time_business.agent_work_time_in_business_minutes,
-    ticket_work_time_business.on_hold_time_in_business_minutes
+    ticket_work_time_business.on_hold_time_in_business_minutes,
+    ticket_work_time_business.new_status_duration_in_business_minutes,
+    ticket_work_time_business.open_status_duration_in_business_minutes
 
   from ticket_enriched
 
@@ -190,7 +192,9 @@ select
   business_hour_metrics.agent_wait_time_in_business_minutes,
   business_hour_metrics.requester_wait_time_in_business_minutes,
   business_hour_metrics.agent_work_time_in_business_minutes,
-  business_hour_metrics.on_hold_time_in_business_minutes
+  business_hour_metrics.on_hold_time_in_business_minutes,
+  business_hour_metrics.new_status_duration_in_business_minutes,
+  business_hour_metrics.open_status_duration_in_business_minutes
 
 from calendar_hour_metrics
 
