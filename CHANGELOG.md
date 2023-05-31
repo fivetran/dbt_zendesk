@@ -1,3 +1,10 @@
+# dbt_zendesk v0.10.2
+
+## Features
+
+- [PR #96](https://github.com/fivetran/dbt_zendesk/pull/96) Added `open_status_duration_in_business_minutes` and `new_status_duration_in_business_minutes` columns to the `int_zendesk__ticket_work_time_business` and `zendesk__ticket_metrics` models. These are counterparts to the already existing `open_status_duration_in_calendar_minutes` and `new_status_duration_in_calendar_minutes` columns. 
+
+
 # dbt_zendesk v0.10.1
 ## Bug Fixes
 - Modified the `int_zendesk__ticket_schedules` model to have the execute statement reference the source `schedule` table as opposed to the `stg_zendesk__schedule` model so the package may successfully compile before being run for the first time. ([#90](https://github.com/fivetran/dbt_zendesk/pull/90))
