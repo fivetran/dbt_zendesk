@@ -271,7 +271,7 @@ with timezone as (
         end_time_utc,
         holiday_name_check,
         is_holiday_week,
-        max(is_schedule_gap) over (partition by schedule_id, valid_until order by valid_until) as is_gap_period,
+        {{ fivetran_utils.max_bool("is_schedule_gap") }} over (partition by schedule_id, valid_until order by valid_until) as is_gap_period,
         lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
     from gap_adjustments
 
