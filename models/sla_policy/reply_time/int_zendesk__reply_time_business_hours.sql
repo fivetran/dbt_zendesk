@@ -23,7 +23,7 @@ with ticket_schedules as (
   select 
     schedule_id,
     sum(end_time - start_time) as total_schedule_weekly_business_minutes
-  -- referrinng to stg_zendesk__schedule instead of int_zendesk__schedule_spine just to calculcate total minutes
+  -- referring to stg_zendesk__schedule instead of int_zendesk__schedule_spine just to calculate total minutes
   from {{ ref('stg_zendesk__schedule') }}
   group by 1
 
@@ -109,11 +109,15 @@ with ticket_schedules as (
   select
     *,
     schedule_end_time + remaining_minutes as breached_at_minutes,
-    {{ dbt.date_trunc('week', 'sla_applied_at') }} as starting_point,
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt.type_int() ~ " )",
-        "" ~ dbt.date_trunc('week', 'sla_applied_at') ~ "" ) }} as sla_breach_at
+        "" ~ dbt_date.week_start('sla_applied_at','UTC') ~ "" ) }} as sla_breach_at,
+    {{ fivetran_utils.timestamp_add(
+        "minute",
+        "cast(((7*24*60) * week_number) + (schedule_start_time) as " ~ dbt.type_int() ~ " )",
+        "" ~ dbt_date.week_start('sla_applied_at','UTC') ~ "" ) }} as sla_schedule_start_at,
+    {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date
   from intercepted_periods_with_breach_flag
 
 ), reply_time_business_hours_sla as (
@@ -123,7 +127,9 @@ with ticket_schedules as (
     sla_policy_name,
     metric,
     sla_applied_at,
+    greatest(sla_applied_at,sla_schedule_start_at) as sla_schedule_start_at,
     target,
+    sum_lapsed_business_minutes,
     in_business_hours,
     sla_breach_at,
     is_breached_during_schedule
