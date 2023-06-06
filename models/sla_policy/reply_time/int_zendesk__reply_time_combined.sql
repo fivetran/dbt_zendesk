@@ -29,7 +29,7 @@ with reply_time_calendar_hours_sla as (
     metric,
     sla_applied_at,
     sla_applied_at as sla_schedule_start_at,
-    null as sum_lapsed_business_minutes,
+    cast(null as {{ dbt.type_numeric() }}) as sum_lapsed_business_minutes,
     target,
     in_business_hours,
     sla_breach_at
