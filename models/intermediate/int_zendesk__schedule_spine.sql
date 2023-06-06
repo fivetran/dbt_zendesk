@@ -95,8 +95,8 @@ with timezone as (
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
 
         -- we'll use these to determine which schedule version to associate tickets with
-        split_timezones.valid_from,
-        split_timezones.valid_until
+        cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
+        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
 
     from schedule
     left join split_timezones
@@ -189,7 +189,7 @@ with timezone as (
 
     select 
         *,
-        case when max(holiday_name_check) over (partition by schedule_id, holiday_week_start) is not null then 1 else 0 end as is_holiday_week
+        case when max(holiday_name_check) over (partition by schedule_id, holiday_week_start order by holiday_week_start rows unbounded preceding) is not null then 1 else 0 end as is_holiday_week
     from spine_union
 
 -- Now that we have an understanding of which weeks are holiday's let's consolidate them with non holiday weeks
@@ -215,7 +215,7 @@ with timezone as (
         valid_until as period_end,
         start_time_utc,
         end_time_utc,
-        null as holiday_name_check,
+        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
         false as is_holiday_week
     from valid_adjustment
 
@@ -236,11 +236,11 @@ with timezone as (
         period_start, 
         period_end,
         coalesce(case 
-          when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by period_start, start_time_utc)
+          when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
           else period_start
         end, period_start) as valid_from,
           coalesce(case 
-          when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by period_start, start_time_utc)
+          when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
           else period_end
         end, period_end) as valid_until,
         start_time_utc,
@@ -254,9 +254,9 @@ with timezone as (
 
     select 
         *,
-        case when valid_from > {{ dbt.dateadd("hour", "2", "lag(valid_until) over (partition by schedule_id order by valid_until)") }} 
-            then true
-            else false
+        case when valid_from > cast({{ dbt.dateadd("hour", "2", "lag(valid_until) over (partition by schedule_id order by valid_until)") }} as {{ dbt.type_timestamp() }}) 
+            then 'gap'
+            else null
         end as is_schedule_gap
     from non_holiday_period_adjustments
 
@@ -271,7 +271,7 @@ with timezone as (
         end_time_utc,
         holiday_name_check,
         is_holiday_week,
-        {{ fivetran_utils.max_bool("is_schedule_gap") }} over (partition by schedule_id, valid_until order by valid_until) as is_gap_period,
+        max(is_schedule_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_gap_period,
         lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
     from gap_adjustments
 
@@ -280,11 +280,11 @@ with timezone as (
 
     select 
         schedule_id,
-        first_value(fill_primer) over (partition by schedule_id, valid_until order by valid_until, start_time_utc) as valid_from,
+        first_value(fill_primer) over (partition by schedule_id, valid_until order by valid_until, start_time_utc rows unbounded preceding) as valid_from,
         valid_from as valid_until,
         start_time_utc, 
         end_time_utc, 
-        null as holiday_name_check,
+        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
         false as is_holiday_week
     from schedule_spine_primer
     where is_gap_period is not null
