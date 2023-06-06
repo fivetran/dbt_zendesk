@@ -1,4 +1,5 @@
 # dbt_zendesk v0.11.0
+[PR #98](https://github.com/fivetran/dbt_zendesk/pull/98) includes the following updates:
 ## Feature Updates:
 - Added support of the new `schedule_holiday` table in the `schedule_spine` intermediate model in order to properly capture how holidays impact ticket schedules and their respective SLAs.
 - Made relevant downstream changes within the following models to capture proper business hour metrics when taking into account holiday schedules:
@@ -9,9 +10,9 @@
   - `zendesk__sla_policies`
 
 ## Under the Hood:
-- Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses.
+- Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. 
   - Start of the week is now consistently set to Sunday.
-- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. 
+- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job.  
 - Updated the pull request templates. 
 # dbt_zendesk v0.10.1
 ## Bug Fixes
