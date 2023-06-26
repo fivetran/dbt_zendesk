@@ -1,4 +1,5 @@
 # dbt_zendesk v0.10.2
+[PR #101](https://github.com/fivetran/dbt_zendesk/pull/101) includes the following updates:
 ## Fixes
 - Updated the `group` variable in the `dbt_project.yml` to have properly closed quotes within the variable declaration.
 - Adjusted the `in_zendesk__calendar_spine` to set the return result of `dbt.current_timestamp_backcompat()` as a variable. This ensures that when the variable is being called within the model it can properly establish a dependency within the manifest.
