@@ -1,3 +1,8 @@
+# dbt_zendesk v0.10.2
+## Fixes
+- Updated the `group` variable in the `dbt_project.yml` to have properly closed quotes within the variable declaration.
+- Adjusted the `in_zendesk__calendar_spine` to set the return result of `dbt.current_timestamp_backcompat()` as a variable. This ensures that when the variable is being called within the model it can properly establish a dependency within the manifest.
+
 # dbt_zendesk v0.10.1
 ## Bug Fixes
 - Modified the `int_zendesk__ticket_schedules` model to have the execute statement reference the source `schedule` table as opposed to the `stg_zendesk__schedule` model so the package may successfully compile before being run for the first time. ([#90](https://github.com/fivetran/dbt_zendesk/pull/90))
