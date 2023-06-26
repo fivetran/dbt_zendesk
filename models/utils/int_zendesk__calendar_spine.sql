@@ -1,9 +1,9 @@
 -- depends_on: {{ source('zendesk', 'ticket') }}
 
 with spine as (
-    {% set current_ts = dbt.current_timestamp_backcompat() %}
 
     {% if execute %}
+    {% set current_ts = dbt.current_timestamp_backcompat() %}
     {% set first_date_query %}
         select  min( created_at ) as min_date from {{ source('zendesk', 'ticket') }}
         -- by default take all the data 
