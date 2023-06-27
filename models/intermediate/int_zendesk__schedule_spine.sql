@@ -114,7 +114,7 @@ with timezone as (
         cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
     from schedule_holiday
     inner join calculate_schedules
-      on calculate_schedules.schedule_id = schedule_holiday.schedule_id
+        on calculate_schedules.schedule_id = schedule_holiday.schedule_id
         and schedule_holiday.holiday_start_date_at between calculate_schedules.valid_from and calculate_schedules.valid_until
 
 -- Let's calculate the start and end date of the Holiday in terms of minutes from Sunday (like other Zendesk schedules)
@@ -167,9 +167,9 @@ with timezone as (
         holiday_week_start,
         holiday_week_end,
         holiday_name_check
-      from holiday_consolidated
+    from holiday_consolidated
 
-      union all
+    union all
 
     select
         schedule_id, 
@@ -205,7 +205,7 @@ with timezone as (
         true as is_holiday_week
     from valid_adjustment
     where holiday_week_start is not null
-      and holiday_week_end is not null
+        and holiday_week_end is not null
 
     union all
 
@@ -236,12 +236,12 @@ with timezone as (
         period_start, 
         period_end,
         coalesce(case 
-          when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
-          else period_start
+            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
+            else period_start
         end, period_start) as valid_from,
-          coalesce(case 
-          when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
-          else period_end
+        coalesce(case 
+            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
+            else period_end
         end, period_end) as valid_until,
         start_time_utc,
         end_time_utc,
@@ -254,6 +254,8 @@ with timezone as (
 
     select 
         *,
+        -- In order to identify the gaps we check to see if the valid_from and previous valid_until are right next to one. If we add two hours to the previous valid_until it should always be greater than the current valid_from.
+        -- However, if the valid_from is greater instead then we can identify that this period has a gap that needs to be filled.
         case when valid_from > cast({{ dbt.dateadd("hour", "2", "lag(valid_until) over (partition by schedule_id order by valid_until)") }} as {{ dbt.type_timestamp() }}) 
             then 'gap'
             else null
