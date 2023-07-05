@@ -1,7 +1,7 @@
 # dbt_zendesk v0.10.3
 [PR #102](https://github.com/fivetran/dbt_zendesk/pull/102) includes the following updates:
 ## 🐛 Bug Fixes 🪛
-- Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments, and also ignores ticket creation comments from an agent, matching the Zendesk definition. 
+- Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments logic, and also ignores ticket creation comments from an agent, matching the Zendesk definition. 
 
 # dbt_zendesk v0.10.2
 [PR #101](https://github.com/fivetran/dbt_zendesk/pull/101) includes the following updates:
