@@ -1,6 +1,6 @@
 # dbt_zendesk v0.11.0
 ## Fixes
-- Added coalesce to `0` statements to the following fields in the `zendesk__ticket_metrics` model. This is necessary as some tickets may have responses entirely outside of business hours which will not count towards business minute metrics. As such, a coalesce to `0` is more representative to the metric as opposed to a `null` record:
+- Added coalesce to `0` statements to the following fields in the `zendesk__ticket_metrics` model. This is necessary as some tickets may have responses entirely outside of business hours which will not count towards business minute metrics. As such, a coalesce to `0` is more representative to the metric as opposed to a `null` record: ([PR #103](https://github.com/fivetran/dbt_zendesk/pull/103))
   - `first_resolution_business_minutes`
   - `full_resolution_business_minutes`
   - `first_reply_time_business_minutes`
