@@ -175,8 +175,8 @@ with agent_work_time_filtered_statuses as (
     {{ fivetran_utils.timestamp_add(
       "minute",
       "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt.type_int() ~ " )",
-      "" ~ dbt.date_trunc('week', 'valid_starting_at') ~ "",
-      ) }} as sla_breach_at
+      "cast(" ~ dbt_date.week_start('valid_starting_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) 
+    }} as sla_breach_at
   from intercepted_periods_agent_filtered
 
 )

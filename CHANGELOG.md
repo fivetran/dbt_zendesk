@@ -1,3 +1,30 @@
+# dbt_zendesk v0.11.0
+## Feature Updates:
+- Added support of the new `schedule_holiday` table in the `schedule_spine` intermediate model in order to properly capture how holidays impact ticket schedules and their respective SLAs. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Made relevant downstream changes within the following models to capture proper business hour metrics when taking into account holiday schedules: ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+  - `int_zendesk__agent_work_time_business_hours`
+  - `int_zendesk__reply_time_business_hours`
+  - `int_zendesk__reply_time_combined`
+  - `int_zendesk__requester_wait_time_business_hours`
+  - `zendesk__sla_policies`
+
+## Fixes:
+- Added coalesce to `0` statements to the following fields in the `zendesk__ticket_metrics` model. This is necessary as some tickets may have responses entirely outside of business hours which will not count towards business minute metrics. As such, a coalesce to `0` is more representative to the metric as opposed to a `null` record: ([PR #103](https://github.com/fivetran/dbt_zendesk/pull/103))
+  - `first_resolution_business_minutes`
+  - `full_resolution_business_minutes`
+  - `first_reply_time_business_minutes`
+  - `agent_wait_time_in_business_minutes`
+  - `requester_wait_time_in_business_minutes`
+  - `agent_work_time_in_business_minutes`
+  - `on_hold_time_in_business_minutes`
+
+
+## Under the Hood:
+- Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Start of the week is now consistently set to Sunday. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Updated the pull request templates. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+
 # dbt_zendesk v0.10.3
 [PR #102](https://github.com/fivetran/dbt_zendesk/pull/102) includes the following updates:
 ## 🐛 Bug Fixes 🪛
