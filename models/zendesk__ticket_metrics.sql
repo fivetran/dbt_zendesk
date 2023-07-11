@@ -100,7 +100,7 @@ select
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
-  coalesce(ticket_comments.count_agent_comments, 0) as total_agent_replies,
+  coalesce(ticket_comments.count_agent_replies, 0) as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
     then ({{ dbt.datediff("ticket_enriched.requester_last_login_at", dbt.current_timestamp_backcompat(), 'second') }} /60)

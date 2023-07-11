@@ -465,7 +465,7 @@ models:
       - name: open_status_duration_in_calendar_minutes
         description: The duration in calendar minutes the ticket was in the "open" status
       - name: total_agent_replies
-        description: The total number of agent replies within the ticket
+        description: The total number of agent replies within the ticket, excluding comments where an agent created the ticket
       - name: requester_last_login_age_minutes
         description: The time in minutes since the ticket requester was last logged in
       - name: assignee_last_login_age_minutes
