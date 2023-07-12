@@ -17,7 +17,7 @@
   - `requester_wait_time_in_business_minutes`
   - `agent_work_time_in_business_minutes`
   - `on_hold_time_in_business_minutes`
-
+- Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments logic, and also ignores ticket creation comments from an agent, matching the Zendesk definition. ([PR #102](https://github.com/fivetran/dbt_zendesk/pull/102))
 
 ## Under the Hood:
 - Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
@@ -25,10 +25,6 @@
 - Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 - Updated the pull request templates. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 
-# dbt_zendesk v0.10.3
-[PR #102](https://github.com/fivetran/dbt_zendesk/pull/102) includes the following updates:
-## 🐛 Bug Fixes 🪛
-- Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments logic, and also ignores ticket creation comments from an agent, matching the Zendesk definition. 
 
 # dbt_zendesk v0.10.2
 [PR #101](https://github.com/fivetran/dbt_zendesk/pull/101) includes the following updates:
