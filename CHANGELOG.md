@@ -1,8 +1,37 @@
+# dbt_zendesk v0.11.0
+## Feature Updates:
+- Added support of the new `schedule_holiday` table in the `schedule_spine` intermediate model in order to properly capture how holidays impact ticket schedules and their respective SLAs. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Made relevant downstream changes within the following models to capture proper business hour metrics when taking into account holiday schedules: ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+  - `int_zendesk__agent_work_time_business_hours`
+  - `int_zendesk__reply_time_business_hours`
+  - `int_zendesk__reply_time_combined`
+  - `int_zendesk__requester_wait_time_business_hours`
+  - `zendesk__sla_policies`
+- Added `open_status_duration_in_business_minutes` and `new_status_duration_in_business_minutes` columns to the `int_zendesk__ticket_work_time_business` and `zendesk__ticket_metrics` models. These are counterparts to the already existing `open_status_duration_in_calendar_minutes` and `new_status_duration_in_calendar_minutes` columns. ([PR #97](https://github.com/fivetran/dbt_zendesk/pull/97)) 
+
+## Fixes:
+- Added coalesce to `0` statements to the following fields in the `zendesk__ticket_metrics` model. This is necessary as some tickets may have responses entirely outside of business hours which will not count towards business minute metrics. As such, a coalesce to `0` is more representative to the metric as opposed to a `null` record: ([PR #103](https://github.com/fivetran/dbt_zendesk/pull/103))
+  - `first_resolution_business_minutes`
+  - `full_resolution_business_minutes`
+  - `first_reply_time_business_minutes`
+  - `agent_wait_time_in_business_minutes`
+  - `requester_wait_time_in_business_minutes`
+  - `agent_work_time_in_business_minutes`
+  - `on_hold_time_in_business_minutes`
+- Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments logic, and also ignores ticket creation comments from an agent, matching the Zendesk definition. ([PR #102](https://github.com/fivetran/dbt_zendesk/pull/102))
+
+## Under the Hood:
+- Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Start of the week is now consistently set to Sunday. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Updated the pull request templates. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+
+
 # dbt_zendesk v0.10.2
-
-## Features
-
-- [PR #97](https://github.com/fivetran/dbt_zendesk/pull/97) Added `open_status_duration_in_business_minutes` and `new_status_duration_in_business_minutes` columns to the `int_zendesk__ticket_work_time_business` and `zendesk__ticket_metrics` models. These are counterparts to the already existing `open_status_duration_in_calendar_minutes` and `new_status_duration_in_calendar_minutes` columns. 
+[PR #101](https://github.com/fivetran/dbt_zendesk/pull/101) includes the following updates:
+## Fixes
+- Updated the `group` variable in the `dbt_project.yml` to have properly closed quotes within the variable declaration.
+- Adjusted the `in_zendesk__calendar_spine` to set the return result of `dbt.current_timestamp_backcompat()` as a variable. This ensures that when the variable is being called within the model it can properly establish a dependency within the manifest.
 
 
 # dbt_zendesk v0.10.1

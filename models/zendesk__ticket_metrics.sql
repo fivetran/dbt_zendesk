@@ -100,7 +100,7 @@ select
   ticket_work_time_calendar.requester_wait_time_in_calendar_minutes,
   ticket_work_time_calendar.agent_work_time_in_calendar_minutes,
   ticket_work_time_calendar.on_hold_time_in_calendar_minutes,
-  coalesce(ticket_comments.count_agent_comments, 0) as total_agent_replies,
+  coalesce(ticket_comments.count_agent_replies, 0) as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
     then ({{ dbt.datediff("ticket_enriched.requester_last_login_at", dbt.current_timestamp_backcompat(), 'second') }} /60)
@@ -178,23 +178,23 @@ left join ticket_comments
 select
   calendar_hour_metrics.*,
   case when calendar_hour_metrics.status in ('solved', 'closed')
-    then business_hour_metrics.first_resolution_business_minutes
+    then coalesce(business_hour_metrics.first_resolution_business_minutes,0)
     else null
       end as first_resolution_business_minutes,
   case when calendar_hour_metrics.status in ('solved', 'closed')
-    then business_hour_metrics.full_resolution_business_minutes
+    then coalesce(business_hour_metrics.full_resolution_business_minutes,0)
     else null
       end as full_resolution_business_minutes,
   case when coalesce(calendar_hour_metrics.count_public_agent_comments, 0) = 0
     then null
-    else business_hour_metrics.first_reply_time_business_minutes
+    else coalesce(business_hour_metrics.first_reply_time_business_minutes,0)
       end as first_reply_time_business_minutes,
-  business_hour_metrics.agent_wait_time_in_business_minutes,
-  business_hour_metrics.requester_wait_time_in_business_minutes,
-  business_hour_metrics.agent_work_time_in_business_minutes,
-  business_hour_metrics.on_hold_time_in_business_minutes,
-  business_hour_metrics.new_status_duration_in_business_minutes,
-  business_hour_metrics.open_status_duration_in_business_minutes
+  coalesce(business_hour_metrics.agent_wait_time_in_business_minutes,0) as agent_wait_time_in_business_minutes,
+  coalesce(business_hour_metrics.requester_wait_time_in_business_minutes,0) as requester_wait_time_in_business_minutes,
+  coalesce(business_hour_metrics.agent_work_time_in_business_minutes,0) as agent_work_time_in_business_minutes,
+  coalesce(business_hour_metrics.on_hold_time_in_business_minutes,0) as on_hold_time_in_business_minutes,
+  coalesce(business_hour_metrics.business_hour_metrics.new_status_duration_in_business_minutes,0) as new_status_duration_in_business_minutes,
+  coalesce(business_hour_metrics.business_hour_metrics.open_status_duration_in_business_minutes,0) as open_status_duration_in_business_minutes
 
 from calendar_hour_metrics
 
