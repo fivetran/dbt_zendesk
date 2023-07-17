@@ -257,7 +257,7 @@ with timezone as (
         *,
         max(period_end) over (partition by schedule_id) as max_valid_until,
         last_value(next_start) over (partition by schedule_id, period_start order by valid_until rows between unbounded preceding and unbounded following) as lead_next_start,
-        first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end,
+        first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end
     from non_holiday_period_adjustments
 
 -- There may be gaps in holiday and non holiday schedules, so we need to identify where these gaps are
