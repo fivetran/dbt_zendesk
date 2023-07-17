@@ -26,6 +26,8 @@
 - Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 - Updated the pull request templates. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 
+## Contributors:
+- [@Tim-Hoare](https://github.com/Tim-Hoare) ([PR #97](https://github.com/fivetran/dbt_zendesk/pull/97)) 
 
 # dbt_zendesk v0.10.2
 [PR #101](https://github.com/fivetran/dbt_zendesk/pull/101) includes the following updates:
