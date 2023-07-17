@@ -295,7 +295,7 @@ with timezone as (
         holiday_name_check,
         is_holiday_week,
         max(is_schedule_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_gap_period,
-        max(is_schedule_double_gap) over (partition by schedule_id, valid_until rows unbounded preceding) as is_double_gap_period,
+        max(is_schedule_double_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_double_gap_period,
         lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
     from gap_adjustments
 
