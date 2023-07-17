@@ -235,12 +235,14 @@ with timezone as (
         schedule_id, 
         period_start, 
         period_end,
+        prev_end,
+        next_start,
         coalesce(case 
-            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
+            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_start
         end, period_start) as valid_from,
         coalesce(case 
-            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by period_start, start_time_utc rows unbounded preceding)
+            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_end
         end, period_end) as valid_until,
         start_time_utc,
@@ -249,6 +251,15 @@ with timezone as (
         is_holiday_week
     from sorted_periods
 
+-- A few window function results will be leveraged downstream. Let's generate them now.
+), gap_starter as (
+    select 
+        *,
+        max(period_end) over (partition by schedule_id) as max_valid_until,
+        last_value(next_start) over (partition by schedule_id, period_start order by valid_until rows between unbounded preceding and unbounded following) as lead_next_start,
+        first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end,
+    from non_holiday_period_adjustments
+
 -- There may be gaps in holiday and non holiday schedules, so we need to identify where these gaps are
 ), gap_adjustments as(
 
@@ -256,11 +267,19 @@ with timezone as (
         *,
         -- In order to identify the gaps we check to see if the valid_from and previous valid_until are right next to one. If we add two hours to the previous valid_until it should always be greater than the current valid_from.
         -- However, if the valid_from is greater instead then we can identify that this period has a gap that needs to be filled.
-        case when valid_from > cast({{ dbt.dateadd("hour", "2", "lag(valid_until) over (partition by schedule_id order by valid_until)") }} as {{ dbt.type_timestamp() }}) 
+        case when valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})
+            then 'gap'
+        when (lead_next_start is null and valid_from < max_valid_until and period_end != max_valid_until)
             then 'gap'
             else null
-        end as is_schedule_gap
-    from non_holiday_period_adjustments
+        end as is_schedule_gap,
+
+        -- Additionally, there may be cases where a gap is identified both before the holiday and after. In those cases we want to make appropriate adjustments after the holiday.
+        case when (valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})) and (lead_next_start is null and valid_from < max_valid_until) and (period_end != max_valid_until)
+            then 'double_gap'
+            else null
+        end as is_schedule_double_gap
+    from gap_starter
 
 -- We know where the gaps are, so now lets prime the data to fill those gaps
 ), schedule_spine_primer as (
@@ -271,15 +290,19 @@ with timezone as (
         valid_until,
         start_time_utc,
         end_time_utc,
+        lead_next_start,
+        max_valid_until,
         holiday_name_check,
         is_holiday_week,
         max(is_schedule_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_gap_period,
+        max(is_schedule_double_gap) over (partition by schedule_id, valid_until rows unbounded preceding) as is_double_gap_period,
         lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
     from gap_adjustments
 
 -- We know the gaps and where they are, so let's fill them with the following union
 ), final_union as (
 
+    -- For all gap periods, let's properly create a schedule filled before the holiday.
     select 
         schedule_id,
         first_value(fill_primer) over (partition by schedule_id, valid_until order by valid_until, start_time_utc rows unbounded preceding) as valid_from,
@@ -293,6 +316,27 @@ with timezone as (
 
     union all
 
+    -- For any double gap periods, let's fill a schedule directly after the holiday.
+    select
+        schedule_id,
+        case when lead_next_start is not null
+            then first_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following) 
+            else last_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following)
+        end as valid_from,
+        case when lead_next_start is not null
+            then valid_from 
+            else max_valid_until
+        end as valid_until,
+        start_time_utc, 
+        end_time_utc, 
+        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
+        false as is_holiday_week
+    from schedule_spine_primer
+    where is_double_gap_period is not null
+
+    union all
+
+    -- Fill all other normal schedules.
     select
         schedule_id, 
         valid_from,
