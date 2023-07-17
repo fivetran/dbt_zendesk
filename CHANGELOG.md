@@ -7,6 +7,7 @@
   - `int_zendesk__reply_time_combined`
   - `int_zendesk__requester_wait_time_business_hours`
   - `zendesk__sla_policies`
+- Added `open_status_duration_in_business_minutes` and `new_status_duration_in_business_minutes` columns to the `int_zendesk__ticket_work_time_business` and `zendesk__ticket_metrics` models. These are counterparts to the already existing `open_status_duration_in_calendar_minutes` and `new_status_duration_in_calendar_minutes` columns. ([PR #97](https://github.com/fivetran/dbt_zendesk/pull/97)) 
 
 ## Fixes:
 - Added coalesce to `0` statements to the following fields in the `zendesk__ticket_metrics` model. This is necessary as some tickets may have responses entirely outside of business hours which will not count towards business minute metrics. As such, a coalesce to `0` is more representative to the metric as opposed to a `null` record: ([PR #103](https://github.com/fivetran/dbt_zendesk/pull/103))
@@ -31,6 +32,7 @@
 ## Fixes
 - Updated the `group` variable in the `dbt_project.yml` to have properly closed quotes within the variable declaration.
 - Adjusted the `in_zendesk__calendar_spine` to set the return result of `dbt.current_timestamp_backcompat()` as a variable. This ensures that when the variable is being called within the model it can properly establish a dependency within the manifest.
+
 
 # dbt_zendesk v0.10.1
 ## Bug Fixes
