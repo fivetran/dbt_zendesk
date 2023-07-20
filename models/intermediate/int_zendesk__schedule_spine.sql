@@ -305,7 +305,7 @@ with timezone as (
     -- For all gap periods, let's properly create a schedule filled before the holiday.
     select 
         schedule_id,
-        first_value(fill_primer) over (partition by schedule_id, valid_until order by valid_until, start_time_utc rows unbounded preceding) as valid_from,
+        first_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following) as valid_from,
         valid_from as valid_until,
         start_time_utc, 
         end_time_utc, 
