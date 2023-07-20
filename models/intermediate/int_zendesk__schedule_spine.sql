@@ -184,14 +184,6 @@ with timezone as (
         null as holiday_name_check
     from calculate_schedules
 
--- Within the spine, determine which schedules contain a holiday
-), valid_adjustment as (
-
-    select 
-        *,
-        case when max(holiday_name_check) over (partition by schedule_id, holiday_week_start order by holiday_week_start rows unbounded preceding) is not null then 1 else 0 end as is_holiday_week
-    from spine_union
-
 -- Now that we have an understanding of which weeks are holiday's let's consolidate them with non holiday weeks
 ), all_periods as (
 
@@ -203,7 +195,7 @@ with timezone as (
         end_time_utc,
         holiday_name_check,
         true as is_holiday_week
-    from valid_adjustment
+    from spine_union
     where holiday_week_start is not null
         and holiday_week_end is not null
 
@@ -217,7 +209,7 @@ with timezone as (
         end_time_utc,
         cast(null as {{ dbt.type_string() }}) as holiday_name_check,
         false as is_holiday_week
-    from valid_adjustment
+    from spine_union
 
 -- We have holiday and non holiday schedules together, now let's sort them to understand the previous end and next start of neighboring schedules
 ), sorted_periods as (
@@ -294,8 +286,8 @@ with timezone as (
         max_valid_until,
         holiday_name_check,
         is_holiday_week,
-        max(is_schedule_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_gap_period,
-        max(is_schedule_double_gap) over (partition by schedule_id, valid_until order by valid_until rows unbounded preceding) as is_double_gap_period,
+        max(is_schedule_gap) over (partition by schedule_id, valid_until) as is_gap_period,
+        max(is_schedule_double_gap) over (partition by schedule_id, valid_until) as is_double_gap_period,
         lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
     from gap_adjustments
 
