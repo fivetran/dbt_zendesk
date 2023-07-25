@@ -31,7 +31,11 @@ comment_counts as (
         count(*) as total_comments,
         count(distinct case when commenter_role = 'internal_comment'
             then user_id
-                end) as count_ticket_handoffs
+                end) as count_ticket_handoffs,
+        sum(case when commenter_role = 'internal_comment' and is_public = true and previous_commenter_role != 'first_comment'
+            then 1
+            else 0
+                end) as count_agent_replies
     from ticket_comments
 
     group by 1, 2
