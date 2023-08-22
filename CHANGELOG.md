@@ -1,3 +1,12 @@
+# dbt_zendesk v0.11.1
+
+Tiny release ahead!
+## Under the Hood:
+- Removes whitespace-escaping from Jinja code in `int_zendesk__field_history_scd`. In different whitepace parsing environments, this can jumble code up with SQL comments ([PR #106](https://github.com/fivetran/dbt_zendesk/pull/106)).
+
+## Contributors: 
+- [@bcolbert978](https://github.com/bcolbert978) ([PR #106](https://github.com/fivetran/dbt_zendesk/pull/106))
+
 # dbt_zendesk v0.11.0
 ## Feature Updates:
 - Added support of the new `schedule_holiday` table in the `schedule_spine` intermediate model in order to properly capture how holidays impact ticket schedules and their respective SLAs. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
