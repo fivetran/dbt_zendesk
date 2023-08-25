@@ -27,8 +27,10 @@ with reply_time_calendar_hours_sla as (
     ticket_id,
     sla_policy_name,
     metric,
+    ticket_created_at,
     sla_applied_at,
     sla_applied_at as sla_schedule_start_at,
+    cast(null as timestamp) as sla_schedule_end_at,
     cast(null as {{ dbt.type_numeric() }}) as sum_lapsed_business_minutes,
     target,
     in_business_hours,
@@ -43,8 +45,10 @@ with reply_time_calendar_hours_sla as (
     ticket_id,
     sla_policy_name,
     metric,
+    ticket_created_at,
     sla_applied_at,
     sla_schedule_start_at,
+    sla_schedule_end_at,
     sum_lapsed_business_minutes,
     target,
     in_business_hours,
@@ -79,11 +83,13 @@ with reply_time_calendar_hours_sla as (
     reply_time_breached_at.ticket_id,
     reply_time_breached_at.sla_policy_name,
     reply_time_breached_at.metric,
+    reply_time_breached_at.ticket_created_at,
     reply_time_breached_at.sla_applied_at,
     reply_time_breached_at.sum_lapsed_business_minutes,
     reply_time_breached_at.target,
     reply_time_breached_at.in_business_hours,
     min(reply_time_breached_at.sla_schedule_start_at) as sla_schedule_start_at,
+    min(reply_time_breached_at.sla_schedule_end_at) as sla_schedule_end_at,
     min(sla_breach_at) as sla_breach_at,
     min(reply_at) as agent_reply_at,
     min(solved_at) as next_solved_at
@@ -94,25 +100,37 @@ with reply_time_calendar_hours_sla as (
   left join ticket_solved_times
     on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
-  {{ dbt_utils.group_by(n=7) }}
+  {{ dbt_utils.group_by(n=8) }}
 
 ), lagging_time_block as (
   select 
     *,
-    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_breach_at rows unbounded preceding) as first_sla_breach_at,
-		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_breach_at), 0) as sum_lapsed_business_minutes_new
+    min(sla_breach_at) over (partition by metric, sla_applied_at order by sla_breach_at rows unbounded preceding) as first_sla_breach_at,
+    min(sla_schedule_start_at) over (partition by ticket_id, metric, sla_applied_at) as sla_measured_from,
+		coalesce(lag(sum_lapsed_business_minutes) over (partition by metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
   from reply_time_breached_at_with_next_reply_timestamp
 
 ), filtered_reply_times as (
   select * 
   from lagging_time_block
-  where {{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} = {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }}
-    or ({{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} < {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }} and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
+  where (in_business_hours = true
+    and (agent_reply_at between sla_schedule_start_at and sla_schedule_end_at
+      or (agent_reply_at < sla_schedule_start_at
+          and sum_lapsed_business_minutes_new = 0 
+          and sla_breach_at = first_sla_breach_at)))
+    or (in_business_hours = false
+      and ({{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} = {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }}
+        or (agent_reply_at < sla_schedule_start_at
+          and sum_lapsed_business_minutes_new = 0 
+          and sla_breach_at = first_sla_breach_at)))
+    or (agent_reply_at is null
+      and sla_applied_at >= ticket_created_at)
 
 ), reply_time_breached_at_remove_old_sla as (
   select 
     *,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
+    row_number() over (partition by ticket_id, sla_policy_name, metric, in_business_hours order by sla_schedule_start_at) as row_num,
     case when 
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
@@ -124,6 +142,7 @@ with reply_time_calendar_hours_sla as (
       else false
         end as is_sla_breached
   from filtered_reply_times
+  where sla_schedule_end_at > sla_schedule_start_at
   
 ), reply_time_breach as (
   select 
@@ -133,6 +152,7 @@ with reply_time_calendar_hours_sla as (
       else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} 
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla
+  where row_num = 1
 )
 
 select *
