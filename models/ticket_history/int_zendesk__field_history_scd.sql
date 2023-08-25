@@ -1,7 +1,7 @@
 -- model needs to materialize as a table to avoid erroneous null values
 {{ config( materialized='table') }} 
 
-{%- set ticket_columns = adapter.get_columns_in_relation(ref('int_zendesk__field_history_pivot')) -%}
+{% set ticket_columns = adapter.get_columns_in_relation(ref('int_zendesk__field_history_pivot')) %}
 
 with change_data as (
 
