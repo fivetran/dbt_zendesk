@@ -103,11 +103,6 @@ with ticket_historical_status as (
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
       and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
-
-      {# and start_week_date + week_number * (7*24*60) + ticket_week_start_time
-
-      and greatest(weekly_periods.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and weekly_periods.status_valid_starting_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }})  #}
   
 ), business_minutes as (
   
