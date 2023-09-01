@@ -101,8 +101,8 @@ with ticket_historical_status as (
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-      and {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
 
       {# and start_week_date + week_number * (7*24*60) + ticket_week_start_time
 
