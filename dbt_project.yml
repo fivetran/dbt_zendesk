@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '0.11.1'
+version: '0.10.2'
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
@@ -35,7 +35,6 @@ vars:
     organization_tag: "{{ ref('stg_zendesk__organization_tag') }}"
     organization: "{{ ref('stg_zendesk__organization') }}"
     schedule: "{{ ref('stg_zendesk__schedule') }}"
-    schedule_holiday: "{{ ref('stg_zendesk__schedule_holiday') }}"
     ticket: "{{ ref('stg_zendesk__ticket') }}"
     ticket_form_history: "{{ ref('stg_zendesk__ticket_form_history') }}"
     ticket_comment: "{{ ref('stg_zendesk__ticket_comment') }}"
