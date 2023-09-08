@@ -14,7 +14,7 @@ Tiny release ahead!
 
 # dbt_zendesk v0.11.0
 
-## Update: There have been bugs identified in this release and we have rolled back this package to v0.10.2 in the v0.12.0 release.
+## Update: There have been bugs identified in this release and we have rolled back this package to v0.10.2 in the v0.11.2 release.
 
 ## Feature Updates:
 - Added support of the new `schedule_holiday` table in the `schedule_spine` intermediate model in order to properly capture how holidays impact ticket schedules and their respective SLAs. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
