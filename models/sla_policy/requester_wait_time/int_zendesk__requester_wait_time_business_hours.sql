@@ -67,8 +67,9 @@ with requester_wait_time_filtered_statuses as (
               'ticket_status_crossed_with_schedule.valid_starting_at', 
               'ticket_status_crossed_with_schedule.valid_ending_at',
               'second') }} /60
-            ) as raw_delta_in_minutes
-            
+            ) as raw_delta_in_minutes,
+    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date -- maybe change to status_valid_starting_at?
+
     from ticket_status_crossed_with_schedule
     {{ dbt_utils.group_by(n=10) }}
 
@@ -80,7 +81,7 @@ with requester_wait_time_filtered_statuses as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
       ticket_full_solved_time.*,
-      generated_number - 1 as week_number
+      cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
     from ticket_full_solved_time
     cross join weeks
     where floor((valid_starting_at_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number -1
@@ -101,8 +102,9 @@ with requester_wait_time_filtered_statuses as (
       raw_delta_in_minutes,
       week_number,
       schedule_id,
-      greatest(0, valid_starting_at_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time_minute,
-      least(valid_starting_at_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time_minute
+      start_week_date,
+      cast(greatest(0, valid_starting_at_in_minutes_from_week - week_number * (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_start_time_minute,
+      cast(least(valid_starting_at_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_end_time_minute
     
     from weeks_cross_ticket_full_solved_time
 
@@ -126,9 +128,13 @@ with requester_wait_time_filtered_statuses as (
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_requester_wait_time.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-      and weekly_period_requester_wait_time.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and weekly_period_requester_wait_time.status_valid_starting_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
-
+      {# and weekly_period_requester_wait_time.status_valid_ending_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+      and weekly_period_requester_wait_time.status_valid_starting_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }})  #}
+      -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+      -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) <= cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+  
 ), intercepted_periods_with_running_total as (
   
     select 

@@ -115,7 +115,8 @@ with timezone as (
     from schedule_holiday
     inner join calculate_schedules
         on calculate_schedules.schedule_id = schedule_holiday.schedule_id
-        and schedule_holiday.holiday_start_date_at between calculate_schedules.valid_from and calculate_schedules.valid_until
+        and schedule_holiday.holiday_start_date_at >= calculate_schedules.valid_from 
+        and schedule_holiday.holiday_start_date_at < calculate_schedules.valid_until
 
 -- Let's calculate the start and end date of the Holiday in terms of minutes from Sunday (like other Zendesk schedules)
 ), holiday_minutes as(

@@ -37,7 +37,8 @@ with ticket_resolution_times_calendar as (
           'ticket_schedules.schedule_created_at',
           'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))',
           'second') }}/60
-        )) as raw_delta_in_minutes
+        )) as raw_delta_in_minutes,
+    {{ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') }} as start_week_date -- or should this truncate first_solved_at?
       
   from ticket_resolution_times_calendar
   join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
@@ -52,7 +53,7 @@ with ticket_resolution_times_calendar as (
     select 
 
       ticket_first_resolution_time.*,
-      generated_number - 1 as week_number
+      cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
     from ticket_first_resolution_time
     cross join weeks
@@ -64,8 +65,8 @@ with ticket_resolution_times_calendar as (
     select 
 
       weeks_cross_ticket_first_resolution_time.*,
-      greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
-      least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
+      cast(greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_start_time,
+      cast(least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_end_time
     
     from weeks_cross_ticket_first_resolution_time
 
@@ -84,9 +85,14 @@ with ticket_resolution_times_calendar as (
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-    and weekly_periods.first_solved_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-    and weekly_periods.first_solved_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }}) 
-    
+    {# and weekly_periods.first_solved_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+    and weekly_periods.first_solved_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }})  #}
+
+    -- this chooses the Daylight Savings Time or Standard Time version of the schedule
+    -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
+    and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+    and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) <= cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+
 )
 
   select 
