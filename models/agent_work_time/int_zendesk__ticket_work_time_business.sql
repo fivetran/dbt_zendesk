@@ -33,6 +33,7 @@ with ticket_historical_status as (
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
+      -- making sure there is indeed real overlap
       where {{ dbt.datediff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
 
 ), ticket_full_solved_time as (
@@ -55,7 +56,7 @@ with ticket_historical_status as (
               'ticket_status_crossed_with_schedule.status_schedule_end',
               'second') }} /60
             ) as raw_delta_in_minutes,
-    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') }} as start_week_date
+    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') }} as start_week_date -- maybe change to status_valid_starting_at?
 
     from ticket_status_crossed_with_schedule
     {{ dbt_utils.group_by(n=7) }}
@@ -78,7 +79,9 @@ with ticket_historical_status as (
     select
 
       weeks_cross_ticket_full_solved_time.*,
+      -- for each week, at what minute do we start counting?
       cast(greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_start_time,
+      -- for each week, at what minute do we stop counting?
       cast(least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_end_time
     
     from weeks_cross_ticket_full_solved_time
@@ -101,8 +104,9 @@ with ticket_historical_status as (
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+      -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) <= cast(schedule.valid_until as {{ dbt.type_timestamp() }})
   
 ), business_minutes as (
   
