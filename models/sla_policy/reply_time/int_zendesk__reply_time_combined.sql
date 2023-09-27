@@ -99,8 +99,8 @@ with reply_time_calendar_hours_sla as (
 ), lagging_time_block as (
   select 
     *,
-    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_breach_at rows unbounded preceding) as first_sla_breach_at,
-		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_breach_at), 0) as sum_lapsed_business_minutes_new
+    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
+		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
   from reply_time_breached_at_with_next_reply_timestamp
 
 ), filtered_reply_times as (
