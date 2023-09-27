@@ -217,7 +217,7 @@ with timezone as (
 
     select distinct
         *,
-        lag(period_end) over (partition by schedule_id order by period_end, start_time_utc) as prev_end,
+        lag(period_end) over (partition by schedule_id order by period_start, start_time_utc) as prev_end,
         lead(period_start) over (partition by schedule_id order by period_start, start_time_utc) as next_start
     from all_periods
 
@@ -230,6 +230,7 @@ with timezone as (
         period_end,
         prev_end,
         next_start,
+        -- taking first_value/last_value because prev_end and next_start are inconsistent within the schedule partitions -- they all include a record that is outside the partition. so we need to ignore those erroneous records that slip in
         coalesce(case 
             when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_start
@@ -249,6 +250,7 @@ with timezone as (
     select 
         *,
         max(period_end) over (partition by schedule_id) as max_valid_until,
+        -- these order-bys are suspicious
         last_value(next_start) over (partition by schedule_id, period_start order by valid_until rows between unbounded preceding and unbounded following) as lead_next_start,
         first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end
     from non_holiday_period_adjustments
