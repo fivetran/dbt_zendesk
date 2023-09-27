@@ -6,7 +6,7 @@ with reply_time_calendar_hours_sla as (
 {% if var('using_schedules', True) %}
 
 ), reply_time_business_hours_sla as (
- 
+
   select *
   from {{ ref('int_zendesk__reply_time_business_hours') }}
 
@@ -17,7 +17,7 @@ with reply_time_calendar_hours_sla as (
   from {{ ref('int_zendesk__updates') }}
 
 ), users as (
- 
+
   select *
   from {{ ref('int_zendesk__user_aggregates') }}
 
@@ -104,10 +104,19 @@ with reply_time_calendar_hours_sla as (
   from reply_time_breached_at_with_next_reply_timestamp
 
 ), filtered_reply_times as (
-  select * 
+  -- select * 
+  -- from lagging_time_block
+  -- where {{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} = {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }}
+  --   or ({{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} < {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }} and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
+
+  select 
+    * 
+
   from lagging_time_block
-  where {{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} = {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }}
-    or ({{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} < {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }} and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
+  where (agent_reply_at between sla_schedule_start_at and sla_schedule_end_at)
+  or (agent_reply_at < sla_schedule_start_at
+
+
 
 ), reply_time_breached_at_remove_old_sla as (
   select 
