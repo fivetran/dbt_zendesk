@@ -3,17 +3,17 @@
 -- step 3, determine when an SLA will breach for SLAs that are in business hours
 
 with ticket_schedules as (
- 
+
   select *
   from {{ ref('int_zendesk__ticket_schedules') }}
 
 ), schedule as (
- 
+
   select *
   from {{ ref('int_zendesk__schedule_spine') }}
 
 ), sla_policy_applied as (
- 
+
   select *
   from {{ ref('int_zendesk__sla_policy_applied') }}
 

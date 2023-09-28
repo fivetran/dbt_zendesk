@@ -110,16 +110,16 @@ with reply_time_calendar_hours_sla as (
   --   or ({{ dbt.date_trunc("day", "cast(agent_reply_at as date)") }} < {{ dbt.date_trunc("day", "cast(sla_schedule_start_at as date)") }} and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
 
   select 
-    * 
+    *
 
   from lagging_time_block
-  where (agent_reply_at between sla_schedule_start_at and sla_schedule_end_at)
-  or (agent_reply_at < sla_schedule_start_at
+  where (agent_reply_at between sla_schedule_start_at and sla_schedule_end_at) -- ticket is replied to between a schedule window
+  or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)-- ticket is replied to before a schedule window and no business minutes have been spent on it
 
 
 
 ), reply_time_breached_at_remove_old_sla as (
-  select 
+  select
     *,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
     case when 
