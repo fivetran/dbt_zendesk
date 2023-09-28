@@ -80,8 +80,8 @@ with timezone as (
         standard_offset_minutes + daylight_offset_minutes as offset_minutes,
         daylight_start_utc as valid_from,
         daylight_end_utc as valid_until,
-        cast(daylight_start_utc as {{ dbt.type_timestamp() }}) as daylight_start_utc,
-        cast(daylight_end_utc as {{ dbt.type_timestamp() }}) as daylight_end_utc
+        daylight_start_utc,
+        daylight_end_utc
 
     from order_timezone_dt
     where daylight_offset_minutes is not null
@@ -101,8 +101,8 @@ with timezone as (
         -- we'll use these to determine which schedule version to associate tickets with
         cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
         cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until,
-        daylight_start_utc,
-        daylight_end_utc
+        cast(daylight_start_utc as {{ dbt.type_timestamp() }}) as daylight_start_utc,
+        cast(daylight_end_utc as {{ dbt.type_timestamp() }}) as daylight_end_utc
 
     from schedule
     left join split_timezones
@@ -242,6 +242,7 @@ with timezone as (
         not (period_end = daylight_start_utc or period_end = daylight_end_utc) as can_merge_rightside, -- can it merge a gap that is later in time
         daylight_start_utc,
         daylight_end_utc
+    from all_periods
 
 -- We have holiday and non holiday schedules together, now let's sort them to understand the previous end and next start of neighboring schedules
 ), sorted_periods as (
@@ -250,7 +251,7 @@ with timezone as (
         *,
         lag(period_end) over (partition by schedule_id order by period_start, start_time_utc) as prev_end,
         lead(period_start) over (partition by schedule_id order by period_start, start_time_utc) as next_start
-    from all_periods
+    from check_if_mergeable
 
 -- We need to adjust some non holiday schedules in order to properly fill holiday gaps in the schedules later down the transformation
 ), non_holiday_period_adjustments as (
