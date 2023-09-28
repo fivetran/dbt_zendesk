@@ -264,11 +264,11 @@ with timezone as (
         next_start,
         -- taking first_value/last_value because prev_end and next_start are inconsistent within the schedule partitions -- they all include a record that is outside the partition. so we need to ignore those erroneous records that slip in
         coalesce(case 
-            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start, start_time_utc order by start_time_utc rows between unbounded preceding and unbounded following)
+            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_start
         end, period_start) as valid_from,
         coalesce(case 
-            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start, start_time_utc order by start_time_utc rows between unbounded preceding and unbounded following)
+            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_end
         end, period_end) as valid_until,
         start_time_utc,
@@ -297,7 +297,6 @@ with timezone as (
         -- In order to identify the gaps we check to see if the valid_from and previous valid_until are right next to one. If we add two hours to the previous valid_until it should always be greater than the current valid_from.
         -- However, if the valid_from is greater instead then we can identify that this period has a gap that needs to be filled.
         case when valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})
-                or  valid_until > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})
             then 'gap'
         when (lead_next_start is null and valid_from < max_valid_until and period_end != max_valid_until)
             then 'gap'
