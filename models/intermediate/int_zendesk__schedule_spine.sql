@@ -63,9 +63,7 @@ with timezone as (
         coalesce(last_daylight_end_utc, cast('1970-01-01' as date)) as valid_from,
 
         -- daylight_start_utc is null for timezones that don't use DT
-        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date)) as valid_until,
-        daylight_start_utc,
-        daylight_end_utc
+        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date)) as valid_until
 
     from order_timezone_dt
 
@@ -79,9 +77,7 @@ with timezone as (
         -- Pacific Time is -8h during standard time and -7h during DT
         standard_offset_minutes + daylight_offset_minutes as offset_minutes,
         daylight_start_utc as valid_from,
-        daylight_end_utc as valid_until,
-        daylight_start_utc,
-        daylight_end_utc
+        daylight_end_utc as valid_until
 
     from order_timezone_dt
     where daylight_offset_minutes is not null
@@ -100,9 +96,7 @@ with timezone as (
 
         -- we'll use these to determine which schedule version to associate tickets with
         cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
-        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until,
-        cast(daylight_start_utc as {{ dbt.type_timestamp() }}) as daylight_start_utc,
-        cast(daylight_end_utc as {{ dbt.type_timestamp() }}) as daylight_end_utc
+        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
 
     from schedule
     left join split_timezones
@@ -155,12 +149,10 @@ with timezone as (
         start_time_utc, 
         end_time_utc, 
         holiday_week_start,
-        daylight_start_utc,
-        daylight_end_utc,
         cast({{ dbt.dateadd("second", "86399", "holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
         max(holiday_name_check) as holiday_name_check
     from holiday_check
-    {{ dbt_utils.group_by(n=11) }}
+    {{ dbt_utils.group_by(n=9) }}
 
 -- Since we have holiday schedules and normal schedules, we need to union them into a holistic schedule spine
 ), spine_union as (
@@ -175,9 +167,7 @@ with timezone as (
         end_time_utc, 
         holiday_week_start,
         holiday_week_end,
-        holiday_name_check,
-        daylight_start_utc,
-        daylight_end_utc
+        holiday_name_check
     from holiday_consolidated
 
     union all
@@ -192,9 +182,7 @@ with timezone as (
         end_time_utc, 
         null as holiday_week_start,
         null as holiday_week_end,
-        null as holiday_name_check,
-        daylight_start_utc,
-        daylight_end_utc
+        null as holiday_name_check
     from calculate_schedules
 
 -- Now that we have an understanding of which weeks are holiday's let's consolidate them with non holiday weeks
@@ -207,9 +195,7 @@ with timezone as (
         start_time_utc,
         end_time_utc,
         holiday_name_check,
-        true as is_holiday_week,
-        daylight_start_utc,
-        daylight_end_utc
+        true as is_holiday_week
     from spine_union
     where holiday_week_start is not null
         and holiday_week_end is not null
@@ -223,26 +209,8 @@ with timezone as (
         start_time_utc,
         end_time_utc,
         cast(null as {{ dbt.type_string() }}) as holiday_name_check,
-        false as is_holiday_week,
-        daylight_start_utc,
-        daylight_end_utc
+        false as is_holiday_week
     from spine_union
-
-), check_if_mergeable as (
-
-    select
-        schedule_id,
-        period_start,
-        period_end,
-        start_time_utc,
-        end_time_utc,
-        holiday_name_check,
-        is_holiday_week,
-        not (period_start = daylight_start_utc or period_start = daylight_end_utc) as can_merge_leftside, -- can it merge with a gap that is earlier in time (do we need to include holiday check?)
-        not (period_end = daylight_start_utc or period_end = daylight_end_utc) as can_merge_rightside, -- can it merge a gap that is later in time
-        daylight_start_utc,
-        daylight_end_utc
-    from all_periods
 
 -- We have holiday and non holiday schedules together, now let's sort them to understand the previous end and next start of neighboring schedules
 ), sorted_periods as (
@@ -251,7 +219,7 @@ with timezone as (
         *,
         lag(period_end) over (partition by schedule_id order by period_start, start_time_utc) as prev_end,
         lead(period_start) over (partition by schedule_id order by period_start, start_time_utc) as next_start
-    from check_if_mergeable
+    from all_periods
 
 -- We need to adjust some non holiday schedules in order to properly fill holiday gaps in the schedules later down the transformation
 ), non_holiday_period_adjustments as (
@@ -263,10 +231,10 @@ with timezone as (
         prev_end,
         next_start,
         -- taking first_value/last_value because prev_end and next_start are inconsistent within the schedule partitions -- they all include a record that is outside the partition. so we need to ignore those erroneous records that slip in
-        coalesce(case 
+        coalesce(greatest(case 
             when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_start
-        end, period_start) as valid_from,
+        end, period_start), period_start) as valid_from,
         coalesce(case 
             when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
             else period_end
@@ -274,9 +242,7 @@ with timezone as (
         start_time_utc,
         end_time_utc,
         holiday_name_check,
-        is_holiday_week,
-        can_merge_leftside,
-        can_merge_rightside
+        is_holiday_week
     from sorted_periods
 
 -- A few window function results will be leveraged downstream. Let's generate them now.
@@ -284,7 +250,6 @@ with timezone as (
     select 
         *,
         max(period_end) over (partition by schedule_id) as max_valid_until,
-        -- these order-bys are suspicious
         last_value(next_start) over (partition by schedule_id, period_start order by valid_until rows between unbounded preceding and unbounded following) as lead_next_start,
         first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end
     from non_holiday_period_adjustments
@@ -296,18 +261,19 @@ with timezone as (
         *,
         -- In order to identify the gaps we check to see if the valid_from and previous valid_until are right next to one. If we add two hours to the previous valid_until it should always be greater than the current valid_from.
         -- However, if the valid_from is greater instead then we can identify that this period has a gap that needs to be filled.
-        case when valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})
+        case 
+        when cast({{ dbt.dateadd("hour", "2", "valid_until") }} as {{ dbt.type_timestamp() }}) < cast(lead_next_start as {{ dbt.type_timestamp() }})
             then 'gap'
         when (lead_next_start is null and valid_from < max_valid_until and period_end != max_valid_until)
             then 'gap'
             else null
-        end as is_schedule_gap,
+        end as is_schedule_gap
 
         -- Additionally, there may be cases where a gap is identified both before the holiday and after. In those cases we want to make appropriate adjustments after the holiday.
-        case when (valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})) and (lead_next_start is null and valid_from < max_valid_until) and (period_end != max_valid_until)
+        {# case when (valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})) and (lead_next_start is null and valid_from < max_valid_until) and (period_end != max_valid_until)
             then 'double_gap'
             else null
-        end as is_schedule_double_gap
+        end as is_schedule_double_gap #}
     from gap_starter
 
 -- We know where the gaps are, so now lets prime the data to fill those gaps
@@ -324,8 +290,8 @@ with timezone as (
         holiday_name_check,
         is_holiday_week,
         max(is_schedule_gap) over (partition by schedule_id, valid_until) as is_gap_period,
-        max(is_schedule_double_gap) over (partition by schedule_id, valid_until) as is_double_gap_period,
-        lag(valid_until) over (partition by schedule_id order by valid_until, start_time_utc) as fill_primer
+        {# max(is_schedule_double_gap) over (partition by schedule_id, valid_until) as is_double_gap_period, #}
+        lead(valid_from) over (partition by schedule_id order by valid_from, start_time_utc) as fill_primer
     from gap_adjustments
 
 -- We know the gaps and where they are, so let's fill them with the following union
@@ -334,8 +300,8 @@ with timezone as (
     -- For all gap periods, let's properly create a schedule filled before the holiday.
     select 
         schedule_id,
-        first_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following) as valid_from,
-        valid_from as valid_until,
+        valid_until as valid_from,
+        coalesce(last_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following), max_valid_until) as valid_until,
         start_time_utc, 
         end_time_utc, 
         cast(null as {{ dbt.type_string() }}) as holiday_name_check,
@@ -343,7 +309,7 @@ with timezone as (
     from schedule_spine_primer
     where is_gap_period is not null
 
-    union all
+    {# union all
 
     -- For any double gap periods, let's fill a schedule directly after the holiday.
     select
@@ -361,7 +327,7 @@ with timezone as (
         cast(null as {{ dbt.type_string() }}) as holiday_name_check,
         false as is_holiday_week
     from schedule_spine_primer
-    where is_double_gap_period is not null
+    where is_double_gap_period is not null #}
 
     union all
 
