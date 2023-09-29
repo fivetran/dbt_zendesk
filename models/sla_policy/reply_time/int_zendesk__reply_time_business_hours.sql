@@ -37,7 +37,9 @@ with ticket_schedules as (
             "cast(sla_policy_applied.sla_applied_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
-      schedule_business_hours.total_schedule_weekly_business_minutes
+      schedule_business_hours.total_schedule_weekly_business_minutes,
+    {{ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') }} as start_week_date -- is this necessary here? 
+
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
     and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_created_at') }} <= sla_policy_applied.sla_applied_at
@@ -56,7 +58,7 @@ with ticket_schedules as (
     select 
 
       ticket_sla_applied_with_schedules.*,
-      generated_number - 1 as week_number
+      cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
     from ticket_sla_applied_with_schedules
     cross join weeks
@@ -66,8 +68,8 @@ with ticket_schedules as (
   
   select 
     weeks_cross_ticket_sla_applied.*,
-    greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
-    (7*24*60) as ticket_week_end_time
+    cast(greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as {{ dbt.type_int() }}) as ticket_week_start_time,
+    cast((7*24*60) as {{ dbt.type_int() }}) as ticket_week_end_time
   from weeks_cross_ticket_sla_applied
 
 ), intercepted_periods as (
@@ -86,9 +88,10 @@ with ticket_schedules as (
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
-    and weekly_periods.sla_applied_at >= cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-    and weekly_periods.sla_applied_at < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
-  
+    -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
+    and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
+    and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+
 ), intercepted_periods_with_breach_flag as (
   
   select 
