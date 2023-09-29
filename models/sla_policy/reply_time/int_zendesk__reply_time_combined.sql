@@ -103,7 +103,7 @@ with reply_time_calendar_hours_sla as (
   {{ dbt_utils.group_by(n=8) }}
 
 ), lagging_time_block as (
-  select 
+  select
     *,
     min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
@@ -113,25 +113,19 @@ with reply_time_calendar_hours_sla as (
   select
     *
   from lagging_time_block
-  where (in_business_hours = true 
-    and ((agent_reply_at between sla_schedule_start_at and sla_schedule_end_at) -- ticket is replied to between a schedule window
-    or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
-    )) -- ticket is replied to before a schedule window and no business minutes have been spent on it
-  -- note it must only pick 1 or the other, not bring both down
-  or (in_business_hours = false
-    and (agent_reply_at >= sla_schedule_start_at )
-    or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
-    )
-  or
-    (agent_reply_at is null
-      and sla_applied_at >= ticket_created_at -- sla_applied_at comes from: case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at; in int_zendesk__sla_policy_applied
-    )
+  where (
+    in_business_hours
+      and ((
+        agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
+        or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
+        or (agent_reply_at is null and sla_applied_at >= ticket_created_at)
+      ))
+    or (not in_business_hours)
 
 ), reply_time_breached_at_remove_old_sla as (
   select
     *,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
-    row_number() over (partition by ticket_id, metric, sla_applied_at, in_business_hours order by sla_schedule_start_at) as row_num,
     case when 
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
@@ -152,7 +146,6 @@ with reply_time_calendar_hours_sla as (
       else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} 
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla
-  where row_num = 1
 )
 
 select *
