@@ -112,13 +112,20 @@ with reply_time_calendar_hours_sla as (
 ), filtered_reply_times as (
   select
     *
-
   from lagging_time_block
-  where (agent_reply_at between sla_schedule_start_at and sla_schedule_end_at) -- ticket is replied to between a schedule window
-  or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)-- ticket is replied to before a schedule window and no business minutes have been spent on it
+  where (in_business_hours = true 
+    and ((agent_reply_at between sla_schedule_start_at and sla_schedule_end_at) -- ticket is replied to between a schedule window
+    or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
+    )) -- ticket is replied to before a schedule window and no business minutes have been spent on it
   -- note it must only pick 1 or the other, not bring both down
-
-
+  or (in_business_hours = false
+    and (agent_reply_at >= sla_schedule_start_at )
+    or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at)
+    )
+  or
+    (agent_reply_at is null
+      and sla_applied_at >= ticket_created_at -- sla_applied_at comes from: case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at; in int_zendesk__sla_policy_applied
+    )
 
 ), reply_time_breached_at_remove_old_sla as (
   select
