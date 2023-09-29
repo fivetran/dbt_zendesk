@@ -117,6 +117,10 @@ with ticket_schedules as (
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_start_time) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
+    {{ fivetran_utils.timestamp_add(
+        "minute",
+        "cast(((7*24*60) * week_number) + (schedule_end_time) as " ~ dbt.type_int() ~ " )",
+        "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
     {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date
   from intercepted_periods_with_breach_flag
 
@@ -126,8 +130,10 @@ with ticket_schedules as (
     ticket_id,
     sla_policy_name,
     metric,
+    ticket_created_at,
     sla_applied_at,
     greatest(sla_applied_at,sla_schedule_start_at) as sla_schedule_start_at,
+    sla_schedule_end_at,
     target,
     sum_lapsed_business_minutes,
     in_business_hours,
