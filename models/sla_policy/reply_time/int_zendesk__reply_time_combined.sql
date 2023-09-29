@@ -131,6 +131,7 @@ with reply_time_calendar_hours_sla as (
   select
     *,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
+    row_number() over (partition by ticket_id, metric, sla_applied_at, in_business_hours order by sla_schedule_start_at) as row_num,
     case when 
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
@@ -151,6 +152,7 @@ with reply_time_calendar_hours_sla as (
       else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} 
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla
+  where row_num = 1
 )
 
 select *
