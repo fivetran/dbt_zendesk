@@ -109,7 +109,7 @@ with timezone as (
         calculate_schedules.*,
         schedule_holiday.holiday_name,
         schedule_holiday.holiday_start_date_at,
-        cast({{ dbt.dateadd("second", "86399", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60-1 seconds
+        cast({{ dbt.dateadd("second", "86400", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60 seconds
         cast({{ dbt_date.week_start("schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
         cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
     from schedule_holiday
@@ -149,7 +149,7 @@ with timezone as (
         start_time_utc, 
         end_time_utc, 
         holiday_week_start,
-        cast({{ dbt.dateadd("second", "86399", "holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
+        cast({{ dbt.dateadd("second", "86400", "holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
         max(holiday_name_check) as holiday_name_check
     from holiday_check
     {{ dbt_utils.group_by(n=9) }}
