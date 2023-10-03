@@ -66,16 +66,16 @@ with reply_time_calendar_hours_sla as (
   and value in ('solved','closed')
 
 ), reply_time as (
-    select 
-      ticket_comment.ticket_id,
-      ticket_comment.valid_starting_at as reply_at,
-      commenter.role
-    from ticket_updates as ticket_comment
-    join users as commenter
-      on commenter.user_id = ticket_comment.user_id
-    where field_name = 'comment' 
-      and ticket_comment.is_public
-      and commenter.role in ('agent','admin')
+  select 
+    ticket_comment.ticket_id,
+    ticket_comment.valid_starting_at as reply_at,
+    commenter.role
+  from ticket_updates as ticket_comment
+  join users as commenter
+    on commenter.user_id = ticket_comment.user_id
+  where field_name = 'comment' 
+    and ticket_comment.is_public
+    and commenter.role in ('agent','admin')
 
 ), reply_time_breached_at_with_next_reply_timestamp as (
 
@@ -119,7 +119,7 @@ with reply_time_calendar_hours_sla as (
       and ((
         agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
         or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
-        or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and {{ dbt.current_timestamp() }} < next_schedule_start)
+        or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and {{ dbt.current_timestamp() }} < next_schedule_start) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)  
       ))
     or (not in_business_hours)
 
