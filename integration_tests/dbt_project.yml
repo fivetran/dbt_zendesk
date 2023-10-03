@@ -10,6 +10,7 @@ vars:
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
+    zendesk_schedule_holiday_identifier:       "schedule_holiday_data"
     zendesk_ticket_identifier:                 "ticket_data"
     zendesk_ticket_comment_identifier:         "ticket_comment_data"
     zendesk_ticket_field_history_identifier:   "ticket_field_history_data"
