@@ -85,7 +85,6 @@ vars:
 ```
 
 ## (Optional) Step 5: Additional configurations
-<details><summary>Expand for configurations</summary>
 
 ### Adding passthrough columns
 This package includes all source columns defined in the staging models. However, the `stg_zendesk__ticket` model allows for additional columns to be added using a pass-through column variable. This is extremely useful if you'd like to include custom fields to the package.
@@ -161,7 +160,6 @@ If an individual source table has a different name than the package expects, add
 vars:
     zendesk_<default_source_table_name>_identifier: your_table_name 
 ```
-</details>
 
 ## (Optional) Step 6: Orchestrate your models with Fivetran Transformations for dbt Core™
 <details><summary>Expand for details</summary>

@@ -1,8 +1,11 @@
 # dbt_zendesk v0.12.0
-PR #<fill in> includes the following changes:
+
+This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the addition of `schedule_holidqay`.
+
+[PR #114](https://github.com/fivetran/dbt_zendesk/pull/114) includes the following changes:
 
 ## Bug Fix
-- 
+- This was a doozy! 
 
 ## Under the Hood
 
