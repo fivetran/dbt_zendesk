@@ -38,7 +38,7 @@ with ticket_schedules as (
             'second') }} /60
           ) as start_time_in_minutes_from_week,
       schedule_business_hours.total_schedule_weekly_business_minutes,
-    {{ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') }} as start_week_date -- is this necessary here? 
+    {{ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') }} as start_week_date
 
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id

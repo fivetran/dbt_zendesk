@@ -68,7 +68,7 @@ with requester_wait_time_filtered_statuses as (
               'ticket_status_crossed_with_schedule.valid_ending_at',
               'second') }} /60
             ) as raw_delta_in_minutes,
-    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date -- maybe change to status_valid_starting_at?
+    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date
 
     from ticket_status_crossed_with_schedule
     {{ dbt_utils.group_by(n=10) }}
