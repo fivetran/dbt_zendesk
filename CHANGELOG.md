@@ -1,3 +1,16 @@
+# dbt_zendesk v0.12.0
+PR #<fill in> includes the following changes:
+
+## Bug Fix
+- 
+
+## Under the Hood
+
+# dbt_zendesk v0.11.2
+
+## Rollback
+This [PR #110](https://github.com/fivetran/dbt_zendesk/pull/110/files) is a rollback to v0.10.2. We are seeing issues in business minutes and SLA duplicate records following the v0.11.0 release.
+
 # dbt_zendesk v0.11.1
 
 Tiny release ahead!
