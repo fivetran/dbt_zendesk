@@ -105,6 +105,7 @@ with reply_time_calendar_hours_sla as (
 ), lagging_time_block as (
   select
     *,
+    lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at) as next_schedule_start,
     min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
   from reply_time_breached_at_with_next_reply_timestamp
@@ -118,13 +119,14 @@ with reply_time_calendar_hours_sla as (
       and ((
         agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
         or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
-        or (agent_reply_at is null and sla_applied_at >= ticket_created_at)
+        or (agent_reply_at is null and current_timestamp >= sla_schedule_start_at and current_timestamp < next_schedule_start)
       ))
     or (not in_business_hours)
 
 ), reply_time_breached_at_remove_old_sla as (
   select
     *,
+    {{ dbt.current_timestamp() }} as current_time_check,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
     case when 
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
@@ -143,10 +145,10 @@ with reply_time_calendar_hours_sla as (
     *,
     case when {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} < 0 
       then 0 
-      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} 
+      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'minute') }} 
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla
 )
 
 select *
-from reply_time_breach
+from reply_time_br
