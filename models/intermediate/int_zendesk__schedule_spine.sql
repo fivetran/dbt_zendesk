@@ -269,11 +269,6 @@ with timezone as (
             else null
         end as is_schedule_gap
 
-        -- Additionally, there may be cases where a gap is identified both before the holiday and after. In those cases we want to make appropriate adjustments after the holiday.
-        {# case when (valid_from > cast({{ dbt.dateadd("hour", "2", "first_prev_end") }} as {{ dbt.type_timestamp() }})) and (lead_next_start is null and valid_from < max_valid_until) and (period_end != max_valid_until)
-            then 'double_gap'
-            else null
-        end as is_schedule_double_gap #}
     from gap_starter
 
 -- We know where the gaps are, so now lets prime the data to fill those gaps
@@ -290,7 +285,6 @@ with timezone as (
         holiday_name_check,
         is_holiday_week,
         max(is_schedule_gap) over (partition by schedule_id, valid_until) as is_gap_period,
-        {# max(is_schedule_double_gap) over (partition by schedule_id, valid_until) as is_double_gap_period, #}
         lead(valid_from) over (partition by schedule_id order by valid_from, start_time_utc) as fill_primer
     from gap_adjustments
 
@@ -308,26 +302,6 @@ with timezone as (
         false as is_holiday_week
     from schedule_spine_primer
     where is_gap_period is not null
-
-    {# union all
-
-    -- For any double gap periods, let's fill a schedule directly after the holiday.
-    select
-        schedule_id,
-        case when lead_next_start is not null
-            then first_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following) 
-            else last_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following)
-        end as valid_from,
-        case when lead_next_start is not null
-            then valid_from 
-            else max_valid_until
-        end as valid_until,
-        start_time_utc, 
-        end_time_utc, 
-        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
-        false as is_holiday_week
-    from schedule_spine_primer
-    where is_double_gap_period is not null #}
 
     union all
 
