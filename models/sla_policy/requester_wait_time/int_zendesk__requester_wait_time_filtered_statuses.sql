@@ -27,7 +27,7 @@ with requester_wait_time_sla as (
   from ticket_historical_status
   join requester_wait_time_sla
     on ticket_historical_status.ticket_id = requester_wait_time_sla.ticket_id
-  where ticket_historical_status.status in ('new', 'open', 'on-hold') -- these are the only statuses that count as "requester wait time"
+  where ticket_historical_status.status in ('new', 'open', 'on-hold', 'hold') -- these are the only statuses that count as "requester wait time"
   and sla_applied_at < valid_ending_at
 
 )
