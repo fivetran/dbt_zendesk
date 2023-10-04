@@ -1,10 +1,6 @@
 # dbt_zendesk v0.12.0
-PR #<fill in> includes the following changes:
-
-## Bug Fix
-- 
-
-## Under the Hood
+## Dependency Updates
+- The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
 
 # dbt_zendesk v0.11.2
 
