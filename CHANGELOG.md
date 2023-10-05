@@ -1,6 +1,14 @@
 # dbt_zendesk v0.12.0
+
+## Fixes:
+- Applies the updates from v0.11.0 but updates the logic to bring through the correct `sla_event_id`` records to the end `zendesk__sla_policies` model. ([PR #108](https://github.com/fivetran/dbt_zendesk/issues/108))
 ## Dependency Updates
 - The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
+
+## Contributors: 
+- [@nschimmoller](https://github.com/nschimmoller)
+- [@cth84](https://github.com/cth84)
+
 
 # dbt_zendesk v0.11.2
 
