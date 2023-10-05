@@ -125,8 +125,11 @@ with ticket_schedules as (
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
-    {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date
-        "" ~ dbt.date_trunc('week', 'sla_applied_at') ~ "" ) }} as sla_breach_at
+    {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date,
+    {{ fivetran_utils.timestamp_add(
+        "minute",
+        "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt.type_int() ~ " )",
+        "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_breach_at
   from intercepted_periods_with_breach_flag
 
 ), reply_time_business_hours_sla as (
