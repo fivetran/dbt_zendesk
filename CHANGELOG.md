@@ -1,5 +1,7 @@
 # dbt_zendesk v0.12.0
 
+This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the addition of `schedule_holidqay`.
+
 ## Fixes:
 - Applies the updates from v0.11.0 but updates the logic to bring through the correct `sla_event_id`` records to the end `zendesk__sla_policies` model. ([PR #108](https://github.com/fivetran/dbt_zendesk/issues/108))
 ## Dependency Updates
@@ -9,6 +11,7 @@
 - [@nschimmoller](https://github.com/nschimmoller)
 - [@cth84](https://github.com/cth84)
 
+[PR #114](https://github.com/fivetran/dbt_zendesk/pull/114) includes the following changes:
 
 # dbt_zendesk v0.11.2
 

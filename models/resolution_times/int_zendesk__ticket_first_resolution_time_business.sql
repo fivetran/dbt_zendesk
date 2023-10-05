@@ -38,7 +38,7 @@ with ticket_resolution_times_calendar as (
           'least(ticket_schedules.schedule_invalidated_at, min(ticket_resolution_times_calendar.first_solved_at))',
           'second') }}/60
         )) as raw_delta_in_minutes,
-    {{ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') }} as start_week_date -- or should this truncate first_solved_at?
+    {{ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') }} as start_week_date
       
   from ticket_resolution_times_calendar
   join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
