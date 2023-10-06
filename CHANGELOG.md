@@ -1,13 +1,15 @@
 # dbt_zendesk v0.12.0
 
-This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the addition of `schedule_holidqay`.
+This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the incorporation of schedule holidays.
 
-[PR #114](https://github.com/fivetran/dbt_zendesk/pull/114) includes the following changes:
+Special thanks to @cth84 and @nschimmoller for working with us to figure out some seriously tricky bugs!
 
 ## Bug Fix
-- This was a doozy! 
-
-## Under the Hood
+- Adjusted the gap-merging logic in `int_shopify__schedule_spine` to look forward in time instead of backward. This allows the model to take Daylight Savings Time into account when merging gaps. Previously, schedule periods with different `start_time_utcs` (because of DST) were getting merged together ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
+  - Also removed the `double_gap` logic as it was rendered unnecessary by the above change.
+- In all of our intermediate business hour models, adjusted the join logic in the `intercepted_periods` CTE, where we associate ticket weekly periods with the appropriate business scedule period. Previously, we did so by comparing the ticket's `status_valid_starting_at` and `status_valid_ending_at` fields to the schedule's `vaid_from` and `valid_until` dates. This was causing fanout in certain cases, as we need to take the ticket-status's `week_number` into account because it is part of the grain of the CTE we are joining ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
+- Adjusted the way we calculate the end of holidays in `int_shopify__schedule_spine`. Previously, we calculated the end of holiday day by adding `24*60*60-1` seconds (making the end the last second of the same day) to the start of the holiday. This previously worked because our downstream joins for calculating business metrics were inclusive (ie `>=` instead of `>`). We've updated these joins to be exclusive (ie `>` or `<`), so we've set the end of the holiday to truly be the end of the day instead of a second prior ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
+- Updated `int_zendesk__requester_wait_time_filtered_statuses` to include the `hold` status, as zendesk updated `on-hold` to just `hold` ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
 
 # dbt_zendesk v0.11.2
 
