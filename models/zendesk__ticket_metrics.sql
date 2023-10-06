@@ -191,8 +191,8 @@ select
   coalesce(business_hour_metrics.requester_wait_time_in_business_minutes,0) as requester_wait_time_in_business_minutes,
   coalesce(business_hour_metrics.agent_work_time_in_business_minutes,0) as agent_work_time_in_business_minutes,
   coalesce(business_hour_metrics.on_hold_time_in_business_minutes,0) as on_hold_time_in_business_minutes,
-  coalesce(business_hour_metrics.business_hour_metrics.new_status_duration_in_business_minutes,0) as new_status_duration_in_business_minutes,
-  coalesce(business_hour_metrics.business_hour_metrics.open_status_duration_in_business_minutes,0) as open_status_duration_in_business_minutes
+  coalesce(business_hour_metrics.new_status_duration_in_business_minutes,0) as new_status_duration_in_business_minutes,
+  coalesce(business_hour_metrics.open_status_duration_in_business_minutes,0) as open_status_duration_in_business_minutes
 
 from calendar_hour_metrics
 
