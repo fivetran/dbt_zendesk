@@ -120,7 +120,11 @@ with ticket_historical_status as (
       case when ticket_status in ('new', 'open') then scheduled_minutes
           else 0 end as agent_work_time_in_minutes,
       case when ticket_status in ('hold') then scheduled_minutes
-          else 0 end as on_hold_time_in_minutes
+          else 0 end as on_hold_time_in_minutes,
+      case when ticket_status = 'new' then scheduled_minutes
+          else 0 end as new_status_duration_minutes,
+      case when ticket_status = 'open' then scheduled_minutes
+          else 0 end as open_status_duration_minutes
     from intercepted_periods
 
 )
@@ -130,6 +134,8 @@ with ticket_historical_status as (
       sum(agent_wait_time_in_minutes) as agent_wait_time_in_business_minutes,
       sum(requester_wait_time_in_minutes) as requester_wait_time_in_business_minutes,
       sum(agent_work_time_in_minutes) as agent_work_time_in_business_minutes,
-      sum(on_hold_time_in_minutes) as on_hold_time_in_business_minutes
+      sum(on_hold_time_in_minutes) as on_hold_time_in_business_minutes,
+      sum(new_status_duration_minutes) as new_status_duration_in_business_minutes,
+      sum(open_status_duration_minutes) as open_status_duration_in_business_minutes
     from business_minutes
     group by 1
