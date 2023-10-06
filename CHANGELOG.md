@@ -12,9 +12,9 @@ Special thanks to @cth84 and @nschimmoller for working with us to figure out som
 - Updated `int_zendesk__requester_wait_time_filtered_statuses` to include the `hold` status, as zendesk updated `on-hold` to just `hold` ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
 - Updates the logic in `int_zendesk__reply_time_combined` to bring through the correct `sla_event_id` records to the end `zendesk__sla_policies` model. ([PR #108](https://github.com/fivetran/dbt_zendesk/issues/108))
 - Originally, duplicate `sla_event_id` records were being persisted because the upstream `filtered_reply_times` CTE did not include for all scenarios. With this update, the CTE will filter for the following scenarios:
-    - ticket is replied to between a schedule window
-    - ticket is replied to before a schedule window and no business minutes have been spent on it
-    - ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)
+    - Ticket is replied to between a schedule window
+    - Ticket is replied to before a schedule window and no business minutes have been spent on it
+    - Ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)
 
 ## Dependency Updates
 - The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
