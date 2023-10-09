@@ -10,6 +10,18 @@ Special thanks to @cth84 and @nschimmoller for working with us to figure out som
 - In all of our intermediate business hour models, adjusted the join logic in the `intercepted_periods` CTE, where we associate ticket weekly periods with the appropriate business scedule period. Previously, we did so by comparing the ticket's `status_valid_starting_at` and `status_valid_ending_at` fields to the schedule's `vaid_from` and `valid_until` dates. This was causing fanout in certain cases, as we need to take the ticket-status's `week_number` into account because it is part of the grain of the CTE we are joining ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
 - Adjusted the way we calculate the end of holidays in `int_shopify__schedule_spine`. Previously, we calculated the end of holiday day by adding `24*60*60-1` seconds (making the end the last second of the same day) to the start of the holiday. This previously worked because our downstream joins for calculating business metrics were inclusive (ie `>=` instead of `>`). We've updated these joins to be exclusive (ie `>` or `<`), so we've set the end of the holiday to truly be the end of the day instead of a second prior ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
 - Updated `int_zendesk__requester_wait_time_filtered_statuses` to include the `hold` status, as zendesk updated `on-hold` to just `hold` ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
+- Updates the logic in `int_zendesk__reply_time_combined` to bring through the correct `sla_event_id` records to the end `zendesk__sla_policies` model. ([PR #108](https://github.com/fivetran/dbt_zendesk/issues/108))
+- Originally, duplicate `sla_event_id` records were being persisted because the upstream `filtered_reply_times` CTE did not include for all scenarios. With this update, the CTE will filter for the following scenarios:
+    - Ticket is replied to between a schedule window
+    - Ticket is replied to before a schedule window and no business minutes have been spent on it
+    - Ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)
+
+## Dependency Updates
+- The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
+
+## Contributors: 
+- [@nschimmoller](https://github.com/nschimmoller)
+- [@cth84](https://github.com/cth84)
 
 # dbt_zendesk v0.11.2
 

@@ -51,7 +51,7 @@ union all
     target,
     false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
-    sum(running_total_calendar_minutes) as sla_elapsed_time,
+    max(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
   from agent_work_calendar_sla
 
@@ -67,7 +67,7 @@ union all
     target,
     false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
-    sum(running_total_calendar_minutes) as sla_elapsed_time,
+    max(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
   from requester_wait_calendar_sla
 
