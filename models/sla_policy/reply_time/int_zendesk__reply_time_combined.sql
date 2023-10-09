@@ -121,7 +121,7 @@ with reply_time_calendar_hours_sla as (
         or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
         or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and {{ dbt.current_timestamp() }} < next_schedule_start) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)  
       ))
-    or (not in_business_hours)
+    or not in_business_hours
 
 ), reply_time_breached_at_remove_old_sla as (
   select
