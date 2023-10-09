@@ -15,6 +15,8 @@ Special thanks to @cth84 and @nschimmoller for working with us to figure out som
     - Ticket is replied to between a schedule window
     - Ticket is replied to before a schedule window and no business minutes have been spent on it
     - Ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next)
+- Updated the ordering within the `int_zendesk__comments_enriched` model logic to also take into account when two comments are posted at the exact same time. Previously, the next comment would be picked arbitrarily. However, we now use the `commenter_role` as the tie breaker giving preference to the `end-user` as they will likely be the first commenter when two comments are posted at the exact same time. ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114))
+- Modified the requester and agent wait time `sla_elapsed_time` metric calculations within the `zendesk__sla_policies` to capture the max `running_total_scheduled_minutes` record as opposed to the cumulative sum. Max more accurately represents the upstream data as it is presented in a rolling sum in the previous intermediate models. ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114))
 
 ## Dependency Updates
 - The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
