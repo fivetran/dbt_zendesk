@@ -2,7 +2,7 @@
 
 This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the incorporation of schedule holidays.
 
-Special thanks to @cth84 and @nschimmoller for working with us to figure out some seriously tricky bugs!
+Special thanks to [@cth84](https://github.com/cth84) and [@nschimmoller](https://github.com/nschimmoller) for working with us to figure out some seriously tricky bugs!
 
 ## Bug Fix
 - Adjusted the gap-merging logic in `int_shopify__schedule_spine` to look forward in time instead of backward. This allows the model to take Daylight Savings Time into account when merging gaps. Previously, schedule periods with different `start_time_utcs` (because of DST) were getting merged together ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114)).
