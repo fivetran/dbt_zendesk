@@ -22,8 +22,8 @@ Special thanks to [@cth84](https://github.com/cth84) and [@nschimmoller](https:/
 - The `dbt-date` dependency has been updated to reflect the recommended latest range, [">=0.9.0", "<1.0.0"]. This will help to avoid upstream dependency conflicts. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
 
 ## Contributors: 
-- [@nschimmoller](https://github.com/nschimmoller)
-- [@cth84](https://github.com/cth84)
+- [@nschimmoller](https://github.com/nschimmoller) ([#108](https://github.com/fivetran/dbt_zendesk/issues/108))
+- [@cth84](https://github.com/cth84) ([#107](https://github.com/fivetran/dbt_zendesk/issues/107))
 
 # dbt_zendesk v0.11.2
 
