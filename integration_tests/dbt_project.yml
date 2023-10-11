@@ -129,6 +129,11 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
+    user_tag_data_snowflake:
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+    organization_tag_data_snowflake:
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+
 
 dispatch:
   - macro_namespace: dbt_utils
