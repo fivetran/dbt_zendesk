@@ -19,7 +19,7 @@ Special thanks to [@cth84](https://github.com/cth84) and [@nschimmoller](https:/
 - Modified the requester and agent wait time `sla_elapsed_time` metric calculations within the `zendesk__sla_policies` to capture the max `running_total_scheduled_minutes` record as opposed to the cumulative sum. Max more accurately represents the upstream data as it is presented in a rolling sum in the previous intermediate models. ([PR #114](https://github.com/fivetran/dbt_zendesk/pull/114))
 
 ## Dependency Updates
-- The `dbt-date` dependency has been updated to the most current version, [">=0.9.0", "<1.0.0"]. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
+- The `dbt-date` dependency has been updated to reflect the recommended latest range, [">=0.9.0", "<1.0.0"]. This will help to avoid upstream dependency conflicts. ([PR #113](https://github.com/fivetran/dbt_zendesk/pull/113))
 
 ## Contributors: 
 - [@nschimmoller](https://github.com/nschimmoller)
