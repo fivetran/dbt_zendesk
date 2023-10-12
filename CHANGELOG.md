@@ -1,6 +1,6 @@
 # dbt_zendesk v0.12.0
 
-This release reverts the rollback of v0.11.2 and fixes the issues introduced in v0.11.0-v0.11.1 by the incorporation of schedule holidays.
+This release includes fixes to issues introduced in v0.11.0-v0.11.1 surrounding the incorporation of schedule holidays.
 
 Special thanks to [@cth84](https://github.com/cth84) and [@nschimmoller](https://github.com/nschimmoller) for working with us to figure out some seriously tricky bugs!
 
