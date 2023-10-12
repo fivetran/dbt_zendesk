@@ -1,8 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.11.2'
-
+version: '0.12.0'
 
 profile: 'integration_tests'
 
@@ -11,6 +10,7 @@ vars:
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
+    zendesk_schedule_holiday_identifier:       "schedule_holiday_data"
     zendesk_ticket_identifier:                 "ticket_data"
     zendesk_ticket_comment_identifier:         "ticket_comment_data"
     zendesk_ticket_field_history_identifier:   "ticket_field_history_data"
@@ -49,6 +49,10 @@ seeds:
         end_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         start_time_utc: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
+    schedule_holiday_data:
+      +column_types:
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_comment_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -125,6 +129,11 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
+    user_tag_data_snowflake:
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+    organization_tag_data_snowflake:
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+
 
 dispatch:
   - macro_namespace: dbt_utils

@@ -26,12 +26,12 @@ with ticket_comment as (
 ), add_previous_commenter_role as (
     /*
     In int_zendesk__ticket_reply_times we will only be focusing on reply times between public tickets.
-    The below union explicitly identifies the previous commentor roles of public and not public comments.
+    The below union explicitly identifies the previous commenter roles of public and not public comments.
     */
     select
         *,
         coalesce(
-            lag(commenter_role) over (partition by ticket_id order by valid_starting_at)
+            lag(commenter_role) over (partition by ticket_id order by valid_starting_at, commenter_role)
             , 'first_comment') 
             as previous_commenter_role
     from joined

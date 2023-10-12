@@ -59,7 +59,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.11.0", "<0.12.0"]
+    version: [">=0.12.0", "<0.13.0"]
 
 ```
 > **Note**: Do not include the Zendesk source package. The Zendesk transform package already has a dependency on the source in its own `packages.yml` file.
@@ -74,7 +74,7 @@ vars:
 ```
 
 ## Step 4: Disable models for non-existent sources
-This package takes into consideration that not every Zendesk account utilizes the `schedule`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
+This package takes into consideration that not every Zendesk account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule` `daylight_time`, `time_zone`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`. Add variables for only the tables you want to disable:
 ```yml
 vars:
     using_schedules:            False         #Disable if you are not using schedules
@@ -85,7 +85,6 @@ vars:
 ```
 
 ## (Optional) Step 5: Additional configurations
-<details><summary>Expand for configurations</summary>
 
 ### Adding passthrough columns
 This package includes all source columns defined in the staging models. However, the `stg_zendesk__ticket` model allows for additional columns to be added using a pass-through column variable. This is extremely useful if you'd like to include custom fields to the package.
@@ -161,7 +160,6 @@ If an individual source table has a different name than the package expects, add
 vars:
     zendesk_<default_source_table_name>_identifier: your_table_name 
 ```
-</details>
 
 ## (Optional) Step 6: Orchestrate your models with Fivetran Transformations for dbt Core™
 <details><summary>Expand for details</summary>
@@ -177,7 +175,7 @@ This dbt package is dependent on the following dbt packages. Please be aware tha
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: [">=0.8.0", "<0.9.0"]
+      version: [">=0.9.0", "<0.10.0"]
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
@@ -189,7 +187,7 @@ packages:
       version: [">=0.3.0", "<0.4.0"]
 
     - package: calogica/dbt_date
-      version: [">=0.7.0", "<0.8.0"]
+      version: [">=0.9.0", "<1.0.0"]
 ```
 # 🙌 How is this package maintained and can I contribute?
 ## Package Maintenance
