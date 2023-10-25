@@ -1,6 +1,9 @@
-packages:
-  - package: fivetran/zendesk_source
-    version: [">=0.9.0", "<0.10.0"]
+# packages:
+#   - package: fivetran/zendesk_source
+#     version: [">=0.9.0", "<0.10.0"]
+  - git: https://github.com/fivetran/dbt_zendesk_source.git
+    revision: test/collect-freshness
+    warn-unpinned: false
 
   - package: calogica/dbt_date
     version: [">=0.9.0", "<1.0.0"]
