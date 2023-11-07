@@ -117,6 +117,8 @@ with ticket_historical_status as (
           else 0 end as agent_wait_time_in_minutes,
       case when ticket_status in ('new', 'open', 'hold') then scheduled_minutes
           else 0 end as requester_wait_time_in_minutes,
+      case when ticket_status in ('new', 'open', 'hold', 'pending') then scheduled_minutes
+          else 0 end as solve_time_in_minutes,
       case when ticket_status in ('new', 'open') then scheduled_minutes
           else 0 end as agent_work_time_in_minutes,
       case when ticket_status in ('hold') then scheduled_minutes
@@ -133,6 +135,7 @@ with ticket_historical_status as (
       ticket_id,
       sum(agent_wait_time_in_minutes) as agent_wait_time_in_business_minutes,
       sum(requester_wait_time_in_minutes) as requester_wait_time_in_business_minutes,
+      sum(solve_time_in_minutes) as solve_time_in_business_minutes,
       sum(agent_work_time_in_minutes) as agent_work_time_in_business_minutes,
       sum(on_hold_time_in_minutes) as on_hold_time_in_business_minutes,
       sum(new_status_duration_minutes) as new_status_duration_in_business_minutes,

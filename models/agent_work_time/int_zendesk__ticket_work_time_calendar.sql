@@ -12,6 +12,8 @@ with ticket_historical_status as (
             else 0 end as agent_wait_time_in_minutes,
         case when status in ('new', 'open', 'hold') then status_duration_calendar_minutes
             else 0 end as requester_wait_time_in_minutes,
+        case when status in ('new', 'open', 'hold', 'pending') then status_duration_calendar_minutes 
+            else 0 end as solve_time_in_minutes, 
         case when status in ('new', 'open') then status_duration_calendar_minutes
             else 0 end as agent_work_time_in_minutes,
         case when status in ('hold') then status_duration_calendar_minutes
@@ -38,6 +40,7 @@ select
   sum(ticket_deleted) as ticket_deleted_count,
   sum(agent_wait_time_in_minutes) as agent_wait_time_in_calendar_minutes,
   sum(requester_wait_time_in_minutes) as requester_wait_time_in_calendar_minutes,
+  sum(solve_time_in_minutes) as solve_time_in_calendar_minutes,
   sum(agent_work_time_in_minutes) as agent_work_time_in_calendar_minutes,
   sum(on_hold_time_in_minutes) as on_hold_time_in_calendar_minutes,
   sum(new_status_duration_minutes) as new_status_duration_in_calendar_minutes,
