@@ -1,0 +1,12 @@
+packages:
+- git: https://github.com/fivetran/dbt_zendesk_source.git
+  revision: feature/dbt-utils-star
+- package: calogica/dbt_date
+  version: 0.10.0
+- package: fivetran/fivetran_utils
+  version: 0.4.8
+- package: dbt-labs/spark_utils
+  version: 0.3.0
+- package: dbt-labs/dbt_utils
+  version: 1.1.1
+sha1_hash: 97acf24fa22aa67e32cd37ee9451f8e17d585973
