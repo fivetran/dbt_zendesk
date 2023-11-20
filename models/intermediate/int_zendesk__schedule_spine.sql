@@ -122,10 +122,12 @@ with timezone as (
 ), holiday_minutes as(
 
     select
-        *,
-        {{ dbt.datediff("holiday_week_start", "holiday_start_date_at", "minute") }} as minutes_from_sunday_start,
-        {{ dbt.datediff("holiday_week_start", "holiday_end_date_at", "minute") }} as minutes_from_sunday_end
+        holiday_start_end_times.*,
+        {{ dbt.datediff("holiday_week_start", "holiday_start_date_at", "minute") }} - coalesce(timezone.standard_offset_minutes, 0) as minutes_from_sunday_start,
+        {{ dbt.datediff("holiday_week_start", "holiday_end_date_at", "minute") }} - coalesce(timezone.standard_offset_minutes, 0) as minutes_from_sunday_end
     from holiday_start_end_times
+    left join timezone
+        on timezone.time_zone = holiday_start_end_times.time_zone
 
 -- Determine which schedule days include a holiday
 ), holiday_check as (
