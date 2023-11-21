@@ -1,7 +1,7 @@
 # dbt_zendesk v0.13.0
 [PR #123](https://github.com/fivetran/dbt_zendesk/pull/123) introduces the following updates:
 
-# 🚨 Breaking Change (Snowflake users) 🚨
+## 🚨 Breaking Change (Snowflake users) 🚨
 - We have changed our identifier logic in the initial Zendesk source package to account for `group` being both a Snowflake reserved word and a source table. Given `dbt_zendesk_source` is a dependency for this package, Snowflake users will want to execute a `dbt run --full-refresh` before using the new version of the package. [PR #42](https://github.com/fivetran/dbt_zendesk_source/pull/42)
 
 ## 🚀 Feature Updates 🚀
