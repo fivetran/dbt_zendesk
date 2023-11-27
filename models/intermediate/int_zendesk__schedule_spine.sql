@@ -108,8 +108,8 @@ with timezone as (
     select
         calculate_schedules.*,
         schedule_holiday.holiday_name,
-        cast({{ dbt.dateadd("minute", "offset_minutes_to_add", "schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_start_date_at,
-        cast({{ dbt.dateadd("minute", "1440 - offset_minutes_to_add", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60 = 1440 minutes
+        schedule_holiday.holiday_start_date_at,
+        cast({{ dbt.dateadd("second", "86400", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60 seconds
         cast({{ dbt_date.week_start("schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
         cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
     from schedule_holiday
