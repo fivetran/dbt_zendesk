@@ -93,7 +93,7 @@ with timezone as (
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-
+        coalesce(split_timezones.offset_minutes, 0) as offset_minutes_to_add,
         -- we'll use these to determine which schedule version to associate tickets with
         cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
         cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
@@ -105,11 +105,11 @@ with timezone as (
 -- Now we need take holiday's into consideration and perform the following transformations to account for Holidays in existing schedules
 ), holiday_start_end_times as (
 
-    select 
+    select
         calculate_schedules.*,
         schedule_holiday.holiday_name,
-        schedule_holiday.holiday_start_date_at,
-        cast({{ dbt.dateadd("second", "86400", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60 seconds
+        cast({{ dbt.dateadd("minute", "offset_minutes_to_add", "schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_start_date_at,
+        cast({{ dbt.dateadd("minute", "1440 - offset_minutes_to_add", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60 = 1440 minutes
         cast({{ dbt_date.week_start("schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
         cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
     from schedule_holiday
