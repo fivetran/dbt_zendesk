@@ -1,3 +1,11 @@
+# dbt_zendesk v0.12.1
+
+## Bug Fixes
+- Updates the `int_zendesk__schedule_spine` model to convert the Holiday schedules into proper UTC values before being used in comparison with the schedule times. This ensures the holidays are properly mapped to schedules regardless of timezones.
+
+## Contributors
+- [@cth84](https://github.com/cth84) ([PR #118](https://github.com/fivetran/dbt_zendesk/pull/118))
+
 # dbt_zendesk v0.12.0
 
 This release includes fixes to issues introduced in v0.11.0-v0.11.1 surrounding the incorporation of schedule holidays.
