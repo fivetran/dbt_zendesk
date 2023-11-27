@@ -3,6 +3,9 @@
 ## Bug Fixes
 - Updates the `int_zendesk__schedule_spine` model to convert the Holiday schedules into proper UTC values before being used in comparison with the schedule times. This ensures the holidays are properly mapped to schedules regardless of timezones.
 
+## Under the Hood
+- Corrected the folder structure for the `.github` folder to properly categorize the Community and Maintainer PR templates.
+
 ## Contributors
 - [@cth84](https://github.com/cth84) ([PR #118](https://github.com/fivetran/dbt_zendesk/pull/118))
 
