@@ -245,6 +245,8 @@ models:
         description: The combined number of business minutes the ticket was in 'pending' status
       - name: requester_wait_time_in_business_minutes
         description: The combined number of business minutes the ticket was in 'new', 'open', or 'hold' status
+      - name: solve_time_in_business_minutes
+        description: The combined number of business minutes the ticket was in 'new', 'open', 'hold', or 'pending' status
       - name: agent_work_time_in_business_minutes
         description: The combined number of business minutes the ticket was in 'new' or 'open' status
       - name: on_hold_time_in_business_minutes
@@ -257,6 +259,8 @@ models:
         description: The combined number of calendar minutes the ticket was in 'pending' status
       - name: requester_wait_time_in_calendar_minutes
         description: The combined number of calendar minutes the ticket was in 'new', 'open', or 'hold' status
+      - name: solve_time_in_calendar_minutes
+        description: The combined number of calendar minutes the ticket was in 'new', 'open', 'hold', or 'pending' status
       - name: agent_work_time_in_calendar_minutes
         description: The combined number of calendar minutes the ticket was in 'new' or 'open' status
       - name: on_hold_time_in_calendar_minutes
