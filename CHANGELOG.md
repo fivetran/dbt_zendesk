@@ -8,7 +8,7 @@
 - Added `solve_time_in_calendar_minutes` and `solve_time_in_business_minutes` to our `zendesk__ticket_metrics` model, which calculates calendar and business minutes for when the ticket was in the 'new', 'open', 'hold', or 'pending' status.
 
 ## 🔎 Under the Hood 🔎 
-- Updated the seed files and seed file configurations for the package integration tests to align with changes in  dbt_zendesk_source made in [PR #42](https://github.com/fivetran/dbt_zendesk_source/pull/42) for applying the dbt_utils.star macro.
+- Updated the seed files and seed file configurations for the package integration tests to align with changes in  dbt_zendesk_source made in [PR #42](https://github.com/fivetran/dbt_zendesk_source/pull/42) for applying the `dbt_utils.star` macro.
 
 # dbt_zendesk v0.12.0
 
