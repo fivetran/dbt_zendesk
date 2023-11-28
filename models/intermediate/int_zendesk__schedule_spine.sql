@@ -22,9 +22,7 @@ with timezone as (
 
 ), schedule_holiday as (
 
-    select *,
-        cast({{ dbt_date.week_start("holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
-        cast({{ dbt_date.week_end("holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
+    select *
     from {{ var('schedule_holiday') }}   
 
 ), timezone_with_dt as (
@@ -95,7 +93,7 @@ with timezone as (
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes_to_add,
+
         -- we'll use these to determine which schedule version to associate tickets with
         cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
         cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
@@ -110,25 +108,23 @@ with timezone as (
     select 
         calculate_schedules.*,
         schedule_holiday.holiday_name,
-        cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_start_date_at,
-        cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60 = 1440 minutes        
-        schedule_holiday.holiday_week_start,
-        schedule_holiday.holiday_week_end,
-        cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_week_start") }} as {{ dbt.type_timestamp() }}) as holiday_week_start_utc,
-        cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end_utc
+        schedule_holiday.holiday_start_date_at,
+        cast({{ dbt.dateadd("second", "86400", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60 seconds
+        cast({{ dbt_date.week_start("schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
+        cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
     from schedule_holiday
     inner join calculate_schedules
         on calculate_schedules.schedule_id = schedule_holiday.schedule_id
-        and cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) >= calculate_schedules.valid_from 
-        and cast({{ dbt.dateadd("minute", "0 - offset_minutes_to_add", "schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) < calculate_schedules.valid_until
+        and schedule_holiday.holiday_start_date_at >= calculate_schedules.valid_from 
+        and schedule_holiday.holiday_start_date_at < calculate_schedules.valid_until
 
 -- Let's calculate the start and end date of the Holiday in terms of minutes from Sunday (like other Zendesk schedules)
 ), holiday_minutes as(
 
     select
         *,
-        {{ dbt.datediff("holiday_week_start_utc", "holiday_start_date_at", "minute") }} as minutes_from_sunday_start,
-        {{ dbt.datediff("holiday_week_start_utc", "holiday_end_date_at", "minute") }} as minutes_from_sunday_end
+        {{ dbt.datediff("holiday_week_start", "holiday_start_date_at", "minute") }} as minutes_from_sunday_start,
+        {{ dbt.datediff("holiday_week_start", "holiday_end_date_at", "minute") }} as minutes_from_sunday_end
     from holiday_start_end_times
 
 -- Determine which schedule days include a holiday
@@ -152,8 +148,8 @@ with timezone as (
         valid_until, 
         start_time_utc, 
         end_time_utc, 
-        holiday_week_start_utc as holiday_week_start,
-        cast({{ dbt.dateadd("second", "86400", "holiday_week_end_utc") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
+        holiday_week_start,
+        cast({{ dbt.dateadd("second", "86400", "holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
         max(holiday_name_check) as holiday_name_check
     from holiday_check
     {{ dbt_utils.group_by(n=9) }}
