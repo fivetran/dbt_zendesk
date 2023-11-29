@@ -14,6 +14,7 @@
 - Corrected the folder structure for the `.github` folder to properly categorize the Community and Maintainer PR templates. ([PR #126](https://github.com/fivetran/dbt_zendesk/pull/126))
 
 ## Contributors
+- [@fivetran-jessicacherny](https://github.com/fivetran-jessicacherny) ([Issue #119](https://github.com/fivetran/dbt_zendesk/issues/119))
 - [@cth84](https://github.com/cth84) ([PR #118](https://github.com/fivetran/dbt_zendesk/pull/118))
 
 # dbt_zendesk v0.12.0
