@@ -1,3 +1,22 @@
+# dbt_zendesk v0.13.0
+
+## 🚨 Breaking Change (Snowflake users) 🚨
+- We have changed our identifier logic in the initial Zendesk source package to account for `group` being both a Snowflake reserved word and a source table. Given `dbt_zendesk_source` is a dependency for this package, Snowflake users will want to execute a `dbt run --full-refresh` before using the new version of the package. [PR #42](https://github.com/fivetran/dbt_zendesk_source/pull/42)
+
+## Bug Fixes
+- Updates the `int_zendesk__schedule_spine` model to convert the Holiday schedules into proper UTC values before being used in comparison with the schedule times. This ensures the holidays are properly mapped to schedules regardless of timezones. ([PR #126](https://github.com/fivetran/dbt_zendesk/pull/126))
+
+## 🚀 Feature Updates 🚀
+- Added `solve_time_in_calendar_minutes` and `solve_time_in_business_minutes` to our `zendesk__ticket_metrics` model, which calculates calendar and business minutes for when the ticket was in the 'new', 'open', 'hold', or 'pending' status. ([PR #123](https://github.com/fivetran/dbt_zendesk/pull/123))
+
+## 🔎 Under the Hood 🔎 
+- Updated the seed files and seed file configurations for the package integration tests to align with changes in  dbt_zendesk_source made in [PR #42](https://github.com/fivetran/dbt_zendesk_source/pull/42) for applying the `dbt_utils.star` macro.
+- Corrected the folder structure for the `.github` folder to properly categorize the Community and Maintainer PR templates. ([PR #126](https://github.com/fivetran/dbt_zendesk/pull/126))
+
+## Contributors
+- [@fivetran-jessicacherny](https://github.com/fivetran-jessicacherny) ([Issue #119](https://github.com/fivetran/dbt_zendesk/issues/119))
+- [@cth84](https://github.com/cth84) ([PR #118](https://github.com/fivetran/dbt_zendesk/pull/118))
+
 # dbt_zendesk v0.12.0
 
 This release includes fixes to issues introduced in v0.11.0-v0.11.1 surrounding the incorporation of schedule holidays.

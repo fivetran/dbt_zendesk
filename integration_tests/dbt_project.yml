@@ -1,12 +1,12 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.12.0'
+version: '0.13.0'
 
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests_2
+  zendesk_schema: zendesk_integration_tests_40
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -20,15 +20,17 @@ vars:
     zendesk_domain_name_identifier:            "domain_name_data"
     zendesk_time_zone_identifier:              "time_zone_data"
     zendesk_daylight_time_identifier:          "daylight_time_data"
-    group:                                     "{{ ref('group_data') }}" 
-    brand:                                     "{{ fivetran_utils.seed_data_helper('brand_data',['postgres']) }}" 
-    user_tag:                                  "{{ fivetran_utils.snowflake_seed_data('user_tag_data') }}" 
-    organization_tag:                          "{{ fivetran_utils.snowflake_seed_data('organization_tag_data') }}" 
-    user:                                      "{{ fivetran_utils.snowflake_seed_data('user_data') }}" 
+    zendesk_brand_identifier:                  "brand_data"
+    zendesk_group_identifier:                  "group_data" 
+    zendesk_organization_tag_identifier:       "organization_tag_data"
+    zendesk_user_identifier:                   "user_data"
+    zendesk_user_tag_identifier:               "user_tag_data"
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
+    +column_types:
+      _fivetran_synced: timestamp
     +column_types:
       _fivetran_synced: timestamp
     group_data:
@@ -74,7 +76,6 @@ seeds:
         requester_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         submitter_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         ticket_form_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        type: "{{ 'varchar(100)'  if target.type in ('redshift', 'postgres') else 'string'}}"
     ticket_field_history_data:
       +column_types:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -88,24 +89,33 @@ seeds:
     user_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        external_id: "{{ 'varchar(100)'  if target.type in ('redshift', 'postgres') else 'string'}}"
+        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         last_login_at: timestamp
+        updated_at: timestamp
       +enabled: "{{ true if target.type != 'snowflake' else false }}"
-    user_tag_data:
+    user_data_snowflake:
+      +alias: user_data
       +column_types:
-        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        _fivetran_synced: timestamp
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        last_login_at: timestamp
+        updated_at: timestamp
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
     brand_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
       +enabled: "{{ true if target.type != 'postgres' else false }}"
     brand_data_postgres:
+      +alias: brand_data
       +column_types:
-        id: bigint
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
       +enabled: "{{ true if target.type == 'postgres' else false }}"
     ticket_form_history_data:
@@ -116,24 +126,22 @@ seeds:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
+    user_tag_data:
+      +column_types:
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        _fivetran_synced: timestamp
+      +enabled: "{{ true if target.type != 'snowflake' else false }}"  
+    user_tag_data_snowflake:
+      +alias: user_tag_data
+      +enabled: "{{ true if target.type == 'snowflake' else false }}"
     organization_tag_data:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-    user_data_snowflake:
-      +column_types:
-        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        external_id: "{{ 'varchar(100)'  if target.type in ('redshift', 'postgres') else 'string'}}"
-        locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-        created_at: timestamp
-        last_login_at: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' else false }}"
-    user_tag_data_snowflake:
-      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+      +enabled: "{{ true if target.type != 'snowflake' else false }}"  
     organization_tag_data_snowflake:
+      +alias: organization_tag_data
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
-
 
 dispatch:
   - macro_namespace: dbt_utils
