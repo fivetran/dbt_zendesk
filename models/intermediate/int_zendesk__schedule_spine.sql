@@ -96,7 +96,8 @@ with timezone as (
 
     from order_timezone_dt
     group by 1, 2
-    having max(daylight_end_utc) < cast({{ dbt.current_timestamp_backcompat() }} as datetime)
+    -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
+    having max(daylight_end_utc) < cast({{ dbt.current_timestamp_backcompat() }} as date)
 
 ), calculate_schedules as (
 
