@@ -28,7 +28,8 @@ with calendar as (
 
     select 
         calendar.date_day,
-        ticket.ticket_id
+        ticket.ticket_id,
+        ticket.source_relation
     from calendar
     inner join ticket
         on calendar.date_day >= cast(ticket.created_at as date)
@@ -39,7 +40,7 @@ with calendar as (
 
     select
         *,
-        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
+        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id','source_relation']) }} as ticket_day_id
     from joined
 
 )

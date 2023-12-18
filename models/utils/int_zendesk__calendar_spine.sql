@@ -1,11 +1,11 @@
--- depends_on: {{ source('zendesk', 'ticket') }}
+-- depends_on: {{ ref('stg_zendesk__ticket') }}
 
 with spine as (
 
     {% if execute %}
     {% set current_ts = dbt.current_timestamp_backcompat() %}
     {% set first_date_query %}
-        select  min( created_at ) as min_date from {{ source('zendesk', 'ticket') }}
+        select  min( created_at ) as min_date from {{ var('ticket') }}
         -- by default take all the data 
         where cast(created_at as date) >= {{ dbt.dateadd('year', - var('ticket_field_history_timeframe_years', 50), current_ts ) }}
     {% endset %}

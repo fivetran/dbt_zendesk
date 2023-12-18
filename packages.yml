@@ -3,7 +3,7 @@ packages:
   #   version: [">=0.10.0", "<0.11.0"]
   # - local: ../dbt_zendesk_source
   - git: https://github.com/fivetran/dbt_zendesk_source.git
-    revision: feature/tag-former-agents
+    revision: feature/add-union-data
     warn-unpinned: false
   - package: calogica/dbt_date
     version: [">=0.9.0", "<1.0.0"]

@@ -12,9 +12,10 @@ with users as (
 ), user_tag_aggregate as (
   select
     user_tags.user_id,
+    user_tags.source_relation,
     {{ fivetran_utils.string_agg( 'user_tags.tags', "', '" )}} as user_tags
   from user_tags
-  group by 1
+  group by 1, 2
 
 {% endif %}
 
@@ -31,7 +32,8 @@ with users as (
   --If you use user tags this will be included, if not it will be ignored.
   {% if var('using_user_tags', True) %}
   left join user_tag_aggregate
-    using(user_id)
+    on users.user_id = user_tag_aggregate.user_id 
+    and users.source_relation = user_tag_aggregate.source_relation
   {% endif %}
 )
 

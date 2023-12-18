@@ -11,6 +11,7 @@ with ticket_status_history as (
   select
   
     ticket_id,
+    source_relation,
     valid_starting_at,
     valid_ending_at,
     {{ dbt.datediff(
@@ -19,7 +20,7 @@ with ticket_status_history as (
         'minute') }} as status_duration_calendar_minutes,
     value as status,
     -- MIGHT BE ABLE TO DELETE ROWS BELOW
-    row_number() over (partition by ticket_id order by valid_starting_at) as ticket_status_counter,
-    row_number() over (partition by ticket_id, value order by valid_starting_at) as unique_status_counter
+    row_number() over (partition by ticket_id, source_relation order by valid_starting_at) as ticket_status_counter,
+    row_number() over (partition by ticket_id, value, source_relation order by valid_starting_at) as unique_status_counter
 
   from ticket_status_history

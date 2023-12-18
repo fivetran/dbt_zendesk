@@ -13,6 +13,7 @@ with ticket_history as (
 ), updates_union as (
     select 
         ticket_id,
+        source_relation,
         field_name,
         value,
         null as is_public,
@@ -25,12 +26,13 @@ with ticket_history as (
 
     select
         ticket_id,
+        source_relation,
         cast('comment' as {{ dbt.type_string() }}) as field_name,
         body as value,
         is_public,
         user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by ticket_id order by created_at) as valid_ending_at
+        lead(created_at) over (partition by ticket_id, source_relation order by created_at) as valid_ending_at
     from ticket_comment
 
 ), final as (
@@ -41,6 +43,7 @@ with ticket_history as (
 
     left join tickets
         on tickets.ticket_id = updates_union.ticket_id
+        and tickets.source_relation = updates_union.source_relation
 )
 
 select *

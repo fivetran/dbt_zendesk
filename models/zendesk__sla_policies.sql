@@ -31,6 +31,7 @@ with reply_time_sla as (
 ), all_slas_unioned as (
   select
     ticket_id,
+    source_relation,
     sla_policy_name,
     metric,
     sla_applied_at,
@@ -45,6 +46,7 @@ union all
 
   select
     ticket_id,
+    source_relation,
     sla_policy_name,
     'agent_work_time' as metric,
     sla_applied_at,
@@ -55,12 +57,13 @@ union all
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
   from agent_work_calendar_sla
 
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 union all
 
   select
     ticket_id,
+    source_relation,
     sla_policy_name,
     'requester_wait_time' as metric,
     sla_applied_at,
@@ -71,7 +74,7 @@ union all
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
   from requester_wait_calendar_sla
 
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 
 {% if var('using_schedules', True) %}
@@ -80,6 +83,7 @@ union all
 
   select 
     ticket_id,
+    source_relation,
     sla_policy_name,
     'agent_work_time' as metric,
     sla_applied_at,
@@ -90,12 +94,13 @@ union all
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
   from agent_work_business_sla
   
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 union all 
 
   select 
     ticket_id,
+    source_relation,
     sla_policy_name,
     'requester_wait_time' as metric,
     sla_applied_at,
@@ -107,7 +112,7 @@ union all
     
   from requester_wait_business_sla
   
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 {% endif %}
 
@@ -116,6 +121,7 @@ union all
 select 
   {{ dbt_utils.generate_surrogate_key(['ticket_id', 'metric', 'sla_applied_at']) }} as sla_event_id,
   ticket_id,
+  source_relation,
   sla_policy_name,
   metric,
   sla_applied_at,

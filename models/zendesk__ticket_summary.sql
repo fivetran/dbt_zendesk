@@ -9,6 +9,7 @@ with ticket_metrics as (
 ), user_sum as (
     select
         cast(1 as {{ dbt.type_int() }}) as summary_helper,
+        source_relation,
         sum(case when is_active = true
             then 1
             else 0
@@ -31,11 +32,12 @@ with ticket_metrics as (
                 end) as suspended_user_count
     from user_table
 
-    group by 1
+    group by 1,2
 
 ), ticket_metric_sum as (
     select 
         cast(1 as {{ dbt.type_int() }}) as summary_helper,
+        source_relation,
         sum(case when lower(status) = 'new'
             then 1
             else 0
@@ -107,11 +109,12 @@ with ticket_metrics as (
         count(total_comments)
     from ticket_metrics
     
-    group by 1
+    group by 1,2
 
 
 ), final as (
     select
+        user_sum.source_relation,
         user_sum.user_count,
         user_sum.active_agent_count,
         user_sum.deleted_user_count,
@@ -136,7 +139,8 @@ with ticket_metrics as (
     from user_sum
 
     left join ticket_metric_sum
-        using(summary_helper)
+        on user_sum.summary_helper = ticket_metric_sum.summary_helper
+        and user_sum.source_relation = ticket_metric_sum.source_relation
 )
 
 select *

@@ -19,6 +19,7 @@ with ticket_resolution_times_calendar as (
 
   select 
     ticket_resolution_times_calendar.ticket_id,
+    ticket_resolution_times_calendar.source_relation,
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
     ticket_schedules.schedule_id,
@@ -40,8 +41,10 @@ with ticket_resolution_times_calendar as (
     {{ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') }} as start_week_date
       
   from ticket_resolution_times_calendar
-  join ticket_schedules on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
-  group by 1, 2, 3, 4
+  join ticket_schedules 
+    on ticket_resolution_times_calendar.ticket_id = ticket_schedules.ticket_id
+    and ticket_resolution_times_calendar.source_relation = ticket_schedules.source_relation
+  {{ dbt_utils.group_by(n=5) }}
 
 ), weeks as (
 
@@ -72,6 +75,7 @@ with ticket_resolution_times_calendar as (
 
   select 
     ticket_id,
+    source_relation,
     week_number,
     weekly_periods.schedule_id,
     ticket_week_start_time,
@@ -83,6 +87,7 @@ with ticket_resolution_times_calendar as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    and weekly_periods.source_relation = schedule.source_relation
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
     -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
     and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
@@ -92,6 +97,7 @@ with ticket_resolution_times_calendar as (
 
   select 
     ticket_id,
+    source_relation,
     sum(scheduled_minutes) as full_resolution_business_minutes
   from intercepted_periods
-  group by 1
+  group by 1, 2

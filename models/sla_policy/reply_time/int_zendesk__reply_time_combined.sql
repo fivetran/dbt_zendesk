@@ -25,6 +25,7 @@ with reply_time_calendar_hours_sla as (
 
   select 
     ticket_id,
+    source_relation,
     sla_policy_name,
     metric,
     ticket_created_at,
@@ -43,6 +44,7 @@ with reply_time_calendar_hours_sla as (
 
   select 
     ticket_id,
+    source_relation,
     sla_policy_name,
     metric,
     ticket_created_at,
@@ -60,6 +62,7 @@ with reply_time_calendar_hours_sla as (
 ), ticket_solved_times as (
   select
     ticket_id,
+    source_relation,
     valid_starting_at as solved_at
   from ticket_updates
   where field_name = 'status'
@@ -68,11 +71,13 @@ with reply_time_calendar_hours_sla as (
 ), reply_time as (
   select 
     ticket_comment.ticket_id,
+    ticket_comment.source_relation,
     ticket_comment.valid_starting_at as reply_at,
     commenter.role
   from ticket_updates as ticket_comment
   join users as commenter
     on commenter.user_id = ticket_comment.user_id
+    and commenter.source_relation = ticket_comment.source_relation
   where field_name = 'comment' 
     and ticket_comment.is_public
     and commenter.role in ('agent','admin')
@@ -81,6 +86,7 @@ with reply_time_calendar_hours_sla as (
 
   select 
     reply_time_breached_at.ticket_id,
+    reply_time_breached_at.source_relation,
     reply_time_breached_at.sla_policy_name,
     reply_time_breached_at.metric,
     reply_time_breached_at.ticket_created_at,
@@ -97,17 +103,19 @@ with reply_time_calendar_hours_sla as (
   left join reply_time
     on reply_time.ticket_id = reply_time_breached_at.ticket_id
     and reply_time.reply_at > reply_time_breached_at.sla_applied_at
+    and reply_time.source_relation = reply_time_breached_at.source_relation
   left join ticket_solved_times
     on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
-  {{ dbt_utils.group_by(n=8) }}
+    and ticket_solved_times.source_relation = reply_time_breached_at.source_relation
+  {{ dbt_utils.group_by(n=9) }}
 
 ), lagging_time_block as (
   select
     *,
-    lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at) as next_schedule_start,
-    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
-		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
+    lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at, source_relation order by sla_schedule_start_at) as next_schedule_start,
+    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at, source_relation order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
+		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at, source_relation order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
   from reply_time_breached_at_with_next_reply_timestamp
 
 ), filtered_reply_times as (
@@ -127,9 +135,9 @@ with reply_time_calendar_hours_sla as (
   select
     *,
     {{ dbt.current_timestamp() }} as current_time_check,
-    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
+    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours, source_relation order by sla_applied_at) as updated_sla_policy_starts_at,
     case when 
-      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
+      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours, source_relation order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
     case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
                 or (sla_breach_at < agent_reply_at and next_solved_at is null)

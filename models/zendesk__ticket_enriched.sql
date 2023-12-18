@@ -128,41 +128,51 @@ with ticket as (
     --Requester Joins
     join users as requester
         on requester.user_id = ticket.requester_id
+        and requester.source_relation = ticket.source_relation
 
     left join organization as requester_org
         on requester_org.organization_id = requester.organization_id
+        and requester_org.source_relation = requester.source_relation
 
     left join requester_updates
         on requester_updates.ticket_id = ticket.ticket_id
             and requester_updates.requester_id = ticket.requester_id
+            and requester_updates.source_relation = ticket.source_relation
     
     --Submitter Joins
     join users as submitter
         on submitter.user_id = ticket.submitter_id
+        and submitter.source_relation = ticket.source_relation
     
     --Assignee Joins
     left join users as assignee
         on assignee.user_id = ticket.assignee_id
+        and assignee.source_relation = ticket.source_relation
 
     left join assignee_updates
         on assignee_updates.ticket_id = ticket.ticket_id
             and assignee_updates.assignee_id = ticket.assignee_id
+            and assignee_updates.source_relation = ticket.source_relation
 
     --Ticket, Org, and Brand Joins
     left join ticket_group
         on ticket_group.group_id = ticket.group_id
+        and ticket_group.source_relation = ticket.source_relation
 
     --If you use using_ticket_form_history this will be included, if not it will be ignored.
     {% if var('using_ticket_form_history', True) %}
     left join latest_ticket_form
         on latest_ticket_form.ticket_form_id = ticket.ticket_form_id
+        and latest_ticket_form.source_relation = ticket.source_relation
     {% endif %}
 
     left join organization
         on organization.organization_id = ticket.organization_id
+        and organization.source_relation = ticket.source_relation
 
     left join latest_satisfaction_ratings
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
+        and latest_satisfaction_ratings.source_relation = ticket.source_relation
 )
 
 select *
