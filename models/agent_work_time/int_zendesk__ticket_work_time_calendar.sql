@@ -25,8 +25,8 @@ with ticket_historical_status as (
             else 0 end as open_status_duration_minutes,
         case when status = 'deleted' then 1
             else 0 end as ticket_deleted,
-        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_status_assignment_date,
-        case when lag(status) over (partition by ticket_id order by valid_starting_at) = 'deleted' and status != 'deleted'
+        first_value(valid_starting_at) over (partition by ticket_id, source_relation order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_status_assignment_date,
+        case when lag(status) over (partition by ticket_id, source_relation order by valid_starting_at) = 'deleted' and status != 'deleted'
             then 1
             else 0
                 end as ticket_recoveries

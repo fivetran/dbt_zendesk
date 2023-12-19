@@ -76,7 +76,7 @@ with ticket_resolution_times_calendar as (
 ), intercepted_periods as (
 
   select ticket_id,
-         source_relation,
+         weekly_periods.source_relation,
          week_number,
          weekly_periods.schedule_id,
          ticket_week_start_time,
