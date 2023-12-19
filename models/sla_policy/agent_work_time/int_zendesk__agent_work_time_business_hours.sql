@@ -116,6 +116,7 @@ with agent_work_time_filtered_statuses as (
   
     select 
       weekly_period_agent_work_time.ticket_id,
+      weekly_period_agent_work_time.source_relation,
       weekly_period_agent_work_time.sla_applied_at,
       weekly_period_agent_work_time.target,
       weekly_period_agent_work_time.sla_policy_name,

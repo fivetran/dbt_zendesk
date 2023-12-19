@@ -84,7 +84,7 @@ with ticket_schedules as (
     schedule.end_time_utc as schedule_end_time,
     (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
     sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
-      (partition by ticket_id, metric, sla_applied_at, source_relation 
+      (partition by ticket_id, metric, sla_applied_at, weekly_periods.source_relation 
         order by week_number, schedule.start_time_utc
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
   from weekly_periods
