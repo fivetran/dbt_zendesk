@@ -182,14 +182,12 @@ models:
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: 
-            - sla_event_id
-            - source_relation  
     columns:
       - name: sla_event_id
-        description: A surrogate key generated from the combination of ticket_id, metric, and sla_applied_at fields
+        description: A surrogate key generated from the combination of `ticket_id`, `metric`, `sla_applied_at`, and `source_relation` fields. 
+        tests:
+          - unique
+          - not_null
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: sla_policy_name
@@ -225,7 +223,7 @@ models:
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: ticket_day_id
-        description: The unique key of the table, a surrogate key of `date_day`, `ticket_id`, and `source_relation`
+        description: The unique key of the table, a surrogate key of `date_day`, `ticket_id`, and `source_relation`.
         tests:
           - unique
           - not_null

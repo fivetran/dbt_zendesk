@@ -1,4 +1,4 @@
--- depends_on: {{ source('zendesk', 'ticket_field_history') }}
+-- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
 
 {{ 
     config(
@@ -11,7 +11,7 @@
 }}
 
 {% if execute -%}
-    {% set results = run_query('select distinct field_name from ' ~ source('zendesk', 'ticket_field_history') ) %}
+    {% set results = run_query('select distinct field_name from ' ~ var('field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 {% endif -%}
 

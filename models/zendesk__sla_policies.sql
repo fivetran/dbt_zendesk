@@ -119,7 +119,7 @@ union all
 )
 
 select 
-  {{ dbt_utils.generate_surrogate_key(['ticket_id', 'metric', 'sla_applied_at']) }} as sla_event_id,
+  {{ dbt_utils.generate_surrogate_key(['ticket_id', 'metric', 'sla_applied_at', 'source_relation']) }} as sla_event_id,
   ticket_id,
   source_relation,
   sla_policy_name,
