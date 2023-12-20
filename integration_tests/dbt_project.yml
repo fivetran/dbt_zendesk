@@ -1,12 +1,12 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.13.0'
+version: '0.14.0'
 
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests_40
+  zendesk_schema: zendesk_integration_tests_43
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
