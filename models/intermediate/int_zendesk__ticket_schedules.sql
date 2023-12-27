@@ -37,26 +37,6 @@ with ticket as (
 
 ), default_schedule_events as (
 
-{# {% if execute %}
-
-    {% set default_schedule_id_query %}
-        with set_default_schedule_flag as (
-          select 
-            row_number() over (order by created_at) = 1 as is_default_schedule,
-            id
-          from {{ source('zendesk','schedule') }}
-        )
-        select 
-          id
-        from set_default_schedule_flag
-        where is_default_schedule
-
-    {% endset %}
-
-    {% set default_schedule_id = run_query(default_schedule_id_query).columns[0][0]|string %}
-
-    {% endif %} #}
-
   select
     ticket.ticket_id,
     ticket.source_relation,
