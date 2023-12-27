@@ -3,7 +3,7 @@
 [PR #128](https://github.com/fivetran/dbt_zendesk/pull/128) includes the following changes:
 ## Bug Fixes
 - The `int_zendesk__schedule_spine` model was updated to properly account for schedules that recognized daylight savings time (DST) at one point in time, and then stopped recognizing it at a later date.
-  - For example, the Hong Kong timezone originally recognized DST, but them stopped in 1979. The previous versions of this package only recorded the schedule business hours until 1979. This update addresses this bug.
+  - For example, the Hong Kong timezone originally recognized DST, but then stopped in 1979. The previous versions of this package only recorded the schedule business hours until 1979. This update addresses this bug.
   - Please note, this update will only effect users leveraging schedules.
 
 ## Under the Hood
