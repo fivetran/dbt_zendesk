@@ -1,3 +1,8 @@
+# dbt_zendesk v0.14.0
+
+## 🎉 Feature Update 🎉 
+This release supports running the package on multiple Zendesk sources at once! See the [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-3-define-database-and-schema-variables) for details on how to leverage this feature ([PR #44](https://github.com/fivetran/dbt_zendesk/pull/132)).
+
 # dbt_zendesk v0.13.0
 
 ## 🚨 Breaking Change (Snowflake users) 🚨
