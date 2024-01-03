@@ -1,0 +1,26 @@
+database_key: zendesk_database
+schema_key: zendesk_schema
+
+dbt_versions: ">=1.3.0" "<2.0.0"
+
+table_variables:
+  using_schedules:
+    - daylight_time
+    - schedule_holiday
+    - schedule
+    - ticket_schedule
+    - time_zone
+  using_domain_names:
+    - domain_name
+  using_user_tags:
+    - user_tag
+  using_ticket_form_history:
+    - ticket_form_history
+  using_organization_tags:
+    - organization_tag
+
+destination_configurations:
+  databricks:
+    dispatch:
+      - macro_namespace: dbt_utils
+        search_order: [ 'spark_utils', 'dbt_utils' ]
