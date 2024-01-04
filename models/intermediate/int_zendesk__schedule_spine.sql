@@ -82,6 +82,23 @@ with timezone as (
     from order_timezone_dt
     where daylight_offset_minutes is not null
 
+    union all
+
+    select
+        time_zone,
+        standard_offset_minutes as offset_minutes,
+
+        -- Get the latest daylight_end_utc time and set that as the valid_from
+        max(daylight_end_utc) as valid_from,
+
+        -- If the latest_daylight_end_time_utc is less than todays timestamp, that means DST has ended. Therefore, we will make the valid_until in the future.
+        cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date) as valid_until
+
+    from order_timezone_dt
+    group by 1, 2
+    -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
+    having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp_backcompat() }} as date)
+
 ), calculate_schedules as (
 
     select 
