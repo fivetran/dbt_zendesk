@@ -1,6 +1,6 @@
 # dbt_zendesk v0.13.2
 
-[PR # ] ()
+[PR #134](https://github.com/fivetran/dbt_zendesk/pull/134)
 
 # dbt_zendesk v0.13.1
 
