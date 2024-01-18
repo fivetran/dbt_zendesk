@@ -1,6 +1,12 @@
 # dbt_zendesk v0.13.2
 
-[PR #134](https://github.com/fivetran/dbt_zendesk/pull/134)
+[PR #134](https://github.com/fivetran/dbt_zendesk/pull/134) includes the following changes:
+
+## Bug Fixes
+- Updated the `int_zendesk__reply_time_combined` model to account for when a ticket is first replied to outside SLA schedules or not yet replied to.
+
+## Under the Hood
+- Adjusted the filter used in the `filtered_reply_times` CTE for business hours to account for the aforementioned cases, as these records were mistakenly being filtered out previously.
 
 # dbt_zendesk v0.13.1
 
