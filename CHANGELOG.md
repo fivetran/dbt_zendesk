@@ -1,3 +1,7 @@
+# dbt_zendesk v0.13.2
+
+[PR # ] ()
+
 # dbt_zendesk v0.13.1
 
 [PR #128](https://github.com/fivetran/dbt_zendesk/pull/128) includes the following changes:
