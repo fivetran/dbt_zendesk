@@ -110,46 +110,46 @@ with reply_time_calendar_hours_sla as (
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new
   from reply_time_breached_at_with_next_reply_timestamp
 
-), filtered_reply_times as (
-  select
-    *
-  from lagging_time_block
-  where (
-    in_business_hours
-      and ((
-        agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
-        or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
-        or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
-        or (agent_reply_at >= sla_schedule_end_at and agent_reply_at <= next_schedule_start ) -- ticket is replied to outside sla schedule hours
-      ))
-    or not in_business_hours
-
-), reply_time_breached_at_remove_old_sla as (
-  select
-    *,
-    {{ dbt.current_timestamp() }} as current_time_check,
-    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
-    case when 
-      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
-      < sla_breach_at then true else false end as is_stale_sla_policy,
-    case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
-                or (sla_breach_at < agent_reply_at and next_solved_at is null)
-                or (agent_reply_at is null and sla_breach_at < next_solved_at)
-                or (agent_reply_at is null and next_solved_at is null)
-      then true
-      else false
-        end as is_sla_breached
-  from filtered_reply_times
-  
-), reply_time_breach as (
+), filtered_reply_times as ( 
   select 
-    *,
-    case when {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} < 0 
-      then 0 
-      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'minute') }} 
-    end as sla_elapsed_time
-  from reply_time_breached_at_remove_old_sla
-)
+    * 
+  from lagging_time_block 
+  where ( 
+    in_business_hours 
+      and (( 
+        agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window 
+        or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it 
+        or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)   
+        or (agent_reply_at >= sla_schedule_end_at and agent_reply_at <= next_schedule_start ) -- ticket is replied to outside sla schedule hours 
+      )) 
+    or not in_business_hours 
+ 
+), reply_time_breached_at_remove_old_sla as ( 
+  select 
+    *, 
+    {{ dbt.current_timestamp() }} as current_time_check, 
+    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at, 
+    case when  
+      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time 
+      < sla_breach_at then true else false end as is_stale_sla_policy, 
+    case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at) 
+                or (sla_breach_at < agent_reply_at and next_solved_at is null) 
+                or (agent_reply_at is null and sla_breach_at < next_solved_at) 
+                or (agent_reply_at is null and next_solved_at is null) 
+      then true 
+      else false 
+        end as is_sla_breached 
+  from filtered_reply_times 
+   
+), reply_time_breach as ( 
+  select  
+    *, 
+    case when {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} < 0  
+      then 0  
+      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'minute') }}  
+    end as sla_elapsed_time 
+  from reply_time_breached_at_remove_old_sla 
+) 
 
 select *
 from reply_time_breach  
