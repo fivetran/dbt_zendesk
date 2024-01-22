@@ -156,4 +156,4 @@ with reply_time_calendar_hours_sla as (
 )
 
 select *
-from reply_time_breach  
+from reply_time_breach
