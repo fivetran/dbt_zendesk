@@ -3,7 +3,10 @@
 [PR #134](https://github.com/fivetran/dbt_zendesk/pull/134) includes the following changes:
 
 ## Bug Fixes
-- Updated the `int_zendesk__reply_time_combined` model to account for when a ticket is first replied to outside SLA schedules or not yet replied to, as these records were mistakenly being filtered out previously.
+- Updated the `int_zendesk__reply_time_combined` model to additionally account for the following scenarios as they were erroneously being filtered out in previous versions of the package:
+   - A ticket is first replied to outside SLA schedules
+   - A ticket is has not yet received an agent reply
+> Note: This update only impacts first reply time business metrics
 
 # dbt_zendesk v0.13.1
 
