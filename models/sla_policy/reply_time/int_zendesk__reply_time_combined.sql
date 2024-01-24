@@ -121,7 +121,7 @@ with reply_time_calendar_hours_sla as (
         agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
         or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
         or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
-        or (agent_reply_at >= sla_schedule_end_at and agent_reply_at <= next_schedule_start ) -- ticket is replied to outside sla schedule hours
+        or (agent_reply_at > sla_schedule_end_at and agent_reply_at < next_schedule_start ) -- ticket is replied to outside sla schedule hours
       ))
     or not in_business_hours
 
@@ -150,7 +150,7 @@ with reply_time_calendar_hours_sla as (
         then 0 -- so don't add new minutes to the SLA
       when total_new_minutes > sum_lapsed_business_minutes -- if total runtime, regardless of when the SLA schedule ended, is more than the total lapsed business minutes, that means the agent replied after the SLA schedule
           then sum_lapsed_business_minutes -- the elapsed time after the SLA end time should not be calculated as part of the business minutes, therefore sla_elapsed_time should only be sum_lapsed_business_minutes
-      else total_new_minutes -- otherwise, the sla_elapsed_time will be the prior row's sum_lapsed_business_minutes plus the minutes between SLA schedule start and agent_reply_time.
+      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'minute') }} -- otherwise, the sla_elapsed_time will be sum_lapsed_business_minutes_new (the prior record's sum_lapsed_business_minutes) plus the minutes between SLA schedule start and agent_reply_time. If the agent hasn't replied yet, then the minute counter is still running, hence the coalesce of agent_reply_time and current_time_check.
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla 
 )
