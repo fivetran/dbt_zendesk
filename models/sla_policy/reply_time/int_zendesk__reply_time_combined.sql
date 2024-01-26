@@ -108,7 +108,7 @@ with reply_time_calendar_hours_sla as (
     lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at) as next_schedule_start,
     min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
-    {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'minute') }} as total_runtime_minutes -- total minutes from sla_schedule_start_at and agent reply time, before taking into account SLA end time
+    {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'second') }} / 60 as total_runtime_minutes -- total minutes from sla_schedule_start_at and agent reply time, before taking into account SLA end time
   from reply_time_breached_at_with_next_reply_timestamp
 
 ), filtered_reply_times as (
@@ -150,7 +150,7 @@ with reply_time_calendar_hours_sla as (
         then 0 -- so don't add new minutes to the SLA
       when total_new_minutes > sum_lapsed_business_minutes -- if total runtime, regardless of when the SLA schedule ended, is more than the total lapsed business minutes, that means the agent replied after the SLA schedule
           then sum_lapsed_business_minutes -- the elapsed time after the SLA end time should not be calculated as part of the business minutes, therefore sla_elapsed_time should only be sum_lapsed_business_minutes
-      else sum_lapsed_business_minutes_new + {{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'minute') }} -- otherwise, the sla_elapsed_time will be sum_lapsed_business_minutes_new (the prior record's sum_lapsed_business_minutes) plus the minutes between SLA schedule start and agent_reply_time. If the agent hasn't replied yet, then the minute counter is still running, hence the coalesce of agent_reply_time and current_time_check.
+      else sum_lapsed_business_minutes_new + ({{ dbt.datediff("sla_schedule_start_at", "coalesce(agent_reply_at, current_time_check)", 'second') }} / 60) -- otherwise, the sla_elapsed_time will be sum_lapsed_business_minutes_new (the prior record's sum_lapsed_business_minutes) plus the minutes between SLA schedule start and agent_reply_time. If the agent hasn't replied yet, then the minute counter is still running, hence the coalesce of agent_reply_time and current_time_check.
     end as sla_elapsed_time
   from reply_time_breached_at_remove_old_sla 
 )
