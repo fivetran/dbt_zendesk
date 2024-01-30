@@ -3,6 +3,22 @@
 ## 🎉 Feature Update 🎉 
 This release supports running the package on multiple Zendesk sources at once! See the [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-3-define-database-and-schema-variables) for details on how to leverage this feature ([PR #132](https://github.com/fivetran/dbt_zendesk/pull/132)).
 
+# dbt_zendesk v0.13.1
+
+[PR #128](https://github.com/fivetran/dbt_zendesk/pull/128) includes the following changes:
+## Bug Fixes
+- The `int_zendesk__schedule_spine` model was updated to properly account for schedules that recognized daylight savings time (DST) at one point in time, and then stopped recognizing it at a later date.
+  - For example, the Hong Kong timezone originally recognized DST, but then stopped in 1979. The previous versions of this package only recorded the schedule business hours until 1979. This update addresses this bug.
+  - Please note, this update will only effect users leveraging schedules.
+
+## Under the Hood
+- Included auto-releaser GitHub Actions workflow to automate future releases.
+- Updated the maintainer PR template to resemble the most up to date format.
+- Included a `quickstart.yml` file to allow for automated Quickstart data model deployments.
+
+## Contributors
+- [@elijamuel](https://github.com/elijamuel) ([Issue #121](https://github.com/fivetran/dbt_zendesk/issues/121))
+
 # dbt_zendesk v0.13.0
 
 ## 🚨 Breaking Change (Snowflake users) 🚨
