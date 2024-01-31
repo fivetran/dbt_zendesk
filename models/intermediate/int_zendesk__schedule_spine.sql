@@ -99,7 +99,8 @@ with timezone as (
         cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date) as valid_until
 
     from order_timezone_dt
-    group by 1, 2
+    
+    group by 1, 2, 3
     -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
     having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp_backcompat() }} as date)
 
