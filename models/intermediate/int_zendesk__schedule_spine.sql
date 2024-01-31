@@ -89,6 +89,7 @@ with timezone as (
 
     select
         time_zone,
+        source_relation,
         standard_offset_minutes as offset_minutes,
 
         -- Get the latest daylight_end_utc time and set that as the valid_from
