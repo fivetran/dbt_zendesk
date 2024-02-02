@@ -14,9 +14,13 @@ with ticket_comment as (
     select 
 
         ticket_comment.*,
+        commenter.name as commenter_name,
+        commenter.email as commenter_email,
         case when commenter.role = 'end-user' then 'external_comment'
             when commenter.role in ('agent','admin') then 'internal_comment'
             else 'unknown' end as commenter_role
+    -- For some reason some of the tickets started with voicemails do not have the voicemail recorded as a public comment?
+        , (is_public is true or value like 'Voicemail from%') as is_public_comment
     
     from ticket_comment
     
@@ -35,7 +39,7 @@ with ticket_comment as (
             , 'first_comment') 
             as previous_commenter_role
     from joined
-    where is_public
+    where is_public_comment
 
     union all
 
@@ -43,7 +47,7 @@ with ticket_comment as (
         *,
         'non_public_comment' as previous_commenter_role
     from joined
-    where not is_public
+    where not is_public_comment
 )
 
 select 

@@ -1,14 +1,19 @@
-with ticket_public_comments as (
+with commenter as (
+
+    select * from {{ ref('stg_zendesk__user') }}
+
+), ticket_public_comments as (
 
     select *
     from {{ ref('int_zendesk__comments_enriched') }}
-    where is_public
+    where is_public_comment
 
 ), end_user_comments as (
   
   select 
     ticket_id,
-    valid_starting_at as end_user_comment_created_at,
+    user_id,
+    valid_starting_at as comment_created_at,
     ticket_created_date,
     commenter_role,
     previous_internal_comment_count,
@@ -24,27 +29,39 @@ with ticket_public_comments as (
     end_user_comments.ticket_id,
     -- If the commentor was internal, a first comment, and had previous non public internal comments then we want the ticket created date to be the end user comment created date
     -- Otherwise we will want to end user comment created date
-    case when is_first_comment then end_user_comments.ticket_created_date else end_user_comments.end_user_comment_created_at end as end_user_comment_created_at,
+    case when is_first_comment then end_user_comments.ticket_created_date else end_user_comments.comment_created_at end as end_user_comment_created_at,
     end_user_comments.is_first_comment,
+    agent_comments.user_id as responding_agent_user_id,
     min(case when is_first_comment 
         and end_user_comments.commenter_role != 'external_comment' 
         and (end_user_comments.previous_internal_comment_count > 0)
-          then end_user_comments.end_user_comment_created_at 
-        else agent_comments.valid_starting_at end) as agent_responded_at
+          then end_user_comments.comment_created_at 
+        else agent_comments.valid_starting_at end) as agent_responded_at,
+    rank() over (partition by end_user_comments.ticket_id, end_user_comment_created_at order by agent_responded_at asc) as rank
+        
   from end_user_comments
   left join ticket_public_comments as agent_comments
     on agent_comments.ticket_id = end_user_comments.ticket_id
     and agent_comments.commenter_role = 'internal_comment'
-    and agent_comments.valid_starting_at > end_user_comments.end_user_comment_created_at
-  group by 1,2,3
+    and agent_comments.valid_starting_at > end_user_comments.comment_created_at
+  group by 1,2,3,4
+
+), joined as (
+
+    select
+      reply_timestamps.*,
+      commenter.name as responding_agent_name,
+      commenter.email as responding_agent_email,
+      ({{ fivetran_utils.timestamp_diff(
+        'end_user_comment_created_at',
+        'agent_responded_at',
+        'second') }} / 60.0) as reply_time_calendar_minutes
+
+    from reply_timestamps
+    left join commenter on commenter.user_id = reply_timestamps.responding_agent_user_id
+    where rank = 1
+    order by 1,2
 
 )
 
-  select
-    *,
-    ({{ dbt.datediff(
-      'end_user_comment_created_at',
-      'agent_responded_at',
-      'second') }} / 60) as reply_time_calendar_minutes
-  from reply_timestamps
-  order by 1,2
+    select * from joined

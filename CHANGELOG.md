@@ -160,6 +160,13 @@ Tiny release ahead!
 - Dependencies on `fivetran/fivetran_utils` have been upgraded, previously `[">=0.3.0", "<0.4.0"]` now `[">=0.4.0", "<0.5.0"]`.
 
 # dbt_zendesk v0.9.1
+
+## Create zendesk__reply_metrics model
+- Creates a new end model called `zendesk__reply_metrics` to surface data at the reply granularity, which none of the existing end models do. It is a modified version of the `int_zendesk__ticket_first_reply_time_business` model.
+- There are minimal changes to existing models, just including the `user_id` field in the `int_zendesk__ticket_reply_times` model
+## Contributiors
+- [zhoward101](https://github.com/zhoward101)
+
 ## Bugfix: 
 - If doing a _dbt_compile_ prior to _dbt_run_, it fails at `int_zendesk__calendar_spine` because the staging model it references is not built yet. This PR changes the intermediate models to reference source tables instead of staging models. ([#79](https://github.com/fivetran/dbt_zendesk/pull/79))
 ## Contributors
