@@ -1,9 +1,12 @@
 # dbt_zendesk v0.14.0
 
 ## 🎉 Feature Update 🎉 
-This release supports running the package on multiple Zendesk sources at once! See the [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-3-define-database-and-schema-variables) for details on how to leverage this feature ([PR #132](https://github.com/fivetran/dbt_zendesk/pull/132)).
+- This release supports running the package on multiple Zendesk sources at once! See the [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-3-define-database-and-schema-variables) for details on how to leverage this feature ([PR #132](https://github.com/fivetran/dbt_zendesk/pull/132)).
 
 > Please note: This is a **🚨Breaking Change🚨** in that we have a added a new field, `source_relation`, that points to the source connector from which the record originated. This field addition will require a `dbt run --full-refresh`.
+
+## 🐞 Bug Fixes 🐞
+- Previous versions of this package determined the [default ticket schedule](https://github.com/fivetran/dbt_zendesk/blob/v0.13.1/models/intermediate/int_zendesk__ticket_schedules.sql#L19-L55) without considering whether schedules have been deleted or not. We now only consider non-deleted schedules in our default ticket schedule logic ([PR #132](https://github.com/fivetran/dbt_zendesk/pull/132)).
 
 # dbt_zendesk v0.13.1
 
