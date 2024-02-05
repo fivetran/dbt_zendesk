@@ -6,7 +6,7 @@ with spine as (
     {% set current_ts = dbt.current_timestamp_backcompat() %}
     {% set first_date_query %}
         -- if you are unioning multiple connectors, you may not be able to `dbt compile` before `dbt run`ing on a new schema.
-        select min( created_at ) as min_date from {{ source('ticket') if var('zendesk_union_schemas', []) == [] and var('zendesk_union_databases', []) == [] else var('ticket') }}
+        select min( created_at ) as min_date from {{ source('zendesk', 'ticket') if var('zendesk_union_schemas', []) == [] and var('zendesk_union_databases', []) == [] else var('ticket') }}
         -- by default take all the data 
         where cast(created_at as date) >= {{ dbt.dateadd('year', - var('ticket_field_history_timeframe_years', 50), current_ts ) }}
     {% endset %}
