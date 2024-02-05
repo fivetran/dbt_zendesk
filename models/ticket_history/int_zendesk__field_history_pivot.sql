@@ -11,7 +11,8 @@
 }}
 
 {% if execute -%}
-    {% set results = run_query('select distinct field_name from ' ~ var('field_history') ) %}
+    -- if you are unioning multiple connectors, you may not be able to `dbt compile` before `dbt run`ing on a new schema.
+    {% set results = run_query('select distinct field_name from ' ~ source('field_history') if var('zendesk_union_schemas', []) == [] and var('zendesk_union_databases', []) == [] else var('field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 {% endif -%}
 
