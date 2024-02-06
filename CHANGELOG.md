@@ -1,6 +1,7 @@
 # dbt_zendesk v0.13.2
 
-
+## Bug Fix
+- [PR #140](https://github.com/fivetran/dbt_zendesk/pull/140) removes the `ticket_schedule` dependency in the `quickstart.yml` as it has been removed as a requirement in Quickstart transformations.
 
 # dbt_zendesk v0.13.1
 
