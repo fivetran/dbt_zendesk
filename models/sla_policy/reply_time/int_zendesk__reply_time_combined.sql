@@ -120,7 +120,8 @@ with reply_time_calendar_hours_sla as (
       and ((
         agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
         or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
-        or (agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
+        or (agent_reply_at is null and next_solved_at >= sla_schedule_start_at and next_solved_at < next_schedule_start) -- There are no reply times, but the ticket is closed and we should capture the closed date as the first and/or next reply time if there is not one preceding.
+        or (next_solved_at is null and agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
         or (agent_reply_at > sla_schedule_end_at and (agent_reply_at < next_schedule_start or next_schedule_start is null)) -- ticket is replied to outside sla schedule hours
       ))
     or not in_business_hours
