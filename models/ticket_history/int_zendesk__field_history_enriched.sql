@@ -35,6 +35,7 @@ with ticket_field_history as (
 
     left join updater_info
         on ticket_field_history.user_id = updater_info.updater_user_id
+        and ticket_field_history.source_relation = updater_info.source_relation
 )
 select *
 from final

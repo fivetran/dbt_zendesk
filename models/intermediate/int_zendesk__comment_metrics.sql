@@ -7,6 +7,7 @@ with ticket_comments as (
 comment_counts as (
     select
         ticket_id,
+        source_relation,
         last_comment_added_at,
         sum(case when commenter_role = 'internal_comment' and is_public = true
             then 1
@@ -38,7 +39,7 @@ comment_counts as (
                 end) as count_agent_replies
     from ticket_comments
 
-    group by 1, 2
+    group by 1, 2, 3
 ),
 
 final as (

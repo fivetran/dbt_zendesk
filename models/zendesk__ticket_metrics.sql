@@ -133,16 +133,20 @@ select
 from ticket_enriched
 
 left join ticket_reply_times_calendar
-  using (ticket_id)
+  on ticket_enriched.ticket_id = ticket_reply_times_calendar.ticket_id
+  and ticket_enriched.source_relation = ticket_reply_times_calendar.source_relation
 
 left join ticket_resolution_times_calendar
-  using (ticket_id)
+  on ticket_enriched.ticket_id = ticket_resolution_times_calendar.ticket_id
+  and ticket_enriched.source_relation = ticket_resolution_times_calendar.source_relation
 
 left join ticket_work_time_calendar
-  using (ticket_id)
+  on ticket_enriched.ticket_id = ticket_work_time_calendar.ticket_id
+  and ticket_enriched.source_relation = ticket_work_time_calendar.source_relation
 
 left join ticket_comments
-  using(ticket_id)
+on ticket_enriched.ticket_id = ticket_comments.ticket_id
+and ticket_enriched.source_relation = ticket_comments.source_relation
 
 {% if var('using_schedules', True) %}
 
@@ -150,6 +154,7 @@ left join ticket_comments
 
   select 
     ticket_enriched.ticket_id,
+    ticket_enriched.source_relation,
     ticket_first_resolution_time_business.first_resolution_business_minutes,
     ticket_full_resolution_time_business.full_resolution_business_minutes,
     ticket_first_reply_time_business.first_reply_time_business_minutes,
@@ -164,16 +169,20 @@ left join ticket_comments
   from ticket_enriched
 
   left join ticket_first_resolution_time_business
-    using (ticket_id)
+    on ticket_enriched.ticket_id = ticket_first_resolution_time_business.ticket_id 
+    and ticket_enriched.source_relation = ticket_first_resolution_time_business.source_relation
 
   left join ticket_full_resolution_time_business
-    using (ticket_id)
+    on ticket_enriched.ticket_id = ticket_full_resolution_time_business.ticket_id 
+    and ticket_enriched.source_relation = ticket_full_resolution_time_business.source_relation
   
   left join ticket_first_reply_time_business
-    using (ticket_id)  
+    on ticket_enriched.ticket_id = ticket_first_reply_time_business.ticket_id 
+    and ticket_enriched.source_relation = ticket_first_reply_time_business.source_relation
   
   left join ticket_work_time_business
-    using (ticket_id)
+    on ticket_enriched.ticket_id = ticket_work_time_business.ticket_id 
+    and ticket_enriched.source_relation = ticket_work_time_business.source_relation
 
 )
 
@@ -202,7 +211,8 @@ select
 from calendar_hour_metrics
 
 left join business_hour_metrics 
-  using (ticket_id)
+  on calendar_hour_metrics.ticket_id = business_hour_metrics.ticket_id
+  and calendar_hour_metrics.source_relation = business_hour_metrics.source_relation
 
 {% else %}
 

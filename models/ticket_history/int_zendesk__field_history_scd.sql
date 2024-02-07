@@ -15,15 +15,16 @@ with change_data as (
     select 
         date_day as valid_from,
         ticket_id,
-        ticket_day_id
+        ticket_day_id,
+        source_relation
 
-        {% for col in ticket_columns if col.name|lower not in ['date_day','ending_day','ticket_id','ticket_day_id'] %} 
+        {% for col in ticket_columns if col.name|lower not in ['date_day','ending_day','ticket_id','ticket_day_id','source_relation'] %} 
 
         ,{{ col.name }}
         ,sum(case when {{ col.name }} is null 
                 then 0 
                 else 1 
-                    end) over (order by ticket_id, date_day rows unbounded preceding) as {{ col.name }}_field_partition
+                    end) over (order by ticket_id, date_day, source_relation rows unbounded preceding) as {{ col.name }}_field_partition
         {% endfor %}
 
     from change_data
@@ -32,11 +33,12 @@ with change_data as (
     select
         valid_from, 
         ticket_id,
-        ticket_day_id
+        ticket_day_id,
+        source_relation
 
-        {% for col in ticket_columns if col.name|lower not in ['date_day','ending_day','ticket_id','ticket_day_id'] %} 
+        {% for col in ticket_columns if col.name|lower not in ['date_day','ending_day','ticket_id','ticket_day_id','source_relation'] %} 
 
-        ,first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_partition, ticket_id order by valid_from asc rows between unbounded preceding and current row) as {{ col.name }}
+        ,first_value( {{ col.name }} ) over (partition by {{ col.name }}_field_partition, ticket_id, source_relation order by valid_from asc rows between unbounded preceding and current row) as {{ col.name }}
         
         {% endfor %}
     from set_values

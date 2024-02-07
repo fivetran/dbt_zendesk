@@ -14,6 +14,7 @@ with requester_wait_time_sla as (
 
   select  
     ticket_historical_status.ticket_id,
+    ticket_historical_status.source_relation,
     greatest(ticket_historical_status.valid_starting_at, requester_wait_time_sla.sla_applied_at) as valid_starting_at,
     coalesce(
       ticket_historical_status.valid_ending_at, 
@@ -27,6 +28,7 @@ with requester_wait_time_sla as (
   from ticket_historical_status
   join requester_wait_time_sla
     on ticket_historical_status.ticket_id = requester_wait_time_sla.ticket_id
+    and ticket_historical_status.source_relation = requester_wait_time_sla.source_relation
   where ticket_historical_status.status in ('new', 'open', 'on-hold', 'hold') -- these are the only statuses that count as "requester wait time"
   and sla_applied_at < valid_ending_at
 

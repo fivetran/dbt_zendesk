@@ -1,4 +1,4 @@
--- depends_on: {{ source('zendesk', 'ticket_field_history') }}
+-- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
 
 {{ 
     config(
@@ -10,8 +10,9 @@
         ) 
 }}
 
-{% if execute -%}
-    {% set results = run_query('select distinct field_name from ' ~ source('zendesk', 'ticket_field_history') ) %}
+{% if execute and flags.WHICH in ('run', 'build') -%}
+    -- if you are unioning multiple connectors, you may not be able to `dbt compile` before `dbt run`ing on a new schema.
+    {% set results = run_query('select distinct field_name from ' ~ var('field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 {% endif -%}
 
@@ -19,6 +20,7 @@ with field_history as (
 
     select
         ticket_id,
+        source_relation,
         field_name,
         valid_ending_at,
         valid_starting_at
@@ -43,7 +45,7 @@ with field_history as (
     select 
         *,
         row_number() over (
-            partition by cast(valid_starting_at as date), ticket_id, field_name
+            partition by cast(valid_starting_at as date), ticket_id, field_name, source_relation
             order by valid_starting_at desc
             ) as row_num
     from field_history
@@ -63,6 +65,7 @@ with field_history as (
 
     select 
         ticket_id,
+        source_relation,
         cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
@@ -90,13 +93,13 @@ with field_history as (
         {% endfor %}
     
     from filtered
-    group by 1,2
+    group by 1,2,3
 
 ), surrogate_key as (
 
     select 
         *,
-        {{ dbt_utils.generate_surrogate_key(['ticket_id','date_day'])}} as ticket_day_id
+        {{ dbt_utils.generate_surrogate_key(['ticket_id','date_day','source_relation'])}} as ticket_day_id
     from pivots
 
 )

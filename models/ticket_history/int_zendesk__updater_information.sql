@@ -9,6 +9,7 @@ with users as (
 ), final as (
     select
         users.user_id as updater_user_id
+        ,users.source_relation
         ,users.name as updater_name
         ,users.role as updater_role
         ,users.email as updater_email
@@ -37,7 +38,8 @@ with users as (
     from users
 
     left join organizations
-        using(organization_id)
+        on users.organization_id = organizations.organization_id
+        and users.source_relation = organizations.source_relation
 )
 
 select * 
