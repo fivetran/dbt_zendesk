@@ -63,7 +63,7 @@ with ticket_schedules as (
     from ticket_sla_applied_with_schedules
     cross join weeks
     -- We need to understand more why the below is needed. I feel this is more a performance issue than a data quality issue. Still need to confirm.
-    {# where {{ fivetran_utils.ceiling('target/total_schedule_weekly_business_minutes') }} >= generated_number - 1 #} 
+    where {{ fivetran_utils.ceiling('target/total_schedule_weekly_business_minutes') }} >= generated_number - 1 
 
 ), weekly_periods as (
   
