@@ -36,7 +36,7 @@ with reply_time_sla as (
     sla_applied_at,
     target,
     in_business_hours,
-    sla_breach_at,
+    sla_update_at as sla_breach_at,
     sla_elapsed_time,
     is_sla_breached
   from reply_time_sla

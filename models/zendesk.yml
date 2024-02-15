@@ -173,7 +173,7 @@ models:
         description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
 
   - name: zendesk__sla_policies
-    description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.
+    description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches for `first_reply_time`, `next_reply_time`, `requester_wait_time`, and `agent_work_time` are supported. If there is a SLA you would like supported that is not included, please create a feature request.
     columns:
       - name: sla_event_id
         description: A surrogate key generated from the combination of ticket_id, metric, and sla_applied_at fields
@@ -192,7 +192,7 @@ models:
       - name: in_business_hours
         description: Boolean field indicating if the SLA target is in business hours (true) or calendar hours (false)
       - name: sla_breach_at
-        description: The time or expected time of the SLA breach event
+        description: The time or expected time of the SLA breach or achieve event.
       - name: sla_elapsed_time
         description: The total elapsed time to achieve the SLA metric whether breached or achieved
       - name: is_active_sla

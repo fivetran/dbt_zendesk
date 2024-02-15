@@ -1,8 +1,19 @@
 # Decision Log
 
+## No Historical Schedule Reference
+At the current moment the Fivetran Zendesk Support connector does not contain historical data of schedules. This means if a schedule is created in the Zendesk UI and remains untouched for years, but then is adjusted in the current month you will see the data synced in the raw `schedule` table to reflect the current adjusted schedule. As a result the raw data will lose all historical reference of what this schedule range was previously.
+
+Therefore, if you are leveraging the `using_schedule` variable as `true` to replicate business hour metrics this data model will only have a reference to the current range of any given schedule. This means tickets from the previous two years that were leveraging the __old__ schedule will not be reported as using the __new__ schedule. If this data limitation is a concern to you, we recommend opening a [Fivetran Support Feature Request](https://support.fivetran.com/hc/en-us/community/topics/360001909373-Feature-Requests?sort_by=votes) to enhance the Zendesk Support connector to include historical schedule data.
+
+## Zendesk First Reply Time SLA Opinionated Logic
+The logic for `first_reply_time` breach/achievement metrics within the `zendesk__ticket_metrics` and `zendesk__sla_policies` models are structured on the Zendesk definition of [first reply time SLA events](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time?page=2#topic_jvw_nqd_1hb). For example, this data model calculates first reply time to be the duration of time (business or calendar) between the creation of the ticket and the first public comment from either an `agent` or `admin`. This holds true regardless of when the first reply time SLA was applied to the ticket.
+
+This means if a ticket has been opened for a number of days and then a `first_reply_time` SLA is applied to the ticket, this data model will still calculate the `first_reply_time` metric as the duration of time from the creation of the ticket and the first public comment, **not** from when the SLA was applied. 
+
+We have found that some reports of `sla_breach_at`, `sla_elapsed_time`, and the `first_reply_time_*` metrics in the aforementioned models do not match the metrics provided in the Zendesk UI. This is due to certain reports in Zendesk calculating the `first_reply_time` as the first public `agent` or `admin` reply following the SLA being applied to the ticket. We are taking the stance in this data model that this is not reflective of the `first_reply_time` metric and will continue to report the `first_reply_time` as mentioned above. As a result, some of your `first_reply_time` metrics may potentially not match exactly what you see reported in the Zendesk UI reports.
 
 ## Zendesk Backlog Tickets
-- You may find some discrepancies between what Zendesk reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk taking a snapshot of each day sometime in the 23rd hour as stated in their [article.](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
+- You may find some discrepancies between what Zendesk reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk taking a snapshot of each day sometime in the 23rd hour as stated in their [article](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
 
 ```
 Because backlog data is captured on a per-day basis, it cannot be segmented hourly. The Backlog recorded - Hour is listed as 23 because data is captured daily between 11 pm, 12 am, or 1 am depending on factors like Daylight Saving Time (DST). 
