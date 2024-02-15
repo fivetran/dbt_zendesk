@@ -111,7 +111,7 @@ with reply_time_calendar_hours_sla as (
   having (in_business_hours and week_number <= min({{ dbt.datediff("reply_time_breached_at.sla_applied_at", "coalesce(reply_time.reply_at, ticket_solved_times.solved_at, " ~ dbt.current_timestamp() ~ ")", 'week') }}))
     or not in_business_hours
   {% endif %}
-  
+
 ), lagging_time_block as (
   select
     *,
@@ -133,7 +133,7 @@ with reply_time_calendar_hours_sla as (
         or (agent_reply_at is null and next_solved_at >= sla_schedule_start_at and next_solved_at < next_schedule_start) -- There are no reply times, but the ticket is closed and we should capture the closed date as the first and/or next reply time if there is not one preceding.
         or (next_solved_at is null and agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
         or (agent_reply_at > sla_schedule_end_at and (agent_reply_at < next_schedule_start or next_schedule_start is null)) -- ticket is replied to outside sla schedule hours
-      ) and sla_schedule_start_at <= {{ dbt.current_timestamp() }})
+      ) and sla_schedule_start_at <= {{ dbt.current_timestamp() }}) -- To help limit the data we do not want to bring through any schedule rows in the future.
     or not in_business_hours
 
 ), reply_time_breached_at_remove_old_sla as (
