@@ -1,12 +1,20 @@
 # dbt_zendesk v0.14.0
 
-[PR #134](https://github.com/fivetran/dbt_zendesk/pull/134) includes the following changes:
+[PR #136](https://github.com/fivetran/dbt_zendesk/pull/136) includes the following changes:
 
 ## Bug Fixes
-- Updated the `int_zendesk__reply_time_combined` model to additionally account for the following scenarios as they were erroneously being filtered out in previous versions of the package:
+- Converted the `zendesk__sla_policies` metric for `sla_elapsed_time` to be reported in minutes to the second as opposed to just the nearest rounded minute. This ensures more accurate reporting.
+- Updated the `int_zendesk__reply_time_combined` model to additionally account for the following business hour scenarios as they were erroneously being filtered out in previous versions of the package:
    - A ticket is first replied to outside SLA schedules
    - A ticket is has not yet received an agent reply
-> Note: This update only impacts first reply time business metrics
+- Included additional logic within the `int_zendesk__ticket_schedules` model to more accurately select the **active** default schedule.
+  - Previously the model could possibly select a deleted schedule. This update ensures only an active schedule is selected.
+- Overhauled the logic used to calculate `sla_breach_at` within the `zendesk__sla_policies` and upstream models for reply time SLAs. It was found this field was inconsistent with the actual breach/achieve time of an SLA. The overhaul should now ensure reply time SLA is accurate to either be the time of the SLA breach or achieve event.
+- Modified the logic that matches schedule weeks when calculating reply time business metrics. Previously long running SLAs would be excluded from the final model, now all reply time business SLAs regardless of sla elapsed duration will be included in the end `zendesk__sla_policies` model.
+
+## Documentation Updates
+- Updated "Zendesk" references within the README to now refer to "Zendesk Support" in order to more accurately reflect the name of the Fivetran Zendesk Support Connector.
+- Added new entries to the DECISIONLOG to highlight nuances and opinionated stances this package uses when calculating business metrics and `first_reply_time` SLAs.
 
 # dbt_zendesk v0.13.1
 

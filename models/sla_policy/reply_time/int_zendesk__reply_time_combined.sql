@@ -105,10 +105,6 @@ with reply_time_calendar_hours_sla as (
   left join ticket_solved_times
     on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
-  -- where (in_business_hours and case when reply_at is null 
-  --   then 360
-  --   else ceil(reply_time_breached_at.target/reply_time_breached_at.total_schedule_weekly_business_minutes) 
-  -- end >= week_number) or not in_business_hours
   {{ dbt_utils.group_by(n=10) }}
   having (in_business_hours and week_number <= min({{ dbt.datediff("sla_applied_at", "coalesce(reply_at, solved_at, current_timestamp)", 'week') }}))
     or not in_business_hours
