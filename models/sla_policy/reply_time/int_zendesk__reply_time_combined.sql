@@ -106,7 +106,7 @@ with reply_time_calendar_hours_sla as (
     on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
   {{ dbt_utils.group_by(n=10) }}
-  having (in_business_hours and week_number <= min({{ dbt.datediff("sla_applied_at", "coalesce(reply_at, solved_at, current_timestamp)", 'week') }}))
+  having (in_business_hours and week_number <= min({{ dbt.datediff("reply_time_breached_at.sla_applied_at", "coalesce(reply_time.reply_at, ticket_solved_times.solved_at, " ~ dbt.current_timestamp() ~ ")", 'week') }}))
     or not in_business_hours
 
 ), lagging_time_block as (
