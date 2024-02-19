@@ -158,8 +158,8 @@ with reply_time_calendar_hours_sla as (
   select  
     *,
     case when is_sla_breached
-      then sla_breach_at
-      else coalesce(agent_reply_at, next_solved_at)
+      then sla_breach_at -- If the SLA was breached then record that time as the breach 
+      else coalesce(agent_reply_at, next_solved_at) -- If the SLA was not breached then record either the agent_reply_at or next_solve_at as the breach event time as it was achieved.
     end as sla_update_at,
     case when total_runtime_minutes < 0 -- agent has already replied to prior to this SLA schedule
         then 0 -- so don't add new minutes to the SLA

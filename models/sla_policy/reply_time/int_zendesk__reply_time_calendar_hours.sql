@@ -10,9 +10,9 @@ with sla_policy_applied as (
   select
     *,
     {{ fivetran_utils.timestamp_add(
-        "minute",
+        "second",
         "cast(target as " ~ dbt.type_int() ~ " )",
-        "sla_applied_at" ) }} as sla_breach_at
+        "sla_applied_at" ) }} / 60 as sla_breach_at
   from sla_policy_applied
   where not in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
