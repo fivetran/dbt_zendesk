@@ -10,7 +10,7 @@
    - A ticket has not yet received an agent reply
 - Overhauled the logic used within the `int_zendesk__reply_time_combined` model to calculate `sla_breach_at` within the `zendesk__sla_policies` and upstream models for reply time SLAs. It was found this field was inconsistent with the actual breach/achieve time of an SLA. The overhaul should now ensure reply time SLA is accurate to either be the time of the SLA breach or achieve event.
   - In particular, for first and next reply time SLAs the `sla_breach_at` will be the time of the breach if the SLA was breached or the time the SLA was achieved if it was not breached.
-- Modified the logic that matches schedule weeks within the `int_zendesk__reply_time_combined` model when calculating reply time business metrics. Previously long running SLAs would be excluded from the final model, now all reply time business SLAs regardless of sla elapsed duration will be included in the ed `zendesk__sla_policies` model.
+- Modified the logic that matches schedule weeks within the `int_zendesk__reply_time_combined` model when calculating reply time business metrics. Previously long running SLAs would be excluded from the final model, now all reply time business SLAs regardless of sla elapsed duration will be included in the end `zendesk__sla_policies` model.
 - Included additional logic within the `int_zendesk__ticket_schedules` model to more accurately select the **active** default schedule used when calculating the business metrics for the downstream `zendesk__ticket_metrics` and `zendesk__sla_policies` models.
   - Previously the model could possibly select a deleted schedule. This update ensures only an active schedule is selected.
 ## Documentation Updates
