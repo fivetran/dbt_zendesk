@@ -1,31 +1,31 @@
 # Decision Log
 
 ## No Historical Schedule Reference
-At the current moment the Fivetran Zendesk Support connector does not contain historical data of schedules. This means if a schedule is created in the Zendesk UI and remains untouched for years, but then is adjusted in the current month you will see the data synced in the raw `schedule` table to reflect the current adjusted schedule. As a result the raw data will lose all historical reference of what this schedule range was previously.
+At the current moment the Fivetran Zendesk Support connector does not contain historical data of schedules. This means if a schedule is created in the Zendesk Support UI and remains untouched for years, but then is adjusted in the current month you will see the data synced in the raw `schedule` table to reflect the current adjusted schedule. As a result the raw data will lose all historical reference of what this schedule range was previously.
 
 Therefore, if you are leveraging the `using_schedule` variable as `true` to replicate business hour metrics this data model will only have a reference to the current range of any given schedule. This means tickets from the previous two years that were leveraging the __old__ schedule will not be reported as using the __new__ schedule. If this data limitation is a concern to you, we recommend opening a [Fivetran Support Feature Request](https://support.fivetran.com/hc/en-us/community/topics/360001909373-Feature-Requests?sort_by=votes) to enhance the Zendesk Support connector to include historical schedule data.
 
-## Zendesk First Reply Time SLA Opinionated Logic
-The logic for `first_reply_time` breach/achievement metrics within the `zendesk__ticket_metrics` and `zendesk__sla_policies` models are structured on the Zendesk definition of [first reply time SLA events](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time?page=2#topic_jvw_nqd_1hb). For example, this data model calculates first reply time to be the duration of time (business or calendar) between the creation of the ticket and the first public comment from either an `agent` or `admin`. This holds true regardless of when the first reply time SLA was applied to the ticket.
+## Zendesk Support First Reply Time SLA Opinionated Logic
+The logic for `first_reply_time` breach/achievement metrics within the `zendesk__ticket_metrics` and `zendesk__sla_policies` models are structured on the Zendesk Support definition of [first reply time SLA events](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time?page=2#topic_jvw_nqd_1hb). For example, this data model calculates first reply time to be the duration of time (business or calendar) between the creation of the ticket and the first public comment from either an `agent` or `admin`. This holds true regardless of when the first reply time SLA was applied to the ticket.
 
 This means if a ticket has been opened for a number of days and then a `first_reply_time` SLA is applied to the ticket, this data model will still calculate the `first_reply_time` metric as the duration of time from the creation of the ticket and the first public comment, **not** from when the SLA was applied. 
 
-We have found that some reports of `sla_breach_at`, `sla_elapsed_time`, and the `first_reply_time_*` metrics in the aforementioned models do not match the metrics provided in the Zendesk UI. This is due to certain reports in Zendesk calculating the `first_reply_time` as the first public `agent` or `admin` reply following the SLA being applied to the ticket. We are taking the stance in this data model that this is not reflective of the `first_reply_time` metric and will continue to report the `first_reply_time` as mentioned above. As a result, some of your `first_reply_time` metrics may potentially not match exactly what you see reported in the Zendesk UI reports.
+We have found that some reports of `sla_breach_at`, `sla_elapsed_time`, and the `first_reply_time_*` metrics in the aforementioned models do not match the metrics provided in the Zendesk Support UI. This is due to certain reports in Zendesk Support calculating the `first_reply_time` as the first public `agent` or `admin` reply following the SLA being applied to the ticket. We are taking the stance in this data model that this is not reflective of the `first_reply_time` metric and will continue to report the `first_reply_time` as mentioned above. As a result, some of your `first_reply_time` metrics may potentially not match exactly what you see reported in the Zendesk Support UI reports.
 
-## Zendesk Backlog Tickets
-- You may find some discrepancies between what Zendesk reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk taking a snapshot of each day sometime in the 23rd hour as stated in their [article](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
+## Zendesk Support Backlog Tickets
+- You may find some discrepancies between what Zendesk Support reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk Support taking a snapshot of each day sometime in the 23rd hour as stated in their [article](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
 
 ```
 Because backlog data is captured on a per-day basis, it cannot be segmented hourly. The Backlog recorded - Hour is listed as 23 because data is captured daily between 11 pm, 12 am, or 1 am depending on factors like Daylight Saving Time (DST). 
 For more information, see the article: Analyzing your ticket backlog history with Explore.
 ```
 
-- While Zendesk doesn't segment their backlog data per hour, on the other hand we always try to model our data starting at a greater granularity. This means we start by taking the _hour_ from the timestamp field from the Zendesk source tables then bringing it to _day_. Therefore there will be edge cases where tickets updated near the end of day may fall into different statuses, depending on whether you're looking at the Zendesk Backlog dashboard or our model outputs.
+- While Zendesk Support doesn't segment their backlog data per hour, on the other hand we always try to model our data starting at a greater granularity. This means we start by taking the _hour_ from the timestamp field from the Zendesk Support source tables then bringing it to _day_. Therefore there will be edge cases where tickets updated near the end of day may fall into different statuses, depending on whether you're looking at the Zendesk Support Backlog dashboard or our model outputs.
 
 ## Business Time Metrics
-When developing this package we noticed Zendesk reported ticket response times in business minutes based on the last schedule which is applied to the ticket. However, we felt this is not an accurate representation of the true ticket elapsed time in business minutes. Therefore, we took the opinionated decision to apply logic within our transformations to calculate the cumulative elapsed time in business minutes of a ticket across **all** schedules which the ticket was assigned during it's lifetime.
+When developing this package we noticed Zendesk Support reported ticket response times in business minutes based on the last schedule which is applied to the ticket. However, we felt this is not an accurate representation of the true ticket elapsed time in business minutes. Therefore, we took the opinionated decision to apply logic within our transformations to calculate the cumulative elapsed time in business minutes of a ticket across **all** schedules which the ticket was assigned during it's lifetime.
 
-Below is a quick explanation of how this is calculated within the dbt package for **first_reply_time_business_minutes** as well as how this differs from Zendesk's logic:
+Below is a quick explanation of how this is calculated within the dbt package for **first_reply_time_business_minutes** as well as how this differs from Zendesk Support's logic:
 > Note: While this is an example of `first_reply_time_business_minutes`, the logic is the same for other business minute metrics.
 
 - A ticket (`941606`) is created on `2020-09-29 17:01:38 UTC` and first solved at `2020-10-01 15:03:44 UTC`.
@@ -67,7 +67,7 @@ Below is a quick explanation of how this is calculated within the dbt package fo
 - Seeing the comments made to the ticket, we understand that the customer commented on the ticket at `2020-09-29 17:01:38 UTC` and the first **public** internal comment was made at `2020-09-30 19:01:46 UTC`.
 - In comparison of the two schedules associated with this ticket, we can see that the `Level 1 Chicago` schedule was set for almost the entire duration of the ticket before the first reply. Whereas, the `Level 2 San Francisco` schedule was only set for 21 seconds.
   - Regardless, we will be using both schedules in the calculation of the `first_reply_time_business_minutes`.
-- Now that we have the schedules, the schedule intervals, and the first_reply_time we can calculate the total elapsed `first_reply_time_business_minutes`. But, let's first convert the UTC timestamps to the Zendesk-esque intervals expressed within the schedules:
+- Now that we have the schedules, the schedule intervals, and the first_reply_time we can calculate the total elapsed `first_reply_time_business_minutes`. But, let's first convert the UTC timestamps to the Zendesk Support-esque intervals expressed within the schedules:
 > The `Interval Results` are calculate via: `(Full Days From Sunday * 24 * 60) + (Hours * 60) + Minutes`
 
 | **Action** | **Timestamp** | **Full Days from Sunday** | **Hours** | **Minutes** | **Interval Result** |
@@ -112,10 +112,10 @@ Below is a quick explanation of how this is calculated within the dbt package fo
 
 - Adding the differences above we arrive at a total `first_reply_time_business_minutes` of 959.46 minutes.
 
-- So how does Zendesk calculate this?
-  - Instead of taking into account the various schedules used by the ticket, Zendesk will instead use the **last** schedule applied to the ticket to record the duration in business minutes.
-- Therefore, in the example above Zendesk will **only** use the `Level 2 San Francisco` schedule when calculating the `first_reply_time_business_minutes` for ticket `941606`.
-  - Below is an example of how Zendesk calculates this:
+- So how does Zendesk Support calculate this?
+  - Instead of taking into account the various schedules used by the ticket, Zendesk Support will instead use the **last** schedule applied to the ticket to record the duration in business minutes.
+- Therefore, in the example above Zendesk Support will **only** use the `Level 2 San Francisco` schedule when calculating the `first_reply_time_business_minutes` for ticket `941606`.
+  - Below is an example of how Zendesk Support calculates this:
 
 | **Schedule** | **Schedule start_time_utc** | **Schedule end_time_utc**  | **Ticket Start** | **Ticket End** | **Difference** | 
 |----| ------------------ | -----------------| ------------------ | -----------------| ------------------ |
