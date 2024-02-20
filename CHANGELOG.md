@@ -6,7 +6,7 @@
 - Converted the `zendesk__sla_policies` metric for `sla_elapsed_time` to be reported in minutes to the second as opposed to just the nearest rounded minute. This ensures more accurate reporting.
 - Updated the `int_zendesk__reply_time_combined` model to additionally account for the following business hour scenarios as they were erroneously being filtered out in previous versions of the package:
    - A ticket is first replied to outside SLA schedules
-   - A ticket is has not yet received an agent reply
+   - A ticket has not yet received an agent reply
 - Included additional logic within the `int_zendesk__ticket_schedules` model to more accurately select the **active** default schedule.
   - Previously the model could possibly select a deleted schedule. This update ensures only an active schedule is selected.
 - Overhauled the logic used to calculate `sla_breach_at` within the `zendesk__sla_policies` and upstream models for reply time SLAs. It was found this field was inconsistent with the actual breach/achieve time of an SLA. The overhaul should now ensure reply time SLA is accurate to either be the time of the SLA breach or achieve event.
