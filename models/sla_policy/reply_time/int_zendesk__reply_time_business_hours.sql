@@ -62,7 +62,6 @@ with ticket_schedules as (
 
     from ticket_sla_applied_with_schedules
     cross join weeks
-    where {{ fivetran_utils.ceiling('target/total_schedule_weekly_business_minutes') }} >= generated_number - 1
 
 ), weekly_periods as (
   
@@ -142,7 +141,10 @@ with ticket_schedules as (
     sum_lapsed_business_minutes,
     in_business_hours,
     sla_breach_at,
-    is_breached_during_schedule
+    is_breached_during_schedule,
+    total_schedule_weekly_business_minutes,
+    max(case when is_breached_during_schedule then sla_breach_at else null end) over (partition by ticket_id, metric, sla_applied_at, target) as sla_breach_exact_time,
+    week_number
   from intercepted_periods_with_breach_flag_calculated
 
 ) 

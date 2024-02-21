@@ -31,6 +31,7 @@ with ticket as (
             row_number() over (order by created_at) = 1 as is_default_schedule,
             id
           from {{ source('zendesk','schedule') }}
+          where not coalesce(_fivetran_deleted, false)
         )
         select 
           id

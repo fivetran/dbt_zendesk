@@ -36,7 +36,7 @@ with reply_time_sla as (
     sla_applied_at,
     target,
     in_business_hours,
-    sla_breach_at,
+    sla_update_at as sla_breach_at,
     sla_elapsed_time,
     is_sla_breached
   from reply_time_sla
@@ -123,7 +123,7 @@ select
   in_business_hours,
   sla_breach_at,
   case when sla_elapsed_time is null
-    then {{ dbt.datediff("sla_applied_at", dbt.current_timestamp_backcompat(), 'minute') }}  --This will create an entry for active sla's
+    then ({{ dbt.datediff("sla_applied_at", dbt.current_timestamp_backcompat(), 'second') }} / 60)  --This will create an entry for active sla's
     else sla_elapsed_time
       end as sla_elapsed_time,
   sla_breach_at > current_timestamp as is_active_sla,
