@@ -219,7 +219,7 @@ models:
         description: The tickets priority ranking
 
   - name: zendesk__ticket_metrics
-    description: Each record represents a Zendesk ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
+    description: Each record represents a Zendesk Support ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
     columns:
       - name: first_reply_time_calendar_minutes
         description: The number of calendar minutes between when the ticket was created and when the first public agent response occurred
