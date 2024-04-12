@@ -33,8 +33,8 @@ with timezone as (
 
     from {{ var('schedule_holiday') }}  
     inner join {{ ref('int_zendesk__calendar_spine') }} 
-        on holiday_start_date_at <= date_day
-        and holiday_end_date_at >= date_day
+        on holiday_start_date_at <= cast(date_day as {{ dbt.type_timestamp() }} )
+        and holiday_end_date_at >= cast(date_day as {{ dbt.type_timestamp() }} )
 
 ), timezone_with_dt as (
 
@@ -361,4 +361,4 @@ with timezone as (
 )
 
 select *
-from final
+from final 
