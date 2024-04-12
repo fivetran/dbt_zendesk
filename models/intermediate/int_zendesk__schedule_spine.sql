@@ -25,8 +25,8 @@ with timezone as (
 
     select
         _fivetran_synced,
-        cast(date_day as datetime) as holiday_start_date_at, -- For each day within a holiday we want to give it its own record. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
-        cast(date_day as datetime) as holiday_end_date_at, -- Since each day within a holiday now gets its own record, the end_date will then be the same day as the start_date. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
+        cast(date_day as {{ dbt.type_timestamp() }} ) as holiday_start_date_at, -- For each day within a holiday we want to give it its own record. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
+        cast(date_day as {{ dbt.type_timestamp() }} ) as holiday_end_date_at, -- Since each day within a holiday now gets its own record, the end_date will then be the same day as the start_date. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
         holiday_id,
         holiday_name,
         schedule_id
