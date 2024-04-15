@@ -88,12 +88,30 @@ vars:
 
 ## (Optional) Step 5: Additional configurations
 
-### Adding passthrough columns
-This package includes all source columns defined in the staging models. However, the `stg_zendesk__ticket` model allows for additional columns to be added using a pass-through column variable. This is extremely useful if you'd like to include custom fields to the package.
+### Add passthrough columns
+This package includes all source columns defined in the macros folder. You can add more columns from the `TICKET`, `USER`, and `ORGANIZATION` tables using our pass-through column variables.
+
+These variables allow for the pass-through fields to be aliased (`alias`) and casted (`transform_sql`) if desired, but not required. Datatype casting is configured via a sql snippet within the `transform_sql` key. You may add the desired sql while omitting the `as field_name` at the end and your custom pass-through fields will be casted accordingly. Use the below format for declaring the respective pass-through variables:
+
 ```yml
 vars:
-  zendesk__ticket_passthrough_columns: [account_custom_field_1, account_custom_field_2]
+  zendesk__ticket_passthrough_columns:
+    - name: "account_custom_field_1" # required
+      alias: "account_1" # optional
+      transform_sql: "cast(account_1 as string)" # optional, must reference the alias if an alias is provided (otherwise the original name)
+    - name: "account_custom_field_2"
+      transform_sql: "cast(account_custom_field_2 as string)"
+    - name: "account_custom_field_3"
+  zendesk__user_passthrough_columns:
+    - name: "internal_app_id_c"
+      alias: "app_id"
+  zendesk__organization_passthrough_columns:
+    - name: "custom_org_field_1"
 ```
+
+> Note: Earlier versions of this package employed a more rudimentary format for passthrough columns, in which the user provided a list of field names to pass in, rather than a mapping. In the above `ticket` example, this would be `[account_custom_field_1, account_custom_field_2, account_custom_field_3]`.
+>
+> This old format will still work, as our passthrough-column macros are all backwards compatible.
 
 ### Mark Former Internal Users as Agents
 If a team member leaves your organization and their internal account is deactivated, their `USER.role` will switch from `agent` or `admin` to `end-user`. This will skew historical ticket SLA metrics, as we calculate reply times and other metrics based on `agent` or `admin` activity only.
