@@ -1,3 +1,8 @@
+# dbt_zendesk v0.15.0
+
+## Documentation Updates
+- Addition of the reference to the Fivetran prebuilt [Zendesk Streamlit report](https://fivetran-zendesk.streamlit.app/) in the README.
+
 # dbt_zendesk v0.14.0
 
 [PR #136](https://github.com/fivetran/dbt_zendesk/pull/136) includes the following changes:
