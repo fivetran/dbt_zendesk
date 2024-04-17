@@ -1,4 +1,12 @@
-# dbt_zendesk v0.15.0
+# dbt_zendesk v0.14.1
+
+[PR #146](https://github.com/fivetran/dbt_zendesk/pull/146) includes the following changes:
+
+## Bug Fixes
+- Fixes the issue of `sla_event_id`'s occurring in the `zendesk__sla_policies` model.
+  - This involved updating the `int_zendesk__schedule_spine` which was previously outputting overlapping schedule windows, to account for when holidays transcended a given schedule week.
+  - This also involved updating the `int_zendesk__reply_time_business_hours` model, where within the model two different versions of a schedule would exist due to daylight savings time.
+
 
 ## Documentation Updates
 - Addition of the reference to the Fivetran prebuilt [Zendesk Streamlit report](https://fivetran-zendesk.streamlit.app/) in the README.
