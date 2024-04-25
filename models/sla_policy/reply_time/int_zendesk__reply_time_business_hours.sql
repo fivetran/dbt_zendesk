@@ -78,7 +78,7 @@ with ticket_schedules as (
   where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
 
-), new_cte as (
+), first_reply_solve_times as (
   select 
     ticket_sla_applied_with_schedules.*,
     min(reply_at) as first_reply_time,
@@ -90,13 +90,13 @@ with ticket_schedules as (
   left join ticket_solved_times
     on ticket_sla_applied_with_schedules.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > ticket_sla_applied_with_schedules.sla_applied_at
-group by all
+  {{ dbt_utils.group_by(n=14) }}
 
-), newer_cte as (
+), week_index_calc as (
     select 
         *,
-        datediff('week',sla_applied_at,least(first_reply_time, first_solved_time)) + 1 as week_index
-    from new_cte
+        {{ dbt.datediff("sla_applied_at", "least(first_reply_time, first_solved_time)", "week") }} + 1 as week_index
+    from first_reply_solve_times
 
 ), weeks as (
 
@@ -104,12 +104,11 @@ group by all
 
 ), weeks_cross_ticket_sla_applied as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
-    select 
-
-      newer_cte.*,
+    select
+      week_index_calc.*,
       cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
-    from newer_cte
+    from week_index_calc
     cross join weeks
     where week_index >= generated_number - 1
 
