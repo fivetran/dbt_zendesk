@@ -17,6 +17,35 @@ with ticket_schedules as (
   select *
   from {{ ref('int_zendesk__sla_policy_applied') }}
 
+), users as (
+
+  select *
+  from {{ ref('int_zendesk__user_aggregates') }}
+
+), ticket_updates as (
+
+  select *
+  from {{ ref('int_zendesk__updates') }}
+
+), ticket_solved_times as (
+  select
+    ticket_id,
+    valid_starting_at as solved_at
+  from ticket_updates
+  where field_name = 'status'
+  and value in ('solved','closed')
+
+), reply_time as (
+  select 
+    ticket_comment.ticket_id,
+    ticket_comment.valid_starting_at as reply_at,
+    commenter.role
+  from ticket_updates as ticket_comment
+  join users as commenter
+    on commenter.user_id = ticket_comment.user_id
+  where field_name = 'comment' 
+    and ticket_comment.is_public
+    and commenter.role in ('agent','admin')
 
 ), schedule_business_hours as (
 
@@ -48,7 +77,27 @@ with ticket_schedules as (
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
   where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
-  
+
+), new_cte as (
+  select 
+    ticket_sla_applied_with_schedules.*,
+    min(reply_at) as first_reply_time,
+    min(solved_at) as first_solved_time
+  from ticket_sla_applied_with_schedules
+  left join reply_time
+    on reply_time.ticket_id = ticket_sla_applied_with_schedules.ticket_id
+    and reply_time.reply_at > ticket_sla_applied_with_schedules.sla_applied_at
+  left join ticket_solved_times
+    on ticket_sla_applied_with_schedules.ticket_id = ticket_solved_times.ticket_id
+    and ticket_solved_times.solved_at > ticket_sla_applied_with_schedules.sla_applied_at
+group by all
+
+), newer_cte as (
+    select 
+        *,
+        datediff('week',sla_applied_at,least(first_reply_time, first_solved_time)) + 1 as week_index
+    from new_cte
+
 ), weeks as (
 
     {{ dbt_utils.generate_series(52) }}
@@ -57,11 +106,12 @@ with ticket_schedules as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select 
 
-      ticket_sla_applied_with_schedules.*,
+      newer_cte.*,
       cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
-    from ticket_sla_applied_with_schedules
+    from newer_cte
     cross join weeks
+    where week_index >= generated_number - 1
 
 ), weekly_periods as (
   
