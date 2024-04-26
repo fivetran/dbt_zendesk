@@ -79,10 +79,23 @@ with ticket_schedules as (
     and metric in ('next_reply_time', 'first_reply_time')
 
 ), first_reply_solve_times as (
-  select 
-    ticket_sla_applied_with_schedules.*,
-    min(reply_at) as first_reply_time,
-    min(solved_at) as first_solved_time
+  select
+    ticket_sla_applied_with_schedules.ticket_id,
+    ticket_sla_applied_with_schedules.ticket_created_at,
+    ticket_sla_applied_with_schedules.valid_starting_at,
+    ticket_sla_applied_with_schedules.ticket_current_status,
+    ticket_sla_applied_with_schedules.metric,
+    ticket_sla_applied_with_schedules.latest_sla,
+    ticket_sla_applied_with_schedules.sla_applied_at,
+    ticket_sla_applied_with_schedules.target,
+    ticket_sla_applied_with_schedules.in_business_hours,
+    ticket_sla_applied_with_schedules.sla_policy_name,
+    ticket_sla_applied_with_schedules.schedule_id,
+    ticket_sla_applied_with_schedules.start_time_in_minutes_from_week,
+    ticket_sla_applied_with_schedules.total_schedule_weekly_business_minutes,
+    ticket_sla_applied_with_schedules.start_week_date,
+    min(reply_time.reply_at) as first_reply_time,
+    min(ticket_solved_times.solved_at) as first_solved_time
   from ticket_sla_applied_with_schedules
   left join reply_time
     on reply_time.ticket_id = ticket_sla_applied_with_schedules.ticket_id
@@ -106,7 +119,7 @@ with ticket_schedules as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
     select
       week_index_calc.*,
-      cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
+      cast(weeks.generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
     from week_index_calc
     cross join weeks
