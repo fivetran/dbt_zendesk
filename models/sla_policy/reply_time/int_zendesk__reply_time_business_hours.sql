@@ -17,6 +17,35 @@ with ticket_schedules as (
   select *
   from {{ ref('int_zendesk__sla_policy_applied') }}
 
+), users as (
+
+  select *
+  from {{ ref('int_zendesk__user_aggregates') }}
+
+), ticket_updates as (
+
+  select *
+  from {{ ref('int_zendesk__updates') }}
+
+), ticket_solved_times as (
+  select
+    ticket_id,
+    valid_starting_at as solved_at
+  from ticket_updates
+  where field_name = 'status'
+  and value in ('solved','closed')
+
+), reply_time as (
+  select 
+    ticket_comment.ticket_id,
+    ticket_comment.valid_starting_at as reply_at,
+    commenter.role
+  from ticket_updates as ticket_comment
+  join users as commenter
+    on commenter.user_id = ticket_comment.user_id
+  where field_name = 'comment' 
+    and ticket_comment.is_public
+    and commenter.role in ('agent','admin')
 
 ), schedule_business_hours as (
 
@@ -48,20 +77,53 @@ with ticket_schedules as (
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
   where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
-  
+
+), first_reply_solve_times as (
+  select
+    ticket_sla_applied_with_schedules.ticket_id,
+    ticket_sla_applied_with_schedules.ticket_created_at,
+    ticket_sla_applied_with_schedules.valid_starting_at,
+    ticket_sla_applied_with_schedules.ticket_current_status,
+    ticket_sla_applied_with_schedules.metric,
+    ticket_sla_applied_with_schedules.latest_sla,
+    ticket_sla_applied_with_schedules.sla_applied_at,
+    ticket_sla_applied_with_schedules.target,
+    ticket_sla_applied_with_schedules.in_business_hours,
+    ticket_sla_applied_with_schedules.sla_policy_name,
+    ticket_sla_applied_with_schedules.schedule_id,
+    ticket_sla_applied_with_schedules.start_time_in_minutes_from_week,
+    ticket_sla_applied_with_schedules.total_schedule_weekly_business_minutes,
+    ticket_sla_applied_with_schedules.start_week_date,
+    min(reply_time.reply_at) as first_reply_time,
+    min(ticket_solved_times.solved_at) as first_solved_time
+  from ticket_sla_applied_with_schedules
+  left join reply_time
+    on reply_time.ticket_id = ticket_sla_applied_with_schedules.ticket_id
+    and reply_time.reply_at > ticket_sla_applied_with_schedules.sla_applied_at
+  left join ticket_solved_times
+    on ticket_sla_applied_with_schedules.ticket_id = ticket_solved_times.ticket_id
+    and ticket_solved_times.solved_at > ticket_sla_applied_with_schedules.sla_applied_at
+  {{ dbt_utils.group_by(n=14) }}
+
+), week_index_calc as (
+    select 
+        *,
+        {{ dbt.datediff("sla_applied_at", "least(first_reply_time, first_solved_time)", "week") }} + 1 as week_index
+    from first_reply_solve_times
+
 ), weeks as (
 
     {{ dbt_utils.generate_series(52) }}
 
 ), weeks_cross_ticket_sla_applied as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
-    select 
+    select
+      week_index_calc.*,
+      cast(weeks.generated_number - 1 as {{ dbt.type_int() }}) as week_number
 
-      ticket_sla_applied_with_schedules.*,
-      cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
-
-    from ticket_sla_applied_with_schedules
+    from week_index_calc
     cross join weeks
+    where week_index >= generated_number - 1
 
 ), weekly_periods as (
   
