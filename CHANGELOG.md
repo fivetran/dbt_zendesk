@@ -1,6 +1,7 @@
-# dbt_zendesk v0.14.1
+# dbt_zendesk v0.15.0
 
-[PR #146](https://github.com/fivetran/dbt_zendesk/pull/146) includes the following changes:
+## 🚨 Minor Upgrade 🚨
+Although this update is not a breaking change, it will significantly impact the output of the `zendesk__sla_policies` model. [PR #146](https://github.com/fivetran/dbt_zendesk/pull/146) includes the following changes:
 
 ## Bug Fixes
 - Fixes the issue of potential duplicate `sla_event_id`'s occurring in the `zendesk__sla_policies` model.
