@@ -6,11 +6,12 @@
 - Fixes the issue of potential duplicate `sla_event_id`'s occurring in the `zendesk__sla_policies` model.
   - This involved updating the `int_zendesk__schedule_spine` which was previously outputting overlapping schedule windows, to account for when holidays transcended a given schedule week.
   - This also involved updating the `int_zendesk__reply_time_business_hours` model, in which two different versions of a schedule could exist due to daylight savings time.
-  - Adjusted the `int_zendesk__reply_time_business_hours` model to only perform the weeks cartesian join on tickets that require the further look into the future.
-    - Previously the `int_zendesk__reply_time_business_hours` would perform a cartesian join on all tickets to calculate weeks into the future. This was required to accurately calculate sla elapsed time for tickets with first replies far into the future. However, this was only necessary for a handful of tickets. Therefore, this has been adjusted to accurately only calculate the future weeks as far as either the first reply time or first solved time.
+- Improved performance by adjusting the `int_zendesk__reply_time_business_hours` model to only perform the weeks cartesian join on tickets that require the further look into the future.
+    - Previously the `int_zendesk__reply_time_business_hours` would perform a cartesian join on all tickets to calculate weeks into the future. This was required to accurately calculate `sla_elapsed_time` for tickets with first replies far into the future. However, this was only necessary for a handful of tickets. Therefore, this has been adjusted to accurately only calculate the future weeks as far as either the first reply time or first solved time.
 
 ## Documentation Updates
 - Addition of the reference to the Fivetran prebuilt [Zendesk Streamlit report](https://fivetran-zendesk.streamlit.app/) in the README.
+- Updates DECISIONLOG to include a note that the generated time series for ticket SLA policies is limited to a year into the future to maintain performance.
 
 # dbt_zendesk v0.14.0
 
