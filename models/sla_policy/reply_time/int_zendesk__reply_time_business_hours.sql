@@ -108,7 +108,7 @@ with ticket_schedules as (
 ), week_index_calc as (
     select 
         *,
-        {{ dbt.datediff("sla_applied_at", "least(first_reply_time, first_solved_time)", "week") }} + 1 as week_index
+        {{ dbt.datediff("sla_applied_at", "least(coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ "))", "week") }} + 1 as week_index
     from first_reply_solve_times
 
 ), weeks as (
