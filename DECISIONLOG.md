@@ -1,5 +1,8 @@
 # Decision Log
 
+## Tracking Ticket SLA Policies Into the Future
+In our models we generate a future time series for ticket SLA policies. This is limited to a year to maintain performance. 
+
 ## No Historical Schedule Reference
 At the current moment the Fivetran Zendesk Support connector does not contain historical data of schedules. This means if a schedule is created in the Zendesk Support UI and remains untouched for years, but then is adjusted in the current month you will see the data synced in the raw `schedule` table to reflect the current adjusted schedule. As a result the raw data will lose all historical reference of what this schedule range was previously.
 
