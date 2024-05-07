@@ -7,7 +7,7 @@ Although this update is not a breaking change, it will likely impact the output 
 - Introduction of an additional condition within the `filtered_reply_times` cte of the `int_zendesk__reply_time_combined` model to ensure tickets replied to before any schedule begins and no business minutes have been spent is reserved for **only** the first day the ticket is open. Previously, this condition _could_ be met on days other than the first.
 
 ## Under the Hood
-- Addition of integrity and consistency validation tests for the `zendesk__sla_policies` and `zendesk__sla_metrics` models (disabled by default). These tests are intended to **only** be used for development and/or CICD purposes to ensure quality and consistency of subsequent package upgrades. Please do not enable these to be executed as part of your normal `dbt test` pipelines.
+- Addition of integrity and consistency validation tests for the `zendesk__sla_policies` and `zendesk__ticket_metrics` models (disabled by default). These tests are intended to **only** be used for development and/or CICD purposes to ensure quality and consistency of subsequent package upgrades. Please do not enable these to be executed as part of your normal `dbt test` pipelines.
 
 # dbt_zendesk v0.15.0
 
