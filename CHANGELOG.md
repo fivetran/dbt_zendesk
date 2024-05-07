@@ -3,7 +3,7 @@
 Although this update is not a breaking change, it will likely impact the output of the `zendesk__sla_policies` and `zendesk__sla_metrics` models. [PR #](https://github.com/fivetran/dbt_zendesk/pull/) includes the following changes:
 
 ## Bug Fixes
-- Addresses the potential issue where the `first_reply_time_business_minutes` metric within the `zendesk__sla_metrics` model would incorrectly calculate the elapsed time when daylight savings occurred. This change involved adjusting a join to reference the difference of two dates as opposed to timestamps. This more accurately applied a cutoff event during daylight savings.
+- Addresses the potential issue where the `first_reply_time_business_minutes` metric within the `zendesk__ticket_metrics` model would incorrectly calculate the elapsed time when daylight savings occurred. This change involved adjusting a join to reference the difference of two dates as opposed to timestamps. This more accurately applied a cutoff event during daylight savings.
 - Introduction of an additional condition within the `filtered_reply_times` cte of the `int_zendesk__reply_time_combined` model to ensure tickets replied to before any schedule begins and no business minutes have been spent is reserved for **only** the first day the ticket is open. Previously, this condition _could_ be met on days other than the first.
 
 ## Under the Hood
