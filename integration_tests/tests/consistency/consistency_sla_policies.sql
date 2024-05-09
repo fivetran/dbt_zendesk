@@ -1,6 +1,6 @@
 
 {{ config(
-    tags="validations",
+    tags="fivetran_validations",
     enabled=var('fivetran_validation_tests_enabled', false)
 ) }}
 

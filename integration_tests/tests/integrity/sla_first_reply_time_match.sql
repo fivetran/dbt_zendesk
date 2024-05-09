@@ -1,5 +1,6 @@
+
 {{ config(
-    tags="validations",
+    tags="fivetran_validations",
     enabled=var('fivetran_validation_tests_enabled', false)
 ) }}
 
@@ -16,6 +17,7 @@ sla_policies as (
         sla_elapsed_time
     from {{ ref('zendesk__sla_policies') }}
     where metric = 'first_reply_time'
+        and in_business_hours
 ),
 
 match_check as (
@@ -26,9 +28,9 @@ match_check as (
     from ticket_metrics
     full outer join sla_policies 
         on ticket_metrics.ticket_id = sla_policies.ticket_id
-    where abs(round(ticket_metrics.first_reply_time_business_minutes,0) - round(sla_policies.sla_elapsed_time,0)) >= 2
-        {{ "and ticket_metrics.ticket_id not in " ~ var('fivetran_integrity_sla_first_reply_time_exclusion_tickets',[]) ~ "" if var('fivetran_integrity_sla_first_reply_time_exclusion_tickets',[]) }}
 )
 
 select *
 from match_check
+where abs(round(first_reply_time_business_minutes,0) - round(sla_elapsed_time,0)) >= 2
+    {{ "and ticket_id not in " ~ var('fivetran_integrity_sla_first_reply_time_exclusion_tickets',[]) ~ "" if var('fivetran_integrity_sla_first_reply_time_exclusion_tickets',[]) }}

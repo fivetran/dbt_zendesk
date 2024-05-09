@@ -26,6 +26,9 @@ vars:
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
 
+models:
+  +schema: "zendesk_{{ var('directed_schema','dev') }}"
+
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
