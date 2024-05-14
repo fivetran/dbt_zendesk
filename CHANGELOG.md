@@ -4,7 +4,7 @@ Although this update is not a breaking change, it will likely impact the output 
 
 ## Bug Fixes
 - Addresses the potential issue where the `first_reply_time_business_minutes` metric within the `zendesk__ticket_metrics` model would incorrectly calculate the elapsed time when daylight savings occurred. This change involved adjusting a join to reference the difference of two dates as opposed to timestamps. This more accurately applies a cutoff event during daylight savings.
-- Introduction of an additional condition within the `filtered_reply_times` cte of the `int_zendesk__reply_time_combined` model to ensure tickets replied to before any schedule begins and no business minutes have been spent is reserved for **only** the first day the ticket is open. Previously, this condition _could_ be met on days other than the first.
+- Introduction of an additional condition within the `filtered_reply_times` cte of the `int_zendesk__reply_time_combined` model to ensure tickets replied to before any schedule begins and no business minutes have been spent is reserved for **only** the first day the ticket is open. Previously, this condition _could_ be met on days other than the first. This would potentially result in duplicates of `sla_event_id`'s further downstream in the `zendesk__sla_policies` model.
 
 ## Under the Hood
 - Addition of integrity and consistency validation tests within integration tests for the `zendesk__sla_policies` and `zendesk__ticket_metrics` models.
