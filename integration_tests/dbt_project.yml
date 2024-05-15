@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.15.0'
+version: '0.16.0'
 
 profile: 'integration_tests'
 
@@ -25,6 +25,19 @@ vars:
     zendesk_organization_tag_identifier:       "organization_tag_data"
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
+
+  ## For validation testing. To be commented out before release.
+  # zendesk_schema: zendesk_test_env
+  # using_domain_names: false
+  # using_user_tags: false
+  # using_organization_tags: false
+  # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (1,56,80)
+  # fivetran_consistency_ticket_metrics_exclusion_tickets: (11092,11093,11094)
+  # fivetran_integrity_sla_count_match_tickets: (76)
+
+
+models:
+  +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
