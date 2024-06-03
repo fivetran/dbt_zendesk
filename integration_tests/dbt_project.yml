@@ -6,7 +6,7 @@ version: '0.17.0'
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests_50
+  zendesk_schema: zz_dbt_jamie
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -43,8 +43,6 @@ models:
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
-    +column_types:
-      _fivetran_synced: timestamp
     +column_types:
       _fivetran_synced: timestamp
     group_data:

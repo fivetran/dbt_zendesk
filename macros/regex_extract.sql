@@ -18,7 +18,7 @@ REGEXP_EXTRACT({{ string }}, {%- if start_or_end == 'start' %} r'{"([^"]+)"' {% 
 
 {% macro snowflake__regex_extract(string, start_or_end) %}
 
-REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '": "([^"]+)"' {% endif -%}, 1, 1, 'e', 1 )
+REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '":"([^"]+)"' {% endif -%}, 1, 1, 'e', 1 )
 
 {% endmacro %}
 
@@ -30,7 +30,7 @@ REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% els
 
 {% macro redshift__regex_extract(string, start_or_end) %}
 
-REGEXP_EXTRACT({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '": "([^"]+)"' {% endif -%}, 1, 1, 'e')
+REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '": "([^"]+)"' {% endif -%}, 1, 1, 'e')
 
 {% endmacro %}
 
