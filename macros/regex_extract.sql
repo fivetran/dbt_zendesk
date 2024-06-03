@@ -30,12 +30,12 @@ REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% els
 
 {% macro redshift__regex_extract(string, start_or_end) %}
 
-REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '": "([^"]+)"' {% endif -%}, 1, 1, 'e')
+REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '":"([^"]+)"' {% endif -%}, 1, 1, 'e')
 
 {% endmacro %}
 
 {% macro spark__regex_extract(string, start_or_end) %}
 
-regexp_extract({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)":' {% else %} '": "([^"]+)"' {% endif -%}, 1)
+regexp_extract({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)":' {% else %} '":"([^"]+)"' {% endif -%}, 1)
 
 {% endmacro %}
