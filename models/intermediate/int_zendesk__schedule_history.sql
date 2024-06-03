@@ -44,10 +44,10 @@ split_days as (
         schedule_id,
         original
         {%- for day in ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] -%}
-            , REGEXP_EXTRACT({{ json_parse_nonscalar('from_schedule', [day]) }}, r'{"([^"]+)"') as from_{{ day }}_start
-            , REGEXP_EXTRACT({{ json_parse_nonscalar('from_schedule', [day]) }}, r'":"([^"]+)"}') as from_{{ day }}_end
-            , REGEXP_EXTRACT({{ json_parse_nonscalar('to_schedule', [day]) }}, r'{"([^"]+)"') as to_{{ day }}_start
-            , REGEXP_EXTRACT({{ json_parse_nonscalar('to_schedule', [day]) }}, r'":"([^"]+)"}') as to_{{ day }}_end
+            , {{ regex_extract(json_parse_nonscalar('from_schedule', [day]), 'start') }} as from_{{ day }}_start
+            , {{ regex_extract(json_parse_nonscalar('from_schedule', [day]), 'end') }} as from_{{ day }}_end
+            , {{ regex_extract(json_parse_nonscalar('to_schedule', [day]), 'start') }} as to_{{ day }}_start
+            , {{ regex_extract(json_parse_nonscalar('to_schedule', [day]), 'end') }} as to_{{ day }}_end
         {% endfor %}
 
     from split_up
