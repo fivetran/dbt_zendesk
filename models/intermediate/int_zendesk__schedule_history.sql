@@ -91,10 +91,10 @@ split_times as (
 
     select 
         schedule_id,
-        cast({{ dbt.split_part('start_time', "':'", 1) }} as {{ dbt.type_int() }}) as start_time_hh, 
-        cast({{ dbt.split_part('start_time', "':'", 2) }} as {{ dbt.type_int() }}) as start_time_mm, 
-        cast({{ dbt.split_part('end_time', "':'", 1) }} as {{ dbt.type_int() }}) as end_time_hh, 
-        cast({{ dbt.split_part('end_time', "':'", 2) }} as {{ dbt.type_int() }}) as end_time_mm, 
+        cast(nullif({{ dbt.split_part('start_time', "':'", 1) }}, ' ') as {{ dbt.type_int() }}) as start_time_hh, 
+        cast(nullif({{ dbt.split_part('start_time', "':'", 2) }}, ' ') as {{ dbt.type_int() }}) as start_time_mm, 
+        cast(nullif({{ dbt.split_part('end_time', "':'", 1) }}, ' ') as {{ dbt.type_int() }}) as end_time_hh, 
+        cast(nullif({{ dbt.split_part('end_time', "':'", 2) }}, ' ') as {{ dbt.type_int() }}) as end_time_mm, 
         start_time,
         end_time,
         dow,
