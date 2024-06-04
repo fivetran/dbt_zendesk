@@ -15,6 +15,7 @@ with timezone as (
     select *
     from {{ var('daylight_time') }}
 
+-- TODO: BRING SCHEDULE HISTORY INTO THIS MODEL LIKELY
 ), schedule as (
 
     select *

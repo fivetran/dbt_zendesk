@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.16.0'
+version: '0.17.0'
 
 profile: 'integration_tests'
 
@@ -25,6 +25,7 @@ vars:
     zendesk_organization_tag_identifier:       "organization_tag_data"
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
+    zendesk_audit_log_identifier:              "audit_log_data"
 
   ## For validation testing. To be commented out before release.
   # zendesk_schema: zendesk_test_env
