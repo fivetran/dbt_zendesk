@@ -89,6 +89,7 @@ seeds:
         requester_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         submitter_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         ticket_form_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        priority: "{{ 'string' if target.type in ('bigquery', 'spark', 'databricks') else 'varchar' }}"
     ticket_field_history_data:
       +column_types:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"

@@ -63,7 +63,7 @@ customer_ticket_metrics as (
                 when ticket_satisfaction_score = 'good' then 1 
             end) as avg_ticket_satisfaction_score -- ignore nulls
     
-        {% if var('using_schedules', True) %}
+        {% if var('using_schedules', true) %}
         , avg(first_reply_time_business_minutes) as avg_first_reply_time_business_minutes
         , avg(first_resolution_business_minutes) as avg_first_resolution_business_minutes
         , avg(final_resolution_business_minutes) as avg_final_resolution_business_minutes
@@ -95,7 +95,7 @@ final as (
         avg_final_resolution_calendar_minutes,
         avg_ticket_satisfaction_score
 
-        {% if var('using_schedules', True) %}
+        {% if var('using_schedules', true) %}
         , avg_first_reply_time_business_minutes
         , avg_first_resolution_business_minutes
         , avg_final_resolution_business_minutes
