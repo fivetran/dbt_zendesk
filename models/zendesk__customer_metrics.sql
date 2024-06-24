@@ -66,7 +66,7 @@ customer_ticket_metrics as (
         {% if var('using_schedules', true) %}
         , avg(first_reply_time_business_minutes) as avg_first_reply_time_business_minutes
         , avg(first_resolution_business_minutes) as avg_first_resolution_business_minutes
-        , avg(final_resolution_business_minutes) as avg_final_resolution_business_minutes
+        , avg(full_resolution_business_minutes) as avg_full_resolution_business_minutes
         {% endif %}
 
     from tickets
@@ -98,7 +98,7 @@ final as (
         {% if var('using_schedules', true) %}
         , avg_first_reply_time_business_minutes
         , avg_first_resolution_business_minutes
-        , avg_final_resolution_business_minutes
+        , avg_full_resolution_business_minutes
         {% endif %}
 
     from users
