@@ -107,14 +107,10 @@ with reply_time_calendar_hours_sla as (
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
   {{ dbt_utils.group_by(n=10) }}
 
-  {% if var('using_schedules', True) %}
-  having (in_business_hours and week_number <= min({{ dbt.datediff("reply_time_breached_at.sla_applied_at", "coalesce(reply_time.reply_at, ticket_solved_times.solved_at, " ~ dbt.current_timestamp() ~ ")", 'week') }}))
-    or not in_business_hours
-  {% endif %}
-
 ), lagging_time_block as (
   select
     *,
+    row_number() over (partition by ticket_id, metric, sla_applied_at order by sla_schedule_start_at) as day_index,
     lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at) as next_schedule_start,
     min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
@@ -129,7 +125,7 @@ with reply_time_calendar_hours_sla as (
     in_business_hours
       and ((
         agent_reply_at >= sla_schedule_start_at and agent_reply_at <= sla_schedule_end_at) -- ticket is replied to between a schedule window
-        or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at) -- ticket is replied to before a schedule window and no business minutes have been spent on it
+        or (agent_reply_at < sla_schedule_start_at and sum_lapsed_business_minutes_new = 0 and sla_breach_at = first_sla_breach_at and day_index = 1) -- ticket is replied to before any schedule begins and no business minutes have been spent on it
         or (agent_reply_at is null and next_solved_at >= sla_schedule_start_at and next_solved_at < next_schedule_start) -- There are no reply times, but the ticket is closed and we should capture the closed date as the first and/or next reply time if there is not one preceding.
         or (next_solved_at is null and agent_reply_at is null and {{ dbt.current_timestamp() }} >= sla_schedule_start_at and ({{ dbt.current_timestamp() }} < next_schedule_start or next_schedule_start is null)) -- ticket is not replied to and therefore active. But only bring through the active SLA record that is most recent (after the last SLA schedule starts but before the next, or if there does not exist a next SLA schedule start time)  
         or (agent_reply_at > sla_schedule_end_at and (agent_reply_at < next_schedule_start or next_schedule_start is null)) -- ticket is replied to outside sla schedule hours
