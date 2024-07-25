@@ -556,3 +556,72 @@ models:
         description: The assignee name assigned to the ticket
       - name: priority
         description: The tickets priority ranking
+
+  - name: zendesk__customer_metrics
+    description: Table consolidating metrics for each customer (determined by role the `internal_user_criteria` variable) served in Zendesk.
+    columns:
+      - name: user_id
+        description: Automatically assigned when the user is created
+        tests:
+          - unique
+          - not_null 
+      - name: email
+        description: The user's primary email address. *Writeable on create only. On update, a secondary email is added. See Email Address
+      - name: name
+        description: The user's name
+      - name: is_active
+        description: false if the user has been deleted
+      - name: created_at
+        description: The time the user was created
+      - name: organization_id
+        description: The id of the user's organization. If the user has more than one organization memberships, the id of the user's default organization
+      - name: phone
+        description: User's phone number.
+      - name: role
+        description: The user's role. Possible values are "end-user", "agent", or "admin"
+      - name: time_zone
+        description: The user's time zone. See Time Zone
+      - name: ticket_restriction
+        description: Specifies which tickets the user has access to. Possible values are organization, groups, assigned, requested and null
+      - name: is_suspended
+        description: Boolean representing whether the user has been suspended, meaning that they can no longer sign in and any new support requests you receive from them are sent to the suspended tickets queue.
+      - name: external_id
+        description: A unique identifier from another system. The API treats the id as case insensitive.
+      - name: updated_at 
+        description: The time the user was last updated.
+      - name: last_login_at
+        description: Last time the user signed in to Zendesk Support or made an API request using an API token or basic authentication.
+      - name: locale 
+        description: The user's locale. A BCP-47 compliant tag for the locale. If both "locale" and "locale_id" are present on create or update, "locale_id" is ignored and only "locale" is used.
+      - name: organization_name
+        description: A unique name for the organization
+      - name: organization_details
+        description: Any details obout the organization, such as the address
+      # - name: organization_external_id
+      #   description: 
+      # - name: account_age_days
+      #   description: 
+      # - name: organization_account_age_days
+      #   description: 
+      # - name: count_created_tickets
+      #   description: 
+      # - name: count_resolved_tickets
+      #   description: 
+      # - name: count_unresolved_tickets
+      #   description: 
+      # - name: count_reopened_tickets
+      #   description: 
+      # - name: count_followup_tickets
+      #   description: 
+      # - name: avg_ticket_priority
+      #   description: 
+      # - name: count_first_contact_resolved_tickets
+      #   description: 
+      # - name: avg_first_reply_time_calendar_minutes
+      #   description: 
+      # - name: avg_first_resolution_calendar_minutes
+      #   description: 
+      # - name: avg_final_resolution_calendar_minutes
+      #   description: 
+      # - name: avg_ticket_satisfaction_score
+      #   description: 

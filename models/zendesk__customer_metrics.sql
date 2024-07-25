@@ -36,10 +36,7 @@ tickets as (
 customer_ticket_metrics as (
 
     select
-        group_id,
-        organization_id,
         requester_id,
-
         count(*) as count_created_tickets,
         sum(case when status in ('solved', 'closed') then 1 else 0 end) as count_resolved_tickets,
         sum(case when status not in ('solved', 'closed') then 1 else 0 end) as count_unresolved_tickets,
@@ -70,7 +67,7 @@ customer_ticket_metrics as (
         {% endif %}
 
     from tickets
-    group by 1,2,3
+    group by 1
 ),
 
 final as (
@@ -83,13 +80,13 @@ final as (
         {{ dbt.datediff('users.created_at', dbt.current_timestamp_backcompat(), 'day') }} as account_age_days,
         {{ dbt.datediff('organizations.created_at', dbt.current_timestamp_backcompat(), 'day') }} as organization_account_age_days,
 
-        count_created_tickets,
-        count_resolved_tickets,
-        count_unresolved_tickets,
-        count_reopened_tickets,
-        count_followup_tickets,
+        coalesce(count_created_tickets, 0) as count_created_tickets,
+        coalesce(count_resolved_tickets, 0) as count_resolved_tickets,
+        coalesce(count_unresolved_tickets, 0) as count_unresolved_tickets,
+        coalesce(count_reopened_tickets, 0) as count_reopened_tickets,
+        coalesce(count_followup_tickets, 0) as count_followup_tickets,
         avg_ticket_priority,
-        count_first_contact_resolved_tickets,
+        coalesce(count_first_contact_resolved_tickets, 0) as count_first_contact_resolved_tickets,
         avg_first_reply_time_calendar_minutes,
         avg_first_resolution_calendar_minutes,
         avg_final_resolution_calendar_minutes,
@@ -102,10 +99,10 @@ final as (
         {% endif %}
 
     from users
-    left join organizations 
-        on users.organization_id = organizations.organization_id
     left join customer_ticket_metrics
         on users.user_id = customer_ticket_metrics.requester_id
+    left join organizations 
+        on users.organization_id = organizations.organization_id
 )
 
 select *
