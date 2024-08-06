@@ -1,4 +1,6 @@
 -- Calculate breach time for agent work time, calendar hours
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with agent_work_time_filtered_statuses as (
 
   select *

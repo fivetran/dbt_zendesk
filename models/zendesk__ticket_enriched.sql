@@ -1,5 +1,6 @@
 -- this model enriches the ticket table with ticket-related dimensions.  This table will not include any metrics.
 -- for metrics, see ticket_metrics!
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with ticket as (
 

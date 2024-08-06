@@ -1,5 +1,5 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
-{{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
+{{ config(enabled = 'status' in var('ticket_field_history_columns') and var('customer360__using_zendesk', true)) }}
 
 with ticket_field_history as (
     select *

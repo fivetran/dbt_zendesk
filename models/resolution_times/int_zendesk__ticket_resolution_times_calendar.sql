@@ -1,3 +1,5 @@
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with historical_solved_status as (
 
     select *

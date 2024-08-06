@@ -1,3 +1,5 @@
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with ticket_metrics as (
     select *
     from {{ ref('zendesk__ticket_metrics') }}

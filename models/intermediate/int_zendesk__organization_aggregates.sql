@@ -1,3 +1,5 @@
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with organizations as (
     select * 
     from {{ ref('stg_zendesk__organization') }}

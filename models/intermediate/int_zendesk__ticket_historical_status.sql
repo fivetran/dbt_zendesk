@@ -1,4 +1,5 @@
 -- To do -- can we delete ticket_status_counter and unique_status_counter?
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with ticket_status_history as (
 

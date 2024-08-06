@@ -1,3 +1,5 @@
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with agent_work_time_sla as (
 
   select *

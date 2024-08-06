@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('customer360__using_zendesk', true)) }}
 
 -- step 3, determine when an SLA will breach for SLAs that are in business hours
 

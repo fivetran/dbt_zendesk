@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('customer360__using_zendesk', true)) }}
 
 /*
     The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may change due to Daylight Savings.

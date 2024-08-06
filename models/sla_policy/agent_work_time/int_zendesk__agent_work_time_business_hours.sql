@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('customer360__using_zendesk', true)) }}
 
 -- AGENT WORK TIME
 -- This is complicated, as SLAs minutes are only counted while the ticket is in 'new' or 'open' status.

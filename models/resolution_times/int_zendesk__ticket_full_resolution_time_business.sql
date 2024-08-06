@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('customer360__using_zendesk', true)) }}
 
 with ticket_resolution_times_calendar as (
 

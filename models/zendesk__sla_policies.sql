@@ -1,4 +1,5 @@
 --final step where we union together all of the reply time, agent work time, and requester wait time sla's
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with reply_time_sla as (
 

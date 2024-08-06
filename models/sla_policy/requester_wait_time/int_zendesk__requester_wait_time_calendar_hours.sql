@@ -1,4 +1,6 @@
 -- Calculate breach time for requester wait time, calendar hours
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with requester_wait_time_filtered_statuses as (
 
   select *

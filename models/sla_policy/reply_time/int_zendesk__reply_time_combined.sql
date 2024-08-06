@@ -1,3 +1,5 @@
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
+
 with reply_time_calendar_hours_sla as (
   
   select *

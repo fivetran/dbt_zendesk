@@ -3,6 +3,7 @@
 -- more on SLA policies here: https://support.zendesk.com/hc/en-us/articles/204770038-Defining-and-using-SLA-policies-Professional-and-Enterprise-
 -- SLA policies are calculated for next_reply_time, first_reply_time, agent_work_time, requester_wait_time.  If you're company uses other SLA metrics, and would like this
 -- package to support those, please reach out to the Fivetran team on Slack.
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with ticket_field_history as (
 

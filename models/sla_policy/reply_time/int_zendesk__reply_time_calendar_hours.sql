@@ -1,5 +1,6 @@
 --REPLY TIME SLA
 -- step 2, figure out when the sla will breach for sla's in calendar hours. The calculation is relatively straightforward.
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with sla_policy_applied as (
 

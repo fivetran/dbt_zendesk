@@ -1,4 +1,5 @@
 -- depends_on: {{ source('zendesk', 'ticket') }}
+{{ config(enabled=var('customer360__using_zendesk', true)) }}
 
 with spine as (
 
