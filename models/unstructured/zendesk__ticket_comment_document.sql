@@ -17,8 +17,8 @@ with ticket_comments as (
     from ticket_comments
     left join users
         on ticket_comments.user_id = users.user_id
-    {# where ticket_comments._fivetran_deleted = false
-        and users._fivetran_deleted = false #}
+    where ticket_comments._fivetran_deleted = false
+        and users._fivetran_deleted = false
 
 ), final as (
     select

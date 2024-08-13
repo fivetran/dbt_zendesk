@@ -19,8 +19,8 @@ with tickets as (
     left join users
         on tickets.requester_id = users.user_id
 
-    {# where tickets._fivetran_deleted = False -- _fivetran_deleted add to source
-        and users._fivetran_deleted = False -- _fivetran_deleted add to source #}
+    where tickets._fivetran_deleted = False
+        and users._fivetran_deleted = False
 
 ), final as (
     select
