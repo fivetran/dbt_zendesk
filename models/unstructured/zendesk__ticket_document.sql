@@ -10,11 +10,11 @@ with tickets as (
     select
         tickets.ticket_id,
         tickets.subject AS ticket_name,
-        coalesce(users.name, 'UNKNOWN') AS user_name,
-        coalesce(users.email, 'UNKNOWN') AS created_by,
+        {{ zendesk.coalesce_cast(["users.name", "'UNKNOWN'"], dbt.type_string()) }} as user_name,
+        {{ zendesk.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as created_by,
         tickets.created_at AS created_on,
-        coalesce(tickets.status, 'UNKNOWN') as status,
-        coalesce(tickets.priority, 'UNKNOWN') as priority
+        {{ zendesk.coalesce_cast(["tickets.status", "'UNKNOWN'"], dbt.type_string()) }} as status,
+        {{ zendesk.coalesce_cast(["tickets.priority", "'UNKNOWN'"], dbt.type_string()) }} as priority
     from tickets
     left join users
         on tickets.requester_id = users.user_id

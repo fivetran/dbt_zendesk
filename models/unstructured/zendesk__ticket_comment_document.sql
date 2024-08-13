@@ -10,8 +10,8 @@ with ticket_comments as (
     select 
         ticket_comments.ticket_comment_id,
         ticket_comments.ticket_id,
-        coalesce(users.email, 'UNKNOWN') as commenter_email,
-        coalesce(users.name, 'UNKNOWN')as commenter_name,
+        {{ zendesk.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as commenter_email,
+        {{ zendesk.coalesce_cast(["users.name", "'UNKNOWN'"], dbt.type_string()) }} as commenter_name,
         ticket_comments.created_at as comment_time,
         ticket_comments.body as comment_body
     from ticket_comments
