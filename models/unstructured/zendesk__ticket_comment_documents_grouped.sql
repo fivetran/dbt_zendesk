@@ -1,11 +1,7 @@
-{# {{ config(
-    pre_hook= "{{ print_skipped_records_count() }}"
-) }} #}
-
 with filtered_comment_documents as (
   select *
-  from {{ ref('zendesk__ticket_comment_document_truncated') }}
-  where comment_tokens <= 7500
+  from {{ ref('zendesk__ticket_comment_document') }}
+  where comment_tokens <= {{ var('max_tokens', 7500) }}
 ),
 
 grouped_comment_documents as (
@@ -24,7 +20,7 @@ grouped_comment_documents as (
 
 select 
   ticket_id,
-  cast(floor((cumulative_length - 1) / 7500) as {{ dbt.type_int() }}) as chunk_index,
+  cast(floor((cumulative_length - 1) / {{ var('max_tokens', 7500) }}) as {{ dbt.type_int() }}) as chunk_index,
   {{ dbt.listagg(
     measure="comment_markdown",
     delimiter_text="'\\n\\n---\\n\\n'",

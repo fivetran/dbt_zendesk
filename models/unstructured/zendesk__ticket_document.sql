@@ -18,9 +18,8 @@ with tickets as (
     from tickets
     left join users
         on tickets.requester_id = users.user_id
-
-    where tickets._fivetran_deleted = False
-        and users._fivetran_deleted = False
+    where not coalesce(tickets._fivetran_deleted, False)
+        and not coalesce(users._fivetran_deleted, False)
 
 ), final as (
     select
