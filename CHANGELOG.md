@@ -1,3 +1,8 @@
+# dbt_zendesk v0.17.0
+[PR #161](https://github.com/fivetran/dbt_zendesk/pull/161) includes the following updates:
+## New model
+- zendesk__document
+
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
 Although this update is not a breaking change, it will likely impact the output of the `zendesk__sla_policies` and `zendesk__sla_metrics` models. [PR #154](https://github.com/fivetran/dbt_zendesk/pull/154) includes the following changes:

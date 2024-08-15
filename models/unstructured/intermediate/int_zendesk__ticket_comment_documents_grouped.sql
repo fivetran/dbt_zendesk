@@ -1,6 +1,6 @@
 with filtered_comment_documents as (
   select *
-  from {{ ref('zendesk__ticket_comment_document') }}
+  from {{ ref('int_zendesk__ticket_comment_document') }}
 ),
 
 grouped_comment_documents as (

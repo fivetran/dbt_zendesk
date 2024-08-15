@@ -1,10 +1,10 @@
 with ticket_document as (
     select *
-    from {{ ref('zendesk__ticket_document') }}
+    from {{ ref('int_zendesk__ticket_document') }}
 
 ), grouped as (
     select *
-    from {{ ref('zendesk__ticket_comment_documents_grouped') }}
+    from {{ ref('int_zendesk__ticket_comment_documents_grouped') }}
 
 ), final as (
     select
