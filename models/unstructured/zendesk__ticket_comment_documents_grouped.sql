@@ -1,7 +1,6 @@
 with filtered_comment_documents as (
   select *
   from {{ ref('zendesk__ticket_comment_document') }}
-  where comment_tokens <= {{ var('max_tokens', 7500) }}
 ),
 
 grouped_comment_documents as (

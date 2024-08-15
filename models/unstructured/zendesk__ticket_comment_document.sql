@@ -45,7 +45,7 @@ with ticket_comments as (
         ticket_comment_id,
         ticket_id,
         comment_time,
-        case when comment_tokens > {{ var('max_tokens', 7500) }} then substring(comment_markdown, 1, {{ var('max_tokens', 7500) }} * 4)  -- approximate 4 characters per token
+        case when comment_tokens > {{ var('max_tokens', 7500) }} then left(comment_markdown, {{ var('max_tokens', 7500) }} * 4)  -- approximate 4 characters per token
             else comment_markdown
             end as comment_markdown,
         case when comment_tokens > {{ var('max_tokens', 7500) }} then {{ var('max_tokens', 7500) }}
