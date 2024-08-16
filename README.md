@@ -37,6 +37,7 @@ The following table provides a detailed list of final models materialized within
 | [zendesk__ticket_backlog](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog)           | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable for all backlog tickets. Backlog tickets being defined as any ticket not in a 'closed', 'deleted', or 'solved' status.                                                             |
 | [zendesk__ticket_field_history](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_field_history) | A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable and the corresponding updater fields defined in the `ticket_field_history_updater_columns` variable.                                                        |
 | [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)           | Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches are supported.    
+| zendesk__document | Each record represents a chunk of text from ticket data, prepared for vectorization. It includes fields for use in NLP workflows. Disabled by default. |
 
 Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk)! Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
 
@@ -90,6 +91,14 @@ vars:
 ```
 
 ## (Optional) Step 5: Additional configurations
+
+### Enabling the unstructured document model for NLP
+This package includes the `zendesk__document` model, which processes and segments Zendesk text data for vectorization, making it suitable for NLP workflows. The model outputs structured chunks of text with associated document IDs, segment indices, and token counts. By default, this model is disabled. To enable it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
+
+```yml
+vars:
+  zendesk__unstructured_enabled: true # false by default.
+```
 
 ### Add passthrough columns
 This package includes all source columns defined in the macros folder. You can add more columns from the `TICKET`, `USER`, and `ORGANIZATION` tables using our pass-through column variables.

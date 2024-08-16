@@ -1,3 +1,5 @@
+{{ config(enabled=var('zendesk__unstructured_enabled', False)) }}
+
 with ticket_comments as (
     select *
     from {{ var('ticket_comment') }}

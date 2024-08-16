@@ -1,3 +1,5 @@
+{{ config(enabled=var('zendesk__unstructured_enabled', False)) }}
+
 with tickets as (
     select *
     from {{ var('ticket') }}

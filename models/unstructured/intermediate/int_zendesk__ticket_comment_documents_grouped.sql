@@ -1,3 +1,5 @@
+{{ config(enabled=var('zendesk__unstructured_enabled', False)) }}
+
 with filtered_comment_documents as (
   select *
   from {{ ref('int_zendesk__ticket_comment_document') }}
