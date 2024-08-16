@@ -33,9 +33,7 @@ with tickets as (
             "'Status : '", "status", "'\\n'",
             "'Priority : '", "priority"
         ]) }} as ticket_markdown
-        
     from ticket_details
-
 )
 
 select 
