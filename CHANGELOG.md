@@ -1,12 +1,14 @@
 # dbt_zendesk v0.17.0
 [PR #161](https://github.com/fivetran/dbt_zendesk/pull/161) includes the following updates:
-## New model!
+## New model
 - Addition of the `zendesk__document` model, designed to structure Zendesk textual data for vectorization and integration into NLP workflows. The model outputs a table with:
   - `document_id`: Corresponding to the `ticket_id`
   - `chunk_index`: For text segmentation
   - `chunk`: The text chunk itself
   - `chunk_tokens_approximate`: Approximate token count for each segment
 - This model is currently disabled by default. You may enable it by setting the `zendesk__unstructured_enabled` variable as `true` in your `dbt_project.yml`.
+  - This model was developed to limit approximate chunk sizes to 7500 for OpenAI, however you can set change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
+  - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
 
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨

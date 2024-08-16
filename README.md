@@ -100,6 +100,15 @@ vars:
   zendesk__unstructured_enabled: true # false by default.
 ```
 
+#### Customizing Chunk Size for Vectorization
+
+The `zendesk__document` model was developed to limit approximate chunk sizes to 7,500 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
+
+```yml
+vars:
+  zendesk_max_tokens: 7500 # Default value
+```
+
 ### Add passthrough columns
 This package includes all source columns defined in the macros folder. You can add more columns from the `TICKET`, `USER`, and `ORGANIZATION` tables using our pass-through column variables.
 
