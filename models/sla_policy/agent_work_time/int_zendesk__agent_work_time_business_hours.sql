@@ -29,7 +29,7 @@ with agent_work_time_filtered_statuses as (
       agent_work_time_filtered_statuses.target,    
       agent_work_time_filtered_statuses.sla_policy_name,    
       ticket_schedules.schedule_id,
-      ticket_schedules.standard_offset_minutes,
+      ticket_schedules.offset_minutes,
 
       -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
       greatest(valid_starting_at, schedule_created_at) as valid_starting_at,
@@ -42,6 +42,8 @@ with agent_work_time_filtered_statuses as (
     from agent_work_time_filtered_statuses
     left join ticket_schedules
       on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
+      and cast(agent_work_time_filtered_statuses.valid_starting_at as date) >= cast(ticket_schedules.valid_from as date)
+      and cast(agent_work_time_filtered_statuses.valid_starting_at as date) < cast(ticket_schedules.valid_until as date)
     where {{ dbt.datediff(
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
@@ -63,7 +65,7 @@ with agent_work_time_filtered_statuses as (
               "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
               "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt.type_timestamp() ~ ")",
               'second') }} 
-              /60 - standard_offset_minutes
+              /60 - offset_minutes
             ) as valid_starting_at_in_minutes_from_week,
       ({{ dbt.datediff(
               'ticket_status_crossed_with_schedule.valid_starting_at', 
@@ -126,7 +128,8 @@ with agent_work_time_filtered_statuses as (
       schedule.end_time_utc as schedule_end_time,
       least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes
     from weekly_period_agent_work_time
-    join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
+    join schedule
+      on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_agent_work_time.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule

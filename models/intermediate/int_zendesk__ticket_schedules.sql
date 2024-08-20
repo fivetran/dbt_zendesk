@@ -15,10 +15,10 @@ with ticket as (
   select *
   from {{ ref('stg_zendesk__schedule') }}
 
-), timezones as (
+), timezones_with_dst as (
  
   select *
-  from {{ var('time_zone') }}
+  from {{ ref('int_zendesk__timezones_with_dst') }}
 
 ), daylight_time as (
 
@@ -90,13 +90,21 @@ with ticket as (
 
 ), ticket_schedules_with_timezone_offset as (
   select
-    ticket_schedules.*,
-    coalesce(timezones.standard_offset_minutes, 0) as standard_offset_minutes
+    ticket_schedules.ticket_id,
+    ticket_schedules.schedule_id,
+    ticket_schedules.schedule_created_at,
+    ticket_schedules.schedule_invalidated_at,
+    coalesce(timezones_with_dst.offset_minutes, 0) as offset_minutes,
+    timezones_with_dst.valid_from,
+    timezones_with_dst.valid_until
   from ticket_schedules
   left join schedules
-    on schedules.schedule_id = ticket_schedules.schedule_id
-  left join timezones
-    on timezones.time_zone = schedules.time_zone
+    on ticket_schedules.schedule_id = schedules.schedule_id
+  left join timezones_with_dst
+    on schedules.time_zone = timezones_with_dst.time_zone
+    and cast(ticket_schedules.schedule_created_at as date) >= cast(timezones_with_dst.valid_from as date) 
+    and cast(ticket_schedules.schedule_created_at as date) < cast(timezones_with_dst.valid_until as date)
+  group by 1,2,3,4,5,6,7
 )
 select
   *
