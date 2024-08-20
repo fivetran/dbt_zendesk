@@ -19,7 +19,7 @@ with agent_work_time_filtered_statuses as (
 
   select * 
   from {{ ref('int_zendesk__ticket_schedules') }}
-  
+
 -- cross schedules with work time
 ), ticket_status_crossed_with_schedule as (
   
@@ -29,6 +29,7 @@ with agent_work_time_filtered_statuses as (
       agent_work_time_filtered_statuses.target,    
       agent_work_time_filtered_statuses.sla_policy_name,    
       ticket_schedules.schedule_id,
+      ticket_schedules.standard_offset_minutes,
 
       -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
       greatest(valid_starting_at, schedule_created_at) as valid_starting_at,
@@ -61,13 +62,14 @@ with agent_work_time_filtered_statuses as (
       ({{ dbt.datediff(
               "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
               "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt.type_timestamp() ~ ")",
-              'second') }} /60
+              'second') }} 
+              /60 - standard_offset_minutes
             ) as valid_starting_at_in_minutes_from_week,
-        ({{ dbt.datediff(
-                'ticket_status_crossed_with_schedule.valid_starting_at', 
-                'ticket_status_crossed_with_schedule.valid_ending_at',
-                'second') }} /60
-              ) as raw_delta_in_minutes,
+      ({{ dbt.datediff(
+              'ticket_status_crossed_with_schedule.valid_starting_at', 
+              'ticket_status_crossed_with_schedule.valid_ending_at',
+              'second') }} /60
+            ) as raw_delta_in_minutes,
     {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date
               
     from ticket_status_crossed_with_schedule

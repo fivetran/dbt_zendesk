@@ -10,11 +10,20 @@ with ticket as (
   select *
   from {{ ref('stg_zendesk__ticket_schedule') }}
 
-), schedule as (
+), schedules as (
  
   select *
   from {{ ref('stg_zendesk__schedule') }}
 
+), timezones as (
+ 
+  select *
+  from {{ var('time_zone') }}
+
+), daylight_time as (
+
+    select *
+    from {{ var('daylight_time') }}
 
 ), default_schedule_events as (
 -- Goal: understand the working schedules applied to tickets, so that we can then determine the applicable business hours/schedule.
@@ -79,7 +88,16 @@ with ticket as (
             , {{ fivetran_utils.timestamp_add("hour", 1000, "" ~ dbt.current_timestamp_backcompat() ~ "") }} ) as schedule_invalidated_at
   from schedule_events
 
+), ticket_schedules_with_timezone_offset as (
+  select
+    ticket_schedules.*,
+    coalesce(timezones.standard_offset_minutes, 0) as standard_offset_minutes
+  from ticket_schedules
+  left join schedules
+    on schedules.schedule_id = ticket_schedules.schedule_id
+  left join timezones
+    on timezones.time_zone = schedules.time_zone
 )
 select
   *
-from ticket_schedules
+from ticket_schedules_with_timezone_offset
