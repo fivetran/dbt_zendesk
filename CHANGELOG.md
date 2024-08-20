@@ -10,6 +10,13 @@
   - This model was developed to limit approximate chunk sizes to 7500 for OpenAI, however you can set change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
   - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
 
+## Breaking changes
+- In the [dbt_zendesk_source v0.12.0 release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.12.0), the field `_fivetran_deleted` to the following models for use in `zendesk__document`:
+  - `stg_zendesk__ticket`
+  - `stg_zendesk__ticket_comment`
+  - `stg_zendesk__user`
+  - If you have already added `_fivetran_deleted` as a passthrough columns using the `zendesk__ticket_passthrough_columns` or `zendesk__user_passthrough_columns` vars, you will need to remove or alias this field from the variable to avoid duplicate column errors.
+
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
 Although this update is not a breaking change, it will likely impact the output of the `zendesk__sla_policies` and `zendesk__sla_metrics` models. [PR #154](https://github.com/fivetran/dbt_zendesk/pull/154) includes the following changes:
