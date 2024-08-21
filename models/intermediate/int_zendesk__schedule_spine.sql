@@ -5,7 +5,12 @@
     End result will include `valid_from` and `valid_until` columns which we will use downstream to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time)
 */
 
-with timezones_with_dst as (
+with timezone as (
+
+    select *
+    from {{ var('time_zone') }}
+
+), timezones_with_dst as (
 
     select *
     from {{ ref('int_zendesk__timezones_with_dst') }}
@@ -40,12 +45,12 @@ with timezones_with_dst as (
         schedule.end_time,
         schedule.created_at,
         schedule.schedule_name,
-        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
-        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes_to_add,
+        schedule.start_time - coalesce(timezones_with_dst.offset_minutes, 0) as start_time_utc,
+        schedule.end_time - coalesce(timezones_with_dst.offset_minutes, 0) as end_time_utc,
+        coalesce(timezones_with_dst.offset_minutes, 0) as offset_minutes_to_add,
         -- we'll use these to determine which schedule version to associate tickets with
-        cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
-        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
+        cast(timezones_with_dst.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
+        cast(timezones_with_dst.valid_until as {{ dbt.type_timestamp() }}) as valid_until
 
     from schedule
     left join timezones_with_dst
