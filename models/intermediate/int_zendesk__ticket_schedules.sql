@@ -104,7 +104,7 @@ with ticket as (
     on schedules.time_zone = timezones_with_dst.time_zone
     and cast(ticket_schedules.schedule_created_at as date) >= cast(timezones_with_dst.valid_from as date) 
     and cast(ticket_schedules.schedule_created_at as date) < cast(timezones_with_dst.valid_until as date)
-  group by 1,2,3,4,5,6,7
+  {{ dbt_utils.group_by(n=7) }}
 )
 select
   *
