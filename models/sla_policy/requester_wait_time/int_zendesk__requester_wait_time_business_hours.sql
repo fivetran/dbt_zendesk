@@ -120,11 +120,15 @@ with requester_wait_time_filtered_statuses as (
       weekly_period_requester_wait_time.week_number,
       weekly_period_requester_wait_time.ticket_week_start_time_minute,
       weekly_period_requester_wait_time.ticket_week_end_time_minute,
-      schedule.start_time_utc as schedule_start_time,
+      coalesce(schedule.start_time_utc, 0) as schedule_start_time,
       schedule.end_time_utc as schedule_end_time,
-      least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_requester_wait_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes
+      coalesce(
+        least(ticket_week_end_time_minute, schedule.end_time_utc)
+        - greatest(weekly_period_requester_wait_time.ticket_week_start_time_minute, schedule.start_time_utc),
+        0) as scheduled_minutes
     from weekly_period_requester_wait_time
-    join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
+    left join schedule
+      on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_requester_wait_time.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
@@ -152,7 +156,7 @@ with requester_wait_time_filtered_statuses as (
     lag(target - running_total_scheduled_minutes) over
           (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
-       when (target - running_total_scheduled_minutes) < 0 
+      when (target - running_total_scheduled_minutes) < 0 
         and 
           (lag(target - running_total_scheduled_minutes) over
           (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) > 0 
