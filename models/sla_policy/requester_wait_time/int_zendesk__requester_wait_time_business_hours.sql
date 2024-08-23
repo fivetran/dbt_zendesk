@@ -75,7 +75,7 @@ with requester_wait_time_filtered_statuses as (
 
 ), weeks as (
 
-    {{ dbt_utils.generate_series(208) }}
+    {{ dbt_utils.generate_series(52) }}
 
 ), weeks_cross_ticket_full_solved_time as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
@@ -133,8 +133,8 @@ with requester_wait_time_filtered_statuses as (
       and weekly_period_requester_wait_time.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time_minute', from_date_or_timestamp='start_week_date') }} as date) < cast(schedule.valid_until as date)
 
 ), intercepted_periods_with_running_total as (
   
@@ -176,7 +176,7 @@ with requester_wait_time_filtered_statuses as (
   from intercepted_periods_agent_with_breach_flag
 
 ), requester_wait_business_breach as (
-  
+
   select 
     *,
     {{ fivetran_utils.timestamp_add(
