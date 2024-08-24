@@ -176,7 +176,7 @@ with requester_wait_time_filtered_statuses as (
   from intercepted_periods_agent_with_breach_flag
 
 ), requester_wait_business_breach as (
-
+  
   select 
     *,
     {{ fivetran_utils.timestamp_add(

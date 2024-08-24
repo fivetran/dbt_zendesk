@@ -1,3 +1,13 @@
+# dbt_zendesk v0.16.1
+
+## Bug Fixes
+- Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported. 
+  - Resolved by adjusting the join logic in `int_zendesk__agent_work_time_business_hours` and `int_zendesk__requester_wait_time_business_hours`. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156))
+
+## Under the hood
+- Added integrity validation within integration tests to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
+- Reduced the weeks looking ahead from 208 to 52 for performance. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156))
+
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
 Although this update is not a breaking change, it will likely impact the output of the `zendesk__sla_policies` and `zendesk__sla_metrics` models. [PR #154](https://github.com/fivetran/dbt_zendesk/pull/154) includes the following changes:
