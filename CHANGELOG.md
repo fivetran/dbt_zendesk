@@ -1,7 +1,7 @@
 # dbt_zendesk v0.17.0
 
 ## Breaking Changes (Full refresh required after upgrading)
-- Incremental models have had the `partition_by` logic adjusted to include a granularity of a month. This change should only impact BigQuery warehouses and was applied to avoid the common `too many partitions` error some users have experienced do to over partitioning by day. Therefore, adjusting the partition to a month granularity will increase the partition windows and allow for more performant querying and incremental loads. This change was applied to the following models:
+- Incremental models running on BigQuery have had the `partition_by` logic adjusted to include a granularity of a month. This change only impacts BigQuery warehouses and was applied to avoid the common `too many partitions` error some users have experienced when partitioning by day. Therefore, adjusting the partition to a month granularity will decrease the number of partitions created and allow for more performant querying and incremental loads. This change was applied to the following models:
   - `int_zendesk__field_calendar_spine`
   - `int_zendesk__field_history_pivot`
   - `zendesk__ticket_field_history`
