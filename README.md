@@ -17,19 +17,19 @@
 ## What does this dbt package do?
 - Produces modeled tables that leverage Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation) and build off the output of our [zendesk source package](https://github.com/fivetran/dbt_zendesk_source).
 - Enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It performs the following actions:
-- Creates an enriched ticket model with relevant resolution, response time, and other metrics
-- Produces a historical ticket field history model to see velocity of your tickets over time
-- Converts metrics to business hours for Zendesk Support Professional or Enterprise users
-- Calculates SLA policy breaches for Zendesk Support Professional or Enterprise users
+  - Creates an enriched ticket model with relevant resolution, response time, and other metrics
+  - Produces a historical ticket field history model to see velocity of your tickets over time
+  - Converts metrics to business hours for Zendesk Support Professional or Enterprise users
+  - Calculates SLA policy breaches for Zendesk Support Professional or Enterprise users
 - Generates a comprehensive data dictionary of your source and modeled Zendesk Support data through the [dbt docs site](https://fivetran.github.io/dbt_zendesk/).
 
 > Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat based tickets. This is a feature request that has been flagged.
 
 <!--section="zendesk_transformation_model"-->
-The following table provides a detailed list of final models materialized within this package by default.
-> TIP: See more details about these models in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
+The following table provides a detailed list of final tables materialized within this package by default.
+> TIP: See more details about these tables in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
 
-| **model**                    | **description**                                                                                                                                                 |
+| **Table**                    | **Description**                                                                                                                                                 |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [zendesk__ticket_metrics](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)       | Each record represents a Zendesk Support ticket, enriched with metrics about reply times, resolution times, and work times.  Calendar and business hours are supported.  |
 | [zendesk__ticket_enriched](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched)      | Each record represents a Zendesk Support ticket, enriched with data about its tags, assignees, requester, submitter, organization, and group.                           |
