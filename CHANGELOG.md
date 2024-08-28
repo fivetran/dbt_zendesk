@@ -1,4 +1,4 @@
-# dbt_zendesk v0.16.1
+# dbt_zendesk v0.17.0
 
 ## Bug Fixes
 - Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported. 

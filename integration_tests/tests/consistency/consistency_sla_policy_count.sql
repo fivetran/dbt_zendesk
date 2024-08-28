@@ -9,6 +9,7 @@ with prod as (
         1 as join_key,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_prod.zendesk__sla_policies
+    where prod.ticket_id not in {{ var('fivetran_consistency_sla_policy_count_exclusion_tickets',()) }}
     group by 1
 ),
 
@@ -17,6 +18,7 @@ dev as (
         1 as join_key,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
+    where dev.ticket_id not in {{ var('fivetran_consistency_sla_policy_count_exclusion_tickets',()) }}
     group by 1
 ),
 

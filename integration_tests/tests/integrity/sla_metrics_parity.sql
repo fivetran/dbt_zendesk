@@ -7,30 +7,30 @@
 This test is to ensure the sla_elapsed_time from zendesk__sla_policies matches the corresponding time in zendesk__ticket_metrics.
 */
 
-with slas as (
+with dev_slas as (
     select *
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
     where in_business_hours
 
-), metrics as (
+), dev_metrics as (
     select *
     from {{ target.schema }}_zendesk_dev.zendesk__ticket_metrics
 
-), comparison as (
+), dev_compare as (
     select 
-        slas.ticket_id,
-        slas.metric,
-        cast(slas.sla_elapsed_time as {{ dbt.type_int() }}) as time_from_slas,
-        case when slas.metric = 'agent_work_time' then metrics.agent_work_time_in_business_minutes
-            when slas.metric = 'requester_wait_time' then metrics.requester_wait_time_in_business_minutes
-            when slas.metric = 'first_reply_time' then metrics.first_reply_time_business_minutes
+        dev_slas.ticket_id,
+        dev_slas.metric,
+        cast(dev_slas.sla_elapsed_time as {{ dbt.type_int() }}) as time_from_slas,
+        case when metric = 'agent_work_time' then dev_metrics.agent_work_time_in_business_minutes
+            when metric = 'requester_wait_time' then dev_metrics.requester_wait_time_in_business_minutes
+            when metric = 'first_reply_time' then dev_metrics.first_reply_time_business_minutes
         end as time_from_metrics
-    from slas
-    left join metrics
-        on metrics.ticket_id = slas.ticket_id
+    from dev_slas
+    left join dev_metrics
+        on dev_metrics.ticket_id = dev_slas.ticket_id
 )
 
 select *
-from comparison
+from dev_compare
 where abs(time_from_slas - time_from_metrics) >= 5
-and ticket_id not in {{ var('fivetran_integrity_sla_metric_parity_exclusion_tickets', ()) }}
+{{ "and ticket_id not in " ~ var('fivetran_integrity_sla_metric_parity_exclusion_tickets',[]) ~ "" if var('fivetran_integrity_sla_metric_parity_exclusion_tickets',[]) }}
