@@ -6,30 +6,30 @@
 
 with prod as (
     select
-        1 as join_key,
+        ticket_id,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_prod.zendesk__sla_policies
-    where prod.ticket_id not in {{ var('fivetran_consistency_sla_policy_count_exclusion_tickets',()) }}
+    {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
     group by 1
 ),
 
 dev as (
     select
-        1 as join_key,
+        ticket_id,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
-    where dev.ticket_id not in {{ var('fivetran_consistency_sla_policy_count_exclusion_tickets',()) }}
+    {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
     group by 1
 ),
 
 final as (
     select 
-        prod.join_key,
+        prod.ticket_id,
         prod.total_slas as prod_sla_total,
         dev.total_slas as dev_sla_total
     from prod
     full outer join dev 
-        on dev.join_key = prod.join_key
+        on dev.ticket_id = prod.ticket_id
 )
 
 select *
