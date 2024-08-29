@@ -1,5 +1,11 @@
 # dbt_zendesk v0.17.0
 
+## Breaking Changes (Full refresh required after upgrading)
+- Incremental models running on BigQuery have had the `partition_by` logic adjusted to include a granularity of a month. This change only impacts BigQuery warehouses and was applied to avoid the common `too many partitions` error some users have experienced when partitioning by day. Therefore, adjusting the partition to a month granularity will decrease the number of partitions created and allow for more performant querying and incremental loads. This change was applied to the following models ([#165](https://github.com/fivetran/dbt_zendesk/pull/165)):
+  - `int_zendesk__field_calendar_spine`
+  - `int_zendesk__field_history_pivot`
+  - `zendesk__ticket_field_history`
+
 ## Bug Fixes
 - Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported. 
   - Resolved by adjusting the join logic in models `int_zendesk__agent_work_time_business_hours` and `int_zendesk__requester_wait_time_business_hours`. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156))
@@ -10,7 +16,9 @@
 - Added integrity validations:
   - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
   - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`.
+- Modified the `consistency_sla_policy_count` validation test to group by `ticket_id` for more accurate testing. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 - Reduced the weeks looking ahead from 208 to 52 for performance. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
+- Updated seed files to reflect a real world ticket field history update scenario. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
