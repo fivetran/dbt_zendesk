@@ -7,7 +7,7 @@
   - `zendesk__ticket_field_history`
 
 ## Bug Fixes
-- Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported. 
+- Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported, specifically for the metrics `requester_wait_time` and `agent_work_time`. 
   - Resolved by adjusting the join logic in models `int_zendesk__agent_work_time_business_hours` and `int_zendesk__requester_wait_time_business_hours`. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156))
 - Fixed as issue in the `zendesk__ticket_metrics` model where certain tickets had miscalculated metrics.
   - Resolved by adjusting the join logic in models `int_zendesk__ticket_work_time_business`, `int_zendesk__ticket_first_resolution_time_business`, and `int_zendesk__ticket_full_resolution_time_business`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
@@ -17,7 +17,7 @@
   - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
   - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`.
 - Modified the `consistency_sla_policy_count` validation test to group by `ticket_id` for more accurate testing. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
-- Reduced the weeks looking ahead from 208 to 52 for performance. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
+- Reduced the weeks looking ahead from 208 to 52 to improve performance, as tracking ticket SLAs beyond one year was unnecessary. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Updated seed files to reflect a real world ticket field history update scenario. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 
 # dbt_zendesk v0.16.0
