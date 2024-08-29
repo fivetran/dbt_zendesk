@@ -72,16 +72,18 @@ with ticket_resolution_times_calendar as (
 
 ), intercepted_periods as (
 
-  select ticket_id,
-        week_number,
-        weekly_periods.schedule_id,
-        ticket_week_start_time,
-        ticket_week_end_time,
-        schedule.start_time_utc as schedule_start_time,
-        schedule.end_time_utc as schedule_end_time,
-        least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
+  select 
+    ticket_id,
+    week_number,
+    weekly_periods.schedule_id,
+    ticket_week_start_time,
+    ticket_week_end_time,
+    schedule.start_time_utc as schedule_start_time,
+    schedule.end_time_utc as schedule_end_time,
+    least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
   from weekly_periods
-  join schedule on ticket_week_start_time <= schedule.end_time_utc 
+  join schedule
+    on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
