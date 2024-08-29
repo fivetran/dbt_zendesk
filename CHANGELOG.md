@@ -7,8 +7,10 @@
   - Resolved by adjusting the join logic in models `int_zendesk__ticket_work_time_business`, `int_zendesk__ticket_first_resolution_time_business`, and `int_zendesk__ticket_full_resolution_time_business`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 
 ## Under the hood
-- Added integrity validation within integration tests to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
-- Reduced the weeks looking ahead from 208 to 52 for performance. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156))
+- Added integrity validations:
+  - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
+  - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`.
+- Reduced the weeks looking ahead from 208 to 52 for performance. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
