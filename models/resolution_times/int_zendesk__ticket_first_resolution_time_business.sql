@@ -46,7 +46,7 @@ with ticket_resolution_times_calendar as (
 
 ), weeks as (
 
-    {{ dbt_utils.generate_series(208) }}
+    {{ dbt_utils.generate_series(52) }}
 
 ), weeks_cross_ticket_first_resolution_time as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
