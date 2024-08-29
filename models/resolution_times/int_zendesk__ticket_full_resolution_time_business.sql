@@ -80,7 +80,7 @@ with ticket_resolution_times_calendar as (
     schedule.end_time_utc as schedule_end_time,
     least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
   from weekly_periods
-  left join schedule on ticket_week_start_time <= schedule.end_time_utc 
+  join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
@@ -92,6 +92,6 @@ with ticket_resolution_times_calendar as (
 
   select 
     ticket_id,
-    coalesce(sum(scheduled_minutes), 0) as full_resolution_business_minutes
+    sum(scheduled_minutes) as full_resolution_business_minutes
   from intercepted_periods
   group by 1

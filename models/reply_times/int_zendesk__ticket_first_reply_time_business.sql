@@ -91,7 +91,7 @@ with ticket_reply_times as (
     schedule.end_time_utc as schedule_end_time,
     least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
   from weekly_periods
-  left join schedule
+  join schedule
     on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
@@ -103,6 +103,6 @@ with ticket_reply_times as (
 )
 
   select ticket_id,
-    coalesce(sum(scheduled_minutes), 0) as first_reply_time_business_minutes
+    sum(scheduled_minutes) as first_reply_time_business_minutes
   from intercepted_periods
   group by 1
