@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.16.0'
+version: '0.17.0'
 
 profile: 'integration_tests'
 
@@ -33,8 +33,7 @@ vars:
   # using_organization_tags: false
   # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (1,56,80)
   # fivetran_consistency_ticket_metrics_exclusion_tickets: (11092,11093,11094)
-  # fivetran_integrity_sla_count_match_tickets: (76)
-
+  # fivetran_integrity_sla_count_match_tickets: (76,11106) ## Upcoming PR will address this.
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
