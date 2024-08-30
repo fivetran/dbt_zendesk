@@ -92,7 +92,7 @@ vars:
 
 ## (Optional) Step 5: Additional configurations
 
-### Enabling the unstructured document model for NLP
+#### Enabling the unstructured document model for NLP
 This package includes the `zendesk__document` model, which processes and segments Zendesk text data for vectorization, making it suitable for NLP workflows. The model outputs structured chunks of text with associated document IDs, segment indices, and token counts. By default, this model is disabled. To enable it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
 
 ```yml
@@ -100,7 +100,7 @@ vars:
   zendesk__unstructured_enabled: true # false by default.
 ```
 
-#### Customizing Chunk Size for Vectorization
+##### Customizing Chunk Size for Vectorization
 
 The `zendesk__document` model was developed to limit approximate chunk sizes to 7,500 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
 
