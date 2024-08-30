@@ -7,7 +7,7 @@
   - `chunk`: The text chunk itself
   - `chunk_tokens_approximate`: Approximate token count for each segment
 - This model is currently disabled by default. You may enable it by setting the `zendesk__unstructured_enabled` variable as `true` in your `dbt_project.yml`.
-  - This model was developed to limit approximate chunk sizes to 7500 for OpenAI, however you can set change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
+  - This model was developed to limit the chunk sizes to approximately 5000 tokens for use with OpenAI, however you can set change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
   - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
 
 ## Breaking changes
