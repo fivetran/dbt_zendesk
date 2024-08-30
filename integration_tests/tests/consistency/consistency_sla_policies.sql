@@ -5,11 +5,16 @@
 ) }}
 
 with prod as (
-    select
+    select 
         ticket_id,
-        metric, 
+        sla_policy_name,
+        metric,
         sla_applied_at,
-        sla_elapsed_time,
+        target,
+        in_business_hours,
+        sla_breach_at,
+        round(sla_elapsed_time, -1) as sla_elapsed_time, --round to the nearest tens
+        is_active_sla,
         is_sla_breach
     from {{ target.schema }}_zendesk_prod.zendesk__sla_policies
 ),
@@ -17,31 +22,46 @@ with prod as (
 dev as (
     select
         ticket_id,
-        metric, 
+        sla_policy_name,
+        metric,
         sla_applied_at,
-        sla_elapsed_time,
+        target,
+        in_business_hours,
+        sla_breach_at,
+        round(sla_elapsed_time, -1) as sla_elapsed_time, --round to the nearest tens
+        is_active_sla,
         is_sla_breach
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
 ),
 
+prod_not_in_dev as (
+    -- rows from prod not found in dev
+    select * from prod
+    except distinct
+    select * from dev
+),
+
+dev_not_in_prod as (
+    -- rows from dev not found in prod
+    select * from dev
+    except distinct
+    select * from prod
+),
+
 final as (
-    select 
-        prod.ticket_id,
-        prod.metric,
-        prod.sla_applied_at,
-        prod.sla_elapsed_time as prod_sla_elapsed_time,
-        dev.sla_elapsed_time as dev_sla_elapsed_time,
-        prod.is_sla_breach as prod_is_sla_breach,
-        dev.is_sla_breach as dev_is_sla_breach
-    from prod
-    full outer join dev 
-        on dev.ticket_id = prod.ticket_id
-            and dev.metric = prod.metric
-            and dev.sla_applied_at = prod.sla_applied_at
+    select
+        *,
+        'from prod' as source
+    from prod_not_in_dev
+
+    union all -- union since we only care if rows are produced
+
+    select
+        *,
+        'from dev' as source
+    from dev_not_in_prod
 )
 
 select *
 from final
-where (abs(prod_sla_elapsed_time - dev_sla_elapsed_time) >= 5
-    or prod_is_sla_breach != dev_is_sla_breach)
-    {{ "and prod.ticket_id not in " ~ var('fivetran_consistency_sla_policies_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policies_exclusion_tickets',[]) }}
+{{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policies_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policies_exclusion_tickets',[]) }}
