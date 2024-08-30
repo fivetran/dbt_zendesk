@@ -47,10 +47,10 @@ with ticket_comments as (
         ticket_comment_id,
         ticket_id,
         comment_time,
-        case when comment_tokens > {{ var('zendesk_max_tokens', 7500) }} then left(comment_markdown, {{ var('zendesk_max_tokens', 7500) }} * 4)  -- approximate 4 characters per token
+        case when comment_tokens > {{ var('zendesk_max_tokens', 5000) }} then left(comment_markdown, {{ var('zendesk_max_tokens', 5000) }} * 4)  -- approximate 4 characters per token
             else comment_markdown
             end as comment_markdown,
-        case when comment_tokens > {{ var('zendesk_max_tokens', 7500) }} then {{ var('zendesk_max_tokens', 7500) }}
+        case when comment_tokens > {{ var('zendesk_max_tokens', 5000) }} then {{ var('zendesk_max_tokens', 5000) }}
             else comment_tokens
             end as comment_tokens
     from comments_tokens

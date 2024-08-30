@@ -21,7 +21,7 @@ grouped_comment_documents as (
 
 select 
   ticket_id,
-  cast({{ dbt_utils.safe_divide('floor(cumulative_length - 1)', var('zendesk_max_tokens', 7500)) }} as {{ dbt.type_int() }}) as chunk_index,
+  cast({{ dbt_utils.safe_divide('floor(cumulative_length - 1)', var('zendesk_max_tokens', 5000)) }} as {{ dbt.type_int() }}) as chunk_index,
   {{ dbt.listagg(
     measure="comment_markdown",
     delimiter_text="'\\n\\n---\\n\\n'",
