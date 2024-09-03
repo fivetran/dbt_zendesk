@@ -26,6 +26,9 @@ vars:
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
 
+  ## Enable for docs generation
+  # zendesk__unstructured_enabled: True
+
   ## For validation testing. To be commented out before release.
   # zendesk_schema: zendesk_test_env
   # using_domain_names: false
