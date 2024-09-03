@@ -1,10 +1,26 @@
 # dbt_zendesk v0.17.0
 
+## New model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161))
+- Addition of the `zendesk__document` model, designed to structure Zendesk textual data for vectorization and integration into NLP workflows. The model outputs a table with:
+  - `document_id`: Corresponding to the `ticket_id`
+  - `chunk_index`: For text segmentation
+  - `chunk`: The text chunk itself
+  - `chunk_tokens_approximate`: Approximate token count for each segment
+- This model is currently disabled by default. You may enable it by setting the `zendesk__unstructured_enabled` variable as `true` in your `dbt_project.yml`.
+  - This model was developed to limit the chunk sizes to approximately 5000 tokens for use with OpenAI, however you can change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
+  - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
+
 ## Breaking Changes (Full refresh required after upgrading)
 - Incremental models running on BigQuery have had the `partition_by` logic adjusted to include a granularity of a month. This change only impacts BigQuery warehouses and was applied to avoid the common `too many partitions` error some users have experienced when partitioning by day. Therefore, adjusting the partition to a month granularity will decrease the number of partitions created and allow for more performant querying and incremental loads. This change was applied to the following models ([#165](https://github.com/fivetran/dbt_zendesk/pull/165)):
   - `int_zendesk__field_calendar_spine`
   - `int_zendesk__field_history_pivot`
   - `zendesk__ticket_field_history`
+
+- In the [dbt_zendesk_source v0.12.0 release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.12.0), the field `_fivetran_deleted` was added to the following models for use in `zendesk__document` model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161)):
+  - `stg_zendesk__ticket`
+  - `stg_zendesk__ticket_comment`
+  - `stg_zendesk__user`
+  - If you have already added `_fivetran_deleted` as a passthrough column via the `zendesk__ticket_passthrough_columns` or `zendesk__user_passthrough_columns` variable, you will need to remove or alias this field from the variable to avoid duplicate column errors.
 
 ## Bug Fixes
 - Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported, specifically for the metrics `requester_wait_time` and `agent_work_time`. 

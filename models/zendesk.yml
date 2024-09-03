@@ -171,6 +171,8 @@ models:
         description: Boolean indicating if the ticket had a satisfaction score went from good to bad.
       - name: is_bad_to_good_satisfaction_score
         description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
+      - name: _fivetran_deleted
+        description: Boolean created by Fivetran to indicate whether the ticket has been deleted.
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches for `first_reply_time`, `next_reply_time`, `requester_wait_time`, and `agent_work_time` are supported. If there is a SLA you would like supported that is not included, please create a feature request.
@@ -492,6 +494,8 @@ models:
         description: The time in minutes the ticket was in an unassigned state
       - name: last_status_assignment_date
         description: The time the status was last changed on the ticket
+      - name: _fivetran_deleted
+        description: Boolean created by Fivetran to indicate whether the ticket has been deleted.
 
   - name: zendesk__ticket_summary
     description: A single record table containing Zendesk ticket and user summary metrics. These metrics are updated for the current day the model is run.
