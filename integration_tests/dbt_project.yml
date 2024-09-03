@@ -27,7 +27,7 @@ vars:
     zendesk_user_tag_identifier:               "user_tag_data"
 
   ## Uncomment for docs generation
-  zendesk__unstructured_enabled: True
+  # zendesk__unstructured_enabled: True
 
   ## For validation testing. To be commented out before release.
   # zendesk_schema: zendesk_test_env
