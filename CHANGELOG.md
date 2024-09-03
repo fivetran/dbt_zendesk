@@ -1,6 +1,6 @@
 # dbt_zendesk v0.17.0
-[PR #161](https://github.com/fivetran/dbt_zendesk/pull/161) includes the following updates:
-## New model
+
+## New model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161))
 - Addition of the `zendesk__document` model, designed to structure Zendesk textual data for vectorization and integration into NLP workflows. The model outputs a table with:
   - `document_id`: Corresponding to the `ticket_id`
   - `chunk_index`: For text segmentation
@@ -10,12 +10,31 @@
   - This model was developed to limit the chunk sizes to approximately 5000 tokens for use with OpenAI, however you can change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
   - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
 
-## Breaking changes
-- In the [dbt_zendesk_source v0.12.0 release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.12.0), the field `_fivetran_deleted` was added to the following models for use in `zendesk__document` model:
+## Breaking Changes (Full refresh required after upgrading)
+- Incremental models running on BigQuery have had the `partition_by` logic adjusted to include a granularity of a month. This change only impacts BigQuery warehouses and was applied to avoid the common `too many partitions` error some users have experienced when partitioning by day. Therefore, adjusting the partition to a month granularity will decrease the number of partitions created and allow for more performant querying and incremental loads. This change was applied to the following models ([#165](https://github.com/fivetran/dbt_zendesk/pull/165)):
+  - `int_zendesk__field_calendar_spine`
+  - `int_zendesk__field_history_pivot`
+  - `zendesk__ticket_field_history`
+
+- In the [dbt_zendesk_source v0.12.0 release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.12.0), the field `_fivetran_deleted` was added to the following models for use in `zendesk__document` model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161)):
   - `stg_zendesk__ticket`
   - `stg_zendesk__ticket_comment`
   - `stg_zendesk__user`
   - If you have already added `_fivetran_deleted` as a passthrough column via the `zendesk__ticket_passthrough_columns` or `zendesk__user_passthrough_columns` variable, you will need to remove or alias this field from the variable to avoid duplicate column errors.
+
+## Bug Fixes
+- Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported, specifically for the metrics `requester_wait_time` and `agent_work_time`. 
+  - Resolved by adjusting the join logic in models `int_zendesk__agent_work_time_business_hours` and `int_zendesk__requester_wait_time_business_hours`. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156))
+- Fixed as issue in the `zendesk__ticket_metrics` model where certain tickets had miscalculated metrics.
+  - Resolved by adjusting the join logic in models `int_zendesk__ticket_work_time_business`, `int_zendesk__ticket_first_resolution_time_business`, and `int_zendesk__ticket_full_resolution_time_business`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
+
+## Under the hood
+- Added integrity validations:
+  - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
+  - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`.
+- Modified the `consistency_sla_policy_count` validation test to group by `ticket_id` for more accurate testing. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
+- Reduced the weeks looking ahead from 208 to 52 to improve performance, as tracking ticket SLAs beyond one year was unnecessary. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
+- Updated seed files to reflect a real world ticket field history update scenario. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 
 # dbt_zendesk v0.16.0
 ## 🚨 Minor Upgrade 🚨
