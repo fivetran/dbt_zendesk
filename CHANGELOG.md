@@ -33,6 +33,7 @@
   - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
   - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Modified the `consistency_sla_policy_count` validation test to group by `ticket_id` for more accurate testing. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
+- Updated casting in joins from timestamps to dates so that the whole day is considered. This produces more accurate results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Reduced the weeks looking ahead from 208 to 52 to improve performance, as tracking ticket SLAs beyond one year was unnecessary. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Updated seed files to reflect a real world ticket field history update scenario. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 
