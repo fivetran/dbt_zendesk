@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: zendesk__document
+    description: Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.  
+    columns:
+      - name: document_id
+        description: Equivalent to `ticket_id`.
+      - name: chunk_index
+        description: The index of the chunk associated with the `document_id`.
+      - name: chunk_tokens_approximate
+        description: Approximate number of tokens for the chunk, assuming 4 characters per token.
+      - name: chunk
+        description: The text of the chunk.

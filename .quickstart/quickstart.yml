@@ -23,3 +23,12 @@ destination_configurations:
     dispatch:
       - macro_namespace: dbt_utils
         search_order: [ 'spark_utils', 'dbt_utils' ]
+
+public_models: [
+  "zendesk__ticket_enriched",
+  "zendesk__ticket_metrics",
+  "zendesk__ticket_summary",
+  "zendesk__ticket_field_history",
+  "zendesk__sla_policies",
+  "zendesk__ticket_backlog"
+]

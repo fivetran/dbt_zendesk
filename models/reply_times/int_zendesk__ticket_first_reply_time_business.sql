@@ -57,7 +57,7 @@ with ticket_reply_times as (
 
 ), weeks as (
 
-    {{ dbt_utils.generate_series(208) }}
+    {{ dbt_utils.generate_series(52) }}
 
 ), weeks_cross_ticket_first_reply as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
@@ -102,6 +102,6 @@ with ticket_reply_times as (
 )
 
   select ticket_id,
-         sum(scheduled_minutes) as first_reply_time_business_minutes
+        sum(scheduled_minutes) as first_reply_time_business_minutes
   from intercepted_periods
   group by 1

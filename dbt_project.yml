@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '0.16.0'
+version: '0.17.0'
 
 
 config-version: 2
@@ -24,6 +24,9 @@ models:
     ticket_history:
       +schema: zendesk_intermediate
       +materialized: ephemeral
+    unstructured:
+      +schema: zendesk_unstructured
+      +materialized: table
     utils:
       +materialized: ephemeral
 vars:
