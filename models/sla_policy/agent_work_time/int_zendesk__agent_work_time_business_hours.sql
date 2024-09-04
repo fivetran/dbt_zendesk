@@ -120,14 +120,14 @@ with agent_work_time_filtered_statuses as (
       weekly_period_agent_work_time.week_number,
       weekly_period_agent_work_time.ticket_week_start_time_minute,
       weekly_period_agent_work_time.ticket_week_end_time_minute,
-      coalesce(schedule.start_time_utc, 0) as schedule_start_time,
+      coalesce(schedule.start_time_utc, 0) as schedule_start_time, -- fill 0 for schedules completely outside schedule window. Only necessary for this field for use downstream.
       schedule.end_time_utc as schedule_end_time,
       coalesce(
         least(ticket_week_end_time_minute, schedule.end_time_utc)
         - greatest(weekly_period_agent_work_time.ticket_week_start_time_minute, schedule.start_time_utc),
-        0) as scheduled_minutes
+        0) as scheduled_minutes -- fill 0 for schedules completely outside schedule window. Only necessary for this field for use downstream.
     from weekly_period_agent_work_time
-    left join schedule
+    left join schedule -- using a left join to account for tickets started and completed entirely outside of a schedule, otherwise they are filtered out
       on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_agent_work_time.schedule_id = schedule.schedule_id

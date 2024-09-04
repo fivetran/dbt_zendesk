@@ -7,7 +7,7 @@
   - `chunk`: The text chunk itself
   - `chunk_tokens_approximate`: Approximate token count for each segment
 - This model is currently disabled by default. You may enable it by setting the `zendesk__unstructured_enabled` variable as `true` in your `dbt_project.yml`.
-  - This model was developed to limit the chunk sizes to approximately 5000 tokens for use with OpenAI, however you can change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
+  - This model was developed with the limit of chunk sizes to approximately 5000 tokens for use with OpenAI, however you can change this limit by setting the variable `zendesk_max_tokens` in your `dbt_project.yml`.
   - See the README section [Enabling the unstructured document model for NLP](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#enabling-the-unstructured-document-model-for-nlp) for more information.
 
 ## Breaking Changes (Full refresh required after upgrading)
@@ -25,13 +25,13 @@
 ## Bug Fixes
 - Fixed an issue in the `zendesk__sla_policies` model where tickets that were opened and solved outside of scheduled hours were not being reported, specifically for the metrics `requester_wait_time` and `agent_work_time`. 
   - Resolved by adjusting the join logic in models `int_zendesk__agent_work_time_business_hours` and `int_zendesk__requester_wait_time_business_hours`. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164), [#156](https://github.com/fivetran/dbt_zendesk/pull/156))
-- Fixed an issue in the `zendesk__ticket_metrics` model where certain tickets had miscalculated metrics.
+- Fixed an issue in the `zendesk__ticket_metrics` model where certain tickets had miscalculated metrics. 
   - Resolved by adjusting the join logic in models `int_zendesk__ticket_work_time_business`, `int_zendesk__ticket_first_resolution_time_business`, and `int_zendesk__ticket_full_resolution_time_business`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 
 ## Under the hood
 - Added integrity validations:
   - Test to ensure `zendesk__sla_policies` and `zendesk__ticket_metrics` models produce consistent time results. ([#164](https://github.com/fivetran/dbt_zendesk/pull/164))
-  - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`.
+  - Test to ensure `zendesk__ticket_metrics` contains all the tickets found in `stg_zendesk__ticket`. ([#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Modified the `consistency_sla_policy_count` validation test to group by `ticket_id` for more accurate testing. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
 - Reduced the weeks looking ahead from 208 to 52 to improve performance, as tracking ticket SLAs beyond one year was unnecessary. ([#156](https://github.com/fivetran/dbt_zendesk/pull/156), [#167](https://github.com/fivetran/dbt_zendesk/pull/167))
 - Updated seed files to reflect a real world ticket field history update scenario. ([#165](https://github.com/fivetran/dbt_zendesk/pull/165))
