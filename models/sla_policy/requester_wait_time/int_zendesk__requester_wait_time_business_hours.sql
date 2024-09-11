@@ -75,7 +75,7 @@ with requester_wait_time_filtered_statuses as (
 
 ), weeks as (
 
-    {{ dbt_utils.generate_series(208) }}
+    {{ dbt_utils.generate_series(52) }}
 
 ), weeks_cross_ticket_full_solved_time as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks
@@ -120,18 +120,22 @@ with requester_wait_time_filtered_statuses as (
       weekly_period_requester_wait_time.week_number,
       weekly_period_requester_wait_time.ticket_week_start_time_minute,
       weekly_period_requester_wait_time.ticket_week_end_time_minute,
-      schedule.start_time_utc as schedule_start_time,
+      coalesce(schedule.start_time_utc, 0) as schedule_start_time,  -- fill 0 for schedules completely outside schedule window. Only necessary for this field for use downstream.
       schedule.end_time_utc as schedule_end_time,
-      least(ticket_week_end_time_minute, schedule.end_time_utc) - greatest(weekly_period_requester_wait_time.ticket_week_start_time_minute, schedule.start_time_utc) as scheduled_minutes
+      coalesce(
+        least(ticket_week_end_time_minute, schedule.end_time_utc)
+        - greatest(weekly_period_requester_wait_time.ticket_week_start_time_minute, schedule.start_time_utc),
+        0) as scheduled_minutes --- fill 0 for schedules completely outside schedule window. Only necessary for this field for use downstream.
     from weekly_period_requester_wait_time
-    join schedule on ticket_week_start_time_minute <= schedule.end_time_utc 
+    left join schedule -- using a left join to account for tickets started and completed entirely outside of a schedule, otherwise they are filtered out
+      on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_requester_wait_time.schedule_id = schedule.schedule_id
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) > cast(schedule.valid_from as {{ dbt.type_timestamp() }})
-      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time_minute', from_date_or_timestamp='start_week_date') }} as {{ dbt.type_timestamp() }}) < cast(schedule.valid_until as {{ dbt.type_timestamp() }})
-  
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
+      and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_start_time_minute', from_date_or_timestamp='start_week_date') }} as date) < cast(schedule.valid_until as date)
+
 ), intercepted_periods_with_running_total as (
   
     select 
@@ -152,7 +156,7 @@ with requester_wait_time_filtered_statuses as (
     lag(target - running_total_scheduled_minutes) over
           (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
-       when (target - running_total_scheduled_minutes) < 0 
+      when (target - running_total_scheduled_minutes) < 0 
         and 
           (lag(target - running_total_scheduled_minutes) over
           (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) > 0 
