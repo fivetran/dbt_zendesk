@@ -50,6 +50,7 @@ vars:
     user: "{{ ref('stg_zendesk__user') }}"
     daylight_time: "{{ ref('stg_zendesk__daylight_time') }}"
     time_zone: "{{ ref('stg_zendesk__time_zone') }}"
+    audit_log: "{{ ref('stg_zendesk__audit_log) }}"
     using_schedules: true
     using_domain_names: true
     using_user_tags: true

@@ -25,6 +25,7 @@ vars:
     zendesk_organization_tag_identifier:       "organization_tag_data"
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
+    zendesk_audit_log_identifier:              "audit_log_data"
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
