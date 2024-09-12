@@ -33,24 +33,24 @@ vars:
   zendesk:
     ticket_field_history_columns: ['assignee_id', 'status', 'priority']
     ticket_field_history_updater_columns: []
-    group: "{{ ref('stg_zendesk__group') }}"
+    audit_log: "{{ ref('stg_zendesk__audit_log') }}"
     brand: "{{ ref('stg_zendesk__brand') }}"
+    daylight_time: "{{ ref('stg_zendesk__daylight_time') }}"
     domain_name: "{{ ref('stg_zendesk__domain_name') }}"
+    field_history: "{{ ref('stg_zendesk__ticket_field_history') }}"
+    group: "{{ ref('stg_zendesk__group') }}"
     organization_tag: "{{ ref('stg_zendesk__organization_tag') }}"
     organization: "{{ ref('stg_zendesk__organization') }}"
-    schedule: "{{ ref('stg_zendesk__schedule') }}"
     schedule_holiday: "{{ ref('stg_zendesk__schedule_holiday') }}"
-    ticket: "{{ ref('stg_zendesk__ticket') }}"
-    ticket_form_history: "{{ ref('stg_zendesk__ticket_form_history') }}"
+    schedule: "{{ ref('stg_zendesk__schedule') }}"
     ticket_comment: "{{ ref('stg_zendesk__ticket_comment') }}"
-    field_history: "{{ ref('stg_zendesk__ticket_field_history') }}"
+    ticket_form_history: "{{ ref('stg_zendesk__ticket_form_history') }}"
     ticket_schedule: "{{ ref('stg_zendesk__ticket_schedule') }}"
     ticket_tag: "{{ ref('stg_zendesk__ticket_tag') }}"
+    ticket: "{{ ref('stg_zendesk__ticket') }}"
+    time_zone: "{{ ref('stg_zendesk__time_zone') }}"
     user_tag: "{{ ref('stg_zendesk__user_tag') }}"
     user: "{{ ref('stg_zendesk__user') }}"
-    daylight_time: "{{ ref('stg_zendesk__daylight_time') }}"
-    time_zone: "{{ ref('stg_zendesk__time_zone') }}"
-    audit_log: "{{ ref('stg_zendesk__audit_log) }}"
     using_schedules: true
     using_domain_names: true
     using_user_tags: true

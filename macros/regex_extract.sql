@@ -1,41 +1,41 @@
-{% macro regex_extract(string, start_or_end) -%}
+{% macro regex_extract(string, regex) -%}
 
-{{ adapter.dispatch('regex_extract', 'zendesk') (string, start_or_end) }}
+{{ adapter.dispatch('regex_extract', 'zendesk') (string, regex) }}
 
 {%- endmacro %}
 
-{% macro default__regex_extract(string, start_or_end) %}
+{% macro default__regex_extract(string, regex) %}
 
-REGEXP_EXTRACT({{ string }}, {%- if start_or_end == 'start' %} r'{"([^"]+)"' {% else %} r'":"([^"]+)"}' {% endif -%} )
-
-{% endmacro %}
-
-{% macro bigquery__regex_extract(string, start_or_end) %}
-
-REGEXP_EXTRACT({{ string }}, {%- if start_or_end == 'start' %} r'{"([^"]+)"' {% else %} r'":"([^"]+)"}' {% endif -%} )
+    regexp_extract({{ string }}, {{ regex }} )
 
 {% endmacro %}
 
-{% macro snowflake__regex_extract(string, start_or_end) %}
+{% macro bigquery__regex_extract(string, regex) %}
 
-REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '":"([^"]+)"' {% endif -%}, 1, 1, 'e', 1 )
-
-{% endmacro %}
-
-{% macro postgres__regex_extract(string, start_or_end) %}
-
-(regexp_matches({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)":' {% else %} '": "([^"]+)' {% endif -%} ))[1]
+    regexp_extract({{ string }}, {{ regex }} )
 
 {% endmacro %}
 
-{% macro redshift__regex_extract(string, start_or_end) %}
+{% macro snowflake__regex_extract(string, regex) %}
 
-REGEXP_SUBSTR({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)"' {% else %} '":"([^"]+)"' {% endif -%}, 1, 1, 'e')
+    REGEXP_SUBSTR({{ string }}, {{ regex }}, 1, 1, 'e', 1 )
 
 {% endmacro %}
 
-{% macro spark__regex_extract(string, start_or_end) %}
+{% macro postgres__regex_extract(string, regex) %}
 
-regexp_extract({{ string }}, {%- if start_or_end == 'start' %} '"([^"]+)":' {% else %} '":"([^"]+)"' {% endif -%}, 1)
+    (regexp_matches({{ string }}, {{ regex }}))[1]
+
+{% endmacro %}
+
+{% macro redshift__regex_extract(string, regex) %}
+
+    REGEXP_SUBSTR({{ string }}, {{ regex }}, 1, 1, 'e')
+
+{% endmacro %}
+
+{% macro spark__regex_extract(string, regex) %}
+
+    regexp_extract({{ string }}, {{ regex }}, 1)
 
 {% endmacro %}
