@@ -22,7 +22,7 @@ with audit_logs as (
     from audit_logs
 
 ), split_to_from as (
-    -- 'from'
+    -- 'from' establishes the schedule from before the change occurred
     select
         audit_logs_enhanced.*,
         cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_from,
@@ -95,7 +95,30 @@ with audit_logs as (
         cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
     from split_days
 {%- endif %}
+
+), split_times as (
+
+    select 
+        unnested_schedules.*,
+        cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 1) }}, ' ') as {{ dbt.type_int() }}) as start_time_hh, 
+        cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 2) }}, ' ') as {{ dbt.type_int() }}) as start_time_mm, 
+        cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 3) }}, ' ') as {{ dbt.type_int() }}) as end_time_hh, 
+        cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 4) }}, ' ') as {{ dbt.type_int() }}) as end_time_mm
+    from unnested_schedules
+
+), final as (
+
+    select
+        _fivetran_synced,
+        schedule_id,
+        start_time_hh * 60 + start_time_mm + 24 * 60 * day_of_week_number as start_time,
+        end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,
+        valid_from,
+        valid_to,
+        day_of_week,
+        day_of_week_number
+    from split_times
 )
 
 select * 
-from unnested_schedules
+from final
