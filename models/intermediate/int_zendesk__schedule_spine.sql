@@ -33,6 +33,7 @@ with schedule as (
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
         cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until, -- The valid_until will then be the the day after.
         cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
+        {{ dbt.date_trunc("holiday.holiday_start_date_at")}}
         holiday.holiday_id,
         holiday.holiday_name,
         holiday.schedule_id
@@ -96,7 +97,7 @@ with schedule as (
         holiday_valid_until,
         case
             when holiday_valid_from = holiday_date
-                then '0'
+                then '0_start'
             end as holiday_start_or_end,
         schedule_valid_from as valid_from,
         holiday_date as valid_until
@@ -119,7 +120,7 @@ with schedule as (
         holiday_valid_until,
         case
             when holiday_valid_until = holiday_date
-                then '1'
+                then '1_end'
             end as holiday_start_or_end,
         holiday_date as valid_from,
         schedule_valid_until as valid_until,
@@ -215,20 +216,30 @@ with schedule as (
         case
             when holiday_start_or_end = 'partition_start'
                 then cast({{ dbt.date_trunc("week", "schedule_valid_from") }} as {{ dbt.type_timestamp() }})
-
-
-            else cast(lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
-                as {{ dbt.type_timestamp() }})
+            when holiday_start_or_end = '0_start'
+                then cast({{ dbt.date_trunc("week",
+                    "lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
+                    ) }} as {{ dbt.type_timestamp() }})
+            when holiday_start_or_end = '1_end'
+                then cast({{ dbt.date_trunc("week",
+                    "lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
+                    ) }} as {{ dbt.type_timestamp() }})
+                {# then cast({{ dbt.date_trunc("week", "holiday_valid_from") }} as {{ dbt.type_timestamp() }}) #}
+                {# then cast(lag(valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                    as {{ dbt.type_timestamp() }}) #}
+            when holiday_start_or_end = 'partition_end'
+                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", "holiday_valid_until")) }} as {{ dbt.type_timestamp() }})
+            else cast({{ dbt.date_trunc("week", "schedule_valid_from") }} as {{ dbt.type_timestamp() }})
         end as valid_from,
 
         case 
             when holiday_start_or_end = 'partition_start'
                 then cast({{ dbt.date_trunc("week", "holiday_valid_from") }} as {{ dbt.type_timestamp() }})
-            when holiday_start_or_end = '0'
+            when holiday_start_or_end = '0_start'
                 then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", 
                     "lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
                     )) }} as {{ dbt.type_timestamp() }})
-            when holiday_start_or_end = '1'
+            when holiday_start_or_end = '1_end'
                 then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", "holiday_valid_until")) }} as {{ dbt.type_timestamp() }})
                 {# then lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index) #}
             when holiday_start_or_end = 'partition_end'
@@ -240,10 +251,10 @@ with schedule as (
         max_valid_from_index,
         holiday_start_or_end
     from add_end_row
-    where holiday_start_or_end != '0' or holiday_start_or_end is null
-    {# where not (valid_from_index > 1 and  holiday_start_or_end = '0') #}
+    where holiday_start_or_end != '0_start' or holiday_start_or_end is null
+    {# where not (valid_from_index > 1 and  holiday_start_or_end = '0_start') #}
 
-), final as(
+{# ), final as(
     select
         schedule_id,
         valid_from,
@@ -251,10 +262,10 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         holiday_name
-    from adjust_ranges
+    from adjust_ranges #}
     
 )
 
 select *
 from adjust_ranges
-{# where holiday_start_or_end != '0' or holiday_start_or_end is null #}
+{# where holiday_start_or_end != '0_start' or holiday_start_or_end is null #}
