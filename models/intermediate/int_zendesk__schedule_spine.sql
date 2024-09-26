@@ -133,7 +133,7 @@ with schedule as (
                 then 'end'
             end as holiday_start_or_end,
         holiday_date as valid_from,
-        schedule_valid_until as valid_until,
+        schedule_valid_until as valid_until
     from holiday_neighbors
     where holiday_date is not null
 
