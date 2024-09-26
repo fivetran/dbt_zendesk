@@ -9,7 +9,7 @@ with schedule as (
         source_id as schedule_id,
         created_at,
         lower(change_description) as change_description
-    from {{ var('audit_log') }}   
+    from {{ var('audit_log') }}
     where lower(change_description) like '%workweek changed from%'
 
 ), audit_logs_enhanced as (

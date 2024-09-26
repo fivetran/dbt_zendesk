@@ -30,9 +30,9 @@ with schedule as (
 
     select
         holiday._fivetran_synced,
-        {# cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_start_date_at, -- For each day within a holiday we want to give it its own record. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
-        cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_end_date_at, -- Since each day within a holiday now gets its own record, the end_date will then be the same day as the start_date. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week. #}
-        cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date, -- Since each day within a holiday now gets its own record, the end_date will then be the same day as the start_date. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
+        cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
+        cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until, -- The valid_until will then be the the day after.
+        cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
         holiday.holiday_id,
         holiday.holiday_name,
         holiday.schedule_id
@@ -71,6 +71,8 @@ with schedule as (
         calculate_schedules.schedule_name,
         schedule_holiday.holiday_date,
         schedule_holiday.holiday_name,
+        schedule_holiday.holiday_valid_from,
+        schedule_holiday.holiday_valid_until,
         calculate_schedules.valid_from as schedule_valid_from,
         calculate_schedules.valid_until as schedule_valid_until
     from calculate_schedules
@@ -78,21 +80,6 @@ with schedule as (
         on schedule_holiday.schedule_id = calculate_schedules.schedule_id
         and schedule_holiday.holiday_date <= calculate_schedules.valid_until
         and schedule_holiday.holiday_date >= calculate_schedules.valid_from
-
-), holiday_neighbors as(
-    select
-        schedule_id,
-        time_zone,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        holiday_name,
-        holiday_date,
-        schedule_valid_from,
-        schedule_valid_until,
-        lag(holiday_date) over (partition by schedule_id, start_time_utc order by holiday_date) as prior_holiday,
-        lead(holiday_date) over (partition by schedule_id, start_time_utc order by holiday_date) as next_holiday
-    from join_holidays
 
 ), split_holidays as(
     select
@@ -105,14 +92,15 @@ with schedule as (
         schedule_valid_until,
         holiday_name,
         holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
         case
-            when (date_diff(holiday_date, prior_holiday, day) > 1
-                or prior_holiday is null)
-                then 'start'
+            when holiday_valid_from = holiday_date
+                then '0'
             end as holiday_start_or_end,
         schedule_valid_from as valid_from,
         holiday_date as valid_until
-    from holiday_neighbors
+    from join_holidays
     where holiday_date is not null
 
     union all
@@ -127,14 +115,15 @@ with schedule as (
         schedule_valid_until,
         holiday_name,
         holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
         case
-            when (date_diff(next_holiday, holiday_date, day) > 1
-                or next_holiday is null)
-                then 'end'
+            when holiday_valid_until = holiday_date
+                then '1'
             end as holiday_start_or_end,
         holiday_date as valid_from,
-        schedule_valid_until as valid_until
-    from holiday_neighbors
+        schedule_valid_until as valid_until,
+    from join_holidays
     where holiday_date is not null
 
     union all
@@ -149,18 +138,67 @@ with schedule as (
         schedule_valid_until,
         holiday_name,
         holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
         cast(null as {{ dbt.type_string() }}) as holiday_start_or_end,
         schedule_valid_from as valid_from,
         schedule_valid_until as valid_until
-    from holiday_neighbors
+    from join_holidays
     where holiday_date is null
 
 ), valid_from_partition as(
     select
         *
-        , row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date) as valid_from_index
+        , row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index
+        , count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
     from split_holidays
     where not (holiday_date is not null and holiday_start_or_end is null)
+
+), add_end_row as(
+    select
+        schedule_id,
+        time_zone,
+        start_time_utc,
+        end_time_utc,
+        schedule_name,
+        schedule_valid_from,
+        schedule_valid_until,
+        holiday_name,
+        holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
+        case when valid_from_index = 1 and holiday_start_or_end is not null
+            then 'partition_start'
+            else holiday_start_or_end
+            end as holiday_start_or_end,
+        valid_from,
+        valid_until,
+        valid_from_index,
+        max_valid_from_index
+    from valid_from_partition
+    
+    union all
+
+    select
+        schedule_id,
+        time_zone,
+        start_time_utc,
+        end_time_utc,
+        schedule_name,
+        schedule_valid_from,
+        schedule_valid_until,
+        holiday_name,
+        holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
+        'partition_end' as holiday_start_or_end,
+        valid_from,
+        valid_until,
+        max_valid_from_index + 1 as valid_from_index,
+        max_valid_from_index
+    from valid_from_partition
+    where max_valid_from_index > 1
+    and valid_from_index = max_valid_from_index
 
 ), adjust_ranges as(
     select
@@ -171,41 +209,52 @@ with schedule as (
         schedule_name,
         holiday_name,
         holiday_date,
-        holiday_start_or_end,
+        holiday_valid_from,
+        holiday_valid_until,
 
-        case 
-            when holiday_start_or_end = 'start'
-                then case when valid_from_index > 1
-                    then lag(holiday_date) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
-                    else schedule_valid_from
-                    end
-            when holiday_start_or_end = 'end'
-                then cast({{ dbt.dateadd(datepart="day", interval=1, from_date_or_timestamp="holiday_date") }} as {{ dbt.type_timestamp() }})
-            else cast(schedule_valid_from as {{ dbt.type_timestamp() }})
+        case
+            when holiday_start_or_end = 'partition_start'
+                then cast({{ dbt.date_trunc("week", "schedule_valid_from") }} as {{ dbt.type_timestamp() }})
+
+
+            else cast(lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                as {{ dbt.type_timestamp() }})
         end as valid_from,
 
         case 
-            when holiday_start_or_end = 'start'
-                then holiday_date
-            when holiday_start_or_end = 'end'
-                then case when valid_from_index > 1
-                    then coalesce(
-                        lead(holiday_date) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index),
-                        schedule_valid_until)
-                    else schedule_valid_until
-                    end
-            else schedule_valid_until
+            when holiday_start_or_end = 'partition_start'
+                then cast({{ dbt.date_trunc("week", "holiday_valid_from") }} as {{ dbt.type_timestamp() }})
+            when holiday_start_or_end = '0'
+                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", 
+                    "lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
+                    )) }} as {{ dbt.type_timestamp() }})
+            when holiday_start_or_end = '1'
+                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", "holiday_valid_until")) }} as {{ dbt.type_timestamp() }})
+                {# then lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index) #}
+            when holiday_start_or_end = 'partition_end'
+                then cast({{ dbt.date_trunc("week", "schedule_valid_until") }} as {{ dbt.type_timestamp() }})
+            else cast({{ dbt.date_trunc("week", "schedule_valid_until") }} as {{ dbt.type_timestamp() }})
         end as valid_until,
 
-        valid_from_index
-    from valid_from_partition
-    where not (valid_from_index > 1 and  holiday_start_or_end = 'start')
-)
+        valid_from_index,
+        max_valid_from_index,
+        holiday_start_or_end
+    from add_end_row
+    where holiday_start_or_end != '0' or holiday_start_or_end is null
+    {# where not (valid_from_index > 1 and  holiday_start_or_end = '0') #}
 
+), final as(
     select
         schedule_id,
         valid_from,
         valid_until,
         start_time_utc,
-        end_time_utc
+        end_time_utc,
+        holiday_name
     from adjust_ranges
+    
+)
+
+select *
+from adjust_ranges
+{# where holiday_start_or_end != '0' or holiday_start_or_end is null #}
