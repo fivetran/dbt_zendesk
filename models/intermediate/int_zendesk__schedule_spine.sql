@@ -33,7 +33,10 @@ with schedule as (
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
         cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until, -- The valid_until will then be the the day after.
         cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
-        {{ dbt.date_trunc("holiday.holiday_start_date_at")}}
+        cast({{ dbt.date_trunc("week", "holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
+            "week", "holiday.holiday_end_date_at")
+            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
         holiday.holiday_id,
         holiday.holiday_name,
         holiday.schedule_id
@@ -74,8 +77,12 @@ with schedule as (
         schedule_holiday.holiday_name,
         schedule_holiday.holiday_valid_from,
         schedule_holiday.holiday_valid_until,
+        schedule_holiday.holiday_starting_sunday,
+        schedule_holiday.holiday_ending_sunday,
         calculate_schedules.valid_from as schedule_valid_from,
-        calculate_schedules.valid_until as schedule_valid_until
+        calculate_schedules.valid_until as schedule_valid_until,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
     from calculate_schedules
     left join schedule_holiday
         on schedule_holiday.schedule_id = calculate_schedules.schedule_id
@@ -84,17 +91,7 @@ with schedule as (
 
 ), split_holidays as(
     select
-        schedule_id,
-        time_zone,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        schedule_valid_from,
-        schedule_valid_until,
-        holiday_name,
-        holiday_date,
-        holiday_valid_from,
-        holiday_valid_until,
+        join_holidays.*,
         case
             when holiday_valid_from = holiday_date
                 then '0_start'
@@ -107,17 +104,7 @@ with schedule as (
     union all
 
     select
-        schedule_id,
-        time_zone,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        schedule_valid_from,
-        schedule_valid_until,
-        holiday_name,
-        holiday_date,
-        holiday_valid_from,
-        holiday_valid_until,
+        join_holidays.*,
         case
             when holiday_valid_until = holiday_date
                 then '1_end'
@@ -130,17 +117,7 @@ with schedule as (
     union all
 
     select
-        schedule_id,
-        time_zone,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        schedule_valid_from,
-        schedule_valid_until,
-        holiday_name,
-        holiday_date,
-        holiday_valid_from,
-        holiday_valid_until,
+        join_holidays.*,
         cast(null as {{ dbt.type_string() }}) as holiday_start_or_end,
         schedule_valid_from as valid_from,
         schedule_valid_until as valid_until
@@ -149,7 +126,7 @@ with schedule as (
 
 ), valid_from_partition as(
     select
-        *
+        split_holidays.*
         , row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index
         , count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
     from split_holidays
@@ -164,10 +141,14 @@ with schedule as (
         schedule_name,
         schedule_valid_from,
         schedule_valid_until,
+        schedule_starting_sunday,
+        schedule_ending_sunday,
         holiday_name,
         holiday_date,
         holiday_valid_from,
         holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
         case when valid_from_index = 1 and holiday_start_or_end is not null
             then 'partition_start'
             else holiday_start_or_end
@@ -188,10 +169,14 @@ with schedule as (
         schedule_name,
         schedule_valid_from,
         schedule_valid_until,
+        schedule_starting_sunday,
+        schedule_ending_sunday,
         holiday_name,
         holiday_date,
         holiday_valid_from,
         holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
         'partition_end' as holiday_start_or_end,
         valid_from,
         valid_until,
@@ -212,39 +197,35 @@ with schedule as (
         holiday_date,
         holiday_valid_from,
         holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
+        schedule_valid_from,
+        schedule_valid_until,
+        schedule_starting_sunday,
+        schedule_ending_sunday,
 
         case
             when holiday_start_or_end = 'partition_start'
-                then cast({{ dbt.date_trunc("week", "schedule_valid_from") }} as {{ dbt.type_timestamp() }})
-            when holiday_start_or_end = '0_start'
-                then cast({{ dbt.date_trunc("week",
-                    "lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
-                    ) }} as {{ dbt.type_timestamp() }})
+                then schedule_starting_sunday
+            {# when holiday_start_or_end = '0_start'
+                then holiday_starting_sunday #}
             when holiday_start_or_end = '1_end'
-                then cast({{ dbt.date_trunc("week",
-                    "lag(holiday_valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
-                    ) }} as {{ dbt.type_timestamp() }})
-                {# then cast({{ dbt.date_trunc("week", "holiday_valid_from") }} as {{ dbt.type_timestamp() }}) #}
-                {# then cast(lag(valid_until) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
-                    as {{ dbt.type_timestamp() }}) #}
+                then holiday_starting_sunday
             when holiday_start_or_end = 'partition_end'
-                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", "holiday_valid_until")) }} as {{ dbt.type_timestamp() }})
-            else cast({{ dbt.date_trunc("week", "schedule_valid_from") }} as {{ dbt.type_timestamp() }})
+                then holiday_ending_sunday
+            else schedule_starting_sunday
         end as valid_from,
 
         case 
             when holiday_start_or_end = 'partition_start'
-                then cast({{ dbt.date_trunc("week", "holiday_valid_from") }} as {{ dbt.type_timestamp() }})
-            when holiday_start_or_end = '0_start'
-                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", 
-                    "lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)"
-                    )) }} as {{ dbt.type_timestamp() }})
+                then holiday_starting_sunday
+            {# when holiday_start_or_end = '0_start'
+                then holiday_ending_sunday #}
             when holiday_start_or_end = '1_end'
-                then cast({{ dbt.dateadd("week", 1, dbt.date_trunc("week", "holiday_valid_until")) }} as {{ dbt.type_timestamp() }})
-                {# then lead(holiday_valid_from) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index) #}
+                then holiday_ending_sunday
             when holiday_start_or_end = 'partition_end'
-                then cast({{ dbt.date_trunc("week", "schedule_valid_until") }} as {{ dbt.type_timestamp() }})
-            else cast({{ dbt.date_trunc("week", "schedule_valid_until") }} as {{ dbt.type_timestamp() }})
+                then schedule_ending_sunday
+            else schedule_ending_sunday
         end as valid_until,
 
         valid_from_index,
