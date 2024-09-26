@@ -1,4 +1,9 @@
-with audit_logs as (
+with schedule as (
+
+    select *
+    from {{ var('schedule') }}  
+
+,) audit_logs as (
     select
         _fivetran_synced,
         source_id as schedule_id,
@@ -26,7 +31,7 @@ with audit_logs as (
     select
         audit_logs_enhanced.*,
         cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_from,
-        created_at as valid_to,
+        created_at as valid_until,
         {{ dbt.split_part('change_description_cleaned', "' to '", 1) }} as schedule_change,
         'from' as change_type -- remove before release but helpful for debugging
     from audit_logs_enhanced
@@ -42,7 +47,7 @@ with audit_logs as (
             lead(created_at) over (
                 partition by schedule_id order by created_at), 
             {{ dbt.current_timestamp_backcompat() }})
-            as valid_to,
+            as valid_until,
         {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change,
         'to' as change_type -- remove before release but helpful for debugging
     from audit_logs_enhanced
@@ -64,7 +69,7 @@ with audit_logs as (
         split_days.*,
 
 {%- if target.type == 'bigquery' %}
-        replace(replace(replace(replace(unnested_schedule, '{', ''), '}', ''), '"', ''), ' ', '') as cleaned_unnested_schedule
+        {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     cross join unnest(json_extract_array('[' || replace(day_of_week_schedule, ',', '},{') || ']', '$')) as unnested_schedule
 
@@ -74,12 +79,12 @@ with audit_logs as (
     cross join lateral flatten(input => parse_json(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{'))) as unnested_schedule
 
 {%- elif target.type == 'postgres' %}
-        replace(replace(replace(replace(unnested_schedule::text, '{', ''), '}', ''), '"', ''), ' ', '') as cleaned_unnested_schedule
+        {{ clean_schedule('unnested_schedule::text') }} as cleaned_unnested_schedule
     from split_days
     cross join lateral jsonb_array_elements(('[' || replace(day_of_week_schedule, ',', '},{') || ']')::jsonb) as unnested_schedule
 
 {%- elif target.type in ('databricks', 'spark') %}
-        replace(replace(replace(replace(unnested_schedule, '{', ''), '}', ''), '"', ''), ' ', '') as cleaned_unnested_schedule
+        {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     lateral view explode(from_json(concat('[', replace(day_of_week_schedule, ',', '},{'), ']'), 'array<string>')) as unnested_schedule
 
@@ -114,7 +119,7 @@ with audit_logs as (
         start_time_hh * 60 + start_time_mm + 24 * 60 * day_of_week_number as start_time,
         end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,
         valid_from,
-        valid_to,
+        valid_until,
         day_of_week,
         day_of_week_number
     from split_times

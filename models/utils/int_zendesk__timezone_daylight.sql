@@ -1,10 +1,3 @@
-{{ config(enabled=var('using_schedules', True)) }}
-
-/*
-    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may change due to Daylight Savings.
-    End result will include `valid_from` and `valid_until` columns which we will use downstream to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time)
-*/
-
 with timezone as (
 
     select *
@@ -88,7 +81,15 @@ with timezone as (
     group by 1, 2
     -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
     having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp_backcompat() }} as date)
+
+), final as (
+    select
+        lower(time_zone) as time_zone,
+        offset_minutes,
+        cast(valid_from as {{ dbt.type_timestamp() }}) as valid_from,
+        cast(valid_until as {{ dbt.type_timestamp() }}) as valid_until
+    from split_timezones
 )
 
-select *
-from split_timezones 
+select * 
+from final
