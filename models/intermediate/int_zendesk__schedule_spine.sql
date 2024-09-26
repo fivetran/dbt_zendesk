@@ -203,50 +203,51 @@ with schedule as (
         schedule_valid_until,
         schedule_starting_sunday,
         schedule_ending_sunday,
-
+        valid_from_index,
+        max_valid_from_index,
+        holiday_start_or_end,
         case
             when holiday_start_or_end = 'partition_start'
                 then schedule_starting_sunday
-            {# when holiday_start_or_end = '0_start'
-                then holiday_starting_sunday #}
+            when holiday_start_or_end = '0_start'
+                then lag(holiday_ending_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
             when holiday_start_or_end = '1_end'
                 then holiday_starting_sunday
             when holiday_start_or_end = 'partition_end'
                 then holiday_ending_sunday
             else schedule_starting_sunday
-        end as valid_from,
-
+        end as valid_from
+        ,
         case 
             when holiday_start_or_end = 'partition_start'
                 then holiday_starting_sunday
-            {# when holiday_start_or_end = '0_start'
-                then holiday_ending_sunday #}
+            when holiday_start_or_end = '0_start'
+                then lead(holiday_starting_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
             when holiday_start_or_end = '1_end'
                 then holiday_ending_sunday
             when holiday_start_or_end = 'partition_end'
                 then schedule_ending_sunday
             else schedule_ending_sunday
-        end as valid_until,
-
-        valid_from_index,
-        max_valid_from_index,
-        holiday_start_or_end
+        end as valid_until
     from add_end_row
-    where holiday_start_or_end != '0_start' or holiday_start_or_end is null
-    {# where not (valid_from_index > 1 and  holiday_start_or_end = '0_start') #}
 
-{# ), final as(
+), filter_dupes as(
     select
         schedule_id,
-        valid_from,
-        valid_until,
+        time_zone,
         start_time_utc,
         end_time_utc,
-        holiday_name
-    from adjust_ranges #}
+        schedule_name,
+        holiday_name,
+        holiday_date,
+        valid_from,
+        valid_until,
+        case when holiday_start_or_end = '1_end' then true
+            end as is_holiday_week
+    from adjust_ranges
+    where not (valid_from = valid_until and holiday_date is not null)
     
 )
 
 select *
-from adjust_ranges
-{# where holiday_start_or_end != '0_start' or holiday_start_or_end is null #}
+from filter_dupes
