@@ -103,8 +103,8 @@ with schedule as (
     {% if var('using_holidays', True) %}
     left join schedule_holiday
         on schedule_holiday.schedule_id = calculate_schedules.schedule_id
-        and schedule_holiday.holiday_date <= calculate_schedules.valid_until
-        and schedule_holiday.holiday_date >= calculate_schedules.valid_from
+        and schedule_holiday.holiday_date <= calculate_schedules.schedule_valid_until
+        and schedule_holiday.holiday_date >= calculate_schedules.schedule_valid_from
     {% endif %}
 
 ), split_holidays as(
