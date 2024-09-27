@@ -31,7 +31,7 @@ with schedule as (
 
     select
         holiday._fivetran_synced,
-        holiday.holiday_id,
+        cast(holiday.holiday_id as {{ dbt.type_string*() }}) as holiday_id,
         holiday.holiday_name,
         holiday.schedule_id,
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
@@ -60,8 +60,8 @@ with schedule as (
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
         coalesce(split_timezones.offset_minutes, 0) as offset_minutes,
         -- we'll use these to determine which schedule version to associate tickets with
-        cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
-        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
+        cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as schedule_valid_from,
+        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as schedule_valid_until
 
     from schedule
     left join split_timezones
@@ -75,13 +75,14 @@ with schedule as (
         calculate_schedules.start_time_utc,
         calculate_schedules.end_time_utc,
         calculate_schedules.schedule_name,
-        calculate_schedules.valid_from as schedule_valid_from,
-        calculate_schedules.valid_until as schedule_valid_until,
+        calculate_schedules.schedule_valid_from,
+        calculate_schedules.schedule_valid_until,
         cast({{ dbt.date_trunc("week", "calculate_schedules.valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
         cast({{ dbt.date_trunc("week", "calculate_schedules.valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
 
         {% if var('using_holidays', True) %}
         schedule_holiday.holiday_date,
+        schedule_holiday.holiday_id,
         schedule_holiday.holiday_name,
         schedule_holiday.holiday_valid_from,
         schedule_holiday.holiday_valid_until,
@@ -89,6 +90,7 @@ with schedule as (
         schedule_holiday.holiday_ending_sunday
         {% else %}
         cast(null as {{ dbt.type_timestamp() }}) as holiday_date,
+        cast(null as {{ dbt.type_string() }}) as holiday_id,
         cast(null as {{ dbt.type_string() }}) as holiday_name,
         cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_from,
         cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_until,
@@ -106,11 +108,12 @@ with schedule as (
     {% endif %}
 
 ), split_holidays as(
+    -- create records for the first day of the holiday
     select
         join_holidays.*,
         case
             when holiday_valid_from = holiday_date
-                then '0_start'
+                then '0_start' -- the number is for ordering later
             end as holiday_start_or_end,
         schedule_valid_from as valid_from,
         holiday_date as valid_until
@@ -119,11 +122,12 @@ with schedule as (
 
     union all
 
+    -- create records for the last day of the holiday
     select
         join_holidays.*,
         case
             when holiday_valid_until = holiday_date
-                then '1_end'
+                then '1_end' -- the number is for ordering later
             end as holiday_start_or_end,
         holiday_date as valid_from,
         schedule_valid_until as valid_until
@@ -132,6 +136,7 @@ with schedule as (
 
     union all
 
+    -- keep records for weeks with no holiday
     select
         join_holidays.*,
         cast(null as {{ dbt.type_string() }}) as holiday_start_or_end,
@@ -142,13 +147,13 @@ with schedule as (
 
 ), valid_from_partition as(
     select
-        split_holidays.*
-        , row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index
-        , count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
+        split_holidays.*,
+        row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
+        count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
     from split_holidays
     where not (holiday_date is not null and holiday_start_or_end is null)
 
-), add_end_row as(
+), add_partition_end_row as(
     select
         schedule_id,
         time_zone,
@@ -160,6 +165,7 @@ with schedule as (
         schedule_valid_until,
         schedule_starting_sunday,
         schedule_ending_sunday,
+        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -178,6 +184,7 @@ with schedule as (
     
     union all
 
+    -- when max_valid_from_index > 1, then we want to duplicate the last row to end the partition.
     select
         schedule_id,
         time_zone,
@@ -189,6 +196,7 @@ with schedule as (
         schedule_valid_until,
         schedule_starting_sunday,
         schedule_ending_sunday,
+        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -212,6 +220,7 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         schedule_name,
+        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -248,7 +257,7 @@ with schedule as (
                 then schedule_ending_sunday
             else schedule_ending_sunday
         end as valid_until
-    from add_end_row
+    from add_partition_end_row
 
 ), holiday_weeks as(
     select
@@ -258,6 +267,7 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         schedule_name,
+        holiday_id,
         holiday_name,
         holiday_valid_from,
         holiday_valid_until,
@@ -302,13 +312,40 @@ with schedule as (
         else null end as holiday_valid_until_minutes_from_sunday
     from holiday_weeks
 
-), remove_holiday_schedule as(
+), find_holidays as(
     select 
-        valid_minutes.*
+        schedule_id,
+        valid_from,
+        valid_until,
+        start_time_utc,
+        end_time_utc,
+        holiday_id,
+        case 
+            when start_time_utc < holiday_valid_until_minutes_from_sunday
+                and end_time_utc > holiday_valid_from_minutes_from_sunday
+                and is_holiday_week is not null
+            then holiday_name
+            else cast(null as {{ dbt.type_string() }}) 
+        end as holiday_name,
+        is_holiday_week,
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holiday_ids_in_week
     from valid_minutes
-    where not (start_time_utc < holiday_valid_until_minutes_from_sunday
-        and end_time_utc > holiday_valid_from_minutes_from_sunday)
-        or is_holiday_week is null
+
+), filter_holidays as(
+    select 
+        *,
+        1 as number_records_for_schedule_start_end
+    from find_holidays
+    where number_holiday_ids_in_week = 1
+
+    union all
+
+    -- we want to count the number of records for each schedule start_time_utc and end_time_utc for comparison later
+    select 
+        distinct *,
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_id) as number_records_for_schedule_start_end
+    from find_holidays
+    where number_holiday_ids_in_week > 1
 
 ), final as(
     select 
@@ -319,6 +356,10 @@ with schedule as (
         end_time_utc,
         is_holiday_week
     from remove_holiday_schedule
+    -- This filter is for multiple holiday ids in 1 week. We want to check for each schedule start_time_utc and end_time_utc 
+    -- that the holiday_id count matches the number of distinct records.
+    -- When rows that don't match, that indicates there is a holiday on that day, and we'll filter them out. 
+    where number_holiday_ids_in_week = number_records_for_schedule_start_end
 )
 
 select *
