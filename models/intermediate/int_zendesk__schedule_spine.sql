@@ -30,16 +30,16 @@ with schedule as (
 
     select
         holiday._fivetran_synced,
+        holiday.holiday_id,
+        holiday.holiday_name,
+        holiday.schedule_id,
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
         cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until, -- The valid_until will then be the the day after.
         cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
         cast({{ dbt.date_trunc("week", "holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
         cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
             "week", "holiday.holiday_end_date_at")
-            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
-        holiday.holiday_id,
-        holiday.holiday_name,
-        holiday.schedule_id
+            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
 
     from holiday 
     inner join calendar_spine
@@ -57,7 +57,7 @@ with schedule as (
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes_to_add,
+        coalesce(split_timezones.offset_minutes, 0) as offset_minutes,
         -- we'll use these to determine which schedule version to associate tickets with
         cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
         cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
@@ -70,6 +70,7 @@ with schedule as (
     select 
         calculate_schedules.schedule_id,
         calculate_schedules.time_zone,
+        calculate_schedules.offset_minutes,
         calculate_schedules.start_time_utc,
         calculate_schedules.end_time_utc,
         calculate_schedules.schedule_name,
@@ -136,6 +137,7 @@ with schedule as (
     select
         schedule_id,
         time_zone,
+        offset_minutes,
         start_time_utc,
         end_time_utc,
         schedule_name,
@@ -164,6 +166,7 @@ with schedule as (
     select
         schedule_id,
         time_zone,
+        offset_minutes,
         start_time_utc,
         end_time_utc,
         schedule_name,
@@ -190,6 +193,7 @@ with schedule as (
     select
         schedule_id,
         time_zone,
+        offset_minutes,
         start_time_utc,
         end_time_utc,
         schedule_name,
@@ -231,23 +235,76 @@ with schedule as (
         end as valid_until
     from add_end_row
 
-), filter_dupes as(
+), holiday_weeks as(
     select
         schedule_id,
         time_zone,
+        offset_minutes,
         start_time_utc,
         end_time_utc,
         schedule_name,
         holiday_name,
-        holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
         valid_from,
         valid_until,
         case when holiday_start_or_end = '1_end' then true
             end as is_holiday_week
     from adjust_ranges
     where not (valid_from = valid_until and holiday_date is not null)
-    
+
+), valid_minutes as(
+    select
+        holiday_weeks.*,
+        -- Calculate holiday_valid_from in minutes from Sunday
+        case when is_holiday_week then (
+            {% if target.type in ('bigquery', 'databricks') %}
+            -- BigQuery and Databricks use DAYOFWEEK where Sunday = 1, so subtract 1 to make Sunday = 0
+                    ((extract(dayofweek from holiday_valid_from) - 1) * 24 * 60)
+            {% else %}
+            -- Snowflake and Postgres use DOW where Sunday = 0
+                    (extract(dow from holiday_valid_from) * 24 * 60)
+            {% endif %}
+            + extract(hour from holiday_valid_from) * 60      -- Get hours and convert to minutes
+            + extract(minute from holiday_valid_from)         -- Get minutes
+            - offset_minutes                                  -- Timezone adjustment
+        ) 
+        else null end as holiday_valid_from_minutes_from_sunday,
+        
+        -- Calculate holiday_valid_until in minutes from Sunday
+        case when is_holiday_week then (
+            (
+            {% if target.type in ('bigquery', 'databricks') %}
+                    (extract(dayofweek from holiday_valid_until) - 1)
+            {% else %}
+                    (extract(dow from holiday_valid_until))
+            {% endif %}
+            + 1) * 24 * 60 -- add 1 day to set the upper bound of the holiday
+            + extract(hour from holiday_valid_until) * 60
+            + extract(minute from holiday_valid_until)
+            - offset_minutes
+        )
+        else null end as holiday_valid_until_minutes_from_sunday
+    from holiday_weeks
+
+), remove_holiday_schedule as(
+    select 
+        valid_minutes.*
+    from valid_minutes
+    where not (start_time_utc < holiday_valid_until_minutes_from_sunday
+        and end_time_utc > holiday_valid_from_minutes_from_sunday)
+        or is_holiday_week is null
+
+), final as(
+    select 
+        schedule_id,
+        valid_from,
+        valid_until,
+        start_time_utc,
+        end_time_utc,
+        is_holiday_week
+    from remove_holiday_schedule
 )
 
 select *
-from filter_dupes
+from final

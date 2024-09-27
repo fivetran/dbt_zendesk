@@ -3,7 +3,7 @@ with schedule as (
     select *
     from {{ var('schedule') }}  
 
-,) audit_logs as (
+), audit_logs as (
     select
         _fivetran_synced,
         source_id as schedule_id,
