@@ -10,11 +10,6 @@ with schedule as (
     select *
     from {{ var('schedule') }}   
 
-), holiday as (
-
-    select *
-    from {{ var('schedule_holiday') }}    
-
 ), calendar_spine as (
 
     select *
@@ -24,6 +19,12 @@ with schedule as (
 
     select *
     from {{ ref('int_zendesk__timezone_daylight') }}  
+
+{% if var('using_holidays', True) %}
+), holiday as (
+
+    select *
+    from {{ var('schedule_holiday') }}    
 
 -- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
 ), schedule_holiday as ( 
@@ -45,6 +46,7 @@ with schedule as (
     inner join calendar_spine
         on holiday_start_date_at <= cast(date_day as {{ dbt.type_timestamp() }} )
         and holiday_end_date_at >= cast(date_day as {{ dbt.type_timestamp() }} )
+{% endif %}
 
 ), calculate_schedules as (
 
@@ -73,21 +75,35 @@ with schedule as (
         calculate_schedules.start_time_utc,
         calculate_schedules.end_time_utc,
         calculate_schedules.schedule_name,
+        calculate_schedules.valid_from as schedule_valid_from,
+        calculate_schedules.valid_until as schedule_valid_until,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
+
+        {% if var('using_holidays', True) %}
         schedule_holiday.holiday_date,
         schedule_holiday.holiday_name,
         schedule_holiday.holiday_valid_from,
         schedule_holiday.holiday_valid_until,
         schedule_holiday.holiday_starting_sunday,
-        schedule_holiday.holiday_ending_sunday,
-        calculate_schedules.valid_from as schedule_valid_from,
-        calculate_schedules.valid_until as schedule_valid_until,
-        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
+        schedule_holiday.holiday_ending_sunday
+        {% else %}
+        cast(null as {{ dbt.type_timestamp() }}) as holiday_date,
+        cast(null as {{ dbt.type_string() }}) as holiday_name,
+        cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_from,
+        cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        cast(null as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast(null as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
+        {% endif %}
+    
     from calculate_schedules
+
+    {% if var('using_holidays', True) %}
     left join schedule_holiday
         on schedule_holiday.schedule_id = calculate_schedules.schedule_id
         and schedule_holiday.holiday_date <= calculate_schedules.valid_until
         and schedule_holiday.holiday_date >= calculate_schedules.valid_from
+    {% endif %}
 
 ), split_holidays as(
     select
