@@ -110,7 +110,7 @@ with schedule as (
                 then '1_end'
             end as holiday_start_or_end,
         holiday_date as valid_from,
-        schedule_valid_until as valid_until,
+        schedule_valid_until as valid_until
     from join_holidays
     where holiday_date is not null
 
