@@ -361,6 +361,7 @@ with schedule as (
     -- that the holiday_id count matches the number of distinct records.
     -- When rows that don't match, that indicates there is a holiday on that day, and we'll filter them out. 
     where number_holiday_ids_in_week = number_records_for_schedule_start_end
+    and holiday_name is null -- this will remove schedules that fall on a holiday
 )
 
 select *
