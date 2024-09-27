@@ -3,7 +3,7 @@ with schedule as (
     select *
     from {{ var('schedule') }}  
 
-,) audit_logs as (
+), audit_logs as (
     select
         _fivetran_synced,
         source_id as schedule_id,
@@ -64,42 +64,88 @@ with schedule as (
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 
+{% if target.type == 'redshift '%}
+-- using PartiQL syntax to work with redshift's SUPER types, which requires an extra CTE
+), redshift_parse_schedule as (
+    -- Redshift requires another CTE for unnesting 
+    select 
+        _fivetran_synced,
+        schedule_id,
+        created_at,
+        min_created_at,
+        change_description,
+        change_description_cleaned,
+        valid_from,
+        valid_until,
+        schedule_change,
+        change_type,
+        day_of_week,
+        day_of_week_number,
+        day_of_week_schedule,
+        json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
+
+    from split_days
+
+), unnested_schedules as (
+    select 
+        _fivetran_synced,
+        schedule_id,
+        created_at,
+        min_created_at,
+        change_description,
+        change_description_cleaned,
+        valid_from,
+        valid_until,
+        schedule_change,
+        change_type,
+        day_of_week,
+        day_of_week_number,
+        -- go back to strings
+        cast(day_of_week_schedule as {{ dbt.type_string() }}) as day_of_week_schedule,
+        {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
+    
+    from redshift_parse_schedule as schedules, schedules.json_schedule as unnested_schedule
+
+{% else %}
 ), unnested_schedules as (
     select
         split_days.*,
 
-{%- if target.type == 'bigquery' %}
+    {%- if target.type == 'bigquery' %}
         {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     cross join unnest(json_extract_array('[' || replace(day_of_week_schedule, ',', '},{') || ']', '$')) as unnested_schedule
 
-{%- elif target.type == 'snowflake' %}
+    {%- elif target.type == 'snowflake' %}
         unnested_schedule.key || ':' || unnested_schedule.value as cleaned_unnested_schedule
     from split_days
     cross join lateral flatten(input => parse_json(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{'))) as unnested_schedule
 
-{%- elif target.type == 'postgres' %}
+    {%- elif target.type == 'postgres' %}
         {{ clean_schedule('unnested_schedule::text') }} as cleaned_unnested_schedule
     from split_days
     cross join lateral jsonb_array_elements(('[' || replace(day_of_week_schedule, ',', '},{') || ']')::jsonb) as unnested_schedule
 
-{%- elif target.type in ('databricks', 'spark') %}
+    {%- elif target.type in ('databricks', 'spark') %}
         {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     lateral view explode(from_json(concat('[', replace(day_of_week_schedule, ',', '},{'), ']'), 'array<string>')) as unnested_schedule
 
-{%- elif target.type == 'redshift' %}
-    {# json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
+    {# {%- elif target.type == 'redshift' %}
+    
+    json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
+    from split_days
+    cross join lateral json_parse(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{')) as element 
+
+        cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
     from split_days #}
-    {# cross join lateral json_parse(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{')) as element #}
 
+    {% else %}
         cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
     from split_days
+    {%- endif %}
 
-{% else %}
-        cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
-    from split_days
-{%- endif %}
+{% endif %}
 
 ), split_times as (
 
