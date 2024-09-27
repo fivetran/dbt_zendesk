@@ -356,7 +356,7 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         is_holiday_week
-    from remove_holiday_schedule
+    from filter_holidays
     -- This filter is for multiple holiday ids in 1 week. We want to check for each schedule start_time_utc and end_time_utc 
     -- that the holiday_id count matches the number of distinct records.
     -- When rows that don't match, that indicates there is a holiday on that day, and we'll filter them out. 
