@@ -77,8 +77,8 @@ with schedule as (
         calculate_schedules.schedule_name,
         calculate_schedules.schedule_valid_from,
         calculate_schedules.schedule_valid_until,
-        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ dbt.date_trunc("week", "calculate_schedules.valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.schedule_valid_from") }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt.date_trunc("week", "calculate_schedules.schedule_valid_until") }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
 
         {% if var('using_holidays', True) %}
         schedule_holiday.holiday_date,
