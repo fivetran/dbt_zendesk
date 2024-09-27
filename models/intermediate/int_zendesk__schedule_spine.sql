@@ -34,7 +34,7 @@ with schedule as (
         holiday.holiday_name,
         holiday.schedule_id,
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
-        cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until, -- The valid_until will then be the the day after.
+        cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until,
         cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
         cast({{ dbt.date_trunc("week", "holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
         cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
