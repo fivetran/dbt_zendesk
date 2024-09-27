@@ -334,7 +334,7 @@ with schedule as (
 ), filter_holidays as(
     select 
         *,
-        1 as number_records_for_schedule_start_end
+        cast(1 as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
     where number_holiday_ids_in_week = 1
 
@@ -343,7 +343,8 @@ with schedule as (
     -- we want to count the number of records for each schedule start_time_utc and end_time_utc for comparison later
     select 
         distinct *,
-        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_id) as number_records_for_schedule_start_end
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_id) 
+            as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
     where number_holiday_ids_in_week > 1
 
