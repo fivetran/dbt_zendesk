@@ -31,7 +31,7 @@ with schedule as (
 
     select
         holiday._fivetran_synced,
-        cast(holiday.holiday_id as {{ dbt.type_string*() }}) as holiday_id,
+        cast(holiday.holiday_id as {{ dbt.type_string() }}) as holiday_id,
         holiday.holiday_name,
         holiday.schedule_id,
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
