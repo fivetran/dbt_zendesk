@@ -53,7 +53,6 @@ with schedule as (
         lower(schedule.time_zone) as time_zone,
         schedule.start_time,
         schedule.end_time,
-        {# schedule.created_at, #}
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
@@ -251,7 +250,7 @@ with schedule as (
         case when holiday_start_or_end = '1_end' then true
             end as is_holiday_week
     from adjust_ranges
-    where not (valid_from = valid_until and holiday_date is not null)
+    where not (valid_from >= valid_until and holiday_date is not null)
 
 ), valid_minutes as(
     select
