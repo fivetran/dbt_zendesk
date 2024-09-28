@@ -12,7 +12,8 @@ with schedule as (
 
 ), calendar_spine as (
 
-    select *
+    select
+        cast(date_day as {{ dbt.type_timestamp() }} ) as date_day
     from {{ ref('int_zendesk__calendar_spine') }}   
 
 ), split_timezones as (
@@ -23,28 +24,89 @@ with schedule as (
 {% if var('using_holidays', True) %}
 ), holiday as (
 
-    select *
+    select
+        _fivetran_synced,
+        holiday_name,
+        schedule_id,
+        cast(holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
+        cast(holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        cast({{ dbt.date_trunc("week", "holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
+            "week", "holiday_end_date_at")
+            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
     from {{ var('schedule_holiday') }}    
+
+), holiday_multiple_weeks_check as (
+
+    select
+        holiday.*,
+        -- calculate weeks the holiday range spans. Takes into account if the holiday extends into the next year.
+        (extract(week from holiday_ending_sunday) + extract(year from holiday_ending_sunday) * 52) 
+            - (extract(week from holiday_starting_sunday) + extract(year from holiday_starting_sunday) * 52)
+            as holiday_weeks_spanned
+    from holiday
+
+), split_multiweek_holidays as (
+
+    select
+        _fivetran_synced,
+        holiday_name,
+        schedule_id,
+        holiday_valid_from,
+        holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
+        holiday_weeks_spanned
+    from holiday_multiple_weeks_check
+    where holiday_weeks_spanned = 1
+
+    union all
+
+    -- Split holidays that span a weekend
+    select
+        _fivetran_synced,
+        holiday_name,
+        schedule_id,
+        holiday_valid_from,
+        cast({{ dbt.last_day('holiday_valid_from', 'week') }} as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        holiday_starting_sunday,
+        cast({{ dbt.dateadd('week', 1, 'holiday_starting_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
+        holiday_weeks_spanned
+    from holiday_multiple_weeks_check
+    where holiday_weeks_spanned > 1
+
+    union all
+
+    -- Split holidays that span a weekend
+    select
+        _fivetran_synced,
+        holiday_name,
+        schedule_id,
+        cast({{ dbt.date_trunc('week', 'holiday_valid_until') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
+        holiday_valid_until,
+        cast({{ dbt.dateadd('week', -1, 'holiday_ending_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        holiday_ending_sunday,
+        holiday_weeks_spanned
+    from holiday_multiple_weeks_check
+    where holiday_weeks_spanned > 1
 
 -- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
 ), schedule_holiday as ( 
 
     select
-        holiday._fivetran_synced,
-        holiday.holiday_name,
-        holiday.schedule_id,
-        cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
-        cast(holiday.holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until,
-        cast(calendar_spine.date_day as {{ dbt.type_timestamp() }} ) as holiday_date,
-        cast({{ dbt.date_trunc("week", "holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
-        cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
-            "week", "holiday.holiday_end_date_at")
-            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
-
-    from holiday 
+        split_multiweek_holidays._fivetran_synced,
+        split_multiweek_holidays.holiday_name,
+        split_multiweek_holidays.schedule_id,
+        split_multiweek_holidays.holiday_valid_from,
+        split_multiweek_holidays.holiday_valid_until,
+        split_multiweek_holidays.holiday_starting_sunday,
+        split_multiweek_holidays.holiday_ending_sunday,
+        calendar_spine.date_day as holiday_date
+    from split_multiweek_holidays 
     inner join calendar_spine
-        on holiday_start_date_at <= cast(date_day as {{ dbt.type_timestamp() }} )
-        and holiday_end_date_at >= cast(date_day as {{ dbt.type_timestamp() }} )
+        on holiday_valid_from <= date_day
+        and holiday_valid_until >= date_day
+
 {% endif %}
 
 ), calculate_schedules as (
