@@ -31,7 +31,6 @@ with schedule as (
 
     select
         holiday._fivetran_synced,
-        cast(holiday.holiday_id as {{ dbt.type_string() }}) as holiday_id,
         holiday.holiday_name,
         holiday.schedule_id,
         cast(holiday.holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
@@ -82,7 +81,6 @@ with schedule as (
 
         {% if var('using_holidays', True) %}
         schedule_holiday.holiday_date,
-        schedule_holiday.holiday_id,
         schedule_holiday.holiday_name,
         schedule_holiday.holiday_valid_from,
         schedule_holiday.holiday_valid_until,
@@ -90,7 +88,6 @@ with schedule as (
         schedule_holiday.holiday_ending_sunday
         {% else %}
         cast(null as {{ dbt.type_timestamp() }}) as holiday_date,
-        cast(null as {{ dbt.type_string() }}) as holiday_id,
         cast(null as {{ dbt.type_string() }}) as holiday_name,
         cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_from,
         cast(null as {{ dbt.type_timestamp() }}) as holiday_valid_until,
@@ -165,7 +162,6 @@ with schedule as (
         schedule_valid_until,
         schedule_starting_sunday,
         schedule_ending_sunday,
-        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -196,7 +192,6 @@ with schedule as (
         schedule_valid_until,
         schedule_starting_sunday,
         schedule_ending_sunday,
-        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -220,7 +215,6 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         schedule_name,
-        holiday_id,
         holiday_name,
         holiday_date,
         holiday_valid_from,
@@ -267,13 +261,13 @@ with schedule as (
         start_time_utc,
         end_time_utc,
         schedule_name,
-        holiday_id,
         holiday_name,
         holiday_valid_from,
         holiday_valid_until,
         valid_from,
         valid_until,
         case when holiday_start_or_end = '1_end' then true
+            else false
             end as is_holiday_week
     from adjust_ranges
     where not (valid_from >= valid_until and holiday_date is not null)
@@ -319,16 +313,15 @@ with schedule as (
         valid_until,
         start_time_utc,
         end_time_utc,
-        holiday_id,
         case 
             when start_time_utc < holiday_valid_until_minutes_from_sunday
                 and end_time_utc > holiday_valid_from_minutes_from_sunday
-                and is_holiday_week is not null
+                and is_holiday_week
             then holiday_name
             else cast(null as {{ dbt.type_string() }}) 
         end as holiday_name,
         is_holiday_week,
-        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holiday_ids_in_week
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holidays_in_week
     from valid_minutes
 
 ), filter_holidays as(
@@ -336,17 +329,17 @@ with schedule as (
         *,
         cast(1 as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
-    where number_holiday_ids_in_week = 1
+    where number_holidays_in_week = 1
 
     union all
 
     -- we want to count the number of records for each schedule start_time_utc and end_time_utc for comparison later
     select 
         distinct *,
-        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_id) 
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
             as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
-    where number_holiday_ids_in_week > 1
+    where number_holidays_in_week > 1
 
 ), final as(
     select 
@@ -358,9 +351,9 @@ with schedule as (
         is_holiday_week
     from filter_holidays
     -- This filter is for multiple holiday ids in 1 week. We want to check for each schedule start_time_utc and end_time_utc 
-    -- that the holiday_id count matches the number of distinct records.
+    -- that the holiday count matches the number of distinct records.
     -- When rows that don't match, that indicates there is a holiday on that day, and we'll filter them out. 
-    where number_holiday_ids_in_week = number_records_for_schedule_start_end
+    where number_holidays_in_week = number_records_for_schedule_start_end
     and holiday_name is null -- this will remove schedules that fall on a holiday
 )
 
