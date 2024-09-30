@@ -62,7 +62,7 @@ with schedule as (
 
     union all
 
-    -- Split holidays that span a weekend
+    -- Split holidays that span a weekend. This is for the first half.
     select
         _fivetran_synced,
         holiday_name,
@@ -77,7 +77,7 @@ with schedule as (
 
     union all
 
-    -- Split holidays that span a weekend
+    -- Split holidays that span a weekend. This is for the last half.
     select
         _fivetran_synced,
         holiday_name,
@@ -89,6 +89,21 @@ with schedule as (
         holiday_weeks_spanned
     from holiday_multiple_weeks_check
     where holiday_weeks_spanned > 1
+
+    union all
+
+    -- Fill holidays that span more than two weeks. This will fill entire weeks for those sandwiched between the ends.
+    select
+        _fivetran_synced,
+        holiday_name,
+        schedule_id,
+        cast({{ dbt.dateadd('week', 1, 'holiday_starting_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
+        cast({{ dbt.dateadd('week', -1, 'holiday_ending_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        cast({{ dbt.dateadd('week', 1, 'holiday_starting_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast({{ dbt.dateadd('week', -1, 'holiday_ending_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
+        holiday_weeks_spanned
+    from holiday_multiple_weeks_check
+    where holiday_weeks_spanned > 2
 
 -- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
 ), schedule_holiday as ( 
