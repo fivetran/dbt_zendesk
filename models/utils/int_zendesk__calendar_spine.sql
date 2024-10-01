@@ -28,7 +28,7 @@ with spine as (
     dbt_utils.date_spine(
         datepart = "day", 
         start_date = first_date_adjust,
-        end_date = dbt.dateadd("week", 1, "current_date")
+        end_date = dbt.dateadd("week", 52, "current_date")
     )   
 }}
 
