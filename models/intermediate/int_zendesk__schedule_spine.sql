@@ -33,7 +33,7 @@ with schedule as (
         cast({{ dbt.date_trunc("week", "holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
         cast({{ dbt.dateadd("week", 1, dbt.date_trunc(
             "week", "holiday_end_date_at")
-            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
+            ) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday -- the next sunday after the holiday ends
     from {{ var('schedule_holiday') }}    
 
 ), holiday_multiple_weeks_check as (
@@ -90,7 +90,7 @@ with schedule as (
     from holiday_multiple_weeks_check
     where holiday_weeks_spanned > 1
 
-    union all
+    {# union all
 
     -- Fill holidays that span more than two weeks. This will fill entire weeks for those sandwiched between the ends.
     select
@@ -98,12 +98,12 @@ with schedule as (
         holiday_name,
         schedule_id,
         cast({{ dbt.dateadd('week', 1, 'holiday_starting_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
-        cast({{ dbt.dateadd('week', -1, 'holiday_ending_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        cast({{ dbt.dateadd('week', -1, dbt.dateadd('day', -1, 'holiday_ending_sunday')) }} as {{ dbt.type_timestamp() }}) as holiday_valid_until,
         cast({{ dbt.dateadd('week', 1, 'holiday_starting_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
         cast({{ dbt.dateadd('week', -1, 'holiday_ending_sunday') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
         holiday_weeks_spanned
     from holiday_multiple_weeks_check
-    where holiday_weeks_spanned > 2
+    where holiday_weeks_spanned > 2 #}
 
 -- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
 ), schedule_holiday as ( 
