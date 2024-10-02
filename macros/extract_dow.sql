@@ -2,7 +2,7 @@
   {{ return(adapter.dispatch('extract_dow', 'zendesk')(date_or_time)) }}
 {%- endmacro %}
 
--- Snowflake and Postgres use DOW where Sunday = 0
+-- Snowflake, Redshift and Postgres use DOW where Sunday = 0
 {% macro default__extract_dow(date_or_time) %}
   extract(dow from {{ date_or_time }})
 {% endmacro %}
