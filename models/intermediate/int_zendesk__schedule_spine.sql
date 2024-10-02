@@ -93,10 +93,8 @@ with calendar_spine as (
     -- This first step is to find those holidays.
     select
         adjust_holiday_week_start.*,
-        -- calculate weeks the holiday range spans. Takes into account if the holiday extends into the next year.
-        (extract(week from holiday_valid_until) + extract(year from holiday_valid_until)) 
-            - (extract(week from holiday_valid_from) + extract(year from holiday_valid_from))
-            + 1 as holiday_weeks_spanned
+        -- calculate weeks the holiday range spans
+        {{ dbt.datediff('holiday_valid_from', 'holiday_valid_until', 'week') }} + 1 as holiday_weeks_spanned
     from adjust_holiday_week_start
 
 ), expanded_holidays as (
@@ -454,4 +452,4 @@ with calendar_spine as (
 )
 
 select *
-from final
+from holiday_multiple_weeks_check
