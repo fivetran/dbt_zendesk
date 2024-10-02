@@ -113,7 +113,7 @@ with schedule as (
         cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 4) }}, ' ') as {{ dbt.type_int() }}) as end_time_mm
     from unnested_schedules
 
-), final as (
+), calculate_start_end_times as (
 
     select
         _fivetran_synced,
@@ -122,10 +122,28 @@ with schedule as (
         end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,
         valid_from,
         valid_until,
+        cast({{ dbt.date_trunc('day', 'valid_from') }} as {{ dbt.type_timestamp() }}) as valid_from_day,
+        cast({{ dbt.date_trunc('day', 'valid_until') }} as {{ dbt.type_timestamp() }}) as valid_until_day,
         day_of_week,
         day_of_week_number
     from split_times
+
+), final as (
+    select 
+        schedule_id,
+        start_time,
+        end_time,
+        day_of_week,
+        day_of_week_number,
+        valid_from_day,
+        valid_until_day,
+        -- want to consolidate multiple user changes that don't result in a true schedule change.
+        min(valid_from) as valid_from,
+        max(valid_until) as valid_until
+    from calculate_start_end_times
+    {{ dbt_utils.group_by(7) }}
+
 )
 
 select * 
-from final
+from calculate_start_end_times
