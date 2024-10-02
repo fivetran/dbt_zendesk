@@ -41,8 +41,6 @@ vars:
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
-  zendesk_source:
-    +materialized: ephemeral
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"

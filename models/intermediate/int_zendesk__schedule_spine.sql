@@ -454,4 +454,4 @@ with calendar_spine as (
 )
 
 select *
-from split_multiweek_holidays
+from final
