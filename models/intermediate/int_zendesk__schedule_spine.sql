@@ -18,14 +18,7 @@ with calendar_spine as (
     select *
     from {{ ref('int_zendesk__timezone_daylight') }}  
 
-{% if var('using_holidays', True) %}
-), schedule_holiday as (
-    select *
-    from {{ var('schedule_holiday') }}  
-{% endif %}
-
-), calculate_schedules as (
-
+), schedule_timezones as (
     select 
         schedule.schedule_id,
         lower(schedule.time_zone) as time_zone,
@@ -45,6 +38,10 @@ with calendar_spine as (
         on split_timezones.time_zone = lower(schedule.time_zone)
 
 {% if var('using_holidays', True) %}
+), schedule_holiday as (
+    select *
+    from {{ var('schedule_holiday') }}  
+
 ), schedule_holiday_ranges as (
     select
         holiday_name,
@@ -142,16 +139,16 @@ with calendar_spine as (
 
 ), join_holidays as (
     select 
-        calculate_schedules.schedule_id,
-        calculate_schedules.time_zone,
-        calculate_schedules.offset_minutes,
-        calculate_schedules.start_time_utc,
-        calculate_schedules.end_time_utc,
-        calculate_schedules.schedule_name,
-        calculate_schedules.schedule_valid_from,
-        calculate_schedules.schedule_valid_until,
-        calculate_schedules.schedule_starting_sunday,
-        calculate_schedules.schedule_ending_sunday,
+        schedule_timezones.schedule_id,
+        schedule_timezones.time_zone,
+        schedule_timezones.offset_minutes,
+        schedule_timezones.start_time_utc,
+        schedule_timezones.end_time_utc,
+        schedule_timezones.schedule_name,
+        schedule_timezones.schedule_valid_from,
+        schedule_timezones.schedule_valid_until,
+        schedule_timezones.schedule_starting_sunday,
+        schedule_timezones.schedule_ending_sunday,
 
         {% if var('using_holidays', True) %}
         schedule_holiday_spine.holiday_date,
@@ -169,13 +166,13 @@ with calendar_spine as (
         cast(null as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
         {% endif %}
     
-    from calculate_schedules
+    from schedule_timezones
 
     {% if var('using_holidays', True) %}
     left join schedule_holiday_spine
-        on schedule_holiday_spine.schedule_id = calculate_schedules.schedule_id
-        and schedule_holiday_spine.holiday_date >= calculate_schedules.schedule_valid_from
-        and schedule_holiday_spine.holiday_date < calculate_schedules.schedule_valid_until
+        on schedule_holiday_spine.schedule_id = schedule_timezones.schedule_id
+        and schedule_holiday_spine.holiday_date >= schedule_timezones.schedule_valid_from
+        and schedule_holiday_spine.holiday_date < schedule_timezones.schedule_valid_until
     {% endif %}
 
 ), split_holidays as(
