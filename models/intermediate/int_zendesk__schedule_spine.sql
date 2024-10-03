@@ -7,7 +7,7 @@
 
 with calendar_spine as (
     select
-        cast(date_day as {{ dbt.type_timestamp() }} ) as date_day
+        cast(date_day as {{ dbt.type_timestamp() }}) as date_day
     from {{ ref('int_zendesk__calendar_spine') }}  
 
 ), schedule as (
@@ -35,70 +35,34 @@ with calendar_spine as (
         schedule.schedule_name,
         schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
         schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        -- we'll use these to determine which schedule version to associate tickets with
+        -- we'll use these to determine which schedule version to associate tickets with.
         cast({{ dbt.date_trunc('day', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_valid_from,
         cast({{ dbt.date_trunc('day', 'split_timezones.valid_until') }}  as {{ dbt.type_timestamp() }}) as schedule_valid_until,
-        cast({{ dbt.date_trunc('week', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_week_start_date,
-        cast({{ dbt.date_trunc('week', 'split_timezones.valid_until') }} as {{ dbt.type_timestamp() }}) as schedule_week_end_date,
-        -- check what dow the warehouse truncates the week to
-        {{ zendesk.extract_dow(dbt.date_trunc('week', 'split_timezones.valid_from')) }} as week_start_dow
+        cast({{ dbt_date.week_start('split_timezones.valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt_date.week_start('split_timezones.valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
     from schedule
     left join split_timezones
         on split_timezones.time_zone = lower(schedule.time_zone)
-
-), adjust_schedule_week_start as (
-    select 
-        schedule_id,
-        time_zone,
-        offset_minutes,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        schedule_valid_from,
-        schedule_valid_until,
-        -- This adjusts to Sunday when the warehouse is not truncating to Sunday.
-        cast({{ dbt.dateadd('day', '-week_start_dow', 'schedule_week_start_date') }}
-            as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ dbt.dateadd('day', '-week_start_dow', 'schedule_week_end_date') }}
-            as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
-    from calculate_schedules
 
 {% if var('using_holidays', True) %}
 ), schedule_holiday_ranges as (
     select
         holiday_name,
         schedule_id,
-        cast(holiday_start_date_at as {{ dbt.type_timestamp() }} ) as holiday_valid_from,
-        cast(holiday_end_date_at as {{ dbt.type_timestamp() }}) as holiday_valid_until,
-        cast({{ dbt.date_trunc('week', 'holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_week_start_date,
-        cast({{ dbt.dateadd('week', 1, dbt.date_trunc(
-            'week', 'holiday_end_date_at')
-            ) }} as {{ dbt.type_timestamp() }}) as holiday_week_end_date,
-        -- check what dow warehouse truncates the week to
-        {{ zendesk.extract_dow(dbt.date_trunc('week', 'holiday_start_date_at')) }} as week_start_dow
+        cast({{ dbt.date_trunc('day', 'holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
+        cast({{ dbt.date_trunc('day', 'holiday_end_date_at') }}  as {{ dbt.type_timestamp() }}) as holiday_valid_until,
+        cast({{ dbt_date.week_start('holiday_start_date_at','UTC') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast({{ dbt_date.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at'),'UTC') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
     from schedule_holiday   
-
-), adjust_holiday_week_start as (
-    select 
-        holiday_name,
-        schedule_id,
-        holiday_valid_from,
-        holiday_valid_until,
-        -- adjusts to Sunday when the database is not truncating to Sunday
-        cast({{ dbt.dateadd('day', '-week_start_dow', 'holiday_week_start_date') }}
-            as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
-        cast({{ dbt.dateadd('day', '-week_start_dow', 'holiday_week_end_date') }}
-            as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
-    from schedule_holiday_ranges
 
 ), holiday_multiple_weeks_check as (
     -- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
     -- This first step is to find those holidays.
     select
-        adjust_holiday_week_start.*,
+        schedule_holiday_ranges.*,
         -- calculate weeks the holiday range spans
         {{ dbt.datediff('holiday_valid_from', 'holiday_valid_until', 'week') }} + 1 as holiday_weeks_spanned
-    from adjust_holiday_week_start
+    from schedule_holiday_ranges
 
 ), expanded_holidays as (
     -- this only needs to be run for holidays spanning multiple weeks
@@ -178,16 +142,16 @@ with calendar_spine as (
 
 ), join_holidays as (
     select 
-        adjust_schedule_week_start.schedule_id,
-        adjust_schedule_week_start.time_zone,
-        adjust_schedule_week_start.offset_minutes,
-        adjust_schedule_week_start.start_time_utc,
-        adjust_schedule_week_start.end_time_utc,
-        adjust_schedule_week_start.schedule_name,
-        adjust_schedule_week_start.schedule_valid_from,
-        adjust_schedule_week_start.schedule_valid_until,
-        adjust_schedule_week_start.schedule_starting_sunday,
-        adjust_schedule_week_start.schedule_ending_sunday,
+        calculate_schedules.schedule_id,
+        calculate_schedules.time_zone,
+        calculate_schedules.offset_minutes,
+        calculate_schedules.start_time_utc,
+        calculate_schedules.end_time_utc,
+        calculate_schedules.schedule_name,
+        calculate_schedules.schedule_valid_from,
+        calculate_schedules.schedule_valid_until,
+        calculate_schedules.schedule_starting_sunday,
+        calculate_schedules.schedule_ending_sunday,
 
         {% if var('using_holidays', True) %}
         schedule_holiday_spine.holiday_date,
@@ -205,13 +169,13 @@ with calendar_spine as (
         cast(null as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
         {% endif %}
     
-    from adjust_schedule_week_start
+    from calculate_schedules
 
     {% if var('using_holidays', True) %}
     left join schedule_holiday_spine
-        on schedule_holiday_spine.schedule_id = adjust_schedule_week_start.schedule_id
-        and schedule_holiday_spine.holiday_date >= adjust_schedule_week_start.schedule_valid_from
-        and schedule_holiday_spine.holiday_date < adjust_schedule_week_start.schedule_valid_until
+        on schedule_holiday_spine.schedule_id = calculate_schedules.schedule_id
+        and schedule_holiday_spine.holiday_date >= calculate_schedules.schedule_valid_from
+        and schedule_holiday_spine.holiday_date < calculate_schedules.schedule_valid_until
     {% endif %}
 
 ), split_holidays as(
@@ -220,7 +184,7 @@ with calendar_spine as (
         join_holidays.*,
         case
             when holiday_valid_from = holiday_date
-                then '0_start' -- the number is for ordering later
+                then '0_gap' -- the number is for ordering later
             end as holiday_start_or_end,
         schedule_valid_from as valid_from,
         holiday_date as valid_until
@@ -234,7 +198,7 @@ with calendar_spine as (
         join_holidays.*,
         case
             when holiday_valid_until = holiday_date
-                then '1_end' -- the number is for ordering later
+                then '1_holiday' -- the number is for ordering later
             end as holiday_start_or_end,
         holiday_date as valid_from,
         schedule_valid_until as valid_until
@@ -341,9 +305,9 @@ with calendar_spine as (
         case
             when holiday_start_or_end = 'partition_start'
                 then schedule_starting_sunday
-            when holiday_start_or_end = '0_start'
+            when holiday_start_or_end = '0_gap'
                 then lag(holiday_ending_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
-            when holiday_start_or_end = '1_end'
+            when holiday_start_or_end = '1_holiday'
                 then holiday_starting_sunday
             when holiday_start_or_end = 'partition_end'
                 then holiday_ending_sunday
@@ -353,9 +317,9 @@ with calendar_spine as (
         case 
             when holiday_start_or_end = 'partition_start'
                 then holiday_starting_sunday
-            when holiday_start_or_end = '0_start'
+            when holiday_start_or_end = '0_gap'
                 then lead(holiday_starting_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
-            when holiday_start_or_end = '1_end'
+            when holiday_start_or_end = '1_holiday'
                 then holiday_ending_sunday
             when holiday_start_or_end = 'partition_end'
                 then schedule_ending_sunday
@@ -378,7 +342,8 @@ with calendar_spine as (
         holiday_ending_sunday,
         valid_from,
         valid_until,
-        case when holiday_start_or_end = '1_end' then true
+        case when holiday_start_or_end = '1_holiday'
+            then true
             else false
             end as is_holiday_week
     from adjust_ranges
@@ -389,21 +354,18 @@ with calendar_spine as (
         holiday_weeks.*,
 
         -- Calculate holiday_valid_from in minutes from week start
-        case when is_holiday_week then (
-            ({{ zendesk.extract_dow('holiday_valid_from') }} * 24 * 60)
-            + extract(hour from holiday_valid_from) * 60      -- Get hours and convert to minutes
-            + extract(minute from holiday_valid_from)         -- Get minutes
-            - offset_minutes                                  -- Timezone adjustment
-            ) else null
+        case when is_holiday_week 
+            then ({{ dbt.datediff('holiday_starting_sunday', 'holiday_valid_from', 'minute') }}
+                - offset_minutes) -- timezone adjustment
+            else null
         end as holiday_valid_from_minutes_from_week_start,
-        
+
         -- Calculate holiday_valid_until in minutes from week start
-        case when is_holiday_week then (
-            (({{ zendesk.extract_dow('holiday_valid_until') }} + 1) * 24 * 60) -- add 1 day to set the upper bound of the holiday
-            + extract(hour from holiday_valid_until) * 60
-            + extract(minute from holiday_valid_until)
-            - offset_minutes
-            ) else null
+        case when is_holiday_week
+            then ({{ dbt.datediff('holiday_starting_sunday', 'holiday_valid_until', 'minute') }}
+                + 24 * 60 -- add 1 day to set the upper bound of the holiday
+                - offset_minutes)-- timezone adjustment
+            else null
         end as holiday_valid_until_minutes_from_week_start
     from holiday_weeks
 
@@ -451,11 +413,13 @@ with calendar_spine as (
         end_time_utc,
         is_holiday_week
     from filter_holidays
-    -- This filter is for multiple holiday ids in 1 week. We want to check for each schedule start_time_utc and end_time_utc 
-    -- that the holiday count matches the number of distinct records.
-    -- When rows that don't match, that indicates there is a holiday on that day, and we'll filter them out. 
+
+    -- This filter ensures that for each schedule, the count of holidays in a week matches the number 
+    -- of distinct schedule records with the same start_time_utc and end_time_utc.
+    -- Rows where this count doesn't match indicate overlap with a holiday, so we filter out that record.
+    -- Additionally, schedule records that fall on a holiday are excluded by checking if holiday_name is null.
     where number_holidays_in_week = number_records_for_schedule_start_end
-    and holiday_name is null -- this will remove schedules that fall on a holiday
+    and holiday_name is null
 )
 
 select *
