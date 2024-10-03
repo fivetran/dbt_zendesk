@@ -1,25 +1,17 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('using_schedule_histories', True)) }}
 
-with schedule as (
-
-    select *
-    from {{ var('schedule') }}  
-
-), audit_logs as (
+with audit_logs as (
     select
-        _fivetran_synced,
-        source_id as schedule_id,
+        cast(source_id as {{ dbt.type_string() }}) as schedule_id,
         created_at,
         lower(change_description) as change_description
     from {{ var('audit_log') }}
     where lower(change_description) like '%workweek changed from%'
 
 ), audit_logs_enhanced as (
-    select 
-        _fivetran_synced,
+    select
         schedule_id,
         created_at,
-        min(created_at) over (partition by schedule_id) as min_created_at,
         replace(replace(replace(replace(change_description,
             'workweek changed from', ''), 
             '&quot;', '"'), 
@@ -29,40 +21,32 @@ with schedule as (
     from audit_logs
 
 ), split_to_from as (
-    -- 'from' establishes the schedule from before the change occurred
     select
-        audit_logs_enhanced.*,
-        cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_from,
-        created_at as valid_until,
-        {{ dbt.split_part('change_description_cleaned', "' to '", 1) }} as schedule_change,
-        'from' as change_type -- remove before release but helpful for debugging
-    from audit_logs_enhanced
-    where created_at = min_created_at -- the 'from' portion only matters for the first row
-
-    union all
-
-    -- 'to'
-    select
-        audit_logs_enhanced.*,
+        schedule_id,
         created_at as valid_from,
-        coalesce(
-            lead(created_at) over (
-                partition by schedule_id order by created_at), 
-            {{ dbt.current_timestamp_backcompat() }})
-            as valid_until,
-        {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change,
-        'to' as change_type -- remove before release but helpful for debugging
+        lead(created_at) over (
+            partition by schedule_id order by created_at) as valid_until,
+        -- we only need what the schedule was changed to
+        {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change
     from audit_logs_enhanced
+
+), consolidate_same_day_changes as (
+    select
+        split_to_from.*
+    from split_to_from
+    -- Filter out schedules with multiple changes in a day to keep the current one
+    where cast(valid_from as date) != cast(valid_until as date)
+    and valid_until is not null
 
 ), split_days as (
     {% set days_of_week = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}
     {% for day, day_number in days_of_week.items() %}
     select
-        split_to_from.*,
+        consolidate_same_day_changes.*,
         '{{ day }}' as day_of_week,
         cast('{{ day_number }}' as {{ dbt.type_int() }}) as day_of_week_number,
         {{ zendesk.regex_extract('schedule_change', "'.*?" ~ day ~ ".*?({.*?})'") }} as day_of_week_schedule
-    from split_to_from
+    from consolidate_same_day_changes
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 
@@ -116,7 +100,6 @@ with schedule as (
 ), calculate_start_end_times as (
 
     select
-        _fivetran_synced,
         schedule_id,
         start_time_hh * 60 + start_time_mm + 24 * 60 * day_of_week_number as start_time,
         end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,
@@ -127,22 +110,6 @@ with schedule as (
         day_of_week,
         day_of_week_number
     from split_times
-
-), final as (
-    select 
-        schedule_id,
-        start_time,
-        end_time,
-        day_of_week,
-        day_of_week_number,
-        valid_from_day,
-        valid_until_day,
-        -- want to consolidate multiple user changes that don't result in a true schedule change.
-        min(valid_from) as valid_from,
-        max(valid_until) as valid_until
-    from calculate_start_end_times
-    {{ dbt_utils.group_by(7) }}
-
 )
 
 select * 

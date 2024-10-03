@@ -1,42 +1,41 @@
--- depends_on: {{ source('zendesk', 'ticket') }}
-
+-- depends_on: {{ var('ticket') }}
 with spine as (
 
-    {% if execute %}
-    {% set current_ts = dbt.current_timestamp_backcompat() %}
-    {% set first_date_query %}
-        select  min( created_at ) as min_date from {{ source('zendesk', 'ticket') }}
-        -- by default take all the data 
-        where cast(created_at as date) >= {{ dbt.dateadd('year', - var('ticket_field_history_timeframe_years', 50), current_ts ) }}
-    {% endset %}
+    {% if execute and flags.WHICH in ('run', 'build') %}
 
-    {% set first_date = run_query(first_date_query).columns[0][0]|string %}
-    
-        {% if target.type == 'postgres' %}
-            {% set first_date_adjust = "cast('" ~ first_date[0:10] ~ "' as date)" %}
+    {%- set first_date_query %}
+    select 
+        coalesce(
+            min(cast(created_at as date)), 
+            cast({{ dbt.dateadd("month", -1, "current_date") }} as date)
+            ) as min_date
+    from {{ var('ticket') }}
+    -- by default take all the data 
+    where cast(created_at as date) >= {{ dbt.dateadd('year', 
+        - var('ticket_field_history_timeframe_years', 50), "current_date") }}
+    {% endset -%}
 
-        {% else %}
-            {% set first_date_adjust = "'" ~ first_date[0:10] ~ "'" %}
+    {% else %} -- {% set first_date_adjust = "2016-01-01" %}
+    {%- set first_date_query%}
+        select cast({{ dbt.dateadd("month", -1, "current_date") }} as date)
+    {% endset -%}
 
-        {% endif %}
-
-    {% else %} {% set first_date_adjust = "2016-01-01" %}
     {% endif %}
 
-
+    {%- set first_date = dbt_utils.get_single_value(first_date_query) %}
+    
 {{
     dbt_utils.date_spine(
         datepart = "day", 
-        start_date = first_date_adjust,
-        end_date = dbt.dateadd("week", 52, "current_date")
+        start_date = "cast('" ~ first_date ~ "' as date)",
+        end_date = dbt.dateadd("week", 1, "current_date")
     )   
 }}
 
 ), recast as (
-
-    select cast(date_day as date) as date_day
+    select
+        cast(date_day as date) as date_day
     from spine
-
 )
 
 select *
