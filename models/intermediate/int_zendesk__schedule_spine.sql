@@ -185,9 +185,7 @@ with calendar_spine as (
         case
             when holiday_valid_from = holiday_date
                 then '0_gap' -- the number is for ordering later
-            end as holiday_start_or_end,
-        schedule_valid_from as valid_from,
-        holiday_date as valid_until
+            end as holiday_start_or_end
     from join_holidays
     where holiday_date is not null
 
@@ -199,9 +197,7 @@ with calendar_spine as (
         case
             when holiday_valid_until = holiday_date
                 then '1_holiday' -- the number is for ordering later
-            end as holiday_start_or_end,
-        holiday_date as valid_from,
-        schedule_valid_until as valid_until
+            end as holiday_start_or_end
     from join_holidays
     where holiday_date is not null
 
@@ -210,9 +206,7 @@ with calendar_spine as (
     -- keep records for weeks with no holiday
     select
         join_holidays.*,
-        cast(null as {{ dbt.type_string() }}) as holiday_start_or_end,
-        schedule_valid_from as valid_from,
-        schedule_valid_until as valid_until
+        cast(null as {{ dbt.type_string() }}) as holiday_start_or_end
     from join_holidays
     where holiday_date is null
 
@@ -246,8 +240,6 @@ with calendar_spine as (
             then 'partition_start'
             else holiday_start_or_end
             end as holiday_start_or_end,
-        valid_from,
-        valid_until,
         valid_from_index,
         max_valid_from_index
     from valid_from_partition
@@ -273,8 +265,6 @@ with calendar_spine as (
         holiday_starting_sunday,
         holiday_ending_sunday,
         'partition_end' as holiday_start_or_end,
-        valid_from,
-        valid_until,
         max_valid_from_index + 1 as valid_from_index,
         max_valid_from_index
     from valid_from_partition
@@ -283,25 +273,7 @@ with calendar_spine as (
 
 ), adjust_ranges as(
     select
-        schedule_id,
-        time_zone,
-        offset_minutes,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        holiday_name,
-        holiday_date,
-        holiday_valid_from,
-        holiday_valid_until,
-        holiday_starting_sunday,
-        holiday_ending_sunday,
-        schedule_valid_from,
-        schedule_valid_until,
-        schedule_starting_sunday,
-        schedule_ending_sunday,
-        valid_from_index,
-        max_valid_from_index,
-        holiday_start_or_end,
+        add_partition_end_row.*,
         case
             when holiday_start_or_end = 'partition_start'
                 then schedule_starting_sunday
@@ -312,8 +284,7 @@ with calendar_spine as (
             when holiday_start_or_end = 'partition_end'
                 then holiday_ending_sunday
             else schedule_starting_sunday
-        end as valid_from
-        ,
+        end as valid_from,
         case 
             when holiday_start_or_end = 'partition_start'
                 then holiday_starting_sunday
@@ -329,24 +300,13 @@ with calendar_spine as (
 
 ), holiday_weeks as(
     select
-        schedule_id,
-        time_zone,
-        offset_minutes,
-        start_time_utc,
-        end_time_utc,
-        schedule_name,
-        holiday_name,
-        holiday_valid_from,
-        holiday_valid_until,
-        holiday_starting_sunday,
-        holiday_ending_sunday,
-        valid_from,
-        valid_until,
+        adjust_ranges.*,
         case when holiday_start_or_end = '1_holiday'
             then true
             else false
             end as is_holiday_week
     from adjust_ranges
+    -- filter out irrelevant records
     where not (valid_from >= valid_until and holiday_date is not null)
 
 ), valid_minutes as(
