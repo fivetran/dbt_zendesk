@@ -71,8 +71,9 @@ with audit_logs as (
         schedule_change,
         -- calculate if this row is adjacent to the previous row
         sum(case when previous_valid_until = valid_from then 0 else 1 end) 
-            over (partition by schedule_id, schedule_change order by valid_from)
-            as group_id
+            over (partition by schedule_id, schedule_change 
+                order by valid_from 
+                rows between unbounded preceding and current row) -- Redshift needs this frame clause for aggregating
     from consolidate_same_day_changes
 
 ), consolidate_actual_changes as (
