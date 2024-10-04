@@ -33,6 +33,7 @@ with calendar_spine as (
     select *
     from {{ var('schedule_holiday') }}  
 
+-- Converts holiday_start_date_at and holiday_end_date_at into daily timestamps and finds the week starts/ends using week_start.
 ), schedule_holiday_ranges as (
     select
         holiday_name,
@@ -43,17 +44,17 @@ with calendar_spine as (
         cast({{ dbt_date.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at'),'UTC') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
     from schedule_holiday   
 
+-- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
+-- This first step is to find those holidays.
 ), holiday_multiple_weeks_check as (
-    -- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
-    -- This first step is to find those holidays.
     select
         schedule_holiday_ranges.*,
         -- calculate weeks the holiday range spans
         {{ dbt.datediff('holiday_valid_from', 'holiday_valid_until', 'week') }} + 1 as holiday_weeks_spanned
     from schedule_holiday_ranges
 
+-- Creates a record for each week of multi-week holidays. Update valid_from and valid_until in the next cte.
 ), expanded_holidays as (
-    -- this only needs to be run for holidays spanning multiple weeks
     select
         holiday_multiple_weeks_check.*,
         cast(week_numbers.generated_number as {{ dbt.type_int() }}) as holiday_week_number
@@ -63,6 +64,7 @@ with calendar_spine as (
     where holiday_multiple_weeks_check.holiday_weeks_spanned > 1
     and week_numbers.generated_number <= holiday_multiple_weeks_check.holiday_weeks_spanned
 
+-- Define start and end times for each segment of a multi-week holiday.
 ), split_multiweek_holidays as (
 
     -- Business as usual for holidays that fall within a single week.
@@ -111,7 +113,8 @@ with calendar_spine as (
     from expanded_holidays
     where holiday_weeks_spanned > 1
 
--- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
+-- Explodes multi-week holidays into individual days by joining with the calendar_spine. This is necessary to remove schedules
+-- that occur during a holiday downstream.
 ), schedule_holiday_spine as ( 
 
     select
@@ -128,6 +131,7 @@ with calendar_spine as (
         and split_multiweek_holidays.holiday_valid_until >= calendar_spine.date_day
 {% endif %}
 
+-- Joins in the holidays if using or casts nulls if not.
 ), join_holidays as (
     select 
         schedule_timezones.schedule_id,
