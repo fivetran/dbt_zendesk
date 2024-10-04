@@ -14,34 +14,26 @@ with calendar_spine as (
     select *
     from {{ var('schedule') }}   
 
-), split_timezones as (
-    select *
-    from {{ ref('int_zendesk__timezone_daylight') }}  
-
 ), schedule_timezones as (
     select 
-        schedule.schedule_id,
-        lower(schedule.time_zone) as time_zone,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes,
-        schedule.start_time,
-        schedule.end_time,
-        schedule.schedule_name,
-        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
-        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        -- we'll use these to determine which schedule version to associate tickets with.
-        cast({{ dbt.date_trunc('day', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_valid_from,
-        cast({{ dbt.date_trunc('day', 'split_timezones.valid_until') }}  as {{ dbt.type_timestamp() }}) as schedule_valid_until,
-        cast({{ dbt_date.week_start('split_timezones.valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ dbt_date.week_start('split_timezones.valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
-    from schedule
-    left join split_timezones
-        on split_timezones.time_zone = lower(schedule.time_zone)
+        schedule_id,
+        time_zone,
+        schedule_name,
+        offset_minutes,
+        start_time_utc,
+        end_time_utc,
+        schedule_valid_from,
+        schedule_valid_until,
+        cast({{ dbt_date.week_start('schedule_valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt_date.week_start('schedule_valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
+    from {{ ref('int_zendesk__schedule_timezones') }}  
 
 {% if var('using_holidays', True) %}
 ), schedule_holiday as (
     select *
     from {{ var('schedule_holiday') }}  
 
+-- Converts holiday_start_date_at and holiday_end_date_at into daily timestamps and finds the week starts/ends using week_start.
 ), schedule_holiday_ranges as (
     select
         holiday_name,
@@ -52,17 +44,17 @@ with calendar_spine as (
         cast({{ dbt_date.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at'),'UTC') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
     from schedule_holiday   
 
+-- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
+-- This first step is to find those holidays.
 ), holiday_multiple_weeks_check as (
-    -- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
-    -- This first step is to find those holidays.
     select
         schedule_holiday_ranges.*,
         -- calculate weeks the holiday range spans
         {{ dbt.datediff('holiday_valid_from', 'holiday_valid_until', 'week') }} + 1 as holiday_weeks_spanned
     from schedule_holiday_ranges
 
+-- Creates a record for each week of multi-week holidays. Update valid_from and valid_until in the next cte.
 ), expanded_holidays as (
-    -- this only needs to be run for holidays spanning multiple weeks
     select
         holiday_multiple_weeks_check.*,
         cast(week_numbers.generated_number as {{ dbt.type_int() }}) as holiday_week_number
@@ -72,6 +64,7 @@ with calendar_spine as (
     where holiday_multiple_weeks_check.holiday_weeks_spanned > 1
     and week_numbers.generated_number <= holiday_multiple_weeks_check.holiday_weeks_spanned
 
+-- Define start and end times for each segment of a multi-week holiday.
 ), split_multiweek_holidays as (
 
     -- Business as usual for holidays that fall within a single week.
@@ -120,7 +113,8 @@ with calendar_spine as (
     from expanded_holidays
     where holiday_weeks_spanned > 1
 
--- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
+-- Explodes multi-week holidays into individual days by joining with the calendar_spine. This is necessary to remove schedules
+-- that occur during a holiday downstream.
 ), schedule_holiday_spine as ( 
 
     select
@@ -137,6 +131,7 @@ with calendar_spine as (
         and split_multiweek_holidays.holiday_valid_until >= calendar_spine.date_day
 {% endif %}
 
+-- Joins in the holidays if using or casts nulls if not.
 ), join_holidays as (
     select 
         schedule_timezones.schedule_id,
