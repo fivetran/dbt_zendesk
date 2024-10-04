@@ -30,7 +30,12 @@ with split_timezones as (
 -- been deleted.
 ), schedule_history_timezones as (
     select
-        schedule_history.*,
+        schedule_history.schedule_id,
+        schedule_history.schedule_id_index,
+        schedule_history.start_time,
+        schedule_history.end_time,
+        schedule_history.valid_from,
+        schedule_history.valid_until,
         lower(schedule_id_timezone.time_zone) as time_zone,
         schedule_id_timezone.schedule_name
     from schedule_history
@@ -118,8 +123,10 @@ with split_timezones as (
         schedule_valid_from,
         schedule_valid_until,
         sum(case when previous_valid_until = schedule_valid_from then 0 else 1 end) -- find if this row is adjacent to the previous row
-            over (partition by schedule_id, start_time, end_time order by schedule_valid_from)
-            as group_id
+            over (partition by schedule_id, start_time, end_time 
+                order by schedule_valid_from
+                rows between unbounded preceding and current row)
+        as group_id
     from lag_valid_until
 
 -- Consolidate records into continuous periods by finding the minimum 
