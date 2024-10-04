@@ -1,42 +1,45 @@
-{% macro regex_extract(string, regex) -%}
+{% macro regex_extract(string, day) -%}
 
-{{ adapter.dispatch('regex_extract', 'zendesk') (string, regex) }}
+{{ adapter.dispatch('regex_extract', 'zendesk') (string, day) }}
 
 {%- endmacro %}
 
-{% macro default__regex_extract(string, regex) %}
-
+{% macro default__regex_extract(string, day) %}
+    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
     regexp_extract({{ string }}, {{ regex }} )
 
 {%- endmacro %}
 
-{% macro bigquery__regex_extract(string, regex) %}
-
+{% macro bigquery__regex_extract(string, day) %}
+    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
     regexp_extract({{ string }}, {{ regex }} )
 
 {%- endmacro %}
 
-{% macro snowflake__regex_extract(string, regex) %}
+{% macro snowflake__regex_extract(string, day) %}
+    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
 
     REGEXP_SUBSTR({{ string }}, {{ regex }}, 1, 1, 'e', 1 )
 
 {%- endmacro %}
 
-{% macro postgres__regex_extract(string, regex) %}
+{% macro postgres__regex_extract(string, day) %}
+    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
 
     (regexp_matches({{ string }}, {{ regex }}))[1]
 
 {%- endmacro %}
 
-{% macro redshift__regex_extract(string, regex) %}
+{% macro redshift__regex_extract(string, day) %}
 
-    {% set reformatted_regex = regex | replace(".*?", ".*") | replace("{", "\\\{") | replace("}", "\\\}") -%}
-    REGEXP_SUBSTR({{ string }}, {{ reformatted_regex }}, 1, 1, 'e')
+    {% set regex = '"' ~ day ~ '"' ~ ':\\\{([^\\\}]*)\\\}' -%}
+
+    '{' || REGEXP_SUBSTR({{ string }}, '{{ regex }}', 1, 1, 'e') || '}'
 
 {%- endmacro %}
 
-{% macro spark__regex_extract(string, regex) %}
-    {% set reformatted_regex = regex | replace("{", "\\\{") | replace("}", "\\\}") -%}
-    regexp_extract({{ string }}, {{ reformatted_regex }}, 1)
+{% macro spark__regex_extract(string, day) %}
+    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" | replace("{", "\\\{") | replace("}", "\\\}") %}
+    regexp_extract({{ string }}, {{ regex }}, 1)
 
 {%- endmacro %}

@@ -9,15 +9,16 @@ with audit_logs as (
     where lower(change_description) like '%workweek changed from%'
 
 ), audit_logs_enhanced as (
-    select
+    select 
         schedule_id,
         row_number() over (partition by schedule_id order by created_at) as schedule_id_index,
         created_at,
-        replace(replace(replace(replace(change_description,
+        -- Clean up the change_description, sometimes has random html stuff in it
+        replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
             'workweek changed from', ''), 
             '&quot;', '"'), 
             'amp;', ''), 
-            '=&gt;', ':')
+            '=&gt;', ':'), ':mon:', '"mon":'), ':tue:', '"tue":'), ':wed:', '"wed":'), ':thu:', '"thu":'), ':fri:', '"fri":'), ':sat:', '"sat":'), ':sun:', '"sun":')
             as change_description_cleaned
     from audit_logs
 
@@ -101,47 +102,74 @@ with audit_logs as (
         schedule_change,
         '{{ day }}' as day_of_week,
         cast('{{ day_number }}' as {{ dbt.type_int() }}) as day_of_week_number,
-        {{ zendesk.regex_extract('schedule_change', "'.*?" ~ day ~ ".*?({.*?})'") }} as day_of_week_schedule
-    from consolidate_actual_changes
+        {{ zendesk.regex_extract('schedule_change', day) }} as day_of_week_schedule
+    from consolidate_same_day_changes
+
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 
+{% if target.type == 'redshift' %}
+-- using PartiQL syntax to work with redshift's SUPER types, which requires an extra CTE
+), redshift_parse_schedule as (
+    -- Redshift requires another CTE for unnesting 
+    select 
+        schedule_id,
+        valid_from,
+        valid_until,
+        schedule_change,
+        day_of_week,
+        day_of_week_number,
+        day_of_week_schedule,
+        json_parse('[' || replace(replace(day_of_week_schedule, ', ', ','), ',', '},{') || ']') as json_schedule
+
+    from split_days
+    where day_of_week_schedule != '{}'
+
+), unnested_schedules as (
+    select 
+        schedule_id,
+        valid_from,
+        valid_until,
+        schedule_change,
+        day_of_week,
+        day_of_week_number,
+        -- go back to strings
+        cast(day_of_week_schedule as {{ dbt.type_string() }}) as day_of_week_schedule,
+        {{ clean_schedule('JSON_SERIALIZE(unnested_schedule)') }} as cleaned_unnested_schedule
+    
+    from redshift_parse_schedule as schedules, schedules.json_schedule as unnested_schedule
+
+{% else %}
 ), unnested_schedules as (
     select
         split_days.*,
 
-{%- if target.type == 'bigquery' %}
+    {%- if target.type == 'bigquery' %}
         {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     cross join unnest(json_extract_array('[' || replace(day_of_week_schedule, ',', '},{') || ']', '$')) as unnested_schedule
 
-{%- elif target.type == 'snowflake' %}
+    {%- elif target.type == 'snowflake' %}
         unnested_schedule.key || ':' || unnested_schedule.value as cleaned_unnested_schedule
     from split_days
     cross join lateral flatten(input => parse_json(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{'))) as unnested_schedule
 
-{%- elif target.type == 'postgres' %}
+    {%- elif target.type == 'postgres' %}
         {{ clean_schedule('unnested_schedule::text') }} as cleaned_unnested_schedule
     from split_days
     cross join lateral jsonb_array_elements(('[' || replace(day_of_week_schedule, ',', '},{') || ']')::jsonb) as unnested_schedule
 
-{%- elif target.type in ('databricks', 'spark') %}
+    {%- elif target.type in ('databricks', 'spark') %}
         {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
     from split_days
     lateral view explode(from_json(concat('[', replace(day_of_week_schedule, ',', '},{'), ']'), 'array<string>')) as unnested_schedule
 
-{%- elif target.type == 'redshift' %}
-    {# json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
-    from split_days #}
-    {# cross join lateral json_parse(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{')) as element #}
-
+    {% else %}
         cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
     from split_days
+    {%- endif %}
 
-{% else %}
-        cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
-    from split_days
-{%- endif %}
+{% endif %}
 
 ), split_times as (
     select 
