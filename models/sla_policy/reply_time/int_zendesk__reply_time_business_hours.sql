@@ -173,7 +173,7 @@ with ticket_schedules as (
   select
     *,
     schedule_end_time + remaining_minutes as breached_at_minutes,
-    {{ dbt.date_trunc('week', 'sla_applied_at') }} as starting_point,
+    {{ dbt_date.week_start('sla_applied_at','UTC') }} as starting_point,
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt.type_int() ~ " )",

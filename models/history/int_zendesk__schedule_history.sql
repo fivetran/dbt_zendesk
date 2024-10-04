@@ -5,7 +5,7 @@ with audit_logs as (
         cast(source_id as {{ dbt.type_string() }}) as schedule_id,
         created_at,
         lower(change_description) as change_description
-    from {{ var('audit_log') }}   
+    from {{ var('audit_log') }}
     where lower(change_description) like '%workweek changed from%'
 
 ), audit_logs_enhanced as (
@@ -124,7 +124,7 @@ with audit_logs as (
         cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 4) }}, ' ') as {{ dbt.type_int() }}) as end_time_mm
     from unnested_schedules
 
-), final as (
+), calculate_start_end_times as (
 
     select
         schedule_id,
@@ -132,10 +132,12 @@ with audit_logs as (
         end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,
         valid_from,
         valid_until,
+        cast({{ dbt.date_trunc('day', 'valid_from') }} as {{ dbt.type_timestamp() }}) as valid_from_day,
+        cast({{ dbt.date_trunc('day', 'valid_until') }} as {{ dbt.type_timestamp() }}) as valid_until_day,
         day_of_week,
         day_of_week_number
     from split_times
 )
 
 select * 
-from final
+from calculate_start_end_times

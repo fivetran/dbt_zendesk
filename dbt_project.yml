@@ -28,7 +28,7 @@ models:
       +schema: zendesk_unstructured
       +materialized: table
     utils:
-      +materialized: ephemeral
+      +materialized: table
 vars:
   zendesk:
     ticket_field_history_columns: ['assignee_id', 'status', 'priority']
