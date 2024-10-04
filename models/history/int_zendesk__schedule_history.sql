@@ -114,6 +114,7 @@ with audit_logs as (
     -- Redshift requires another CTE for unnesting 
     select 
         schedule_id,
+        schedule_id_index,
         valid_from,
         valid_until,
         schedule_change,
@@ -128,6 +129,7 @@ with audit_logs as (
 ), unnested_schedules as (
     select 
         schedule_id,
+        schedule_id_index,
         valid_from,
         valid_until,
         schedule_change,

@@ -41,28 +41,21 @@ with calendar_spine as (
         cast({{ dbt.date_trunc('day', 'holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
         cast({{ dbt.date_trunc('day', 'holiday_end_date_at') }}  as {{ dbt.type_timestamp() }}) as holiday_valid_until,
         cast({{ dbt_date.week_start('holiday_start_date_at','UTC') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
-        cast({{ dbt_date.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at'),'UTC') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday
-    from schedule_holiday   
-
--- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks.
--- This first step is to find those holidays.
-), holiday_multiple_weeks_check as (
-    select
-        schedule_holiday_ranges.*,
-        -- calculate weeks the holiday range spans
-        {{ dbt.datediff('holiday_valid_from', 'holiday_valid_until', 'week') }} + 1 as holiday_weeks_spanned
-    from schedule_holiday_ranges
+        cast({{ dbt_date.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at'),'UTC') }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
+        -- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks. First step is to find those holidays.
+        {{ dbt.datediff('holiday_start_date_at', 'holiday_end_date_at', 'week') }} + 1 as holiday_weeks_spanned
+    from schedule_holiday
 
 -- Creates a record for each week of multi-week holidays. Update valid_from and valid_until in the next cte.
 ), expanded_holidays as (
     select
-        holiday_multiple_weeks_check.*,
+        schedule_holiday_ranges.*,
         cast(week_numbers.generated_number as {{ dbt.type_int() }}) as holiday_week_number
-    from holiday_multiple_weeks_check
+    from schedule_holiday_ranges
     -- Generate a sequence of numbers from 0 to the max number of weeks spanned, assuming a holiday won't span more than 52 weeks
     cross join ({{ dbt_utils.generate_series(upper_bound=52) }}) as week_numbers
-    where holiday_multiple_weeks_check.holiday_weeks_spanned > 1
-    and week_numbers.generated_number <= holiday_multiple_weeks_check.holiday_weeks_spanned
+    where schedule_holiday_ranges.holiday_weeks_spanned > 1
+    and week_numbers.generated_number <= schedule_holiday_ranges.holiday_weeks_spanned
 
 -- Define start and end times for each segment of a multi-week holiday.
 ), split_multiweek_holidays as (
@@ -76,7 +69,7 @@ with calendar_spine as (
         holiday_starting_sunday,
         holiday_ending_sunday,
         holiday_weeks_spanned
-    from holiday_multiple_weeks_check
+    from schedule_holiday_ranges
     where holiday_weeks_spanned = 1
 
     union all
