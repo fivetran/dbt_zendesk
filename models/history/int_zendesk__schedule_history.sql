@@ -12,6 +12,7 @@ with audit_logs as (
     select 
         schedule_id,
         created_at,
+        -- Clean up the change_description, sometimes has random html stuff in it
         replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
             'workweek changed from', ''), 
             '&quot;', '"'), 
@@ -35,8 +36,8 @@ with audit_logs as (
         split_to_from.*
     from split_to_from
     -- Filter out schedules with multiple changes in a day to keep the current one
-    -- where cast(valid_from as date) != cast(valid_until as date)
-    -- and valid_until is not null
+    where cast(valid_from as date) != cast(valid_until as date) -- may need to use date_trunc instead? 
+    and valid_until is not null
 
 ), split_days as (
     {% set days_of_week = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}

@@ -41,8 +41,8 @@ vars:
   # fivetran_consistency_ticket_metrics_exclusion_tickets: (11092,11093,11094)
   # fivetran_integrity_sla_count_match_tickets: (76)
 
-# models:
-#   +schema: "zendesk_{{ var('directed_schema','dev') }}"
+models:
+  +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
