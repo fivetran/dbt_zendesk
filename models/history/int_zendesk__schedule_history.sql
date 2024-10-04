@@ -74,6 +74,7 @@ with audit_logs as (
             over (partition by schedule_id, schedule_change 
                 order by valid_from 
                 rows between unbounded preceding and current row) -- Redshift needs this frame clause for aggregating
+        as group_id
     from consolidate_same_day_changes
 
 ), consolidate_actual_changes as (
