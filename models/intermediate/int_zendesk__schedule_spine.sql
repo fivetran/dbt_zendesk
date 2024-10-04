@@ -14,28 +14,19 @@ with calendar_spine as (
     select *
     from {{ var('schedule') }}   
 
-), split_timezones as (
-    select *
-    from {{ ref('int_zendesk__timezone_daylight') }}  
-
 ), schedule_timezones as (
     select 
-        schedule.schedule_id,
-        lower(schedule.time_zone) as time_zone,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes,
-        schedule.start_time,
-        schedule.end_time,
-        schedule.schedule_name,
-        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
-        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        -- we'll use these to determine which schedule version to associate tickets with.
-        cast({{ dbt.date_trunc('day', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_valid_from,
-        cast({{ dbt.date_trunc('day', 'split_timezones.valid_until') }}  as {{ dbt.type_timestamp() }}) as schedule_valid_until,
-        cast({{ dbt_date.week_start('split_timezones.valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ dbt_date.week_start('split_timezones.valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
-    from schedule
-    left join split_timezones
-        on split_timezones.time_zone = lower(schedule.time_zone)
+        schedule_id,
+        time_zone,
+        schedule_name,
+        offset_minutes,
+        start_time_utc,
+        end_time_utc,
+        schedule_valid_from,
+        schedule_valid_until,
+        cast({{ dbt_date.week_start('schedule_valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt_date.week_start('schedule_valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday
+    from {{ ref('int_zendesk__schedule_timezones') }}  
 
 {% if var('using_holidays', True) %}
 ), schedule_holiday as (
