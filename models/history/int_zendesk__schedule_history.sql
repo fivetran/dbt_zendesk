@@ -1,14 +1,8 @@
-{{ config(enabled=var('using_schedules', True)) }}
+{{ config(enabled=var('using_schedules', True) and var('using_schedule_histories', True)) }}
 
-with schedule as (
-
-    select *
-    from {{ var('schedule') }}  
-
-), audit_logs as (
+with audit_logs as (
     select
-        _fivetran_synced,
-        source_id as schedule_id,
+        cast(source_id as {{ dbt.type_string() }}) as schedule_id,
         created_at,
         lower(change_description) as change_description
     from {{ var('audit_log') }}   
@@ -16,95 +10,74 @@ with schedule as (
 
 ), audit_logs_enhanced as (
     select 
-        _fivetran_synced,
         schedule_id,
         created_at,
-        min(created_at) over (partition by schedule_id) as min_created_at,
-        replace(replace(replace(replace(change_description,
+        replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
             'workweek changed from', ''), 
             '&quot;', '"'), 
             'amp;', ''), 
-            '=&gt;', ':')
+            '=&gt;', ':'), ':mon:', '"mon":'), ':tue:', '"tue":'), ':wed:', '"wed":'), ':thu:', '"thu":'), ':fri:', '"fri":'), ':sat:', '"sat":'), ':sun:', '"sun":')
             as change_description_cleaned
     from audit_logs
 
 ), split_to_from as (
-    -- 'from' establishes the schedule from before the change occurred
     select
-        audit_logs_enhanced.*,
-        cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_from,
-        created_at as valid_until,
-        {{ dbt.split_part('change_description_cleaned', "' to '", 1) }} as schedule_change,
-        'from' as change_type -- remove before release but helpful for debugging
-    from audit_logs_enhanced
-    where created_at = min_created_at -- the 'from' portion only matters for the first row
-
-    union all
-
-    -- 'to'
-    select
-        audit_logs_enhanced.*,
+        schedule_id,
         created_at as valid_from,
-        coalesce(
-            lead(created_at) over (
-                partition by schedule_id order by created_at), 
-            {{ dbt.current_timestamp_backcompat() }})
-            as valid_until,
-        {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change,
-        'to' as change_type -- remove before release but helpful for debugging
+        lead(created_at) over (
+            partition by schedule_id order by created_at) as valid_until,
+        -- we only need what the schedule was changed to
+        {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change
     from audit_logs_enhanced
+
+), consolidate_same_day_changes as (
+    select
+        split_to_from.*
+    from split_to_from
+    -- Filter out schedules with multiple changes in a day to keep the current one
+    -- where cast(valid_from as date) != cast(valid_until as date)
+    -- and valid_until is not null
 
 ), split_days as (
     {% set days_of_week = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}
     {% for day, day_number in days_of_week.items() %}
     select
-        split_to_from.*,
+        consolidate_same_day_changes.*,
         '{{ day }}' as day_of_week,
         cast('{{ day_number }}' as {{ dbt.type_int() }}) as day_of_week_number,
-        {{ zendesk.regex_extract('schedule_change', "'.*?" ~ day ~ ".*?({.*?})'") }} as day_of_week_schedule
-    from split_to_from
+        {{ zendesk.regex_extract('schedule_change', day) }} as day_of_week_schedule
+    from consolidate_same_day_changes
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 
-{% if target.type == 'redshift '%}
+{% if target.type == 'redshift' %}
 -- using PartiQL syntax to work with redshift's SUPER types, which requires an extra CTE
 ), redshift_parse_schedule as (
     -- Redshift requires another CTE for unnesting 
     select 
-        _fivetran_synced,
         schedule_id,
-        created_at,
-        min_created_at,
-        change_description,
-        change_description_cleaned,
         valid_from,
         valid_until,
         schedule_change,
-        change_type,
         day_of_week,
         day_of_week_number,
         day_of_week_schedule,
-        json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
+        json_parse('[' || replace(replace(day_of_week_schedule, ', ', ','), ',', '},{') || ']') as json_schedule
 
     from split_days
+    where day_of_week_schedule != '{}'
 
 ), unnested_schedules as (
     select 
-        _fivetran_synced,
         schedule_id,
-        created_at,
-        min_created_at,
-        change_description,
-        change_description_cleaned,
         valid_from,
         valid_until,
         schedule_change,
-        change_type,
         day_of_week,
         day_of_week_number,
         -- go back to strings
         cast(day_of_week_schedule as {{ dbt.type_string() }}) as day_of_week_schedule,
-        {{ clean_schedule('unnested_schedule') }} as cleaned_unnested_schedule
+        {{ clean_schedule('JSON_SERIALIZE(unnested_schedule)') }} as cleaned_unnested_schedule
     
     from redshift_parse_schedule as schedules, schedules.json_schedule as unnested_schedule
 
@@ -133,15 +106,6 @@ with schedule as (
     from split_days
     lateral view explode(from_json(concat('[', replace(day_of_week_schedule, ',', '},{'), ']'), 'array<string>')) as unnested_schedule
 
-    {# {%- elif target.type == 'redshift' %}
-    
-    json_parse('[' || replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{') || ']') as json_schedule
-    from split_days
-    cross join lateral json_parse(replace(replace(day_of_week_schedule, '\}\}', '\}'), '\{\{', '\{')) as element 
-
-        cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
-    from split_days #}
-
     {% else %}
         cast(null as {{ dbt.type_string() }}) as cleaned_unnested_schedule
     from split_days
@@ -162,7 +126,6 @@ with schedule as (
 ), final as (
 
     select
-        _fivetran_synced,
         schedule_id,
         start_time_hh * 60 + start_time_mm + 24 * 60 * day_of_week_number as start_time,
         end_time_hh * 60 + end_time_mm + 24 * 60 * day_of_week_number as end_time,

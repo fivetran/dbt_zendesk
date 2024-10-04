@@ -7,6 +7,8 @@ profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests_50
+  using_schedule_histories: true
+  using_schedules: true
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -39,14 +41,12 @@ vars:
   # fivetran_consistency_ticket_metrics_exclusion_tickets: (11092,11093,11094)
   # fivetran_integrity_sla_count_match_tickets: (76)
 
-models:
-  +schema: "zendesk_{{ var('directed_schema','dev') }}"
+# models:
+#   +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
-    +column_types:
-      _fivetran_synced: timestamp
     +column_types:
       _fivetran_synced: timestamp
     group_data:
