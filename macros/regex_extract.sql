@@ -26,7 +26,7 @@
 {% macro postgres__regex_extract(string, day) %}
     {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
 
-    (regexp_matches({{ string }}, '{{ regex }}'))[1]
+    (regexp_matches({{ string }}, {{ regex }}))[1]
 
 {%- endmacro %}
 
