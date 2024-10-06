@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', true) and var('using_schedule_histories', true)) }}
+{{ config(enabled=fivetran_utils.enabled_vars(['using_schedules','using_schedule_histories'])) }}
 
 with audit_logs as (
     select

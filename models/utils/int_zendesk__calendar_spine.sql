@@ -15,15 +15,13 @@ with spine as (
         - var('ticket_field_history_timeframe_years', 50), "current_date") }}
     {% endset -%}
 
-    {% else %} -- {% set first_date_adjust = "2016-01-01" %}
-    {%- set first_date_query%}
-        select cast({{ dbt.dateadd("month", -1, "current_date") }} as date)
-    {% endset -%}
+    {%- set first_date = dbt_utils.get_single_value(first_date_query) %}
+
+    {% else %}
+    {%- set first_date = '2016-01-01' %}
 
     {% endif %}
 
-    {%- set first_date = dbt_utils.get_single_value(first_date_query) %}
-    
 {{
     dbt_utils.date_spine(
         datepart = "day", 

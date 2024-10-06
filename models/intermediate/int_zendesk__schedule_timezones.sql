@@ -44,7 +44,7 @@ with split_timezones as (
     -- We have to filter these records out since time math requires timezone
     -- revisit later if this becomes a bigger issue
     where time_zone is not null
-{% endif %}
+{# {% endif %} #}
 
 -- Combine current schedules with historical schedules, marking if each 
 -- record is historical. Adjust the valid_from and valid_until dates accordingly.
@@ -62,7 +62,7 @@ with split_timezones as (
         False as is_historical
     from schedule
 
-{% if var('using_schedule_histories', True) %}
+{# {% if var('using_schedule_histories', True) %} #}
     union all
 
     select
@@ -77,7 +77,7 @@ with split_timezones as (
         cast(valid_until as date) as valid_until,
         True as is_historical
     from schedule_history_timezones
-{% endif %}
+{# {% endif %} #}
 
 -- Set the schedule_valid_from for current schedules based on the most recent historical row.
 -- This allows the current schedule to pick up where the historical schedule left off.
@@ -144,8 +144,7 @@ with split_timezones as (
     from find_actual_changes
     {{ dbt_utils.group_by(5) }}
 
--- Reset the schedule_valid_from date for the "default schedule" to 1970-01-01
--- for downstream models referencing this schedule. See int_zendesk__ticket_schedules.
+-- For each schedule_id, reset the earliest schedule_valid_from date to 1970-01-01.
 ), reset_schedule_start as (
     select
         schedule_id,
@@ -156,7 +155,7 @@ with split_timezones as (
         end_time,
         -- this is for the 'default schedule' (see used in int_zendesk__ticket_schedules)
         case 
-            when schedule_valid_from = min(schedule_valid_from) over () then '1970-01-01'
+            when schedule_valid_from = min(schedule_valid_from) over (partition by schedule_id) then '1970-01-01'
             else schedule_valid_from
         end as schedule_valid_from,
         schedule_valid_until
@@ -185,7 +184,7 @@ with split_timezones as (
 -- Assemble the final schedule-timezone relationship by determining the correct 
 -- schedule_valid_from and schedule_valid_until based on overlapping periods 
 -- between the schedule and timezone. 
-), assemble_schedule_timezones as (
+), final_schedule as (
     select
         schedule_id,
         schedule_id_index,
@@ -194,6 +193,8 @@ with split_timezones as (
         offset_minutes,
         start_time_utc,
         end_time_utc,
+        timezone_valid_from,
+        timezone_valid_until,
 -- Be very careful if changing the order of these case whens--it does matter!
         case
             -- timezone that a schedule start falls within
@@ -229,7 +230,44 @@ with split_timezones as (
     or (schedule_valid_until >= timezone_valid_from and schedule_valid_until < timezone_valid_until)
     -- timezones that fall completely within the bounds of the schedule
     or (timezone_valid_from >= schedule_valid_from and timezone_valid_until < schedule_valid_until)
+
+{% else %}
+
+), final_schedule as (
+    select 
+        schedule.schedule_id,
+        0 as schedule_id_index,
+        lower(schedule.time_zone) as time_zone,
+        schedule.schedule_name,
+        coalesce(split_timezones.offset_minutes, 0) as offset_minutes,
+        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
+        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
+        cast({{ dbt.date_trunc('day', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_valid_from,
+        cast({{ dbt.date_trunc('day', 'split_timezones.valid_until') }}  as {{ dbt.type_timestamp() }}) as schedule_valid_until,
+        cast({{ dbt.date_trunc('day', 'split_timezones.valid_from') }} as {{ dbt.type_timestamp() }}) as timezone_valid_from,
+        cast({{ dbt.date_trunc('day', 'split_timezones.valid_until') }}  as {{ dbt.type_timestamp() }}) as timezone_valid_until
+    from schedule
+    left join split_timezones
+        on split_timezones.time_zone = lower(schedule.time_zone)
+{% endif %}
+
+), final as (
+    select
+        schedule_id,
+        schedule_id_index,
+        time_zone,
+        schedule_name,
+        offset_minutes,
+        start_time_utc,
+        end_time_utc,
+        schedule_valid_from,
+        schedule_valid_until,
+        case when schedule_valid_from = timezone_valid_from
+            then 'timezone'
+            else 'schedule'
+            end as change_type
+    from final_schedule
 )
 
 select * 
-from assemble_schedule_timezones
+from final

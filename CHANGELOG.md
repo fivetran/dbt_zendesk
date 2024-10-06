@@ -1,4 +1,9 @@
 # dbt_zendesk v0.17.0
+[PR #171](https://github.com/fivetran/dbt_zendesk/pull/171) includes the following changes:
+
+- Update this
+
+# dbt_zendesk v0.17.0
 
 ## New model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161))
 - Addition of the `zendesk__document` model, designed to structure Zendesk textual data for vectorization and integration into NLP workflows. The model outputs a table with:

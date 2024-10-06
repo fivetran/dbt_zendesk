@@ -20,8 +20,8 @@ dbt seed --target "$db" --full-refresh
 dbt run --target "$db" --full-refresh
 dbt run --target "$db"
 dbt test --target "$db"
-dbt run --vars '{zendesk__unstructured_enabled: true, using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target "$db" --full-refresh
-dbt run --vars '{zendesk__unstructured_enabled: true, using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target "$db"
+dbt run --vars '{zendesk__unstructured_enabled: true, using_schedules: false, using_schedule_histories: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target "$db" --full-refresh
+dbt run --vars '{zendesk__unstructured_enabled: true, using_schedules: false, using_schedule_histories: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false}' --target "$db"
 dbt test --target "$db"
 
 # dbt run-operation fivetran_utils.drop_schemas_automation --target "$db"
