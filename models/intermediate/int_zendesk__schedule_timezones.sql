@@ -262,6 +262,8 @@ with split_timezones as (
         end_time_utc,
         schedule_valid_from,
         schedule_valid_until,
+        cast({{ dbt_date.week_start('schedule_valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ dbt_date.week_start('schedule_valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
         case when schedule_valid_from = timezone_valid_from
             then 'timezone'
             else 'schedule'
