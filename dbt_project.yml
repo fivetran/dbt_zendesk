@@ -13,6 +13,10 @@ models:
     intermediate:
       +schema: zendesk_intermediate
       +materialized: table
+      int_zendesk__schedule_timezones:
+        +materialized: ephemeral
+      int_zendesk__schedule_holiday:
+        +materialized: ephemeral
     reply_times:
       +materialized: ephemeral
     resolution_times:
