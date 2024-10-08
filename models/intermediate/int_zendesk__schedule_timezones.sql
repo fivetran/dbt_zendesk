@@ -44,7 +44,6 @@ with split_timezones as (
     -- We have to filter these records out since time math requires timezone
     -- revisit later if this becomes a bigger issue
     where time_zone is not null
-{# {% endif %} #}
 
 -- Combine current schedules with historical schedules, marking if each 
 -- record is historical. Adjust the valid_from and valid_until dates accordingly.
@@ -58,11 +57,10 @@ with split_timezones as (
         lower(time_zone) as time_zone,
         schedule_name,
         cast(null as date) as valid_from, -- created_at is when the schedule was first ever created, so we'll fill the real value later
-        cast({{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date) as valid_until,
+        cast({{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date) as valid_until,
         False as is_historical
     from schedule
 
-{# {% if var('using_schedule_histories', True) %} #}
     union all
 
     select
@@ -77,7 +75,6 @@ with split_timezones as (
         cast(valid_until as date) as valid_until,
         True as is_historical
     from schedule_history_timezones
-{# {% endif %} #}
 
 -- Set the schedule_valid_from for current schedules based on the most recent historical row.
 -- This allows the current schedule to pick up where the historical schedule left off.
@@ -110,39 +107,35 @@ with split_timezones as (
             order by schedule_valid_from, schedule_valid_until) as previous_valid_until
     from fill_current_schedule
 
--- Identify unique schedule groupings by detecting gaps between adjacent time 
--- periods to group unchanged records for filtering later.
-), find_actual_changes as (
-    select 
-        schedule_id,
-        schedule_id_index,
-        start_time,
+-- Identify unique schedule groupings
+), assign_groups as (
+    select distinct 
+        schedule_id, 
+        start_time, 
         end_time,
-        time_zone,
-        schedule_name,
-        schedule_valid_from,
-        schedule_valid_until,
-        sum(case when previous_valid_until = schedule_valid_from then 0 else 1 end) -- find if this row is adjacent to the previous row
-            over (partition by schedule_id, start_time, end_time 
-                order by schedule_valid_from
-                rows between unbounded preceding and current row)
-        as group_id
-    from lag_valid_until
+        row_number() over (partition by schedule_id order by start_time) as group_id
+    from fill_current_schedule
+    {{ dbt_utils.group_by(3) }}
 
 -- Consolidate records into continuous periods by finding the minimum 
 -- valid_from and maximum valid_until for each group of unchanged schedules.
 ), consolidate_changes as (
     select 
-        schedule_id,
-        start_time,
-        end_time,
-        time_zone,
-        schedule_name,
-        max(schedule_id_index) as schedule_id_index, --this is arbitrary, but helps with keeping groups together downstream.
-        min(schedule_valid_from) as schedule_valid_from,
-        max(schedule_valid_until) as schedule_valid_until
-    from find_actual_changes
-    {{ dbt_utils.group_by(5) }}
+        fill_current_schedule.schedule_id,
+        fill_current_schedule.start_time,
+        fill_current_schedule.end_time,
+        fill_current_schedule.time_zone,
+        fill_current_schedule.schedule_name,
+        assign_groups.group_id,
+        min(fill_current_schedule.schedule_id_index) as schedule_id_index, --helps with keeping groups together downstream.
+        min(fill_current_schedule.schedule_valid_from) as schedule_valid_from,
+        max(fill_current_schedule.schedule_valid_until) as schedule_valid_until
+    from fill_current_schedule
+    left join assign_groups
+        on assign_groups.schedule_id = fill_current_schedule.schedule_id
+        and assign_groups.start_time = fill_current_schedule.start_time
+        and assign_groups.end_time = fill_current_schedule.end_time
+    {{ dbt_utils.group_by(6) }}
 
 -- For each schedule_id, reset the earliest schedule_valid_from date to 1970-01-01.
 ), reset_schedule_start as (
@@ -155,7 +148,7 @@ with split_timezones as (
         end_time,
         -- this is for the 'default schedule' (see used in int_zendesk__ticket_schedules)
         case 
-            when schedule_valid_from = min(schedule_valid_from) over (partition by schedule_id) then '1970-01-01'
+            when schedule_valid_from = min(schedule_valid_from) over () then '1970-01-01'
             else schedule_valid_from
         end as schedule_valid_from,
         schedule_valid_until

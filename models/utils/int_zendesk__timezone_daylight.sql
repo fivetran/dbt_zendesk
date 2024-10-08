@@ -48,7 +48,7 @@ with timezone as (
         coalesce(last_daylight_end_utc, cast('1970-01-01' as date)) as valid_from,
 
         -- daylight_start_utc is null for timezones that don't use DT
-        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date)) as valid_until
+        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date)) as valid_until
 
     from order_timezone_dt
 
@@ -77,12 +77,12 @@ with timezone as (
         max(daylight_end_utc) as valid_from,
 
         -- If the latest_daylight_end_time_utc is less than todays timestamp, that means DST has ended. Therefore, we will make the valid_until in the future.
-        cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date) as valid_until
+        cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date) as valid_until
 
     from order_timezone_dt
     group by 1, 2
     -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
-    having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp_backcompat() }} as date)
+    having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp() }} as date)
 
 ), final as (
     select

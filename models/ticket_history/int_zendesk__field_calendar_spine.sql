@@ -21,7 +21,7 @@ with calendar as (
     select 
         *,
         -- closed tickets cannot be re-opened or updated, and solved tickets are automatically closed after a pre-defined number of days configured in your Zendesk settings
-        cast( {{ dbt.date_trunc('day', "case when status != 'closed' then " ~ dbt.current_timestamp_backcompat() ~ " else updated_at end") }} as date) as open_until
+        cast( {{ dbt.date_trunc('day', "case when status != 'closed' then " ~ dbt.current_timestamp() ~ " else updated_at end") }} as date) as open_until
     from {{ var('ticket') }}
     
 ), joined as (

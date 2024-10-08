@@ -43,7 +43,7 @@ with audit_logs as (
         row_number() over (
             partition by schedule_id, cast(valid_from as date)
             -- ordering to get the latest change when there are multiple on one day
-            order by valid_from desc, coalesce(valid_until, {{ dbt.current_timestamp_backcompat() }}) desc
+            order by valid_from desc, coalesce(valid_until, {{ dbt.current_timestamp() }}) desc
         ) as row_number
     from split_to_from
 

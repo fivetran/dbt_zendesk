@@ -76,7 +76,7 @@ with ticket as (
     schedule_id,
     schedule_created_at,
     coalesce(lead(schedule_created_at) over (partition by ticket_id order by schedule_created_at)
-            , {{ fivetran_utils.timestamp_add("hour", 1000, "" ~ dbt.current_timestamp_backcompat() ~ "") }} ) as schedule_invalidated_at
+            , {{ fivetran_utils.timestamp_add("hour", 1000, "" ~ dbt.current_timestamp() ~ "") }} ) as schedule_invalidated_at
   from schedule_events
 
 )
