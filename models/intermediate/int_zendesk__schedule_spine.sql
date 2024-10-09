@@ -55,7 +55,7 @@ with schedule_timezones as (
         count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
     from join_holidays
 
--- Label the partition start and add a row for to account for the partition end if there are multiple valid periods.
+-- Label the partition start and add a row to account for the partition end if there are multiple valid periods.
 ), add_partition_end_row as(
     select
         schedule_id,

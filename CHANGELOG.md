@@ -3,16 +3,21 @@
 
 ## Breaking Changes (Full refresh required after upgrading)
 ### Schedule Change Support
-- Support for schedule changes has been added:
-  - Schedule changes are now extracted directly from the audit log, providing a view of schedule modifications over time.
-  - This feature is enabled by default, but can be easily turned off by setting `using_schedule_histories` to `false` in `dbt_project.yml`.
-  - The `int_zendesk__schedule_spine` model is now enhanced to incorporate these schedule changes, making it possible for downstream models to reflect the most up-to-date schedule data.
-  - This improves granularity for Zendesk metrics related to agent availability, SLA tracking, and time-based performance analysis, allowing for more accurate reporting.
+- Support for schedule changes has been added. This feature is disabled by default, but can be enabled by setting variable `using_schedule_histories` to `true` in `dbt_project.yml`:
+```yml
+vars:
+  using_schedule_histories: true
+```
+  - Schedule changes can now extracted directly from the audit log, providing a view of schedule modifications over time.
+  - The `int_zendesk__schedule_spine` model is now incorporates these schedule changes, making it possible for downstream models to reflect the most up-to-date schedule data.
+    - Note this is only in effect when `using_schedule_histories` is true.
+  - This improves granularity for Zendesk metrics related to agent availability, SLA tracking, and time-based performance analysis.
 ### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
-- Added the `stg_zendesk__audit_log` table for capturing schedule changes. This is disabled when setting `using_schedule_histories` to `false` in `dbt_project.yml`.
+- Introduced the `stg_zendesk__audit_log` table for capturing schedule changes from Zendesk's audit log.
+  - This model is disabled by default, to enable it set variable `using_schedule_histories` to `true` in `dbt_project.yml`.
 
 ## New Features
-- Holiday support: Users can now choose to disable holiday tracking by setting `using_holidays` to `false` in `dbt_project.yml`.
+- Holiday support: Users can now choose to disable holiday tracking by setting variable `using_holidays` to `false` in `dbt_project.yml`.
 - New intermediate models have been introduced to streamline both the readability and maintainability:
   - `int_zendesk__timezone_daylight`: A utility model that maintains a record of daylight savings adjustments for each time zone.
   - `int_zendesk__schedule_history`: Captures a full history of schedule changes for each `schedule_id`.
@@ -20,11 +25,16 @@
   - `int_zendesk__schedule_holidays`: Identifies and calculates holiday periods for each schedule.
 - Rebuilt logic in `int_zendesk__schedule_spine` to consolidate updates from the new intermediate models.
 ### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
-- Updated the `stg_zendesk__schedule_holidays` model to allow users to disable holiday processing by setting `using_holidays` to `false`.
+- Updated the `stg_zendesk__schedule_holidays` model to allow users to disable holiday processing by setting variable `using_holidays` to `false`.
 - Added field-level documentation for the `stg_zendesk__audit_log` table.
 
 ## Bug Fixes
 - Resolved a bug in the `int_zendesk__schedule_spine` model where users experienced large gaps in non-holiday periods. The updated logic addresses this issue.
+
+## Decision log
+- Added the following [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md) entries:
+  - Entry addressing how multiple schedule changes in a single day are handled. Only the last change of the day is captured to align with day-based downstream logic.
+  - Entry to clarify backfilling of schedule history. The most recent schedule is sourced from `stg_zendesk__schedule`, while historical changes are managed separately, allowing users to disable the history feature if needed.
 
 ## Under the Hood
 - Replaced instances of `dbt.date_trunc` with `dbt_date.week_start` to standardize week start dates to Sunday across all warehouses, since our schedule logic relies on consistent weeks.

@@ -2,7 +2,7 @@
 
 ## Schedule History
 ### Handling Multiple Schedule Changes in a Day
-While integrating schedule changes from the audit_log source, we observed that multiple changes can occur on the same day, often when users are still finalizing a schedule. To maintain clarity and align with our day-based downstream logic, we decided to capture only the last change made on any given day. If this approach proves insufficient for your use case, please submit a feature request to enable support for multiple changes within a single day.
+While integrating schedule changes from the audit_log source, we observed that multiple changes can occur on the same day, often when users are still finalizing a schedule. To maintain clarity and align with our day-based downstream logic, we decided to capture only the last change made on any given day. If this approach proves insufficient for your use case, please submit a [feature request](https://github.com/fivetran/dbt_zendesk/issues/new/choose) for enabling support for multiple changes within a single day.
 
 ### Backfilling the Schedule History
 Although the schedule history extracted from the audit log includes the most recent schedule, we exclude it in the `int_zendesk__schedule_history` model. Instead, we rely on the schedule from `stg_zendesk__schedule`, since it represents the live schedule. This approach also allows users who are not using schedule histories to easily disable the history feature. We join the live schedule with the schedule history model and bridge the valid_from and valid_until dates to maintain consistency.

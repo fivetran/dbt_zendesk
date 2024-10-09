@@ -1,4 +1,4 @@
-{{ config(enabled=fivetran_utils.enabled_vars(['using_schedules','using_schedule_holidays'])) }}
+{{ config(enabled=var('using_schedules', True) and var('using_holidays', True)) }}
 
 /*
     The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may 

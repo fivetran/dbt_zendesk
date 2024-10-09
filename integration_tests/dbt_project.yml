@@ -29,6 +29,7 @@ vars:
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
+  # using_schedule_histories: True
 
   ## For validation testing. To be commented out before release.
   # zendesk_schema: zendesk_test_env

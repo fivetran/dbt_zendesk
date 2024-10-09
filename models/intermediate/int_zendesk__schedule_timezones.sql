@@ -56,7 +56,7 @@ with split_timezones as (
         lower(time_zone) as time_zone,
         schedule_name,
         cast(null as date) as valid_from, -- created_at is when the schedule was first ever created, so we'll fill this value later
-        cast({{ dbt.current_timestamp() }} as date) as valid_until,
+        cast({{ dbt.dateadd('day', 7, dbt.current_timestamp()) }} as date) as valid_until,
         False as is_historical
     from schedule
 
