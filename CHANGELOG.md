@@ -8,6 +8,8 @@
   - This feature is enabled by default, but can be easily turned off by setting `using_schedule_histories` to `false` in `dbt_project.yml`.
   - The `int_zendesk__schedule_spine` model is now enhanced to incorporate these schedule changes, making it possible for downstream models to reflect the most up-to-date schedule data.
   - This improves granularity for Zendesk metrics related to agent availability, SLA tracking, and time-based performance analysis, allowing for more accurate reporting.
+### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
+- Added the `stg_zendesk__audit_log` table for capturing schedule changes. This is disabled when setting `using_schedule_histories` to `false` in `dbt_project.yml`.
 
 ## New Features
 - Holiday support: Users can now choose to disable holiday tracking by setting `using_holidays` to `false` in `dbt_project.yml`.
@@ -17,11 +19,14 @@
   - `int_zendesk__schedule_timezones`: Merges schedule history with time zone shifts.
   - `int_zendesk__schedule_holidays`: Identifies and calculates holiday periods for each schedule.
 - Rebuilt logic in `int_zendesk__schedule_spine` to consolidate updates from the new intermediate models.
+### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
+- Updated the `stg_zendesk__schedule_holidays` model to allow users to disable holiday processing by setting `using_holidays` to `false`.
+- Added field-level documentation for the `stg_zendesk__audit_log` table.
 
 ## Bug Fixes
 - Resolved a bug in the `int_zendesk__schedule_spine` model where users experienced large gaps in non-holiday periods. The updated logic addresses this issue.
 
-## Under the Hood Improvements
+## Under the Hood
 - Replaced instances of `dbt.date_trunc` with `dbt_date.week_start` to standardize week start dates to Sunday across all warehouses, since our schedule logic relies on consistent weeks.
 - Replaced the deprecated `dbt.current_timestamp_backcompat()` function with `dbt.current_timestamp()` to ensure all timestamps are captured in UTC.
 - Added seed data for `audit_log` to enhance integration testing capabilities.
