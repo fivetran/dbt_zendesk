@@ -1,10 +1,34 @@
-# dbt_zendesk v0.17.0
+# dbt_zendesk v0.18.0
 [PR #171](https://github.com/fivetran/dbt_zendesk/pull/171) includes the following changes:
 
-- Update this
+## Breaking Changes (Full refresh required after upgrading)
+### Schedule Change Support
+- Support for schedule changes has been added:
+  - Schedule changes are now extracted directly from the audit log, providing a view of schedule modifications over time.
+  - This feature is enabled by default, but can be easily turned off by setting `using_schedule_histories` to `false` in `dbt_project.yml`.
+  - The `int_zendesk__schedule_spine` model is now enhanced to incorporate these schedule changes, making it possible for downstream models to reflect the most up-to-date schedule data.
+  - This improves granularity for Zendesk metrics related to agent availability, SLA tracking, and time-based performance analysis, allowing for more accurate reporting.
+
+## New Features
+- Holiday support: Users can now choose to disable holiday tracking by setting `using_holidays` to `false` in `dbt_project.yml`.
+- New intermediate models have been introduced to streamline both the readability and maintainability:
+  - `int_zendesk__timezone_daylight`: A utility model that maintains a record of daylight savings adjustments for each time zone.
+  - `int_zendesk__schedule_history`: Captures a full history of schedule changes for each `schedule_id`.
+  - `int_zendesk__schedule_timezones`: Merges schedule history with time zone shifts.
+  - `int_zendesk__schedule_holidays`: Identifies and calculates holiday periods for each schedule.
+- Rebuilt logic in `int_zendesk__schedule_spine` to consolidate updates from the new intermediate models.
+
+## Bug Fixes
+- Resolved a bug in the `int_zendesk__schedule_spine` model where users experienced large gaps in non-holiday periods. The updated logic addresses this issue.
+
+## Under the Hood Improvements
+- Replaced instances of `dbt.date_trunc` with `dbt_date.week_start` to standardize week start dates to Sunday across all warehouses, since our schedule logic relies on consistent weeks.
+- Replaced the deprecated `dbt.current_timestamp_backcompat()` function with `dbt.current_timestamp()` to ensure all timestamps are captured in UTC.
+- Added seed data for `audit_log` to enhance integration testing capabilities.
+- Introduced new helper macros, `clean_data` and `regex_extract`, to process complex text of the schedule changes extracted from audit logs.
+- Updated `int_zendesk__calendar_spine` logic to prevent errors during compilation before the first full run, ensuring a smoother development experience.
 
 # dbt_zendesk v0.17.0
-
 ## New model ([#161](https://github.com/fivetran/dbt_zendesk/pull/161))
 - Addition of the `zendesk__document` model, designed to structure Zendesk textual data for vectorization and integration into NLP workflows. The model outputs a table with:
   - `document_id`: Corresponding to the `ticket_id`
