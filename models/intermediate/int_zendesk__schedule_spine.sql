@@ -1,8 +1,9 @@
 {{ config(enabled=var('using_schedules', True)) }}
 
 /*
-    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may change due to Daylight Savings.
-    End result will include `valid_from` and `valid_until` columns which we will use downstream to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time)
+    This model generates `valid_from` and `valid_until` timestamps for each schedule start_time and stop_time, 
+    accounting for timezone changes, holidays, and historical schedule adjustments. The inclusion of holidays 
+    and historical changes is controlled by variables `using_holidays` and `using_schedule_histories`.
 */
 
 with schedule_timezones as (
@@ -40,8 +41,8 @@ with schedule_timezones as (
         and schedule_holidays.holiday_date >= schedule_timezones.schedule_valid_from
         and schedule_holidays.holiday_date < schedule_timezones.schedule_valid_until
 
-), split_holidays as(
-    -- create records for the first day of the holiday
+), split_holidays as (
+    -- Creates a record that will be used for the time before a holiday
     select
         join_holidays.*,
         case
@@ -53,7 +54,7 @@ with schedule_timezones as (
 
     union all
 
-    -- create records for the last day of the holiday
+    -- Creates another record that will be used for the holiday itself
     select
         join_holidays.*,
         case
@@ -78,6 +79,7 @@ with schedule_timezones as (
         row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
         count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
     from split_holidays
+    -- filter out records that have a holiday_date but aren't marked as a start or end. 
     where not (holiday_date is not null and holiday_start_or_end is null)
 
 ), add_partition_end_row as(

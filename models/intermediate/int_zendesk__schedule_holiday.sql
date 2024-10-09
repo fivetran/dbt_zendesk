@@ -91,7 +91,7 @@ with calendar_spine as (
     from expanded_holidays
     where holiday_weeks_spanned > 1
 
--- Explodes multi-week holidays into individual days by joining with the calendar_spine. This is necessary to remove schedules
+-- Explodes holidays into individual days by joining with the calendar_spine. This is necessary to remove schedules
 -- that occur during a holiday downstream.
 ), holiday_spine as ( 
 

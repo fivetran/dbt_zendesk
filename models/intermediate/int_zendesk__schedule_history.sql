@@ -8,10 +8,11 @@ with audit_logs as (
     from {{ var('audit_log') }}
     where lower(change_description) like '%workweek changed from%'
 
+-- the formats for change_description vary, so it needs to be cleaned
 ), audit_logs_enhanced as (
     select 
         schedule_id,
-        row_number() over (partition by schedule_id order by created_at) as schedule_id_index,
+        rank() over (partition by schedule_id order by created_at desc) as schedule_id_index,
         created_at,
         -- Clean up the change_description, sometimes has random html stuff in it
         replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
@@ -26,10 +27,10 @@ with audit_logs as (
     select
         schedule_id,
         schedule_id_index,
-        created_at as valid_from,
-        lead(created_at) over (
-            partition by schedule_id order by schedule_id_index) as valid_until,
-        -- we only need what the schedule was changed to
+        created_at,
+        cast(created_at as date) as valid_from,
+        -- each change_description has two parts: 1-from the old schedule 2-to the new schedule.
+        {{ dbt.split_part('change_description_cleaned', "' to '", 1) }} as schedule_change_from,
         {{ dbt.split_part('change_description_cleaned', "' to '", 2) }} as schedule_change
     from audit_logs_enhanced
 
@@ -37,60 +38,33 @@ with audit_logs as (
     select
         schedule_id,
         schedule_id_index,
-        cast(valid_from as date) as valid_from,
-        cast(valid_until as date) as valid_until,
+        created_at,
+        valid_from,
+        schedule_change_from,
         schedule_change,
         row_number() over (
-            partition by schedule_id, cast(valid_from as date)
+            partition by schedule_id, valid_from -- valid from is type date
             -- ordering to get the latest change when there are multiple on one day
-            order by valid_from desc, coalesce(valid_until, {{ dbt.current_timestamp() }}) desc
+            order by schedule_id_index, schedule_change_from -- use the length of schedule_change_from to tie break, which will deprioritize empty "from" schedules
         ) as row_number
     from split_to_from
 
+-- multiple changes can occur on one day, so we will keep only the latest change in a day.
 ), consolidate_same_day_changes as (
     select
         schedule_id,
         schedule_id_index,
+        created_at,
         valid_from,
-        valid_until,
-        schedule_change,
-        -- for use in the next cte
-        lag(valid_until) over (partition by schedule_id, schedule_change order by valid_from, valid_until) as previous_valid_until
+        lead(valid_from) over (
+            partition by schedule_id order by schedule_id_index desc) as valid_until,
+        schedule_change
     from find_same_day_changes
     where row_number = 1
-    -- we don't want the most current schedule since it would be captured by the live schedule. we want to use the live schedule in case we're not using histories.
-    and valid_until is not null
 
-), find_actual_changes as (
-    -- sometimes an audit log record is generated but the schedule is actually unchanged.
-    -- accumulate group flags to create unique groupings for adjacent periods
-    select 
-        schedule_id,
-        schedule_id_index,
-        valid_from,
-        valid_until,
-        schedule_change,
-        -- calculate if this row is adjacent to the previous row
-        sum(case when previous_valid_until = valid_from then 0 else 1 end) 
-            over (partition by schedule_id, schedule_change 
-                order by valid_from 
-                rows between unbounded preceding and current row) -- Redshift needs this frame clause for aggregating
-        as group_id
-    from consolidate_same_day_changes
-
-), consolidate_actual_changes as (
-    -- consolidate the records by finding the min valid_from and max valid_until for each group
-    select 
-        schedule_id,
-        group_id,
-        schedule_change,
-        max(schedule_id_index) as schedule_id_index,
-        min(valid_from) as valid_from,
-        max(valid_until) as valid_until
-    from find_actual_changes
-    {{ dbt_utils.group_by(3) }}
-
--- now that the schedule changes are cleaned, we can split into the individual schedules periods
+-- Creates a record for each day of the week for each schedule_change event.
+-- This is done by iterating over the days of the week, extracting the corresponding 
+-- schedule data for each day, and unioning the results after each iteration.
 ), split_days as (
     {% set days_of_week = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}
     {% for day, day_number in days_of_week.items() %}
@@ -102,12 +76,17 @@ with audit_logs as (
         schedule_change,
         '{{ day }}' as day_of_week,
         cast('{{ day_number }}' as {{ dbt.type_int() }}) as day_of_week_number,
-        {{ zendesk.regex_extract('schedule_change', day) }} as day_of_week_schedule
+        {{ zendesk.regex_extract('schedule_change', day) }} as day_of_week_schedule -- Extracts the schedule data specific to the current day from the schedule_change field.
     from consolidate_same_day_changes
+    -- Exclude records with a null valid_until, which indicates it is the current schedule. 
+    -- We will to pull in the live schedule downstream, which is necessary when not using schedule histories.
+    where valid_until is not null
 
     {% if not loop.last %}union all{% endif %}
     {% endfor %}
 
+-- A single day may contain multiple start and stop times, so we need to generate a separate record for each.
+-- The day_of_week_schedule is structured like a JSON string, requiring warehouse-specific logic to flatten it into individual records.
 {% if target.type == 'redshift' %}
 -- using PartiQL syntax to work with redshift's SUPER types, which requires an extra CTE
 ), redshift_parse_schedule as (
@@ -124,7 +103,7 @@ with audit_logs as (
         json_parse('[' || replace(replace(day_of_week_schedule, ', ', ','), ',', '},{') || ']') as json_schedule
 
     from split_days
-    where day_of_week_schedule != '{}'
+    where day_of_week_schedule != '{}' -- exclude when the day_of_week_schedule in empty. 
 
 ), unnested_schedules as (
     select 
@@ -173,6 +152,7 @@ with audit_logs as (
 
 {% endif %}
 
+-- Each cleaned_unnested_schedule will have the format hh:mm:hh:mm, so we can extract each time part. 
 ), split_times as (
     select 
         unnested_schedules.*,
@@ -182,6 +162,7 @@ with audit_logs as (
         cast(nullif({{ dbt.split_part('cleaned_unnested_schedule', "':'", 4) }}, ' ') as {{ dbt.type_int() }}) as end_time_mm
     from unnested_schedules
 
+-- Calculate the start_time and end_time as minutes from Sunday
 ), calculate_start_end_times as (
     select
         schedule_id,
