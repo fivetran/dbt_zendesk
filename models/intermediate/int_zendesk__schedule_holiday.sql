@@ -1,16 +1,13 @@
 {{ config(enabled=fivetran_utils.enabled_vars(['using_schedules','using_schedule_holidays'])) }}
 
 /*
-    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may change due to Daylight Savings.
-    End result will include `valid_from` and `valid_until` columns which we will use downstream to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time)
+    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may 
+    change due to Daylight Savings. End result will include `valid_from` and `valid_until` columns which we will use downstream 
+    to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time).
 */
 
-with calendar_spine as (
-    select
-        cast(date_day as {{ dbt.type_timestamp() }}) as date_day
-    from {{ ref('int_zendesk__calendar_spine') }}  
 
-), schedule as (
+with schedule as (
     select *
     from {{ var('schedule') }}   
 
@@ -59,7 +56,7 @@ with calendar_spine as (
 
     union all
 
-    -- Split holidays by week that span multiple weeks.
+    -- Split holidays by week that span multiple weeks since the schedule spine is based on weeks.
     select
         holiday_name,
         schedule_id,
@@ -91,23 +88,24 @@ with calendar_spine as (
     from expanded_holidays
     where holiday_weeks_spanned > 1
 
--- Explodes holidays into individual days by joining with the calendar_spine. This is necessary to remove schedules
--- that occur during a holiday downstream.
-), holiday_spine as ( 
-
+-- Create a record for each the holiday start and holiday end for each week to use downstream.
+), split_holidays as (
+    -- Creates a record that will be used for the time before a holiday
     select
-        split_multiweek_holidays.holiday_name,
-        split_multiweek_holidays.schedule_id,
-        split_multiweek_holidays.holiday_valid_from,
-        split_multiweek_holidays.holiday_valid_until,
-        split_multiweek_holidays.holiday_starting_sunday,
-        split_multiweek_holidays.holiday_ending_sunday,
-        calendar_spine.date_day as holiday_date
-    from split_multiweek_holidays 
-    inner join calendar_spine
-        on split_multiweek_holidays.holiday_valid_from <= calendar_spine.date_day
-        and split_multiweek_holidays.holiday_valid_until >= calendar_spine.date_day
+        split_multiweek_holidays.*,
+        holiday_valid_from as holiday_date,
+        '0_gap' as holiday_start_or_end
+    from split_multiweek_holidays
+
+    union all
+
+    -- Creates another record that will be used for the holiday itself
+    select
+        split_multiweek_holidays.*,
+        holiday_valid_until as holiday_date,
+        '1_holiday' as holiday_start_or_end
+    from split_multiweek_holidays
 )
 
 select *
-from holiday_spine
+from split_holidays

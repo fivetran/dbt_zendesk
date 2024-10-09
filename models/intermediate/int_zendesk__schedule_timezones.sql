@@ -233,8 +233,7 @@ with split_timezones as (
     -- timezones that fall completely within the bounds of the schedule
     or (timezone_valid_from >= schedule_valid_from and timezone_valid_until < schedule_valid_until)
 
-{% else %}
-
+{% else %} -- when not using schedule histories
 ), final_schedule as (
     select 
         schedule.schedule_id,
@@ -267,6 +266,7 @@ with split_timezones as (
         -- use dbt_date.week_start to ensure we truncate to Sunday
         cast({{ dbt_date.week_start('schedule_valid_from','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
         cast({{ dbt_date.week_start('schedule_valid_until','UTC') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
+        -- Check if the start fo the schedule was from a schedule or timezone change for tracking downstream.
         case when schedule_valid_from = timezone_valid_from
             then 'timezone'
             else 'schedule'

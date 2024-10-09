@@ -4,6 +4,10 @@
     This model generates `valid_from` and `valid_until` timestamps for each schedule start_time and stop_time, 
     accounting for timezone changes, holidays, and historical schedule adjustments. The inclusion of holidays 
     and historical changes is controlled by variables `using_holidays` and `using_schedule_histories`.
+
+    !!! Important distinction for holiday ranges: A holiday remains valid through the entire day specified by 
+    the `valid_until` field. In contrast, schedule history and timezone `valid_until` values mark the end of 
+    validity at the start of the specified day.
 */
 
 with schedule_timezones as (
@@ -15,7 +19,8 @@ with schedule_timezones as (
     select *
     from {{ ref('int_zendesk__schedule_holiday') }}  
 
--- Joins in the holidays if using or casts nulls if not.
+-- Joins the schedules with holidays, ensuring holidays fall within the valid schedule period.
+-- If there are no holidays, the columns are filled with null values.
 ), join_holidays as (
     select 
         schedule_timezones.schedule_id,
@@ -34,54 +39,23 @@ with schedule_timezones as (
         schedule_holidays.holiday_valid_from,
         schedule_holidays.holiday_valid_until,
         schedule_holidays.holiday_starting_sunday,
-        schedule_holidays.holiday_ending_sunday
+        schedule_holidays.holiday_ending_sunday,
+        schedule_holidays.holiday_start_or_end
     from schedule_timezones
     left join schedule_holidays
         on schedule_holidays.schedule_id = schedule_timezones.schedule_id
         and schedule_holidays.holiday_date >= schedule_timezones.schedule_valid_from
         and schedule_holidays.holiday_date < schedule_timezones.schedule_valid_until
 
-), split_holidays as (
-    -- Creates a record that will be used for the time before a holiday
-    select
-        join_holidays.*,
-        case
-            when holiday_valid_from = holiday_date
-                then '0_gap' -- the number is for ordering later
-            end as holiday_start_or_end
-    from join_holidays
-    where holiday_date is not null
-
-    union all
-
-    -- Creates another record that will be used for the holiday itself
-    select
-        join_holidays.*,
-        case
-            when holiday_valid_until = holiday_date
-                then '1_holiday' -- the number is for ordering later
-            end as holiday_start_or_end
-    from join_holidays
-    where holiday_date is not null
-
-    union all
-
-    -- keep records for weeks with no holiday
-    select
-        join_holidays.*,
-        cast(null as {{ dbt.type_string() }}) as holiday_start_or_end
-    from join_holidays
-    where holiday_date is null
-
+-- Find and count all holidays that fall within a schedule range.
 ), valid_from_partition as(
     select
-        split_holidays.*,
+        join_holidays.*,
         row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
         count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
-    from split_holidays
-    -- filter out records that have a holiday_date but aren't marked as a start or end. 
-    where not (holiday_date is not null and holiday_start_or_end is null)
+    from join_holidays
 
+-- Label the partition start and add a row for to account for the partition end if there are multiple valid periods.
 ), add_partition_end_row as(
     select
         schedule_id,
@@ -135,8 +109,9 @@ with schedule_timezones as (
         max_valid_from_index
     from valid_from_partition
     where max_valid_from_index > 1
-    and valid_from_index = max_valid_from_index
+    and valid_from_index = max_valid_from_index -- this finds the last rows to duplicate
 
+-- Adjusts and fills the valid from and valid until times for each partition, taking into account the partition start, gap, or holiday.
 ), adjust_ranges as(
     select
         add_partition_end_row.*,
@@ -179,16 +154,17 @@ with schedule_timezones as (
         holiday_valid_until,
         holiday_starting_sunday,
         holiday_ending_sunday,
-        'partition_end' as holiday_start_or_end,
+        holiday_start_or_end,
         valid_from_index,
         case when holiday_start_or_end = '1_holiday'
             then 'holiday'
             else change_type
             end as change_type
     from adjust_ranges
-    -- filter out irrelevant records
+    -- filter out irrelevant records after adjusting the ranges
     where not (valid_from >= valid_until and holiday_date is not null)
 
+-- Converts holiday valid_from and valid_until times into minutes from the start of the week, adjusting for timezones.
 ), valid_minutes as(
     select
         holiday_weeks.*,
@@ -209,6 +185,7 @@ with schedule_timezones as (
         end as holiday_valid_until_minutes_from_week_start
     from holiday_weeks
 
+-- Identifies whether a schedule overlaps with a holiday by comparing start and end times with holiday minutes.
 ), find_holidays as(
     select 
         schedule_id,
@@ -227,6 +204,7 @@ with schedule_timezones as (
         count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holidays_in_week
     from valid_minutes
 
+-- Filter out records where holiday overlaps don't match, ensuring each schedule's holiday status is consistent.
 ), filter_holidays as(
     select 
         *,
@@ -236,7 +214,7 @@ with schedule_timezones as (
 
     union all
 
-    -- we want to count the number of records for each schedule start_time_utc and end_time_utc for filtering later
+    -- CFount the number of records for each schedule start_time_utc and end_time_utc for filtering later.
     select 
         distinct *,
         cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
