@@ -80,11 +80,11 @@ vars:
 ```
 
 ### Step 4: Enable/Disable models for non-existent sources
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `audit_log`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories`. Add variables for only the tables you want to enable/disable:
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories`. Add variables for only the tables you want to enable/disable:
 ```yml
 vars:
     using_schedule_histories:   True          #Enable if you are using audit_logs for schedule histories
-    using_schedules:            False         #Disable if you are not using schedules
+    using_schedules:            False         #Disable if you are not using schedules, which requires source tables `ticket_schedule`, `daylight_time`, and `time_zone`
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
     using_domain_names:         False         #Disable if you are not using domain names
     using_user_tags:            False         #Disable if you are not using user tags
