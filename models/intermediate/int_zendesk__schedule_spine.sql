@@ -1,364 +1,256 @@
 {{ config(enabled=var('using_schedules', True)) }}
 
 /*
-    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may change due to Daylight Savings.
-    End result will include `valid_from` and `valid_until` columns which we will use downstream to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time)
+    This model generates `valid_from` and `valid_until` timestamps for each schedule start_time and stop_time, 
+    accounting for timezone changes, holidays, and historical schedule adjustments. The inclusion of holidays 
+    and historical changes is controlled by variables `using_holidays` and `using_schedule_histories`.
+
+    !!! Important distinction for holiday ranges: A holiday remains valid through the entire day specified by 
+    the `valid_until` field. In contrast, schedule history and timezone `valid_until` values mark the end of 
+    validity at the start of the specified day.
 */
 
-with timezone as (
-
+with schedule_timezones as (
     select *
-    from {{ var('time_zone') }}
+    from {{ ref('int_zendesk__schedule_timezones') }}  
 
-), daylight_time as (
-
+{% if var('using_holidays', True) %}
+), schedule_holidays as (
     select *
-    from {{ var('daylight_time') }}
+    from {{ ref('int_zendesk__schedule_holiday') }}  
 
-), schedule as (
+-- Joins the schedules with holidays, ensuring holidays fall within the valid schedule period.
+-- If there are no holidays, the columns are filled with null values.
+), join_holidays as (
+    select 
+        schedule_timezones.schedule_id,
+        schedule_timezones.time_zone,
+        schedule_timezones.offset_minutes,
+        schedule_timezones.start_time_utc,
+        schedule_timezones.end_time_utc,
+        schedule_timezones.schedule_name,
+        schedule_timezones.schedule_valid_from,
+        schedule_timezones.schedule_valid_until,
+        schedule_timezones.schedule_starting_sunday,
+        schedule_timezones.schedule_ending_sunday,
+        schedule_timezones.change_type,
+        schedule_holidays.holiday_date,
+        schedule_holidays.holiday_name,
+        schedule_holidays.holiday_valid_from,
+        schedule_holidays.holiday_valid_until,
+        schedule_holidays.holiday_starting_sunday,
+        schedule_holidays.holiday_ending_sunday,
+        schedule_holidays.holiday_start_or_end
+    from schedule_timezones
+    left join schedule_holidays
+        on schedule_holidays.schedule_id = schedule_timezones.schedule_id
+        and schedule_holidays.holiday_date >= schedule_timezones.schedule_valid_from
+        and schedule_holidays.holiday_date < schedule_timezones.schedule_valid_until
 
-    select *
-    from {{ var('schedule') }}   
-
--- in the below CTE we want to explode out each holiday period into individual days, to prevent potential fanouts downstream in joins to schedules.
-), schedule_holiday as ( 
-
+-- Find and count all holidays that fall within a schedule range.
+), valid_from_partition as(
     select
-        _fivetran_synced,
-        cast(date_day as {{ dbt.type_timestamp() }} ) as holiday_start_date_at, -- For each day within a holiday we want to give it its own record. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
-        cast(date_day as {{ dbt.type_timestamp() }} ) as holiday_end_date_at, -- Since each day within a holiday now gets its own record, the end_date will then be the same day as the start_date. In the later CTE holiday_start_end_times, we transform these timestamps into minutes-from-beginning-of-the-week.
-        holiday_id,
+        join_holidays.*,
+        row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
+        count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
+    from join_holidays
+
+-- Label the partition start and add a row to account for the partition end if there are multiple valid periods.
+), add_partition_end_row as(
+    select
+        schedule_id,
+        time_zone,
+        offset_minutes,
+        start_time_utc,
+        end_time_utc,
+        schedule_name,
+        schedule_valid_from,
+        schedule_valid_until,
+        schedule_starting_sunday,
+        schedule_ending_sunday,
+        change_type,
         holiday_name,
-        schedule_id
-
-    from {{ var('schedule_holiday') }}  
-    inner join {{ ref('int_zendesk__calendar_spine') }} 
-        on holiday_start_date_at <= cast(date_day as {{ dbt.type_timestamp() }} )
-        and holiday_end_date_at >= cast(date_day as {{ dbt.type_timestamp() }} )
-
-), timezone_with_dt as (
-
-    select 
-        timezone.*,
-        daylight_time.daylight_start_utc,
-        daylight_time.daylight_end_utc,
-        daylight_time.daylight_offset_minutes
-
-    from timezone 
-    left join daylight_time 
-        on timezone.time_zone = daylight_time.time_zone
-
-), order_timezone_dt as (
-
-    select 
-        *,
-        -- will be null for timezones without any daylight savings records (and the first entry)
-        -- we will coalesce the first entry date with .... the X years ago
-        lag(daylight_end_utc, 1) over (partition by time_zone order by daylight_end_utc asc) as last_daylight_end_utc,
-        -- will be null for timezones without any daylight savings records (and the last entry)
-        -- we will coalesce the last entry date with the current date 
-        lead(daylight_start_utc, 1) over (partition by time_zone order by daylight_start_utc asc) as next_daylight_start_utc
-
-    from timezone_with_dt
-
-), split_timezones as (
-
-    -- standard schedule (includes timezones without DT)
-    -- starts: when the last Daylight Savings ended
-    -- ends: when the next Daylight Savings starts
-    select 
-        time_zone,
-        standard_offset_minutes as offset_minutes,
-
-        -- last_daylight_end_utc is null for the first record of the time_zone's daylight time, or if the TZ doesn't use DT
-        coalesce(last_daylight_end_utc, cast('1970-01-01' as date)) as valid_from,
-
-        -- daylight_start_utc is null for timezones that don't use DT
-        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date)) as valid_until
-
-    from order_timezone_dt
-
-    union all 
-
-    -- DT schedule (excludes timezones without it)
-    -- starts: when this Daylight Savings started
-    -- ends: when this Daylight Savings ends
-    select 
-        time_zone,
-        -- Pacific Time is -8h during standard time and -7h during DT
-        standard_offset_minutes + daylight_offset_minutes as offset_minutes,
-        daylight_start_utc as valid_from,
-        daylight_end_utc as valid_until
-
-    from order_timezone_dt
-    where daylight_offset_minutes is not null
-
+        holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
+        case when valid_from_index = 1 and holiday_start_or_end is not null
+            then 'partition_start'
+            else holiday_start_or_end
+            end as holiday_start_or_end,
+        valid_from_index,
+        max_valid_from_index
+    from valid_from_partition
+    
     union all
 
+    -- when max_valid_from_index > 1, then we want to duplicate the last row to end the partition.
     select
-        time_zone,
-        standard_offset_minutes as offset_minutes,
-
-        -- Get the latest daylight_end_utc time and set that as the valid_from
-        max(daylight_end_utc) as valid_from,
-
-        -- If the latest_daylight_end_time_utc is less than todays timestamp, that means DST has ended. Therefore, we will make the valid_until in the future.
-        cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp_backcompat()) }} as date) as valid_until
-
-    from order_timezone_dt
-    group by 1, 2
-    -- We only want to apply this logic to time_zone's that had daylight saving time and it ended at a point. For example, Hong Kong ended DST in 1979.
-    having cast(max(daylight_end_utc) as date) < cast({{ dbt.current_timestamp_backcompat() }} as date)
-
-), calculate_schedules as (
-
-    select 
-        schedule.schedule_id,
-        schedule.time_zone,
-        schedule.start_time,
-        schedule.end_time,
-        schedule.created_at,
-        schedule.schedule_name,
-        schedule.start_time - coalesce(split_timezones.offset_minutes, 0) as start_time_utc,
-        schedule.end_time - coalesce(split_timezones.offset_minutes, 0) as end_time_utc,
-        coalesce(split_timezones.offset_minutes, 0) as offset_minutes_to_add,
-        -- we'll use these to determine which schedule version to associate tickets with
-        cast(split_timezones.valid_from as {{ dbt.type_timestamp() }}) as valid_from,
-        cast(split_timezones.valid_until as {{ dbt.type_timestamp() }}) as valid_until
-
-    from schedule
-    left join split_timezones
-        on split_timezones.time_zone = schedule.time_zone
-
--- Now we need take holiday's into consideration and perform the following transformations to account for Holidays in existing schedules
-), holiday_start_end_times as (
-
-    select
-        calculate_schedules.*,
-        schedule_holiday.holiday_name,
-        schedule_holiday.holiday_start_date_at,
-        cast({{ dbt.dateadd("second", "86400", "schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_end_date_at, -- add 24*60*60 seconds
-        cast({{ dbt_date.week_start("schedule_holiday.holiday_start_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_start,
-        cast({{ dbt_date.week_end("schedule_holiday.holiday_end_date_at") }} as {{ dbt.type_timestamp() }}) as holiday_week_end
-    from schedule_holiday
-    inner join calculate_schedules
-        on calculate_schedules.schedule_id = schedule_holiday.schedule_id
-        and schedule_holiday.holiday_start_date_at >= calculate_schedules.valid_from 
-        and schedule_holiday.holiday_start_date_at < calculate_schedules.valid_until
-
--- Let's calculate the start and end date of the Holiday in terms of minutes from Sunday (like other Zendesk schedules)
-), holiday_minutes as(
-
-    select
-        holiday_start_end_times.*,
-        {{ dbt.datediff("holiday_week_start", "holiday_start_date_at", "minute") }} - coalesce(timezone.standard_offset_minutes, 0) as minutes_from_sunday_start,
-        {{ dbt.datediff("holiday_week_start", "holiday_end_date_at", "minute") }} - coalesce(timezone.standard_offset_minutes, 0) as minutes_from_sunday_end
-    from holiday_start_end_times
-    left join timezone
-        on timezone.time_zone = holiday_start_end_times.time_zone
-
--- Determine which schedule days include a holiday
-), holiday_check as (
-
-    select
-        *,
-        case when minutes_from_sunday_start < start_time_utc and minutes_from_sunday_end > end_time_utc 
-            then holiday_name 
-        end as holiday_name_check
-    from holiday_minutes
-
--- Consolidate the holiday records that were just created
-), holiday_consolidated as (
-
-    select 
-        schedule_id, 
-        time_zone, 
-        schedule_name, 
-        valid_from, 
-        valid_until, 
-        start_time_utc, 
-        end_time_utc, 
-        holiday_week_start,
-        cast({{ dbt.dateadd("second", "86400", "holiday_week_end") }} as {{ dbt.type_timestamp() }}) as holiday_week_end,
-        max(holiday_name_check) as holiday_name_check
-    from holiday_check
-    {{ dbt_utils.group_by(n=9) }}
-
--- Since we have holiday schedules and normal schedules, we need to union them into a holistic schedule spine
-), spine_union as (
-
-    select
-        schedule_id, 
-        time_zone, 
-        schedule_name, 
-        valid_from, 
-        valid_until, 
-        start_time_utc, 
-        end_time_utc, 
-        holiday_week_start,
-        holiday_week_end,
-        holiday_name_check
-    from holiday_consolidated
-
-    union all
-
-    select
-        schedule_id, 
-        time_zone, 
-        schedule_name, 
-        valid_from, 
-        valid_until, 
-        start_time_utc, 
-        end_time_utc, 
-        null as holiday_week_start,
-        null as holiday_week_end,
-        null as holiday_name_check
-    from calculate_schedules
-
--- Now that we have an understanding of which weeks are holiday's let's consolidate them with non holiday weeks
-), all_periods as (
-
-    select distinct
         schedule_id,
-        holiday_week_start as period_start,
-        holiday_week_end as period_end,
+        time_zone,
+        offset_minutes,
         start_time_utc,
         end_time_utc,
-        holiday_name_check,
-        true as is_holiday_week
-    from spine_union
-    where holiday_week_start is not null
-        and holiday_week_end is not null
+        schedule_name,
+        schedule_valid_from,
+        schedule_valid_until,
+        schedule_starting_sunday,
+        schedule_ending_sunday,
+        change_type,
+        holiday_name,
+        holiday_date,
+        holiday_valid_from,
+        holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
+        'partition_end' as holiday_start_or_end,
+        max_valid_from_index + 1 as valid_from_index,
+        max_valid_from_index
+    from valid_from_partition
+    where max_valid_from_index > 1
+    and valid_from_index = max_valid_from_index -- this finds the last rows to duplicate
 
-    union all
-
-    select distinct
-        schedule_id,
-        valid_from as period_start,
-        valid_until as period_end,
-        start_time_utc,
-        end_time_utc,
-        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
-        false as is_holiday_week
-    from spine_union
-
--- We have holiday and non holiday schedules together, now let's sort them to understand the previous end and next start of neighboring schedules
-), sorted_periods as (
-
-    select distinct
-        *,
-        lag(period_end) over (partition by schedule_id order by period_start, start_time_utc) as prev_end,
-        lead(period_start) over (partition by schedule_id order by period_start, start_time_utc) as next_start
-    from all_periods
-
--- We need to adjust some non holiday schedules in order to properly fill holiday gaps in the schedules later down the transformation
-), non_holiday_period_adjustments as (
-
+-- Adjusts and fills the valid from and valid until times for each partition, taking into account the partition start, gap, or holiday.
+), adjust_ranges as(
     select
-        schedule_id, 
-        period_start, 
-        period_end,
-        prev_end,
-        next_start,
-        -- taking first_value/last_value because prev_end and next_start are inconsistent within the schedule partitions -- they all include a record that is outside the partition. so we need to ignore those erroneous records that slip in
-        coalesce(greatest(case 
-            when not is_holiday_week and prev_end is not null then first_value(prev_end) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
-            else period_start
-        end, period_start), period_start) as valid_from,
-        coalesce(case 
-            when not is_holiday_week and next_start is not null then last_value(next_start) over (partition by schedule_id, period_start order by start_time_utc rows between unbounded preceding and unbounded following)
-            else period_end
-        end, period_end) as valid_until,
-        start_time_utc,
-        end_time_utc,
-        holiday_name_check,
-        is_holiday_week
-    from sorted_periods
-
--- A few window function results will be leveraged downstream. Let's generate them now.
-), gap_starter as (
-    select 
-        *,
-        max(period_end) over (partition by schedule_id) as max_valid_until,
-        last_value(next_start) over (partition by schedule_id, period_start order by valid_until rows between unbounded preceding and unbounded following) as lead_next_start,
-        first_value(prev_end) over (partition by schedule_id, valid_from order by start_time_utc rows between unbounded preceding and unbounded following) as first_prev_end
-    from non_holiday_period_adjustments
-
--- There may be gaps in holiday and non holiday schedules, so we need to identify where these gaps are
-), gap_adjustments as(
-
-    select 
-        *,
-        -- In order to identify the gaps we check to see if the valid_from and previous valid_until are right next to one. If we add two hours to the previous valid_until it should always be greater than the current valid_from.
-        -- However, if the valid_from is greater instead then we can identify that this period has a gap that needs to be filled.
+        add_partition_end_row.*,
+        case
+            when holiday_start_or_end = 'partition_start'
+                then schedule_starting_sunday
+            when holiday_start_or_end = '0_gap'
+                then lag(holiday_ending_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+            when holiday_start_or_end = '1_holiday'
+                then holiday_starting_sunday
+            when holiday_start_or_end = 'partition_end'
+                then holiday_ending_sunday
+            else schedule_starting_sunday
+        end as valid_from,
         case 
-        when cast({{ dbt.dateadd("hour", "2", "valid_until") }} as {{ dbt.type_timestamp() }}) < cast(lead_next_start as {{ dbt.type_timestamp() }})
-            then 'gap'
-        when (lead_next_start is null and valid_from < max_valid_until and period_end != max_valid_until)
-            then 'gap'
+            when holiday_start_or_end = 'partition_start'
+                then holiday_starting_sunday
+            when holiday_start_or_end = '0_gap'
+                then lead(holiday_starting_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+            when holiday_start_or_end = '1_holiday'
+                then holiday_ending_sunday
+            when holiday_start_or_end = 'partition_end'
+                then schedule_ending_sunday
+            else schedule_ending_sunday
+        end as valid_until
+    from add_partition_end_row
+
+), holiday_weeks as(
+    select
+        schedule_id,
+        time_zone,
+        offset_minutes,
+        start_time_utc,
+        end_time_utc,
+        schedule_name,
+        valid_from,
+        valid_until,
+        holiday_name,
+        holiday_valid_from,
+        holiday_valid_until,
+        holiday_starting_sunday,
+        holiday_ending_sunday,
+        holiday_start_or_end,
+        valid_from_index,
+        case when holiday_start_or_end = '1_holiday'
+            then 'holiday'
+            else change_type
+            end as change_type
+    from adjust_ranges
+    -- filter out irrelevant records after adjusting the ranges
+    where not (valid_from >= valid_until and holiday_date is not null)
+
+-- Converts holiday valid_from and valid_until times into minutes from the start of the week, adjusting for timezones.
+), valid_minutes as(
+    select
+        holiday_weeks.*,
+
+        -- Calculate holiday_valid_from in minutes from week start
+        case when change_type = 'holiday' 
+            then ({{ dbt.datediff('holiday_starting_sunday', 'holiday_valid_from', 'minute') }}
+                - offset_minutes) -- timezone adjustment
             else null
-        end as is_schedule_gap
+        end as holiday_valid_from_minutes_from_week_start,
 
-    from gap_starter
+        -- Calculate holiday_valid_until in minutes from week start
+        case when change_type = 'holiday' 
+            then ({{ dbt.datediff('holiday_starting_sunday', 'holiday_valid_until', 'minute') }}
+                + 24 * 60 -- add 1 day to set the upper bound of the holiday
+                - offset_minutes) -- timezone adjustment
+            else null
+        end as holiday_valid_until_minutes_from_week_start
+    from holiday_weeks
 
--- We know where the gaps are, so now lets prime the data to fill those gaps
-), schedule_spine_primer as (
-
+-- Identifies whether a schedule overlaps with a holiday by comparing start and end times with holiday minutes.
+), find_holidays as(
     select 
-        schedule_id, 
+        schedule_id,
         valid_from,
         valid_until,
         start_time_utc,
         end_time_utc,
-        lead_next_start,
-        max_valid_until,
-        holiday_name_check,
-        is_holiday_week,
-        max(is_schedule_gap) over (partition by schedule_id, valid_until) as is_gap_period,
-        lead(valid_from) over (partition by schedule_id order by valid_from, start_time_utc) as fill_primer
-    from gap_adjustments
+        change_type,
+        case 
+            when start_time_utc < holiday_valid_until_minutes_from_week_start
+                and end_time_utc > holiday_valid_from_minutes_from_week_start
+                and change_type = 'holiday' 
+            then holiday_name
+            else cast(null as {{ dbt.type_string() }}) 
+        end as holiday_name,
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holidays_in_week
+    from valid_minutes
 
--- We know the gaps and where they are, so let's fill them with the following union
-), final_union as (
-
-    -- For all gap periods, let's properly create a schedule filled before the holiday.
+-- Filter out records where holiday overlaps don't match, ensuring each schedule's holiday status is consistent.
+), filter_holidays as(
     select 
-        schedule_id,
-        valid_until as valid_from,
-        coalesce(last_value(fill_primer) over (partition by schedule_id, valid_until order by start_time_utc rows between unbounded preceding and unbounded following), max_valid_until) as valid_until,
-        start_time_utc, 
-        end_time_utc, 
-        cast(null as {{ dbt.type_string() }}) as holiday_name_check,
-        false as is_holiday_week
-    from schedule_spine_primer
-    where is_gap_period is not null
+        *,
+        cast(1 as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
+    from find_holidays
+    where number_holidays_in_week = 1
 
     union all
 
-    -- Fill all other normal schedules.
-    select
-        schedule_id, 
-        valid_from,
-        valid_until,
-        start_time_utc,
-        end_time_utc,
-        holiday_name_check,
-        is_holiday_week
-    from schedule_spine_primer
+    -- Count the number of records for each schedule start_time_utc and end_time_utc for filtering later.
+    select 
+        distinct *,
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
+            as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
+    from find_holidays
+    where number_holidays_in_week > 1
 
--- We can finally filter out the holiday_name_check results as the gap filling properly filled in the gaps for holidays
 ), final as(
-
-    select
-        schedule_id, 
+    select 
+        schedule_id,
         valid_from,
         valid_until,
         start_time_utc,
         end_time_utc,
-        is_holiday_week
-    from final_union
-    where holiday_name_check is null
+        change_type
+    from filter_holidays
+
+    -- This filter ensures that for each schedule, the count of holidays in a week matches the number 
+    -- of distinct schedule records with the same start_time_utc and end_time_utc.
+    -- Rows where this count doesn't match indicate overlap with a holiday, so we filter out that record.
+    -- Additionally, schedule records that fall on a holiday are excluded by checking if holiday_name is null.
+    where number_holidays_in_week = number_records_for_schedule_start_end
+    and holiday_name is null
+
+{% else %} 
+), final as(
+    select 
+        schedule_id,
+        schedule_valid_from as valid_from,
+        schedule_valid_until as valid_until,
+        start_time_utc,
+        end_time_utc,
+        change_type
+    from schedule_timezones
+{% endif %} 
 )
 
 select *
-from final 
+from final

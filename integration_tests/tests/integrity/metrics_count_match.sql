@@ -14,7 +14,6 @@ with stg_count as (
 metric_count as (
     select
         count(*) as metric_ticket_count
-    from source
     from {{ ref('zendesk__ticket_metrics') }}
 )
 
