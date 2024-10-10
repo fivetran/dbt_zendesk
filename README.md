@@ -84,7 +84,7 @@ This package takes into consideration that not every Zendesk Support account uti
 ```yml
 vars:
     using_schedule_histories:   True          #Enable if you are using audit_logs for schedule histories
-    using_schedules:            False         #Disable if you are not using schedules, which requires source tables `ticket_schedule`, `daylight_time`, and `time_zone`
+    using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
     using_domain_names:         False         #Disable if you are not using domain names
     using_user_tags:            False         #Disable if you are not using user tags
