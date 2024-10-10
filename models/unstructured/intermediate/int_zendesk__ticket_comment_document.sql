@@ -1,4 +1,4 @@
-{{ config(enabled=var('zendesk__unstructured_enabled', False)) }}
+{{ config(enabled=var('zendesk__unstructured_enabled', True)) }}
 
 with ticket_comments as (
     select *
