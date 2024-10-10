@@ -1,4 +1,4 @@
-{{ config(enabled=var('zendesk__unstructured_enabled', False)) }}
+{{ config(enabled=var('zendesk__unstructured_enabled', True)) }}
 
 with filtered_comment_documents as (
   select *
