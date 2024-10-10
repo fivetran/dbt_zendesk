@@ -65,7 +65,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.19.0", "<0.20.0"]
+    version: [">=0.18.0", "<0.19.0"]
 
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
@@ -84,7 +84,7 @@ This package takes into consideration that not every Zendesk Support account uti
 ```yml
 vars:
     using_schedule_histories:   True          #Enable if you are using audit_logs for schedule histories
-    using_schedules:            False         #Disable if you are not using schedules, which requires source tables `ticket_schedule`, `daylight_time`, and `time_zone`
+    using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
     using_domain_names:         False         #Disable if you are not using domain names
     using_user_tags:            False         #Disable if you are not using user tags
@@ -94,19 +94,19 @@ vars:
 
 ### (Optional) Step 5: Additional configurations
 
-#### Disabling the unstructured document model for NLP
+#### Enabling the unstructured document model for NLP
 This package includes the `zendesk__document` model, which processes and segments Zendesk text data for vectorization, making it suitable for NLP workflows. The model outputs structured chunks of text with associated document IDs, segment indices, and token counts. For definitions and more information, refer to [zendesk__document](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__document) in our dbt docs.
 
-By default, this model is enabled. To disable it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
+By default, this model is disabled. To enable it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
 
 ```yml
 vars:
-  zendesk__unstructured_enabled: False # true by default.
+  zendesk__unstructured_enabled: true # false by default.
 ```
 
 ##### Customizing Chunk Size for Vectorization
 
-The `zendesk__document` model was developed to limit approximate chunk sizes to approximately 5,000 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
+The `zendesk__document` model was developed to limit approximate chunk sizes to 7,500 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
 
 ```yml
 vars:

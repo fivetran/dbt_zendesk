@@ -8,7 +8,7 @@
 
 ## Breaking Changes (Full refresh required after upgrading)
 ### Schedule Change Support
-- Support for schedule changes has been added. This feature is disabled by default, but can be enabled by setting variable `using_schedule_histories` to `true` in your `dbt_project.yml`:
+- Support for schedule changes has been added. This feature is disabled by default since most users do not sync the required source `audit_table`. To enable this feature set the variable `using_schedule_histories` to `true` in your `dbt_project.yml`:
 ```yml
 vars:
   using_schedule_histories: true
@@ -17,25 +17,24 @@ vars:
   - The `int_zendesk__schedule_spine` model is now able to incorporate these schedule changes, making it possible for downstream models to reflect the most up-to-date schedule data.
     - Note this is only in effect when `using_schedule_histories` is true.
   - This improves granularity for Zendesk metrics related to agent availability, SLA tracking, and time-based performance analysis.
-### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
+#### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
 - Introduced the `stg_zendesk__audit_log` table for capturing schedule changes from Zendesk's audit log.
   - This model is disabled by default, to enable it set variable `using_schedule_histories` to `true` in `dbt_project.yml`.
 
 ## New Features
-- Holiday support: Users can now choose to disable holiday tracking by setting variable `using_holidays` to `false` in `dbt_project.yml`.
+- Holiday support: Users can now choose to disable holiday tracking, while continuing to use schedules, by setting variable `using_holidays` to `false` in `dbt_project.yml`.
 - New intermediate models have been introduced to streamline both the readability and maintainability:
-  - `int_zendesk__timezone_daylight`: A utility model that maintains a record of daylight savings adjustments for each time zone.
+  - [`int_zendesk__timezone_daylight`](https://github.com/fivetran/dbt_zendesk/blob/main/models/utils/int_zendesk__timezone_daylight.sql): A utility model that maintains a record of daylight savings adjustments for each time zone.
     - materialization: ephemeral
-  - `int_zendesk__schedule_history`: Captures a full history of schedule changes for each `schedule_id`.
+  - [`int_zendesk__schedule_history`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__schedule_history.sql): Captures a full history of schedule changes for each `schedule_id`.
     - materialization: table (if enabled)
-  - `int_zendesk__schedule_timezones`: Merges schedule history with time zone shifts.
+  - [`int_zendesk__schedule_timezones`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__schedule_timezones.sql): Merges schedule history with time zone shifts.
     - materialization: ephemeral
-  - `int_zendesk__schedule_holidays`: Identifies and calculates holiday periods for each schedule.
+  - [`int_zendesk__schedule_holiday`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__schedule_holiday.sql): Identifies and calculates holiday periods for each schedule.
     - materialization: ephemeral
-- Rebuilt logic in `int_zendesk__schedule_spine` to consolidate updates from the new intermediate models.
-### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
+- Rebuilt logic in [`int_zendesk__schedule_spine`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__schedule_spine.sql) to consolidate updates from the new intermediate models.
+#### dbt_zendesk_source changes (see the [Release Notes](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.13.0) for more details)
 - Updated the `stg_zendesk__schedule_holidays` model to allow users to disable holiday processing by setting variable `using_holidays` to `false`.
-- Added field-level documentation for the `stg_zendesk__audit_log` table.
 
 ## Bug Fixes
 - Resolved a bug in the `int_zendesk__schedule_spine` model where users experienced large gaps in non-holiday periods. The updated logic addresses this issue.

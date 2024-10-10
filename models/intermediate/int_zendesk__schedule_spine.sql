@@ -180,7 +180,7 @@ with schedule_timezones as (
         case when change_type = 'holiday' 
             then ({{ dbt.datediff('holiday_starting_sunday', 'holiday_valid_until', 'minute') }}
                 + 24 * 60 -- add 1 day to set the upper bound of the holiday
-                - offset_minutes)-- timezone adjustment
+                - offset_minutes) -- timezone adjustment
             else null
         end as holiday_valid_until_minutes_from_week_start
     from holiday_weeks
@@ -214,7 +214,7 @@ with schedule_timezones as (
 
     union all
 
-    -- CFount the number of records for each schedule start_time_utc and end_time_utc for filtering later.
+    -- Count the number of records for each schedule start_time_utc and end_time_utc for filtering later.
     select 
         distinct *,
         cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
