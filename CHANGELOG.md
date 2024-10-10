@@ -19,7 +19,7 @@ vars:
 ## New Features
 - Holiday support: Users can now choose to disable holiday tracking, while continuing to use schedules, by setting variable `using_holidays` to `false` in `dbt_project.yml`.
 - New intermediate models have been introduced to streamline both the readability and maintainability:
-  - [`int_zendesk__timezone_daylight`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__timezone_daylight.sql): A utility model that maintains a record of daylight savings adjustments for each time zone.
+  - [`int_zendesk__timezone_daylight`](https://github.com/fivetran/dbt_zendesk/blob/main/models/utils/int_zendesk__timezone_daylight.sql): A utility model that maintains a record of daylight savings adjustments for each time zone.
     - materialization: ephemeral
   - [`int_zendesk__schedule_history`](https://github.com/fivetran/dbt_zendesk/blob/main/models/intermediate/int_zendesk__schedule_history.sql): Captures a full history of schedule changes for each `schedule_id`.
     - materialization: table (if enabled)

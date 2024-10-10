@@ -1,12 +1,5 @@
 {{ config(enabled=var('using_schedules', True) and var('using_holidays', True)) }}
 
-/*
-    The purpose of this model is to create a spine of appropriate timezone offsets to use for schedules, as offsets may 
-    change due to Daylight Savings. End result will include `valid_from` and `valid_until` columns which we will use downstream 
-    to determine which schedule-offset to associate with each ticket (ie standard time vs daylight time).
-*/
-
-
 with schedule as (
     select *
     from {{ var('schedule') }}   
