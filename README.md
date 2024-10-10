@@ -97,7 +97,7 @@ vars:
 #### Disabling the unstructured document model for NLP
 This package includes the `zendesk__document` model, which processes and segments Zendesk text data for vectorization, making it suitable for NLP workflows. The model outputs structured chunks of text with associated document IDs, segment indices, and token counts. For definitions and more information, refer to [zendesk__document](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__document) in our dbt docs.
 
-By default, this model is enabled. To disabled it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
+By default, this model is enabled. To disable it, update the `zendesk__unstructured_enabled` variable to true in your dbt_project.yml:
 
 ```yml
 vars:
