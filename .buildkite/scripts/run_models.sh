@@ -26,9 +26,5 @@ dbt run --vars '{using_schedule_histories: true, using_holidays: false}' --targe
 dbt test --target "$db"
 dbt run --vars '{using_schedule_histories: true, using_holidays: true}' --target "$db" --full-refresh
 dbt test --target "$db"
-dbt run --vars '{using_schedule_histories: true, using_holidays: false}' --target "$db" --full-refresh
-dbt test --target "$db"
-dbt run --vars '{using_schedule_histories: true, using_holidays: true}' --target "$db" --full-refresh
-dbt test --target "$db"
 
 dbt run-operation fivetran_utils.drop_schemas_automation --target "$db"
