@@ -1,3 +1,8 @@
+# dbt_zendesk v0.19.0
+[PR #171](https://github.com/fivetran/dbt_zendesk/pull/172) includes the following changes:
+## Breaking Changes
+- Model `zendesk__document` is now enabled by default. To disable it, by set the `zendesk__unstructured_enabled` variable to `false` in your `dbt_project.yml`.
+
 # dbt_zendesk v0.18.0
 [PR #171](https://github.com/fivetran/dbt_zendesk/pull/171) includes the following changes:
 

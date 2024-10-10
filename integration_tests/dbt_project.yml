@@ -1,11 +1,14 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.18.0'
+version: '0.19.0'
 
 profile: 'integration_tests'
 
 vars:
+  ## Uncomment for docs generation
+  # using_schedule_histories: True
+
   zendesk_schema: zendesk_integration_tests_50
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
@@ -26,10 +29,6 @@ vars:
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
     zendesk_audit_log_identifier:              "audit_log_data"
-
-  ## Uncomment for docs generation
-  # zendesk__unstructured_enabled: True
-  # using_schedule_histories: True
 
   ## For validation testing. To be commented out before release.
   # zendesk_schema: zendesk_test_env
