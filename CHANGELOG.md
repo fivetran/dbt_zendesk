@@ -1,4 +1,10 @@
 # dbt_zendesk v0.18.0
+PR # something includes the following changes:
+
+## Bug Fix
+- Addressed an issue in which some records in `zendesk__sla_policies` might erroneously have a null `sla_policy_name` due to system-generated millisecond-long gaps in timestamps. The package now compares timestamps to the nearest `second` when selecting valid SLA policy names in [int_zendesk__sla_policy_applied](https://github.com/fivetran/dbt_zendesk/blob/main/models/sla_policy/int_zendesk__sla_policy_applied.sql).
+
+# dbt_zendesk v0.18.0
 [PR #171](https://github.com/fivetran/dbt_zendesk/pull/171) includes the following changes:
 
 ## Breaking Changes (Full refresh required after upgrading)

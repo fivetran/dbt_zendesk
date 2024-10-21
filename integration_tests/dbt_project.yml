@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.18.0'
+version: '0.18.1'
 
 profile: 'integration_tests'
 
@@ -38,6 +38,7 @@ vars:
   # using_organization_tags: false
   # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
   # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
+  # fivetran_consistency_sla_policies_exclusion_tickets: (55,58) # can remove after this release
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
