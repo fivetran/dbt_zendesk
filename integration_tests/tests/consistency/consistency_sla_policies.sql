@@ -82,7 +82,7 @@ select *
 from final
 where 
     {# Take differences in runtime into account #}
-    max_sla_elapsed_time - min_sla_elapsed_time > 2 -- take differences in runtime into account
+    max_sla_elapsed_time - min_sla_elapsed_time > 2 
     
     {# Remove after v0.18.1 #}
     and NOT name_was_null_prior
