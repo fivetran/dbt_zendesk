@@ -46,8 +46,8 @@ with ticket_field_history as (
   from sla_policy_applied
   left join sla_policy_name
     on sla_policy_name.ticket_id = sla_policy_applied.ticket_id
-      and sla_policy_applied.valid_starting_at >= sla_policy_name.valid_starting_at
-      and sla_policy_applied.valid_starting_at < coalesce(sla_policy_name.valid_ending_at, {{ dbt.current_timestamp() }}) 
+      and {{ dbt.date_trunc("second", "sla_policy_applied.valid_starting_at") }} >= {{ dbt.date_trunc("second", "sla_policy_name.valid_starting_at") }}
+      and {{ dbt.date_trunc("second", "sla_policy_applied.valid_starting_at") }} < coalesce({{ dbt.date_trunc("second", "sla_policy_name.valid_ending_at") }}, {{ dbt.current_timestamp() }})
   where sla_policy_applied.latest_sla = 1
 )
 

@@ -93,6 +93,7 @@ vars:
 ```
 
 ### (Optional) Step 5: Additional configurations
+<details open><summary>Expand/Collapse details</summary>
 
 #### Enabling the unstructured document model for NLP
 This package includes the `zendesk__document` model, which processes and segments Zendesk text data for vectorization, making it suitable for NLP workflows. The model outputs structured chunks of text with associated document IDs, segment indices, and token counts. For definitions and more information, refer to [zendesk__document](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__document) in our dbt docs.
@@ -171,9 +172,6 @@ This package will create a row in `zendesk__ticket_field_history` for each day t
 ```yml
 # dbt_project.yml
 
-...
-config-version: 2
-
 vars:
   zendesk:
     ticket_field_history_extension_months: integer_number_of_months # default = 0 
@@ -183,9 +181,6 @@ Conversely, you may want to only track the past X years of ticket field history.
 
 ```yml
 # dbt_project.yml
-
-...
-config-version: 2
 
 vars:
   zendesk:
@@ -218,6 +213,8 @@ If an individual source table has a different name than the package expects, add
 vars:
     zendesk_<default_source_table_name>_identifier: your_table_name 
 ```
+
+</details>
 
 ### (Optional) Step 6: Orchestrate your models with Fivetran Transformations for dbt Core™
 <details><summary>Expand for details</summary>

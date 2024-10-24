@@ -13,7 +13,7 @@ with prod as (
         target,
         in_business_hours,
         sla_breach_at,
-        round(sla_elapsed_time, -1) as sla_elapsed_time, --round to the nearest tens
+        sla_elapsed_time,
         is_active_sla,
         is_sla_breach
     from {{ target.schema }}_zendesk_prod.zendesk__sla_policies
@@ -28,7 +28,7 @@ dev as (
         target,
         in_business_hours,
         sla_breach_at,
-        round(sla_elapsed_time, -1) as sla_elapsed_time, --round to the nearest tens
+        sla_elapsed_time,
         is_active_sla,
         is_sla_breach
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
@@ -48,7 +48,7 @@ dev_not_in_prod as (
     select * from prod
 ),
 
-final as (
+combine as (
     select
         *,
         'from prod' as source
@@ -60,8 +60,20 @@ final as (
         *,
         'from dev' as source
     from dev_not_in_prod
+),
+
+final as (
+    select 
+        *,
+        max(sla_elapsed_time) over (partition by ticket_id, metric, sla_applied_at) as max_sla_elapsed_time,
+        min(sla_elapsed_time) over (partition by ticket_id, metric, sla_applied_at) as min_sla_elapsed_time
+
+    from combine 
+    {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policies_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policies_exclusion_tickets',[]) }}
 )
 
 select *
 from final
-{{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policies_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policies_exclusion_tickets',[]) }}
+where 
+    {# Take differences in runtime into account #}
+    max_sla_elapsed_time - min_sla_elapsed_time > 2 
