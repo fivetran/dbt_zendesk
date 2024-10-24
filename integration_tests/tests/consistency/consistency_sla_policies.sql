@@ -66,13 +66,7 @@ final as (
     select 
         *,
         max(sla_elapsed_time) over (partition by ticket_id, metric, sla_applied_at) as max_sla_elapsed_time,
-        min(sla_elapsed_time) over (partition by ticket_id, metric, sla_applied_at) as min_sla_elapsed_time,
-
-        {# 
-        This is necessary for upgrading to v0.18.1, as it introduces a fix for erronesouly null sla_policy_name values. The union all will consider these distinct rows as a result
-        Remove this and following where clause afterward 
-        #}
-        sum(case when sla_policy_name is null then 1 else 0 end) over (partition by ticket_id, metric, sla_applied_at) = 1 as name_was_null_prior
+        min(sla_elapsed_time) over (partition by ticket_id, metric, sla_applied_at) as min_sla_elapsed_time
 
     from combine 
     {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policies_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policies_exclusion_tickets',[]) }}
@@ -83,6 +77,3 @@ from final
 where 
     {# Take differences in runtime into account #}
     max_sla_elapsed_time - min_sla_elapsed_time > 2 
-    
-    {# Remove after v0.18.1 #}
-    and NOT name_was_null_prior
