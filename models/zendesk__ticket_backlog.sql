@@ -34,6 +34,7 @@ with ticket_field_history as (
 
 ), backlog as (
     select
+        ticket_field_history.source_relation,
         ticket_field_history.date_day
         ,ticket_field_history.ticket_id
         ,ticket_field_history.status
@@ -69,35 +70,42 @@ with ticket_field_history as (
 
     left join tickets
         on tickets.ticket_id = ticket_field_history.ticket_id
+        and tickets.source_relation = ticket_field_history.source_relation
 
     {% if 'ticket_form_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join ticket_forms
         on ticket_forms.ticket_form_id = cast(ticket_field_history.ticket_form_id as {{ dbt.type_bigint() }})
+        and ticket_forms.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     {% if 'group_id' in var('ticket_field_history_columns') %}--Join not needed if field is not located in variable, otherwise it is included.
     left join group_names
         on group_names.group_id = cast(ticket_field_history.group_id as {{ dbt.type_bigint() }})
+        and group_names.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     {% if 'assignee_id' in var('ticket_field_history_columns') or 'requester_id' in var('ticket_field_history_columns') or 'locale_id' in var('ticket_field_history_columns')%} --Join not needed if fields is not located in variable, otherwise it is included.
     left join users as assignee
         on assignee.user_id = cast(ticket_field_history.assignee_id as {{ dbt.type_bigint() }})
+        and assignee.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     {% if 'requester_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join users as requester
         on requester.user_id = cast(ticket_field_history.requester_id as {{ dbt.type_bigint() }})
+        and requester.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     {% if 'brand_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join brands
         on brands.brand_id = cast(ticket_field_history.brand_id as {{ dbt.type_bigint() }})
+        and brands.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     {% if 'organization_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join organizations
         on organizations.organization_id = cast(ticket_field_history.organization_id as {{ dbt.type_bigint() }})
+        and organizations.source_relation = ticket_field_history.source_relation
     {% endif %}
 
     where ticket_field_history.status not in ('closed', 'solved', 'deleted')

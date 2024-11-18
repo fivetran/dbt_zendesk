@@ -30,6 +30,7 @@ with reply_time_sla as (
 
 ), all_slas_unioned as (
   select
+    source_relation,
     ticket_id,
     sla_policy_name,
     metric,
@@ -44,6 +45,7 @@ with reply_time_sla as (
 union all
 
   select
+    source_relation,
     ticket_id,
     sla_policy_name,
     'agent_work_time' as metric,
@@ -52,14 +54,15 @@ union all
     false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
+    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
   from agent_work_calendar_sla
 
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 union all
 
   select
+    source_relation,
     ticket_id,
     sla_policy_name,
     'requester_wait_time' as metric,
@@ -68,10 +71,10 @@ union all
     false as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
+    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
   from requester_wait_calendar_sla
 
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 
 {% if var('using_schedules', True) %}
@@ -79,6 +82,7 @@ union all
 union all 
 
   select 
+    source_relation,
     ticket_id,
     sla_policy_name,
     'agent_work_time' as metric,
@@ -87,14 +91,15 @@ union all
     true as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
+    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
   from agent_work_business_sla
   
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 union all 
 
   select 
+    source_relation,
     ticket_id,
     sla_policy_name,
     'requester_wait_time' as metric,
@@ -103,18 +108,19 @@ union all
     true as in_business_hours,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }}
+    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
     
   from requester_wait_business_sla
   
-  group by 1, 2, 3, 4, 5, 6
+  {{ dbt_utils.group_by(n=7) }}
 
 {% endif %}
 
 )
 
 select 
-  {{ dbt_utils.generate_surrogate_key(['ticket_id', 'metric', 'sla_applied_at']) }} as sla_event_id,
+  {{ dbt_utils.generate_surrogate_key(['source_relation', 'ticket_id', 'metric', 'sla_applied_at']) }} as sla_event_id,
+  source_relation,
   ticket_id,
   sla_policy_name,
   metric,

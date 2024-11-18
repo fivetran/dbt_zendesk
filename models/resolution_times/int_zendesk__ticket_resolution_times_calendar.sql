@@ -22,19 +22,19 @@ with historical_solved_status as (
 ), solved_times as (
   
   select
-  
+    source_relation,
     ticket_id,
     min(valid_starting_at) as first_solved_at,
     max(valid_starting_at) as last_solved_at,
     count(status) as solved_count 
 
   from historical_solved_status
-  group by 1
+  group by 1, 2
 
 )
 
   select
-
+    ticket.source_relation,
     ticket.ticket_id,
     ticket.created_at,
     solved_times.first_solved_at,
@@ -73,11 +73,14 @@ with historical_solved_status as (
   from ticket
 
   left join ticket_historical_assignee
-    using(ticket_id)
+    on ticket.ticket_id = ticket_historical_assignee.ticket_id
+    and ticket.source_relation = ticket_historical_assignee.source_relation
 
   left join ticket_historical_group
-    using(ticket_id)
+    on ticket.ticket_id = ticket_historical_group.ticket_id
+    and ticket.source_relation = ticket_historical_group.source_relation
 
   left join solved_times
-    using(ticket_id)
+    on ticket.ticket_id = solved_times.ticket_id
+    and ticket.source_relation = solved_times.source_relation
 

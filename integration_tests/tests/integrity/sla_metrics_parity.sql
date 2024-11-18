@@ -18,6 +18,7 @@ with dev_slas as (
 
 ), dev_compare as (
     select 
+        dev_slas.source_relation,
         dev_slas.ticket_id,
         dev_slas.metric,
         cast(dev_slas.sla_elapsed_time as {{ dbt.type_int() }}) as time_from_slas,
@@ -28,6 +29,7 @@ with dev_slas as (
     from dev_slas
     left join dev_metrics
         on dev_metrics.ticket_id = dev_slas.ticket_id
+        and dev_metrics.source_relation = dev_slas.source_relation
 )
 
 select *

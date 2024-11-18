@@ -18,6 +18,7 @@ dev as (
         first_reply_time_business_minutes, 
         first_reply_time_calendar_minutes
     from {{ target.schema }}_zendesk_dev.zendesk__ticket_metrics
+    {{ "where source_relation =  '" ~ (var("zendesk_database", target.database)|lower ~ "." ~ var("zendesk_schema", "zendesk")) ~ "'" if 'source_relation' in var("consistency_test_exclude_fields", '[]') }}
 ),
 
 final as (

@@ -6,7 +6,7 @@ with ticket_group_history as (
 
 ), group_breakdown as (
     select
-  
+        source_relation,
         ticket_id,
         valid_starting_at,
         valid_ending_at,
@@ -15,11 +15,12 @@ with ticket_group_history as (
 
 ), final as (
     select
+        source_relation,
         ticket_id,
         count(group_id) as group_stations_count
     from group_breakdown
 
-    group by 1
+    group by 1, 2
 )
 
 select *

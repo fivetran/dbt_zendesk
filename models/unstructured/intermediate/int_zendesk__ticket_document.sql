@@ -10,6 +10,7 @@ with tickets as (
 
 ), ticket_details as (
     select
+        tickets.source_relation,
         tickets.ticket_id,
         tickets.subject AS ticket_name,
         {{ zendesk.coalesce_cast(["users.name", "'UNKNOWN'"], dbt.type_string()) }} as user_name,
@@ -20,11 +21,13 @@ with tickets as (
     from tickets
     left join users
         on tickets.requester_id = users.user_id
+        and tickets.source_relation = users.source_relation
     where not coalesce(tickets._fivetran_deleted, False)
         and not coalesce(users._fivetran_deleted, False)
 
 ), final as (
     select
+        source_relation,
         ticket_id,
         {{ dbt.concat([
             "'# Ticket : '", "ticket_name", "'\\n\\n'",

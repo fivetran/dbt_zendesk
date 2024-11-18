@@ -27,6 +27,7 @@ with calendar as (
 ), joined as (
 
     select 
+        ticket.source_relation,
         calendar.date_day,
         ticket.ticket_id
     from calendar
@@ -39,7 +40,7 @@ with calendar as (
 
     select
         *,
-        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id']) }} as ticket_day_id
+        {{ dbt_utils.generate_surrogate_key(['date_day','ticket_id', 'source_relation']) }} as ticket_day_id
     from joined
 
 )

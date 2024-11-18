@@ -33,12 +33,14 @@ sla_policies as (
 
 match_check as (
     select 
+        coalesce(sla_policies.source_relation, source_filter.source_relation) as source_relation,
         sla_policies.ticket_id,
         end_model_row_count,
         source_row_count
     from sla_policies
     full outer join source_filter
         on source_filter.ticket_id = sla_policies.ticket_id
+        and source_filter.source_relation = sla_policies.source_relation
 )
 
 select *

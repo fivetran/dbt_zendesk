@@ -22,12 +22,14 @@ sla_policies as (
 
 match_check as (
     select 
+        ticket_metrics.source_relation,
         ticket_metrics.ticket_id,
         ticket_metrics.first_reply_time_business_minutes,
         sla_policies.sla_elapsed_time
     from ticket_metrics
     full outer join sla_policies 
         on ticket_metrics.ticket_id = sla_policies.ticket_id
+        and ticket_metrics.source_relation = sla_policies.source_relation
 )
 
 select *

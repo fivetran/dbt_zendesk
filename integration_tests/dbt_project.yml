@@ -7,6 +7,11 @@ profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests_50
+
+
+  using_organization_tags: false
+  using_holidays: false
+  
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -39,6 +44,7 @@ vars:
   # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
   # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
   # fivetran_consistency_sla_policies_exclusion_tickets: (55,58) # can remove after this release
+  consistency_test_exclude_fields: ['source_relation', 'ticket_tags', 'ticket_day_id'] # leave ticket_tags
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"

@@ -18,6 +18,7 @@ with ticket_historical_status as (
 ), ticket_status_crossed_with_schedule as (
   
     select
+      ticket_historical_status.source_relation,
       ticket_historical_status.ticket_id,
       ticket_historical_status.status as ticket_status,
       ticket_schedules.schedule_id,
@@ -33,12 +34,14 @@ with ticket_historical_status as (
     from ticket_historical_status
     left join ticket_schedules
       on ticket_historical_status.ticket_id = ticket_schedules.ticket_id
+      and ticket_historical_status.source_relation = ticket_schedules.source_relation
       -- making sure there is indeed real overlap
       where {{ dbt.datediff('greatest(valid_starting_at, schedule_created_at)', 'least(valid_ending_at, schedule_invalidated_at)', 'second') }} > 0
 
 ), ticket_full_solved_time as (
 
     select 
+      source_relation,
       ticket_id,
       ticket_status,
       schedule_id,
@@ -59,7 +62,7 @@ with ticket_historical_status as (
     {{ dbt_date.week_start('ticket_status_crossed_with_schedule.status_schedule_start','UTC') }} as start_week_date
 
     from ticket_status_crossed_with_schedule
-    {{ dbt_utils.group_by(n=7) }}
+    {{ dbt_utils.group_by(n=8) }}
 
 ), weeks as (
 
@@ -89,6 +92,7 @@ with ticket_historical_status as (
 ), intercepted_periods as (
   
     select 
+      weekly_periods.source_relation,
       weekly_periods.ticket_id,
       weekly_periods.week_number,
       weekly_periods.schedule_id,
@@ -103,6 +107,7 @@ with ticket_historical_status as (
       on ticket_week_start_time <= schedule.end_time_utc 
       and ticket_week_end_time >= schedule.start_time_utc
       and weekly_periods.schedule_id = schedule.schedule_id
+      and weekly_periods.source_relation = schedule.source_relation
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
       and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
@@ -111,6 +116,7 @@ with ticket_historical_status as (
 ), business_minutes as (
   
     select 
+      source_relation,
       ticket_id,
       ticket_status,
       case when ticket_status in ('pending') then scheduled_minutes
@@ -132,6 +138,7 @@ with ticket_historical_status as (
 )
   
     select 
+      source_relation,
       ticket_id,
       sum(agent_wait_time_in_minutes) as agent_wait_time_in_business_minutes,
       sum(requester_wait_time_in_minutes) as requester_wait_time_in_business_minutes,
@@ -141,4 +148,4 @@ with ticket_historical_status as (
       sum(new_status_duration_minutes) as new_status_duration_in_business_minutes,
       sum(open_status_duration_minutes) as open_status_duration_in_business_minutes
     from business_minutes
-    group by 1
+    group by 1,2

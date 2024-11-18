@@ -10,6 +10,7 @@ with ticket_comments as (
 
 ), comment_details as (
     select 
+        ticket_comments.source_relation,
         ticket_comments.ticket_comment_id,
         ticket_comments.ticket_id,
         {{ zendesk.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as commenter_email,
@@ -19,11 +20,13 @@ with ticket_comments as (
     from ticket_comments
     left join users
         on ticket_comments.user_id = users.user_id
+        and ticket_comments.source_relation = users.source_relation
     where not coalesce(ticket_comments._fivetran_deleted, False)
         and not coalesce(users._fivetran_deleted, False)
 
 ), comment_markdowns as (
     select
+        source_relation,
         ticket_comment_id,
         ticket_id,
         comment_time,
@@ -44,6 +47,7 @@ with ticket_comments as (
 
 ), truncated_comments as (
     select
+        source_relation,
         ticket_comment_id,
         ticket_id,
         comment_time,

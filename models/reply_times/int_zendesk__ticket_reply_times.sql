@@ -6,7 +6,8 @@ with ticket_public_comments as (
 
 ), end_user_comments as (
   
-  select 
+  select
+    source_relation,
     ticket_id,
     valid_starting_at as end_user_comment_created_at,
     ticket_created_date,
@@ -21,6 +22,7 @@ with ticket_public_comments as (
 ), reply_timestamps as (  
 
   select
+    end_user_comments.source_relation,
     end_user_comments.ticket_id,
     -- If the commentor was internal, a first comment, and had previous non public internal comments then we want the ticket created date to be the end user comment created date
     -- Otherwise we will want to end user comment created date
@@ -36,7 +38,8 @@ with ticket_public_comments as (
     on agent_comments.ticket_id = end_user_comments.ticket_id
     and agent_comments.commenter_role = 'internal_comment'
     and agent_comments.valid_starting_at > end_user_comments.end_user_comment_created_at
-  group by 1,2,3
+    and end_user_comments.source_relation = agent_comments.source_relation
+  {{ dbt_utils.group_by(n=4) }}
 
 )
 

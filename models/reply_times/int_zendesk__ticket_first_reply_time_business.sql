@@ -19,6 +19,7 @@ with ticket_reply_times as (
 ), first_reply_time as (
 
     select
+      source_relation,
       ticket_id,
       end_user_comment_created_at,
       agent_responded_at
@@ -29,6 +30,7 @@ with ticket_reply_times as (
 ), ticket_first_reply_time as (
 
   select 
+    first_reply_time.source_relation,
     first_reply_time.ticket_id,
     ticket_schedules.schedule_created_at,
     ticket_schedules.schedule_invalidated_at,
@@ -52,8 +54,10 @@ with ticket_reply_times as (
     {{ dbt_date.week_start('ticket_schedules.schedule_created_at','UTC') }} as start_week_date
   
   from first_reply_time
-  join ticket_schedules on first_reply_time.ticket_id = ticket_schedules.ticket_id
-  group by 1, 2, 3, 4
+  join ticket_schedules 
+    on first_reply_time.ticket_id = ticket_schedules.ticket_id
+    and first_reply_time.source_relation = ticket_schedules.source_relation
+  {{ dbt_utils.group_by(n=5) }}
 
 ), weeks as (
 
@@ -82,7 +86,9 @@ with ticket_reply_times as (
 
 ), intercepted_periods as (
 
-  select ticket_id,
+  select 
+      weekly_periods.source_relation,
+      ticket_id,
       week_number,
       weekly_periods.schedule_id,
       ticket_week_start_time,
@@ -94,6 +100,7 @@ with ticket_reply_times as (
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    and weekly_periods.source_relation = schedule.source_relation
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
     and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
@@ -101,7 +108,9 @@ with ticket_reply_times as (
       
 )
 
-  select ticket_id,
-        sum(scheduled_minutes) as first_reply_time_business_minutes
+  select 
+    ticket_id, 
+    source_relation,
+    sum(scheduled_minutes) as first_reply_time_business_minutes
   from intercepted_periods
-  group by 1
+  group by 1, 2
