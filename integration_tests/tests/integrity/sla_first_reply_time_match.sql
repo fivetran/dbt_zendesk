@@ -7,6 +7,7 @@
 with ticket_metrics as (
     select
         ticket_id,
+        source_relation,
         first_reply_time_business_minutes
     from {{ ref('zendesk__ticket_metrics') }}
 ),
@@ -14,6 +15,7 @@ with ticket_metrics as (
 sla_policies as (
     select
         ticket_id,
+        source_relation,
         sla_elapsed_time
     from {{ ref('zendesk__sla_policies') }}
     where metric = 'first_reply_time'

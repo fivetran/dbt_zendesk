@@ -47,3 +47,4 @@ final as (
 
 select *
 from final
+where date_day < current_date

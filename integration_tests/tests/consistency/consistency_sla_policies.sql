@@ -76,4 +76,5 @@ select *
 from final
 where 
     {# Take differences in runtime into account #}
-    max_sla_elapsed_time - min_sla_elapsed_time > 2 
+    max_sla_elapsed_time - min_sla_elapsed_time > 5
+    and date(sla_applied_at) < current_date

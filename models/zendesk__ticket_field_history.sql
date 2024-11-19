@@ -80,7 +80,7 @@ with change_data as (
         {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
         , {{ col.name }}
         -- create a batch/partition once a new value is provided
-        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by ticket_id
+        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by source_relation, ticket_id
             order by date_day rows unbounded preceding) as {{ col.name }}_field_partition
 
         {% endfor %}
