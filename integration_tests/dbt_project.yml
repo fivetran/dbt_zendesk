@@ -43,7 +43,7 @@ vars:
   fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
   fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
   consistency_test_exclude_fields: ['source_relation', 'ticket_tags', 'ticket_day_id', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
-  # get rid of source_relation and ticket_day_id after my update
+  # get rid of source_relation and ticket_day_id after my update ^
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"

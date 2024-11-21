@@ -4,7 +4,10 @@
 ## Feature Update: Run Models on Muliple Zendesk Sources
 - This release supports running the package on multiple Zendesk sources at once! See the [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-3-define-database-and-schema-variables) for details on how to leverage this feature.
 
-> Please note: This is a **🚨Breaking Change🚨** in that we have a added a new field, `source_relation`, that points to the source connector from which the record originated. This field addition will require a `dbt run --full-refresh`.
+> Please note: This is a **🚨Breaking Change🚨** in that we have a added a new field, `source_relation`, that points to the source connector from which the record originated. This field addition will require a `dbt run --full-refresh`, even if you are not using this new functionality.
+
+## Documentation
+- Cleaned up the column-level documentation descriptions for the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models.
 
 # dbt_zendesk v0.18.1
 [PR #174](https://github.com/fivetran/dbt_zendesk/pull/174) includes the following changes:
