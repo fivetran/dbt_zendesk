@@ -56,6 +56,8 @@ dev as (
         deleted_ticket_count
 
     from {{ target.schema }}_zendesk_dev.zendesk__ticket_summary
+
+    {# Make sure we're only comparing one schema since this current update (v0.19.0) added mult-schema support. Can remove for future releases #}
     {{ "where source_relation =  '" ~ (var("zendesk_database", target.database)|lower ~ "." ~ var("zendesk_schema", "zendesk")) ~ "'" if 'source_relation' in var("consistency_test_exclude_fields", '[]') }}
 ),
 
@@ -111,7 +113,7 @@ joined as (
 
 select *
 from joined 
-where 
+where -- sometimes one of the below metrics will be off by 6-8, but let's leave 5 for now
     abs(prod_user_count - dev_user_count) > 5
     or abs(prod_active_agent_count - dev_active_agent_count) > 5
     or abs(prod_deleted_user_count - dev_deleted_user_count) > 5

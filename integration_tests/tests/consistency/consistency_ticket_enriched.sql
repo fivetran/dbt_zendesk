@@ -8,7 +8,7 @@ with prod as (
     select
         {{ dbt_utils.star(from=ref('zendesk__ticket_enriched'), except=var('consistency_test_exclude_fields', '[]')) }}
     from {{ target.schema }}_zendesk_prod.zendesk__ticket_enriched
-    where  true -- date(created_at) < current_date
+    where  true
     and {{ dbt.datediff(dbt.current_timestamp(), "updated_at", "minute") }} >= 60
 ),
 
@@ -16,8 +16,10 @@ dev as (
     select
         {{ dbt_utils.star(from=ref('zendesk__ticket_enriched'), except=var('consistency_test_exclude_fields', '[]')) }}
     from {{ target.schema }}_zendesk_dev.zendesk__ticket_enriched
-    where true -- date(created_at) < current_date
+    where true
     and {{ dbt.datediff(dbt.current_timestamp(), "updated_at", "minute") }} >= 60
+
+    {# Make sure we're only comparing one schema since this current update (v0.19.0) added mult-schema support. Can remove for future releases #}
     {{ "and source_relation =  '" ~ (var("zendesk_database", target.database)|lower ~ "." ~ var("zendesk_schema", "zendesk")) ~ "'" if 'source_relation' in var("consistency_test_exclude_fields", '[]') }}
 ),
 

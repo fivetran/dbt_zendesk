@@ -14,6 +14,8 @@ dev as (
     select
         {{ dbt_utils.star(from=ref('zendesk__ticket_backlog'), except=var('consistency_test_exclude_fields', '[]')) }}
     from {{ target.schema }}_zendesk_dev.zendesk__ticket_backlog
+
+    {# Make sure we're only comparing one schema since this current update (v0.19.0) added mult-schema support. Can remove for future releases #}
     {{ "where source_relation =  '" ~ (var("zendesk_database", target.database)|lower ~ "." ~ var("zendesk_schema", "zendesk")) ~ "'" if 'source_relation' in var("consistency_test_exclude_fields", '[]') }}
     
 ),
