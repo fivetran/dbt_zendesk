@@ -10,7 +10,6 @@
 - Cleaned up the column-level documentation descriptions for the `zendesk__ticket_enriched` and `zendesk__ticket_metrics` models.
 
 ## Under the Hood
- (maintainers only).
 - Relevant to package maintainers only:
   - Added a consistency data validation test for each end model.
   - Added `consistency_test_exclude_fields` to ignore in consistency tests. These are largely timestamp fields that can differ slightly due to different runtimes, but `source_relation` is also currently included due to the nature of this update.
