@@ -10,6 +10,7 @@ with ticket_document as (
 
 ), final as (
     select
+        ticket_document.source_relation,
         cast(ticket_document.ticket_id as {{ dbt.type_string() }}) as document_id,
         grouped.chunk_index,
         grouped.chunk_tokens as chunk_tokens_approximate,
@@ -21,6 +22,7 @@ with ticket_document as (
     from ticket_document
     join grouped
         on grouped.ticket_id = ticket_document.ticket_id
+        and grouped.source_relation = ticket_document.source_relation
 )
 
 select *

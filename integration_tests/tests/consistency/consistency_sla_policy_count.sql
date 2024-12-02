@@ -9,7 +9,8 @@ with prod as (
         ticket_id,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_prod.zendesk__sla_policies
-    {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
+    where date(sla_applied_at) < current_date
+    {{ "and ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
     group by 1
 ),
 
@@ -18,7 +19,8 @@ dev as (
         ticket_id,
         count(*) as total_slas
     from {{ target.schema }}_zendesk_dev.zendesk__sla_policies
-    {{ "where ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
+    where date(sla_applied_at) < current_date
+    {{ "and ticket_id not in " ~ var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) ~ "" if var('fivetran_consistency_sla_policy_count_exclusion_tickets',[]) }}
     group by 1
 ),
 

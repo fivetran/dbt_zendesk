@@ -6,6 +6,7 @@ with ticket_historical_status as (
 ), calendar_minutes as (
   
     select 
+        source_relation,
         ticket_id,
         status,
         case when status in ('pending') then status_duration_calendar_minutes
@@ -24,8 +25,8 @@ with ticket_historical_status as (
             else 0 end as open_status_duration_minutes,
         case when status = 'deleted' then 1
             else 0 end as ticket_deleted,
-        first_value(valid_starting_at) over (partition by ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_status_assignment_date,
-        case when lag(status) over (partition by ticket_id order by valid_starting_at) = 'deleted' and status != 'deleted'
+        first_value(valid_starting_at) over (partition by ticket_id, source_relation order by valid_starting_at desc, ticket_id, source_relation rows unbounded preceding) as last_status_assignment_date,
+        case when lag(status) over (partition by ticket_id, source_relation order by valid_starting_at) = 'deleted' and status != 'deleted'
             then 1
             else 0
                 end as ticket_recoveries
@@ -35,6 +36,7 @@ with ticket_historical_status as (
 )
 
 select 
+  source_relation,
   ticket_id,
   last_status_assignment_date,
   sum(ticket_deleted) as ticket_deleted_count,
@@ -47,4 +49,4 @@ select
   sum(open_status_duration_minutes) as open_status_duration_in_calendar_minutes,
   sum(ticket_recoveries) as total_ticket_recoveries
 from calendar_minutes
-group by 1, 2
+group by 1, 2, 3

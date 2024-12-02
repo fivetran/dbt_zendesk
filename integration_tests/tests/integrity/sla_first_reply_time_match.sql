@@ -7,6 +7,7 @@
 with ticket_metrics as (
     select
         ticket_id,
+        source_relation,
         first_reply_time_business_minutes
     from {{ ref('zendesk__ticket_metrics') }}
 ),
@@ -14,6 +15,7 @@ with ticket_metrics as (
 sla_policies as (
     select
         ticket_id,
+        source_relation,
         sla_elapsed_time
     from {{ ref('zendesk__sla_policies') }}
     where metric = 'first_reply_time'
@@ -22,12 +24,14 @@ sla_policies as (
 
 match_check as (
     select 
+        ticket_metrics.source_relation,
         ticket_metrics.ticket_id,
         ticket_metrics.first_reply_time_business_minutes,
         sla_policies.sla_elapsed_time
     from ticket_metrics
     full outer join sla_policies 
         on ticket_metrics.ticket_id = sla_policies.ticket_id
+        and ticket_metrics.source_relation = sla_policies.source_relation
 )
 
 select *

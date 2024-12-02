@@ -1,4 +1,4 @@
--- depends_on: {{ var('ticket') }}
+-- depends_on: {{ ref('stg_zendesk__ticket') }}
 with spine as (
 
     {% if execute and flags.WHICH in ('run', 'build') %}

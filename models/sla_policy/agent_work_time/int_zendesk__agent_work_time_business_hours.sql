@@ -24,6 +24,7 @@ with agent_work_time_filtered_statuses as (
 ), ticket_status_crossed_with_schedule as (
   
     select
+      agent_work_time_filtered_statuses.source_relation,
       agent_work_time_filtered_statuses.ticket_id,
       agent_work_time_filtered_statuses.sla_applied_at,
       agent_work_time_filtered_statuses.target,    
@@ -41,6 +42,7 @@ with agent_work_time_filtered_statuses as (
     from agent_work_time_filtered_statuses
     left join ticket_schedules
       on agent_work_time_filtered_statuses.ticket_id = ticket_schedules.ticket_id
+      and agent_work_time_filtered_statuses.source_relation = ticket_schedules.source_relation
     where {{ dbt.datediff(
               'greatest(valid_starting_at, schedule_created_at)', 
               'least(valid_ending_at, schedule_invalidated_at)', 
@@ -49,6 +51,7 @@ with agent_work_time_filtered_statuses as (
 ), ticket_full_solved_time as (
 
     select 
+      source_relation,
       ticket_id,
       sla_applied_at,
       target,    
@@ -71,7 +74,7 @@ with agent_work_time_filtered_statuses as (
     {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date
               
     from ticket_status_crossed_with_schedule
-    {{ dbt_utils.group_by(n=10) }}
+    {{ dbt_utils.group_by(n=11) }}
 
 ), weeks as (
 
@@ -89,7 +92,7 @@ with agent_work_time_filtered_statuses as (
 ), weekly_period_agent_work_time as (
 
     select 
-
+      source_relation,
       ticket_id,
       sla_applied_at,
       valid_starting_at,
@@ -111,6 +114,7 @@ with agent_work_time_filtered_statuses as (
 ), intercepted_periods_agent as (
   
     select 
+      weekly_period_agent_work_time.source_relation,
       weekly_period_agent_work_time.ticket_id,
       weekly_period_agent_work_time.sla_applied_at,
       weekly_period_agent_work_time.target,
@@ -131,6 +135,7 @@ with agent_work_time_filtered_statuses as (
       on ticket_week_start_time_minute <= schedule.end_time_utc 
       and ticket_week_end_time_minute >= schedule.start_time_utc
       and weekly_period_agent_work_time.schedule_id = schedule.schedule_id
+      and weekly_period_agent_work_time.source_relation = schedule.source_relation
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
       and cast( {{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time_minute', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
@@ -141,7 +146,7 @@ with agent_work_time_filtered_statuses as (
     select 
       *,
       sum(scheduled_minutes) over 
-        (partition by ticket_id, sla_applied_at 
+        (partition by source_relation, ticket_id, sla_applied_at 
           order by valid_starting_at, week_number, schedule_end_time
           rows between unbounded preceding and current row)
         as running_total_scheduled_minutes
@@ -154,15 +159,15 @@ with agent_work_time_filtered_statuses as (
     intercepted_periods_with_running_total.*,
     target - running_total_scheduled_minutes as remaining_target_minutes,
     lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
+          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
       when (target - running_total_scheduled_minutes) < 0 
         and 
           (lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) > 0 
+          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) > 0 
           or 
           lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) is null) 
+          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) is null) 
           then true else false end as is_breached_during_schedule
           
   from  intercepted_periods_with_running_total

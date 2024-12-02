@@ -11,6 +11,7 @@ with schedule as (
 -- Converts holiday_start_date_at and holiday_end_date_at into daily timestamps and finds the week starts/ends using week_start.
 ), schedule_holiday_ranges as (
     select
+        source_relation,
         holiday_name,
         schedule_id,
         cast({{ dbt.date_trunc('day', 'holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
@@ -37,6 +38,7 @@ with schedule as (
 
     -- Business as usual for holidays that fall within a single week.
     select
+        source_relation,
         holiday_name,
         schedule_id,
         holiday_valid_from,
@@ -51,6 +53,7 @@ with schedule as (
 
     -- Split holidays by week that span multiple weeks since the schedule spine is based on weeks.
     select
+        source_relation,
         holiday_name,
         schedule_id,
         case 

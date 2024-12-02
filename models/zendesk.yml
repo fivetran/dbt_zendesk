@@ -3,11 +3,15 @@ version: 2
 models:
   - name: zendesk__ticket_enriched
     description: Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.  
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: 
+            - ticket_id
+            - source_relation 
     columns:
       - name: ticket_id
         description: Automatically assigned when the ticket is created
         tests:
-            - unique
             - not_null
       - name: url
         description: The API url of this ticket
@@ -91,8 +95,6 @@ models:
         description: The brand name of with the ticket
       - name: ticket_form_name
         description: The form name of the ticket
-      - name: ticket_satisfaction_rating
-        description: The ticket satisfaction rating
       - name: ticket_satisfaction_comment
         description: The ticket satisfaction comment
       - name: ticket_satisfaction_reason
@@ -173,14 +175,23 @@ models:
         description: Boolean indicating if the ticket had a satisfaction score went from bad to good.
       - name: _fivetran_deleted
         description: Boolean created by Fivetran to indicate whether the ticket has been deleted.
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches for `first_reply_time`, `next_reply_time`, `requester_wait_time`, and `agent_work_time` are supported. If there is a SLA you would like supported that is not included, please create a feature request.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: 
+            - sla_event_id
+            - source_relation 
     columns:
       - name: sla_event_id
-        description: A surrogate key generated from the combination of ticket_id, metric, and sla_applied_at fields
-        tests:
-          - unique
+        description: A surrogate key generated from the combination of `ticket_id`, `metric`, `sla_applied_at`, and `source_relation` fields
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: sla_policy_name
@@ -201,7 +212,11 @@ models:
         description: Boolean field indicating that the SLA event is currently active and not breached (true) or past (false)
       - name: is_sla_breach
         description: Boolean field indicating if the SLA has been breached (true) or was achieved (false)
-      
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
+
   - name: zendesk__ticket_field_history
     description: >
       A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable 
@@ -212,16 +227,25 @@ models:
       - name: ticket_id
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: ticket_day_id
-        description: The unique key of the table, a surrogate key of date_day and ticket_id.
+        description: The unique key of the table, a surrogate key of `date_day`, `ticket_id`, and `source_relation`.
       - name: assignee_id
         description: The assignee id assigned to the ticket
       - name: status
         description: The status of the ticket
       - name: priority
         description: The tickets priority ranking
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
 
   - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk Support ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: 
+            - ticket_id
+            - source_relation 
     columns:
       - name: first_reply_time_calendar_minutes
         description: The number of calendar minutes between when the ticket was created and when the first public agent response occurred
@@ -270,7 +294,6 @@ models:
       - name: ticket_id
         description: Automatically assigned when the ticket is created
         tests:
-            - unique
             - not_null  
       - name: url
         description: The API url of this ticket
@@ -354,8 +377,6 @@ models:
         description: The brand name of with the ticket
       - name: ticket_form_name
         description: The form name of the ticket
-      - name: ticket_satisfaction_rating
-        description: The ticket satisfaction rating
       - name: ticket_satisfaction_comment
         description: The ticket satisfaction comment
       - name: ticket_satisfaction_reason
@@ -496,6 +517,16 @@ models:
         description: The time the status was last changed on the ticket
       - name: _fivetran_deleted
         description: Boolean created by Fivetran to indicate whether the ticket has been deleted.
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+      - name: ticket_deleted_count
+        description: The count of ticket deletion events.
+      - name: total_ticket_recoveries
+        description: The count of ticket recovery (deletion reversal) events.
 
   - name: zendesk__ticket_summary
     description: A single record table containing Zendesk ticket and user summary metrics. These metrics are updated for the current day the model is run.
@@ -542,6 +573,10 @@ models:
         description: Total count of deleted tickets
       - name: recovered_ticket_count
         description: Total count of tickets that were deleted then reopened
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
 
   - name: zendesk__ticket_backlog
     description: >
@@ -560,3 +595,7 @@ models:
         description: The assignee name assigned to the ticket
       - name: priority
         description: The tickets priority ranking
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.

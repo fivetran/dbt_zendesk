@@ -7,7 +7,7 @@ with split_timezones as (
 ), schedule as (
     select 
         *,
-        max(created_at) over (partition by schedule_id) as max_created_at
+        max(created_at) over (partition by source_relation, schedule_id) as max_created_at
     from {{ var('schedule') }}   
 
 {% if var('using_schedule_histories', False) %}
@@ -19,7 +19,7 @@ with split_timezones as (
 -- the max_created_at timestamp. Historical timezone changes are not yet tracked.
 ), schedule_id_timezone as (
     select
-        distinct schedule_id,
+        distinct schedule_id, source_relation,
         lower(time_zone) as time_zone,
         schedule_name
     from schedule
@@ -30,6 +30,7 @@ with split_timezones as (
 -- been deleted.
 ), schedule_history_timezones as (
     select
+        schedule_history.source_relation,
         schedule_history.schedule_id,
         schedule_history.schedule_id_index,
         schedule_history.start_time,
@@ -41,6 +42,7 @@ with split_timezones as (
     from schedule_history
     left join schedule_id_timezone
         on schedule_id_timezone.schedule_id = schedule_history.schedule_id
+        and schedule_id_timezone.source_relation = schedule_history.source_relation
     -- We have to filter these records out since time math requires timezone
     -- revisit later if this becomes a bigger issue
     where time_zone is not null
@@ -48,6 +50,7 @@ with split_timezones as (
 -- Combine current schedules with historical schedules. Adjust the valid_from and valid_until dates accordingly.
 ), union_schedule_histories as (
     select
+        source_relation,
         schedule_id,
         0 as schedule_id_index, -- set the index as 0 for the current schedule
         created_at,
@@ -63,6 +66,7 @@ with split_timezones as (
     union all
 
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         cast(null as {{ dbt.type_timestamp() }}) as created_at,
@@ -79,6 +83,7 @@ with split_timezones as (
 -- This allows the current schedule to pick up where the historical schedule left off.
 ), fill_current_schedule as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         start_time,
@@ -89,7 +94,7 @@ with split_timezones as (
             when schedule_id_index = 0
             -- get max valid_until from historical rows in the same schedule
             then max(case when schedule_id_index > 0 then valid_until end) 
-                over (partition by schedule_id)
+                over (partition by source_relation, schedule_id)
             else valid_from
             end,
             cast(created_at as date))
@@ -102,7 +107,7 @@ with split_timezones as (
 ), lag_valid_until as (
     select 
         fill_current_schedule.*,
-        lag(schedule_valid_until) over (partition by schedule_id, start_time, end_time 
+        lag(schedule_valid_until) over (partition by source_relation, schedule_id, start_time, end_time 
             order by schedule_valid_from, schedule_valid_until) as previous_valid_until
     from fill_current_schedule
 
@@ -111,6 +116,7 @@ with split_timezones as (
 -- we want to maintain the intermediate schedule change.
 ), find_actual_changes as (
     select 
+        source_relation,
         schedule_id,
         schedule_id_index,
         start_time,
@@ -125,7 +131,7 @@ with split_timezones as (
     -- Adjacent schedules with the same start_time and end_time are grouped together, 
     -- while non-adjacent schedules are treated as separate groups.
         sum(case when previous_valid_until = schedule_valid_from then 0 else 1 end) -- find if this row is adjacent to the previous row
-            over (partition by schedule_id, start_time, end_time 
+            over (partition by source_relation, schedule_id, start_time, end_time 
                 order by schedule_valid_from
                 rows between unbounded preceding and current row)
         as group_id
@@ -135,6 +141,7 @@ with split_timezones as (
 -- valid_from and maximum valid_until for each group.
 ), consolidate_changes as (
     select 
+        source_relation,
         schedule_id,
         start_time,
         end_time,
@@ -145,11 +152,12 @@ with split_timezones as (
         min(schedule_valid_from) as schedule_valid_from,
         max(schedule_valid_until) as schedule_valid_until
     from find_actual_changes
-    {{ dbt_utils.group_by(6) }}
+    {{ dbt_utils.group_by(7) }}
 
 -- For each schedule_id, reset the earliest schedule_valid_from date to 1970-01-01 for full schedule coverage.
 ), reset_schedule_start as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         time_zone,
@@ -157,7 +165,7 @@ with split_timezones as (
         start_time,
         end_time,
         case 
-            when schedule_valid_from = min(schedule_valid_from) over (partition by schedule_id) then '1970-01-01'
+            when schedule_valid_from = min(schedule_valid_from) over (partition by source_relation, schedule_id) then '1970-01-01'
             else schedule_valid_from
         end as schedule_valid_from,
         schedule_valid_until
@@ -167,6 +175,7 @@ with split_timezones as (
 -- time_zone matches for each schedule. The erroneous timezones will be filtered next.
 ), schedule_timezones as (
     select 
+        reset_schedule_start.source_relation,
         reset_schedule_start.schedule_id,
         reset_schedule_start.schedule_id_index,
         reset_schedule_start.time_zone,
@@ -182,12 +191,14 @@ with split_timezones as (
     from reset_schedule_start
     left join split_timezones
         on split_timezones.time_zone = reset_schedule_start.time_zone
+        and split_timezones.source_relation = reset_schedule_start.source_relation
 
 -- Assemble the final schedule-timezone relationship by determining the correct 
 -- schedule_valid_from and schedule_valid_until based on overlapping periods 
 -- between the schedule and timezone. 
 ), final_schedule as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         time_zone,
@@ -236,6 +247,7 @@ with split_timezones as (
 {% else %} -- when not using schedule histories
 ), final_schedule as (
     select 
+        schedule.source_relation,
         schedule.schedule_id,
         0 as schedule_id_index,
         lower(schedule.time_zone) as time_zone,
@@ -250,10 +262,12 @@ with split_timezones as (
     from schedule
     left join split_timezones
         on split_timezones.time_zone = lower(schedule.time_zone)
+        and schedule.source_relation = split_timezones.source_relation
 {% endif %}
 
 ), final as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         time_zone,

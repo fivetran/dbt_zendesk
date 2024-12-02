@@ -2,6 +2,7 @@
 
 with audit_logs as (
     select
+        source_relation,
         cast(source_id as {{ dbt.type_string() }}) as schedule_id,
         created_at,
         lower(change_description) as change_description
@@ -11,8 +12,9 @@ with audit_logs as (
 -- the formats for change_description vary, so it needs to be cleaned
 ), audit_logs_enhanced as (
     select 
+        source_relation,
         schedule_id,
-        rank() over (partition by schedule_id order by created_at desc) as schedule_id_index,
+        rank() over (partition by schedule_id, source_relation order by created_at desc) as schedule_id_index,
         created_at,
         -- Clean up the change_description, sometimes has random html stuff in it
         replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
@@ -25,6 +27,7 @@ with audit_logs as (
 
 ), split_to_from as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         created_at,
@@ -36,6 +39,7 @@ with audit_logs as (
 
 ), find_same_day_changes as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         created_at,
@@ -43,7 +47,7 @@ with audit_logs as (
         schedule_change_from,
         schedule_change,
         row_number() over (
-            partition by schedule_id, valid_from -- valid from is type date
+            partition by source_relation, schedule_id, valid_from -- valid from is type date
             -- ordering to get the latest change when there are multiple on one day
             order by schedule_id_index, schedule_change_from -- use the length of schedule_change_from to tie break, which will deprioritize empty "from" schedules
         ) as row_number
@@ -52,12 +56,13 @@ with audit_logs as (
 -- multiple changes can occur on one day, so we will keep only the latest change in a day.
 ), consolidate_same_day_changes as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         created_at,
         valid_from,
         lead(valid_from) over (
-            partition by schedule_id order by schedule_id_index desc) as valid_until,
+            partition by source_relation, schedule_id order by schedule_id_index desc) as valid_until,
         schedule_change
     from find_same_day_changes
     where row_number = 1
@@ -69,6 +74,7 @@ with audit_logs as (
     {% set days_of_week = {'sun': 0, 'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6} %}
     {% for day, day_number in days_of_week.items() %}
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         valid_from,
@@ -92,6 +98,7 @@ with audit_logs as (
 ), redshift_parse_schedule as (
     -- Redshift requires another CTE for unnesting 
     select 
+        source_relation,
         schedule_id,
         schedule_id_index,
         valid_from,
@@ -107,6 +114,7 @@ with audit_logs as (
 
 ), unnested_schedules as (
     select 
+        source_relation,
         schedule_id,
         schedule_id_index,
         valid_from,
@@ -165,6 +173,7 @@ with audit_logs as (
 -- Calculate the start_time and end_time as minutes from Sunday
 ), calculate_start_end_times as (
     select
+        source_relation,
         schedule_id,
         schedule_id_index,
         start_time_hh * 60 + start_time_mm + 24 * 60 * day_of_week_number as start_time,

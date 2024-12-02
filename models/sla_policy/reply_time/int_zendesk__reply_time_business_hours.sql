@@ -29,6 +29,7 @@ with ticket_schedules as (
 
 ), ticket_solved_times as (
   select
+    source_relation,
     ticket_id,
     valid_starting_at as solved_at
   from ticket_updates
@@ -37,12 +38,14 @@ with ticket_schedules as (
 
 ), reply_time as (
   select 
+    ticket_comment.source_relation,
     ticket_comment.ticket_id,
     ticket_comment.valid_starting_at as reply_at,
     commenter.role
   from ticket_updates as ticket_comment
   join users as commenter
     on commenter.user_id = ticket_comment.user_id
+    and commenter.source_relation = ticket_comment.source_relation
   where field_name = 'comment' 
     and ticket_comment.is_public
     and commenter.role in ('agent','admin')
@@ -50,11 +53,12 @@ with ticket_schedules as (
 ), schedule_business_hours as (
 
   select 
+    source_relation,
     schedule_id,
     sum(end_time - start_time) as total_schedule_weekly_business_minutes
   -- referring to stg_zendesk__schedule instead of int_zendesk__schedule_spine just to calculate total minutes
   from {{ ref('stg_zendesk__schedule') }}
-  group by 1
+  group by 1, 2
 
 ), ticket_sla_applied_with_schedules as (
 
@@ -71,15 +75,18 @@ with ticket_schedules as (
 
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
+    and sla_policy_applied.source_relation = ticket_schedules.source_relation
     and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_created_at') }} <= sla_policy_applied.sla_applied_at
     and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_invalidated_at') }} > sla_policy_applied.sla_applied_at
   left join schedule_business_hours 
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
+    and ticket_schedules.source_relation = schedule_business_hours.source_relation
   where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
 
 ), first_reply_solve_times as (
   select
+    ticket_sla_applied_with_schedules.source_relation,
     ticket_sla_applied_with_schedules.ticket_id,
     ticket_sla_applied_with_schedules.ticket_created_at,
     ticket_sla_applied_with_schedules.valid_starting_at,
@@ -100,10 +107,12 @@ with ticket_schedules as (
   left join reply_time
     on reply_time.ticket_id = ticket_sla_applied_with_schedules.ticket_id
     and reply_time.reply_at > ticket_sla_applied_with_schedules.sla_applied_at
+    and reply_time.source_relation = ticket_sla_applied_with_schedules.source_relation
   left join ticket_solved_times
     on ticket_sla_applied_with_schedules.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > ticket_sla_applied_with_schedules.sla_applied_at
-  {{ dbt_utils.group_by(n=14) }}
+    and ticket_solved_times.source_relation = ticket_sla_applied_with_schedules.source_relation
+  {{ dbt_utils.group_by(n=15) }}
 
 ), week_index_calc as (
     select 
@@ -141,13 +150,14 @@ with ticket_schedules as (
     schedule.end_time_utc as schedule_end_time,
     (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
     sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
-      (partition by ticket_id, metric, sla_applied_at 
+      (partition by weekly_periods.source_relation, ticket_id, metric, sla_applied_at 
         order by week_number, schedule.start_time_utc
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
   from weekly_periods
   join schedule on ticket_week_start_time <= schedule.end_time_utc 
     and ticket_week_end_time >= schedule.start_time_utc
     and weekly_periods.schedule_id = schedule.schedule_id
+    and weekly_periods.source_relation = schedule.source_relation
     -- this chooses the Daylight Savings Time or Standard Time version of the schedule
     -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
     and cast ({{ dbt.dateadd(datepart='minute', interval='week_number * (7*24*60) + ticket_week_end_time', from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
@@ -161,10 +171,10 @@ with ticket_schedules as (
     case when (target - sum_lapsed_business_minutes) < 0 
       and 
         (lag(target - sum_lapsed_business_minutes) over
-        (partition by ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) >= 0 
+        (partition by source_relation, ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) >= 0 
         or 
         lag(target - sum_lapsed_business_minutes) over
-        (partition by ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) is null) 
+        (partition by source_relation, ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) is null) 
         then true else false end as is_breached_during_schedule -- this flags the scheduled period on which the breach took place
   from intercepted_periods
 
@@ -192,6 +202,7 @@ with ticket_schedules as (
 ), reply_time_business_hours_sla as (
 
   select
+    source_relation,
     ticket_id,
     sla_policy_name,
     metric,
@@ -205,7 +216,7 @@ with ticket_schedules as (
     sla_breach_at,
     is_breached_during_schedule,
     total_schedule_weekly_business_minutes,
-    max(case when is_breached_during_schedule then sla_breach_at else null end) over (partition by ticket_id, metric, sla_applied_at, target) as sla_breach_exact_time,
+    max(case when is_breached_during_schedule then sla_breach_at else null end) over (partition by source_relation, ticket_id, metric, sla_applied_at, target) as sla_breach_exact_time,
     week_number
   from intercepted_periods_with_breach_flag_calculated
 
