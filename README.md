@@ -80,8 +80,10 @@ vars:
     zendesk_schema: your_schema_name 
 ```
 
+> **Note**: When running the package with a single source connector, the `source_relation` column in each model will be populated with an empty string.
+
 #### Option B: Union multiple connectors
-If you have multiple Zendesk connectors in Fivetran and would like to use this package on all of them simultaneously, we have provided functionality to do so. For each source table, the package will union all of the data together and pass the unioned table into the transformations. You will be able to see which source each record came from in the `source_relation` column of each model. 
+If you have multiple Zendesk connectors in Fivetran and would like to use this package on all of them simultaneously, we have provided functionality to do so. For each source table, the package will union all of the data together and pass the unioned table into the transformations. The `source_relation` column in each model indicates the origin of each record.
 
 To use this functionality, you will need to set the `zendesk_sources` variable in your root `dbt_project.yml` file:
 
@@ -134,6 +136,8 @@ vars:
 ```
 
 ### Step 4: Enable/Disable models for non-existent sources
+
+> _This step is optional if you are unioning multiple connectors together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
 This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories`. Add variables for only the tables you want to enable/disable:
 ```yml
 vars:
