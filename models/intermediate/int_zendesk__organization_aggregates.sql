@@ -1,9 +1,14 @@
 with organizations as (
+    {% if var('using_organizations', True) and var('using_organization_tags', True) %}
     select * 
     from {{ ref('stg_zendesk__organization') }}
+    {% else %}
+    select null as organization_id -- Placeholder when not using organizations
+    {% endif %}
+{% endif %}
 
 --If you use organization tags this will be included, if not it will be ignored.
-{% if var('using_organization_tags', True) %}
+{% if var('using_organization_tags', True) and var('using_organizations', True) %}
 ), organization_tags as (
     select * 
     from {{ ref('stg_zendesk__organization_tag') }}
@@ -45,7 +50,7 @@ with organizations as (
         organizations.*
 
         --If you use organization tags this will be included, if not it will be ignored.
-        {% if var('using_organization_tags', True) %}
+        {% if var('using_organization_tags', True) and var('using_organizations', True) %}
         ,tag_aggregates.organization_tags
         {% endif %}
 
@@ -63,7 +68,7 @@ with organizations as (
     {% endif %}
 
     --If you use organization tags this will be included, if not it will be ignored.
-    {% if var('using_organization_tags', True) %}
+    {% if var('using_organization_tags', True) and var('using_organizations', True) %}
     left join tag_aggregates
         using(organization_id)
     {% endif %}

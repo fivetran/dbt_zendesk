@@ -31,7 +31,7 @@ with users as (
         {% endif %}
 
         --If you use organization tags this will be included, if not it will be ignored.
-        {% if var('using_organization_tags', True) %}
+        {% if var('using_organization_tags', True) and var('using_organizations', True) %}
         ,organizations.organization_tags as updater_organization_organization_tags
         {% endif %}
     from users

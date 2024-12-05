@@ -17,22 +17,36 @@ with ticket_field_history as (
     select *
     from {{ ref('stg_zendesk__user') }}
 
-), brands as (
+{% if var('using_brands', True) %}
+), 
+
+brands as (
     select *
     from {{ ref('stg_zendesk__brand') }}
+{% endif %}
 
 --The below model is excluded if the user does not include ticket_form_id in the variable as a low percentage of accounts use ticket forms.
 {% if 'ticket_form_id' in var('ticket_field_history_columns') %}
-), ticket_forms as (
+), 
+
+
+ticket_forms as (
     select *
     from {{ ref('int_zendesk__latest_ticket_form') }}
 {% endif %}
 
-), organizations as (
+{% if var('using_organizations', True) %}
+), 
+
+organizations as (
     select *
     from {{ ref('stg_zendesk__organization') }}
+    
+{% endif %}
+), 
 
-), backlog as (
+
+backlog as (
     select
         ticket_field_history.date_day
         ,ticket_field_history.ticket_id

@@ -7,11 +7,13 @@ with tickets as (
   select *
   from {{ ref('stg_zendesk__ticket_tag') }}
 
+{% if var('using_brands', True) %}
 ), brands as (
 
   select *
   from {{ ref('stg_zendesk__brand') }}
   
+{% endif %}  
 ), ticket_tag_aggregate as (
   select
     ticket_tags.ticket_id,

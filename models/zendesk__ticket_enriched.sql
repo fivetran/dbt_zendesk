@@ -85,7 +85,7 @@ with ticket as (
         requester_org.name as requester_organization_name,
 
         --If you use organization tags this will be included, if not it will be ignored.
-        {% if var('using_organization_tags', True) %}
+        {% if var('using_organization_tags', True) and var('using_organizations', True) %}
         requester_org.organization_tags as requester_organization_tags,
         {% endif %}
         requester_org.external_id as requester_organization_external_id,
