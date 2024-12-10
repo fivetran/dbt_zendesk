@@ -1,8 +1,5 @@
 packages:
-  # - package: fivetran/zendesk_source
-  #   version: [">=0.14.0", "<0.15.0"]
+  - package: fivetran/zendesk_source
+    version: [">=0.14.0", "<0.15.0"]
   - package: calogica/dbt_date
     version: [">=0.9.0", "<1.0.0"]
-  - git: https://github.com/fivetran/dbt_zendesk_source.git
-    revision: bugfix/group-reserved-kw-union-data-v3
-    warn-unpinned: false
