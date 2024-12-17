@@ -47,7 +47,7 @@ with ticket as (
     on ticket.source_relation = default_schedules.source_relation
   left join ticket_schedule as first_schedule
     on first_schedule.ticket_id = ticket.ticket_id
-    and {{ fivetran_utils.timestamp_add('second', -5, 'first_schedule.created_at') }} <= ticket.created_at
+    and {{ fivetran_utils.timestamp_add('second', -5, 'cast(first_schedule.created_at as ' ~ dbt.type_timestamp() ~ ')') }} <= ticket.created_at
     and first_schedule.created_at >= ticket.created_at   
     and first_schedule.source_relation = ticket.source_relation
   where first_schedule.ticket_id is null
@@ -61,9 +61,9 @@ with ticket as (
   union all
   
   select 
-    ticket_id,
+    cast(ticket_id as {{ dbt.type_bigint() }}) as ticket_id,
     source_relation,
-    created_at as schedule_created_at,
+    cast(created_at as {{ dbt.type_timestamp() }}) as schedule_created_at,
     schedule_id
   from ticket_schedule
 
