@@ -39,10 +39,13 @@ with ticket as (
     select *
     from {{ ref('stg_zendesk__group') }}
 
+--If using organizations, this will be included, if not it will be ignored.
+{% if var('using_organizations', True) %}
 ), organization as (
 
     select *
     from {{ ref('int_zendesk__organization_aggregates') }}
+{% endif %}
 
 ), joined as (
 
@@ -63,9 +66,9 @@ with ticket as (
         latest_satisfaction_ratings.is_good_to_bad_satisfaction_score,
         latest_satisfaction_ratings.is_bad_to_good_satisfaction_score,
 
-        --If you use using_domain_names tags this will be included, if not it will be ignored.
-        {% if var('using_domain_names', True) %}
-        organization.domain_names as ticket_organization_domain_names,
+        --If you use using_domain_names tags, this will be included, if not it will be ignored.
+        {% if var('using_domain_names', True) and var('using_organizations', True) %}
+        organization.domain_names as ticket_organization_domain_names, 
         requester_org.domain_names as requester_organization_domain_names,
         {% endif %}
 
@@ -82,15 +85,20 @@ with ticket as (
         requester_updates.last_updated as requester_ticket_last_update_at,
         requester.last_login_at as requester_last_login_at,
         requester.organization_id as requester_organization_id,
+        {% if var('using_organizations', True) %}
         requester_org.name as requester_organization_name,
+        {% endif %}
 
         --If you use organization tags this will be included, if not it will be ignored.
-        {% if var('using_organization_tags', True) %}
+        {% if var('using_organization_tags', True) and var('using_organizations', True) %}
         requester_org.organization_tags as requester_organization_tags,
         {% endif %}
+        --If you use organizations this will be included, if not it will be ignored.
+        {% if var('using_organizations', True) %}
         requester_org.external_id as requester_organization_external_id,
         requester_org.created_at as requester_organization_created_at,
         requester_org.updated_at as requester_organization_updated_at,
+        {% endif %}
         submitter.external_id as submitter_external_id,
         submitter.role as submitter_role,
         case when submitter.role in ('agent','admin') 
@@ -112,9 +120,11 @@ with ticket as (
         coalesce(assignee_updates.total_updates, 0) as assignee_ticket_update_count,
         assignee_updates.last_updated as assignee_ticket_last_update_at,
         assignee.last_login_at as assignee_last_login_at,
-        ticket_group.name as group_name,
-        organization.name as organization_name
-
+        ticket_group.name as group_name
+        --If you use organizations this will be included, if not it will be ignored.
+        {% if var('using_organizations', True) %}
+        ,organization.name as organization_name
+        {% endif %}
         --If you use using_user_tags this will be included, if not it will be ignored.
         {% if var('using_user_tags', True) %}
         ,requester.user_tags as requester_tag,
@@ -129,10 +139,12 @@ with ticket as (
     join users as requester
         on requester.user_id = ticket.requester_id
         and requester.source_relation = ticket.source_relation
-
+    
+    {% if var('using_organizations', True) %}
     left join organization as requester_org
         on requester_org.organization_id = requester.organization_id
         and requester_org.source_relation = requester.source_relation
+    {% endif %}
 
     left join requester_updates
         on requester_updates.ticket_id = ticket.ticket_id
@@ -166,9 +178,11 @@ with ticket as (
         and latest_ticket_form.source_relation = ticket.source_relation
     {% endif %}
 
+    {% if var('using_organizations', True) %}
     left join organization
         on organization.organization_id = ticket.organization_id
         and organization.source_relation = ticket.source_relation
+    {% endif %}
 
     left join latest_satisfaction_ratings
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id

@@ -1,9 +1,11 @@
+{{ config(enabled=var('using_organizations', True)) }}
+
 with organizations as (
     select * 
     from {{ ref('stg_zendesk__organization') }}
 
---If you use organization tags this will be included, if not it will be ignored.
-{% if var('using_organization_tags', True) %}
+--If you use organization tags and organizations, this will be included, if not it will be ignored.
+{% if var('using_organization_tags', True) and var('using_organizations', True) %}
 ), organization_tags as (
     select * 
     from {{ ref('stg_zendesk__organization_tag') }}
@@ -19,11 +21,12 @@ with organizations as (
         on organizations.organization_id = organization_tags.organization_id 
         and organizations.source_relation = organization_tags.source_relation
 
+
     group by 1, 2
 {% endif %}
 
 --If you use using_domain_names tags this will be included, if not it will be ignored.
-{% if var('using_domain_names', True) %}
+{% if var('using_domain_names', True) and var('using_organizations', True) %}
 ), domain_names as (
 
     select *
@@ -49,26 +52,26 @@ with organizations as (
         organizations.*
 
         --If you use organization tags this will be included, if not it will be ignored.
-        {% if var('using_organization_tags', True) %}
+        {% if var('using_organization_tags', True) and var('using_organizations', True) %}
         ,tag_aggregates.organization_tags
         {% endif %}
 
         --If you use using_domain_names tags this will be included, if not it will be ignored.
-        {% if var('using_domain_names', True) %}
+        {% if var('using_domain_names', True) and var('using_organizations', True) %}
         ,domain_aggregates.domain_names
         {% endif %}
 
     from organizations
 
     --If you use using_domain_names tags this will be included, if not it will be ignored.
-    {% if var('using_domain_names', True) %}
+    {% if var('using_domain_names', True) and var('using_organizations', True) %}
     left join domain_aggregates
         on organizations.organization_id = domain_aggregates.organization_id 
         and organizations.source_relation = domain_aggregates.source_relation
     {% endif %}
 
     --If you use organization tags this will be included, if not it will be ignored.
-    {% if var('using_organization_tags', True) %}
+    {% if var('using_organization_tags', True) and var('using_organizations', True) %}
     left join tag_aggregates
         on organizations.organization_id = tag_aggregates.organization_id 
         and organizations.source_relation = tag_aggregates.source_relation
