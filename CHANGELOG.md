@@ -1,3 +1,10 @@
+# dbt_zendesk v0.20.0
+
+## [Upstream Under-the-Hood Updates](https://github.com/fivetran/dbt_zendesk_source/blob/main/CHANGELOG.md) from `zendesk_source` Package
+- (Affects Redshift only) Updates the `union_zendesk_connections` macro to use a limit 1 instead of limit 0 for empty tables.
+  - When a table is empty, Redshift ignores explicit data casts and will materialize every column as a `varchar`. Redshift users may experience errors in downstream transformations as a consequence.
+  - For each staging model, if the source table is not found, the package will create a empty table with 0 rows for non-Redshift warehouses and a table with 1 all-`null` row for Redshift destinations. The 1 row will ensure that Redshift will respect the package's datatype casts.
+
 # dbt_zendesk v0.19.1
 [PR #180](https://github.com/fivetran/dbt_zendesk/pull/180) includes the following update:
 
