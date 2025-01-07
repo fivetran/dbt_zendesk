@@ -4,7 +4,7 @@ with organizations as (
     select * 
     from {{ ref('stg_zendesk__organization') }}
 
---If you use organization tags and organizations, this will be included, if not it will be ignored.
+--If you use organization tags, this will be included, if not it will be ignored.
 {% if var('using_organization_tags', True) %}
 ), organization_tags as (
     select * 
@@ -71,7 +71,7 @@ with organizations as (
     {% endif %}
 
     --If you use organization tags this will be included, if not it will be ignored.
-    {% if var('using_organization_tags', True) and var('using_organizations', True) %}
+    {% if var('using_organization_tags', True) %}
     left join tag_aggregates
         on organizations.organization_id = tag_aggregates.organization_id 
         and organizations.source_relation = tag_aggregates.source_relation
