@@ -1,3 +1,9 @@
+# dbt_zendesk version.version
+
+## Documentation
+- Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
+- Corrected references to connectors and connections in the README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
+
 # dbt_zendesk v0.19.1
 [PR #180](https://github.com/fivetran/dbt_zendesk/pull/180) includes the following update:
 
