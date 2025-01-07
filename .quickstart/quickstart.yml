@@ -16,6 +16,7 @@ table_variables:
     - ticket_form_history
   using_organization_tags:
     - organization_tag
+    - organization
   using_schedule_histories:
     - audit_log
   using_holidays:

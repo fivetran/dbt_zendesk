@@ -8,7 +8,7 @@
 with source as (
     select
         *,
-        case when field_name in ('first_reply_time') then row_number() over (partition by ticket_id, field_name, source_relation order by valid_starting_at) else 1 end as latest_sla
+        case when field_name = 'first_reply_time' then row_number() over (partition by ticket_id, field_name, source_relation order by valid_starting_at) else 1 end as latest_sla
     from {{ ref('stg_zendesk__ticket_field_history') }}
 ),
 

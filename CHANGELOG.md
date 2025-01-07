@@ -2,7 +2,7 @@
 [PR #181](https://github.com/fivetran/dbt_zendesk/pull/181) includes the following updates:
 
 ## New Features
-- Introduced new config variables `using_brands` and `using_organizations` to allow the customers to enable and disable `brand` and `organization` source data. 
+- Introduced new config variables `using_brands` and `using_organizations` to allow  customers to enable and disable `brand` and `organization` source data, resulting in potential downstream impacts:
 - End models that could be impacted by these variables include: 
   - `zendesk__ticket_backlog`: `using_brands` and/or `using_organizations` can be set to `false` to disable `brand` and/or `organization` fields.
   - `zendesk__ticket_enriched`: `using_organizations` can be set to `false` to remove `organization` fields from the final model.
