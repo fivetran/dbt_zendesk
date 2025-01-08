@@ -17,9 +17,11 @@ with ticket_field_history as (
     select *
     from {{ ref('stg_zendesk__user') }}
 
+{% if var('using_brands', True) %}
 ), brands as (
     select *
     from {{ ref('stg_zendesk__brand') }}
+{% endif %}
 
 --The below model is excluded if the user does not include ticket_form_id in the variable as a low percentage of accounts use ticket forms.
 {% if 'ticket_form_id' in var('ticket_field_history_columns') %}
@@ -28,9 +30,12 @@ with ticket_field_history as (
     from {{ ref('int_zendesk__latest_ticket_form') }}
 {% endif %}
 
+--If using organizations, this will be included, if not it will be ignored.
+{% if var('using_organizations', True) %}
 ), organizations as (
     select *
     from {{ ref('stg_zendesk__organization') }}
+{% endif %}
 
 ), backlog as (
     select
@@ -49,10 +54,10 @@ with ticket_field_history as (
             {% elif col in ['ticket_form_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,ticket_forms.name as ticket_form_name
 
-            {% elif col in ['organization_id'] %} --Standard ID field where the name can easily be joined from stg model.
+            {% elif var('using_organizations', True) and col in ['organization_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,organizations.name as organization_name
 
-            {% elif col in ['brand_id'] %} --Standard ID field where the name can easily be joined from stg model.
+            {% elif var('using_brands', True) and col in ['brand_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,brands.name as brand_name
 
             {% elif col in ['group_id'] %} --Standard ID field where the name can easily be joined from stg model.
@@ -96,13 +101,13 @@ with ticket_field_history as (
         and requester.source_relation = ticket_field_history.source_relation
     {% endif %}
 
-    {% if 'brand_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
+    {% if var('using_brands', True) and 'brand_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join brands
         on brands.brand_id = cast(ticket_field_history.brand_id as {{ dbt.type_bigint() }})
         and brands.source_relation = ticket_field_history.source_relation
     {% endif %}
 
-    {% if 'organization_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
+    {% if var('using_organizations', True) and 'organization_id' in var('ticket_field_history_columns') %} --Join not needed if field is not located in variable, otherwise it is included.
     left join organizations
         on organizations.organization_id = cast(ticket_field_history.organization_id as {{ dbt.type_bigint() }})
         and organizations.source_relation = ticket_field_history.source_relation

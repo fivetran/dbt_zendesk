@@ -6,7 +6,7 @@ version: '0.20.0'
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests_60
+  zendesk_schema: zendesk_integration_tests_61
 
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
@@ -32,16 +32,15 @@ vars:
   # zendesk__unstructured_enabled: True
   # using_schedule_histories: True
 
-  ## For validation testing. To be commented out before release.
-  # zendesk_schema: zendesk_test_env
+  # For validation testing. To be commented out before release.
   # using_domain_names: false
   # using_user_tags: false
   # using_organization_tags: false
   # using_holidays: false
   # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
   # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
-  consistency_test_exclude_fields: ['source_relation', 'ticket_tags', 'ticket_day_id', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
-  # get rid of source_relation and ticket_day_id after v0.19.0
+  # fivetran_integrity_sla_count_match_tickets: (11109)
+  # consistency_test_exclude_fields: ['ticket_tags', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
