@@ -2,7 +2,7 @@
 [PR #185](https://github.com/fivetran/dbt_zendesk/pull/185) includes the following updates:
 
 ## Quickstart Update
-- Removed `organization` from `using_organization_tags` configuration, to maintain a one-to-one mapping between a Quickstart source table and whether its corresponding variable should be enabled or disabled.
+- Removed `organization` from `using_organization_tags` configuration to maintain a one-to-one mapping between a Quickstart source table and whether its corresponding variable in the models should be enabled or disabled.
 
 # dbt_zendesk v0.19.2
 [PR #181](https://github.com/fivetran/dbt_zendesk/pull/181) includes the following updates:
