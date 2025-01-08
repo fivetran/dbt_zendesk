@@ -138,7 +138,7 @@ vars:
 ### Step 4: Enable/Disable models for non-existent sources
 
 > _This step is optional if you are unioning multiple connectors together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories`. Add variables for only the tables you want to enable/disable:
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, or `ticket_form_history` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories`. Add variables for only the tables you want to enable/disable:
 ```yml
 vars:
     using_schedule_histories:   True          #Enable if you are using audit_logs for schedule histories
@@ -147,6 +147,8 @@ vars:
     using_domain_names:         False         #Disable if you are not using domain names
     using_user_tags:            False         #Disable if you are not using user tags
     using_ticket_form_history:  False         #Disable if you are not using ticket form history
+    using_brands:               False         #Disable if you are not using brands
+    using_organizations:        False         #Disable if you are not using organizations. Setting this to False will also disable organization tags. 
     using_organization_tags:    False         #Disable if you are not using organization tags
 ```
 
