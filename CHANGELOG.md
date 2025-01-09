@@ -5,7 +5,7 @@
 - Removed `organization` from `using_organization_tags` configuration to maintain a one-to-one mapping between a Quickstart source table and whether its corresponding variable in the models should be enabled or disabled.
 
 ## Under The Hood
-- Updated the`packages.yml` to point to the [latest release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.14.2) of the `dbt_zendesk_source` package.
+- Updated the `packages.yml` to point to the [latest release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.14.2) of the `dbt_zendesk_source` package.
 
 # dbt_zendesk v0.19.2
 [PR #181](https://github.com/fivetran/dbt_zendesk/pull/181) includes the following updates:
