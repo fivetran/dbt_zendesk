@@ -5,6 +5,15 @@
   - When a table is empty, Redshift ignores explicit data casts and will materialize every column as a `varchar`. Redshift users may experience errors in downstream transformations as a consequence.
   - For each staging model, if the source table is not found, the package will create a empty table with 0 rows for non-Redshift warehouses and a table with 1 all-`null` row for Redshift destinations. The 1 row will ensure that Redshift will respect the package's datatype casts.
 
+# dbt_zendesk v0.19.3
+[PR #185](https://github.com/fivetran/dbt_zendesk/pull/185) includes the following updates:
+
+## Quickstart Update
+- Removed `organization` from `using_organization_tags` configuration to maintain a one-to-one mapping between a Quickstart source table and whether its corresponding variable in the models should be enabled or disabled.
+
+## Under The Hood
+- Updated the `packages.yml` to point to the [latest release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.14.2) of the `dbt_zendesk_source` package.
+
 # dbt_zendesk v0.19.2
 [PR #181](https://github.com/fivetran/dbt_zendesk/pull/181) includes the following updates:
 
