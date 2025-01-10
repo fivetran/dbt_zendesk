@@ -1,6 +1,6 @@
 # Zendesk Support Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
 
-<p align="center">
+<p align="left">
     <a alt="License"
         href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
