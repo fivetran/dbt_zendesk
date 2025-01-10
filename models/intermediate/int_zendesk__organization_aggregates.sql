@@ -1,8 +1,10 @@
+{{ config(enabled=var('using_organizations', True)) }}
+
 with organizations as (
     select * 
     from {{ ref('stg_zendesk__organization') }}
 
---If you use organization tags this will be included, if not it will be ignored.
+--If you use organization tags, this will be included, if not it will be ignored.
 {% if var('using_organization_tags', True) %}
 ), organization_tags as (
     select * 
@@ -18,6 +20,7 @@ with organizations as (
     left join organization_tags
         on organizations.organization_id = organization_tags.organization_id 
         and organizations.source_relation = organization_tags.source_relation
+
 
     group by 1, 2
 {% endif %}

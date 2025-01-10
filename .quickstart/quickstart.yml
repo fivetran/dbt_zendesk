@@ -20,6 +20,10 @@ table_variables:
     - audit_log
   using_holidays:
     - schedule_holiday
+  using_brands:
+    - brand
+  using_organizations:
+    - organization
 
 destination_configurations:
   databricks:

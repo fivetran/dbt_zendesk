@@ -4,6 +4,35 @@
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
 - Corrected references to connectors and connections in the README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
 
+# dbt_zendesk v0.19.3
+[PR #185](https://github.com/fivetran/dbt_zendesk/pull/185) includes the following updates:
+
+## Quickstart Update
+- Removed `organization` from `using_organization_tags` configuration to maintain a one-to-one mapping between a Quickstart source table and whether its corresponding variable in the models should be enabled or disabled.
+
+## Under The Hood
+- Updated the `packages.yml` to point to the [latest release](https://github.com/fivetran/dbt_zendesk_source/releases/tag/v0.14.2) of the `dbt_zendesk_source` package.
+
+# dbt_zendesk v0.19.2
+[PR #181](https://github.com/fivetran/dbt_zendesk/pull/181) includes the following updates:
+
+## New Features
+- Introduced new config variables `using_brands` and `using_organizations` to allow  customers to enable and disable `brand` and `organization` source data, resulting in potential downstream impacts:
+- End models that could be impacted by these variables include: 
+  - `zendesk__ticket_backlog`: `using_brands` and/or `using_organizations` can be set to `false` to disable `brand` and/or `organization` fields.
+  - `zendesk__ticket_enriched`: `using_organizations` can be set to `false` to remove `organization` fields from the final model.
+- Intermediate models that could be impacted by these variables include:
+  - `int_zendesk__organization_aggregates`: `using_organizations` can be utilized to completely disable the model.
+  - `int_zendesk__ticket_aggregates`: `using_brands` can be set to `false` to remove `brand` fields from the final model.
+  - `int_zendesk__updater_information`: `using_organizations` can be set to `false` to remove `organization` fields from the final model.
+
+## Under the Hood
+- Updated `table_variables` in the `quickstart.yml` with the new `brand` and `organization` tables.
+- Updated our Buildkite model run script to ensure we test for when `using_brands` and `using_organizations` is set to either true or false. 
+
+## Documentation Updates
+- [Updated README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-4-enabledisable-models-for-non-existent-sources) with instructions on how to disable `brand` and `organization` sources. 
+
 # dbt_zendesk v0.19.1
 [PR #180](https://github.com/fivetran/dbt_zendesk/pull/180) includes the following update:
 

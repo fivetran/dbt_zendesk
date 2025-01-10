@@ -7,10 +7,13 @@ with tickets as (
   select *
   from {{ ref('stg_zendesk__ticket_tag') }}
 
+--If you use using_brands this will be included, if not it will be ignored.
+{% if var('using_brands', True) %}
 ), brands as (
 
   select *
   from {{ ref('stg_zendesk__brand') }}
+{% endif %}
   
 ), ticket_tag_aggregate as (
   select
@@ -27,7 +30,9 @@ with tickets as (
       then true
       else false
         end as is_incident,
+    {% if var('using_brands', True) %}
     brands.name as ticket_brand_name,
+    {% endif %}
     ticket_tag_aggregate.ticket_tags
   from tickets
 
@@ -35,9 +40,11 @@ with tickets as (
     on tickets.ticket_id = ticket_tag_aggregate.ticket_id 
     and tickets.source_relation = ticket_tag_aggregate.source_relation
 
+  {% if var('using_brands', True) %}
   left join brands
     on brands.brand_id = tickets.brand_id
     and brands.source_relation = tickets.source_relation
+  {% endif %}    
 )
 
 select *
