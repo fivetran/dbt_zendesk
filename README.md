@@ -94,13 +94,13 @@ To use this functionality, you will need to set the `zendesk_sources` variable i
 
 vars:
   zendesk_sources:
-    - database: connector_1_destination_name # Required
-      schema: connector_1_schema_name # Rquired
-      name: connector_1_source_name # Required only if following the step in the following subsection
+    - database: connection_1_destination_name # Required
+      schema: connection_1_schema_name # Rquired
+      name: connection_1_source_name # Required only if following the step in the following subsection
 
-    - database: connector_2_destination_name
-      schema: connector_2_schema_name
-      name: connector_2_source_name
+    - database: connection_2_destination_name
+      schema: connection_2_schema_name
+      name: connection_2_source_name
 ```
 
 ##### Recommended: Incorporate unioned sources into DAG
