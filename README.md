@@ -1,4 +1,6 @@
-<p align="center">
+# Zendesk Support Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
+
+<p align="left">
     <a alt="License"
         href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
@@ -13,7 +15,6 @@
         <img src="https://img.shields.io/badge/Fivetran_Quickstart_Compatible%3F-yes-green.svg" /></a>
 </p>
 
-# Zendesk Support Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
 ## What does this dbt package do?
 - Produces modeled tables that leverage Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation) and build off the output of our [zendesk source package](https://github.com/fivetran/dbt_zendesk_source).
 - Enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It performs the following actions:
@@ -67,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.19.0", "<0.20.0"]
+    version: [">=0.20.0", "<0.21.0"]
 
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
@@ -293,7 +294,7 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: [">=0.14.0", "<0.15.0"]
+      version: [">=0.15.0", "<0.16.0"]
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
