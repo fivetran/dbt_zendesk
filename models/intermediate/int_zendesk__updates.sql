@@ -10,6 +10,50 @@ with ticket_history as (
     select *
     from {{ ref('stg_zendesk__ticket') }}
 
+{% if var('using_chat', True) %}
+), ticket_chat as (
+
+    select *
+    from {{ ref('stg_zendesk__ticket_chat') }}
+
+), ticket_chat_event as (
+
+    select *
+    from {{ ref('stg_zendesk__ticket_chat_event') }}
+    where lower(type) = 'chatmessage'
+
+), users as (
+
+    select *
+    from {{ ref('stg_zendesk__user') }}
+
+), ticket_chat_join as (
+
+    select 
+        ticket_chat_event.*,
+        ticket_chat.ticket_id 
+
+    from ticket_chat_event 
+    join ticket_chat 
+        on ticket_chat_event.chat_id = ticket_chat.chat_id
+        and ticket_chat_event.source_relation = ticket_chat.source_relation
+    join users
+        on ticket_chat_event.actor_id = users.user_id 
+        and ticket_chat_event.source_relation = ticket_chat_event.source_relation
+    where users.role in ('admin', 'agent') -- limit to internal users
+
+{% endif %}
+), comments_with_channel as (
+
+    select 
+        ticket_comment.*
+
+    from ticket_comment 
+    join tickets 
+        on ticket_comment.ticket_id = tickets.ticket_id
+        and ticket_comment.source_relation = tickets.source_relation
+    where lower(tickets.created_channel) not in ('chat', 'native_messaging')
+
 ), updates_union as (
     select 
         source_relation,
@@ -33,7 +77,22 @@ with ticket_history as (
         user_id,
         created_at as valid_starting_at,
         lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
-    from ticket_comment
+    from comments_with_channel
+
+{% if var('using_chat', True) %}
+    union all
+
+    select
+        source_relation,
+        ticket_id,
+        cast('comment' as {{ dbt.type_string() }}) as field_name,
+        message as value,
+        true as is_public,
+        actor_id as user_id,
+        created_at as valid_starting_at,
+        lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
+    from ticket_chat_join
+{% endif %}
 
 ), final as (
     select
@@ -44,6 +103,7 @@ with ticket_history as (
     left join tickets
         on tickets.ticket_id = updates_union.ticket_id
         and tickets.source_relation = updates_union.source_relation
+
 )
 
 select *

@@ -24,6 +24,9 @@ table_variables:
     - brand
   using_organizations:
     - organization
+  using_chat:
+    - ticket_chat
+    - ticket_chat_event
 
 destination_configurations:
   databricks:

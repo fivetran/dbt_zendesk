@@ -27,6 +27,8 @@ vars:
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
     zendesk_audit_log_identifier:              "audit_log_data"
+    zendesk_ticket_chat_identifier:            "ticket_chat_data"
+    zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
@@ -159,6 +161,14 @@ seeds:
     organization_tag_data_snowflake:
       +alias: organization_tag_data
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
+    ticket_chat_event_data:
+      +column_types:
+        actor_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        created_at: timestamp
+        status_updated_at: timestamp
+    ticket_chat_data:
+      +column_types:
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
 
 dispatch:
   - macro_namespace: dbt_utils

@@ -1,0 +1,11 @@
+chat_id,created_at,_fivetran_synced,actor_id,chat_index,external_message_id,filename,is_history_context,message,message_id,message_source,mime_type,original_message,original_message_type,parent_message_id,reason,size,status,status_updated_at,type,url
+4323.953441.TyDt23helloZt4E,2023-12-12 11:20:28.994000,2024-03-19 16:51:27.764000,403969141094,3,,,,,,,,,,,,,,,ChatDepartmentTransfer,
+4323.953441.TyDs6revFIOI0Y,2023-12-12 11:16:58.905000,2024-03-19 16:51:27.757000,403959218893,5,,,,,,,,,,,,,,,ChatDepartmentTransfer,
+4323.953441.T6OrgbvMIqPplK,2023-12-08 05:07:51.946000,2024-03-19 16:51:30.989000,403969141094,2,,,,,,,,,,,,,,,ChatEmailChanged,
+4323.953441.TyDs6revFIOI0Y,2023-12-12 11:16:29.190000,2024-03-19 16:51:27.756000,403959218893,0,,,,,,,,,,,,,,,ChatMessage,
+4323.953441.TyDfrDh7BV3QA,2023-12-12 10:27:50.256000,2024-03-19 16:51:27.753000,403969141094,0,,,,,,,,,,,,,,,ChatJoin,
+4323.953441.T6OrgbvMIqPplK,2023-12-08 05:07:28.408000,2024-03-19 16:51:30.989000,403959218893,0,,,,,,,,,,,,,,,ChatMessage,
+4323.953441.TzkBGrapJoA,2023-12-28 14:22:12.840000,2024-03-19 16:51:21.702000,403969141094,0,,,,,,,,,,,,,,,ChatMessage,
+4323.953441.TzkArUd3CjKI,2023-12-28 14:20:35.032000,2024-03-19 16:51:23.267000,403959218893,0,,,,,,,,,,,,,,,ChatMessage,
+4323.953441.TzAcedetjkcKyq,2023-12-22 10:37:20.489000,2024-03-19 16:51:25.454000,403969141094,0,,,,,,,,,,,,,,,ChatMessage,
+4323.953441.TyDt23helloZt4E,2023-12-12 11:20:10.181000,2024-03-19 16:51:27.764000,403959218893,0,,,,,,,,,,,,,,,ChatMessage,
