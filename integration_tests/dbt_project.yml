@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.20.0'
+version: '0.21.0'
 
 profile: 'integration_tests'
 
@@ -169,7 +169,8 @@ seeds:
     ticket_chat_data:
       +column_types:
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
-
+        ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        
 dispatch:
   - macro_namespace: dbt_utils
     search_order: ['spark_utils', 'dbt_utils']
