@@ -24,7 +24,7 @@ table_variables:
     - brand
   using_organizations:
     - organization
-  using_chat:
+  using_ticket_chat:
     - ticket_chat
     - ticket_chat_event
 
