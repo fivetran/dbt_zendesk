@@ -43,16 +43,6 @@ with ticket_history as (
     where users.role in ('admin', 'agent') -- limit to internal users
 
 {% endif %}
-), comments_with_channel as (
-
-    select 
-        ticket_comment.*
-
-    from ticket_comment 
-    join tickets 
-        on ticket_comment.ticket_id = tickets.ticket_id
-        and ticket_comment.source_relation = tickets.source_relation
-    where lower(tickets.created_channel) not in ('chat', 'native_messaging')
 
 ), updates_union as (
     select 
@@ -71,13 +61,13 @@ with ticket_history as (
     select
         source_relation,
         ticket_id,
-        cast('comment' as {{ dbt.type_string() }}) as field_name,
+        cast('comment - not chat' as {{ dbt.type_string() }}) as field_name,
         body as value,
         is_public,
         user_id,
         created_at as valid_starting_at,
         lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
-    from comments_with_channel
+    from ticket_comment
 
 {% if var('using_ticket_chat', False) %}
     union all
@@ -85,7 +75,7 @@ with ticket_history as (
     select
         source_relation,
         ticket_id,
-        cast('comment' as {{ dbt.type_string() }}) as field_name,
+        cast('comment - chat' as {{ dbt.type_string() }}) as field_name,
         message as value,
         true as is_public,
         actor_id as user_id,
@@ -96,13 +86,24 @@ with ticket_history as (
 
 ), final as (
     select
-        updates_union.*,
+        updates_union.source_relation,
+        updates_union.ticket_id,
+        case 
+            when updates_union.field_name in ('comment - chat', 'comment - not chat') then 'comment' 
+        else updates_union.field_name end as field_name,
+        updates_union.value,
+        updates_union.is_public,
+        updates_union.user_id,
+        updates_union.valid_starting_at,
+        updates_union.valid_ending_at,
         tickets.created_at as ticket_created_date
     from updates_union
 
     left join tickets
         on tickets.ticket_id = updates_union.ticket_id
         and tickets.source_relation = updates_union.source_relation
+
+    where not (updates_union.field_name = 'comment - not chat' and lower(tickets.created_channel) in ('chat', 'native_messaging')) -- Only keep chat comments for chat/native_messaging tickets
 
 )
 
