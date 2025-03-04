@@ -10,7 +10,7 @@ with ticket_history as (
     select *
     from {{ ref('stg_zendesk__ticket') }}
 
-{% if var('using_chat', True) %}
+{% if var('using_ticket_chat', False) %}
 ), ticket_chat as (
 
     select *
@@ -79,7 +79,7 @@ with ticket_history as (
         lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
     from comments_with_channel
 
-{% if var('using_chat', True) %}
+{% if var('using_ticket_chat', False) %}
     union all
 
     select

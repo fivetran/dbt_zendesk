@@ -1,4 +1,10 @@
-# dbt_zendesk version.version
+# dbt_zendesk v0.21.0
+
+## New Features
+[TODO]
+- Support for tickets created from messaging channels in `zendesk__sla_policies` and `zendesk__ticket_metrics`
+- `using_ticket_chat` variable
+- 4 new staging models.
 
 ## Documentation
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
