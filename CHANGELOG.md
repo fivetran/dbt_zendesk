@@ -1,10 +1,19 @@
-# dbt_zendesk v0.21.0
+# dbt_zendesk v0.21.0-a1
 
 ## New Features
-[TODO]
-- Support for tickets created from messaging channels in `zendesk__sla_policies` and `zendesk__ticket_metrics`
-- `using_ticket_chat` variable
-- 4 new staging models.
+- Incorporated the `ticket_chat` and `ticket_chat_event` source tables to properly capture tickets created via `chat` and `native_messaging` channels in SLA Policy and other ticket metrics. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+- Added the `using_ticket_chat` variable to enable/disable `ticket_chat` and `ticket_chat_event` staging models and transformations. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+  - For Fivetran Quickstart users, `using_ticket_chat` is dynamically set based on the presence of the `ticket_chat` and `ticket_chat_event` source tables.
+  - For other users, `using_ticket_chat` is set to **False** by default. To change this and enable the ticket chat models, add the following configuration (see [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-4-enabledisable-models-for-non-existent-sources) for details).
+
+```yml
+vars:
+  zendesk_source:
+    using_ticket_chat: True
+  zendesk:
+    using_ticket_chat: True
+```
+> Note: If `using_ticket_chat` is enabled, this update increases the model count of the package by **4 models**.
 
 ## Documentation
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))

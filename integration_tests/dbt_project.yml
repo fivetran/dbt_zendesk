@@ -7,7 +7,6 @@ profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests_63
-
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -33,6 +32,7 @@ vars:
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
   # using_schedule_histories: True
+  # using_ticket_chat: true
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false
