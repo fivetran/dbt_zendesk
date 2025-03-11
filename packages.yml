@@ -1,8 +1,6 @@
 packages:
-  # - package: fivetran/zendesk_source
-  #   version: 0.16.0-a1
-  - git: https://github.com/fivetran/dbt_zendesk_source.git
-    revision: update/handle-chat-slas
+  - package: fivetran/zendesk_source
+    version: 0.16.0-a1
 
   - package: calogica/dbt_date
     version: [">=0.9.0", "<1.0.0"]
