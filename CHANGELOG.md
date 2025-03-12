@@ -1,4 +1,15 @@
-# dbt_zendesk version.version
+# dbt_zendesk 0.21.0
+
+## Dependency Changes
+- Removed the dependency on [calogica/dbt_date](https://github.com/calogica/dbt-date) as it is no longer actively maintained. To maintain functionality, key date macros have been replicated within the fivetran_date_macros folder with minimal modifications. Only macro versions supporting Fivetran Zendesk supported destinations are retained, and all have been prefixed with `fivetran_` to avoid naming conflicts.
+  - `date_part` -> `fivetran_date_part`
+  - `day_of_week` -> `fivetran_day_of_week`
+  - `n_days_ago` -> `fivetran_n_days_ago`
+  - `n_days_away` -> `fivetran_n_days_away`
+  - `today` -> `fivetran_today`
+    - Please note, this macro has been adjusted to remove the timezone conversion as all dates are intended to by in UTC for the Zendesk package use case.
+  - `week_end` -> `fivetran_week_end`
+  - `week_start` -> `fivetran_week_start`
 
 ## Documentation
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))

@@ -62,7 +62,7 @@ with requester_wait_time_filtered_statuses as (
       status_valid_starting_at,
       status_valid_ending_at,
       ({{ dbt.datediff(
-            "cast(" ~ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
+            "cast(" ~ zendesk.fivetran_week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
             "cast(ticket_status_crossed_with_schedule.valid_starting_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} /60
           ) as valid_starting_at_in_minutes_from_week,
@@ -71,7 +71,7 @@ with requester_wait_time_filtered_statuses as (
               'ticket_status_crossed_with_schedule.valid_ending_at',
               'second') }} /60
             ) as raw_delta_in_minutes,
-    {{ dbt_date.week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date
+    {{ zendesk.fivetran_week_start('ticket_status_crossed_with_schedule.valid_starting_at','UTC') }} as start_week_date
 
     from ticket_status_crossed_with_schedule
     {{ dbt_utils.group_by(n=11) }}
@@ -187,7 +187,7 @@ with requester_wait_time_filtered_statuses as (
     {{ fivetran_utils.timestamp_add(
       "minute",
       "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt.type_int() ~ " )",
-      "cast(" ~ dbt_date.week_start('valid_starting_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ " )"
+      "cast(" ~ zendesk.fivetran_week_start('valid_starting_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ " )"
       ) }} as sla_breach_at
   from intercepted_periods_agent_filtered
 
