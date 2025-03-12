@@ -1,5 +1,5 @@
 {% macro fivetran_date_part(datepart, date) -%}
-    {{ adapter.dispatch('fivetran_date_part', 'zendesk') (datepart, date) }}
+    {{ return(adapter.dispatch('fivetran_date_part', 'zendesk') (datepart, date)) }}
 {%- endmacro %}
 
 {% macro default__fivetran_date_part(datepart, date) -%}

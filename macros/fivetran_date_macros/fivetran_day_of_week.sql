@@ -1,5 +1,5 @@
 {%- macro fivetran_day_of_week(date, isoweek=true) -%}
-{{ adapter.dispatch('fivetran_day_of_week', 'zendesk') (date, isoweek) }}
+    {{ return(adapter.dispatch('fivetran_day_of_week', 'zendesk') (date, isoweek)) }}
 {%- endmacro %}
 
 {%- macro default__fivetran_day_of_week(date, isoweek) -%}
@@ -31,8 +31,6 @@
         end
     {%- endif -%}
 
-
-
 {%- endmacro %}
 
 {%- macro bigquery__fivetran_day_of_week(date, isoweek) -%}
@@ -51,7 +49,6 @@
 
 {%- endmacro %}
 
-
 {%- macro postgres__fivetran_day_of_week(date, isoweek) -%}
 
     {%- if isoweek -%}
@@ -65,7 +62,6 @@
     {%- endif -%}
 
 {%- endmacro %}
-
 
 {%- macro redshift__fivetran_day_of_week(date, isoweek) -%}
 
@@ -86,7 +82,6 @@
 {%- macro duckdb__fivetran_day_of_week(date, isoweek) -%}
 {{ return(zendesk.postgres__fivetran_day_of_week(date, isoweek)) }}
 {%- endmacro %}
-
 
 {%- macro spark__fivetran_day_of_week(date, isoweek) -%}
 

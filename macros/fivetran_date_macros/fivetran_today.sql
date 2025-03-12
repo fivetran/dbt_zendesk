@@ -1,9 +1,7 @@
 {%- macro fivetran_today(tz=None) -%}
-{{ adapter.dispatch('fivetran_today', 'zendesk') () }}
+    {{ return(adapter.dispatch('fivetran_today', 'zendesk')) (tz) }}
 {%- endmacro -%}
 
 {%- macro default__fivetran_today(tz) -%}
-
-cast({{ dbt.current_timestamp() }} as date)
-
+    cast({{ dbt.current_timestamp() }} as date)
 {%- endmacro -%}

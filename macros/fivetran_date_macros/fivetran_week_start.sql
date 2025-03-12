@@ -1,10 +1,10 @@
 {%- macro fivetran_week_start(date=None, tz=None) -%}
-{%-set dt = date if date else zendesk.fivetran_today(tz) -%}
-{{ adapter.dispatch('fivetran_week_start', 'zendesk') (dt) }}
+    {%-set dt = date if date else zendesk.fivetran_today(tz) -%}
+    {{ return(adapter.dispatch('fivetran_week_start', 'zendesk') (dt)) }}
 {%- endmacro -%}
 
 {%- macro default__fivetran_week_start(date) -%}
-cast({{ dbt.date_trunc('week', date) }} as date)
+    cast({{ dbt.date_trunc('week', date) }} as date)
 {%- endmacro %}
 
 {%- macro snowflake__fivetran_week_start(date) -%}
@@ -17,10 +17,10 @@ cast({{ dbt.date_trunc('week', date) }} as date)
 {%- endmacro %}
 
 {%- macro postgres__fivetran_week_start(date) -%}
--- Sunday as week start date
-cast({{ dbt.dateadd('day', -1, dbt.date_trunc('week', dbt.dateadd('day', 1, date))) }} as date)
+    -- Sunday as week start date
+    cast({{ dbt.dateadd('day', -1, dbt.date_trunc('week', dbt.dateadd('day', 1, date))) }} as date)
 {%- endmacro %}
 
 {%- macro duckdb__fivetran_week_start(date) -%}
-{{ return(zendesk.postgres__fivetran_week_start(date)) }}
+    {{ return(zendesk.postgres__fivetran_week_start(date)) }}
 {%- endmacro %}
