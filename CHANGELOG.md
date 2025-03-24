@@ -1,8 +1,8 @@
 # dbt_zendesk v0.21.0-a2
 This pre-release builds upon the changes made in v0.21.0-a1.
 
-## Bug Fixes
-- Adjusts Full Resolution Time logic to handle tickets that were marked as `closed` but not `solved`. This is not the norm for tickets, but a case that the Data Model will still accommodate.
+## Feature Update
+- Adjusts Full Resolution Time logic to handle tickets that were marked as `closed` but not `solved`. This is not the norm for tickets, but a case that the Data Model will still accommodate. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
 
 # dbt_zendesk v0.21.0-a1
 
