@@ -40,7 +40,7 @@ with ticket_reply_times as (
     min(first_reply_time.agent_responded_at) as agent_responded_at,
 
     ({{ dbt.datediff(
-            "cast(" ~ zendesk.week_start('ticket_schedules.schedule_created_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
+            "cast(" ~ zendesk.fivetran_week_start('ticket_schedules.schedule_created_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
             "cast(ticket_schedules.schedule_created_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
@@ -51,7 +51,7 @@ with ticket_reply_times as (
           'least(ticket_schedules.schedule_invalidated_at, min(first_reply_time.agent_responded_at))',
           'second') }}/60
         )) as raw_delta_in_minutes,
-    {{ zendesk.week_start('ticket_schedules.schedule_created_at') }} as start_week_date
+    {{ zendesk.fivetran_week_start('ticket_schedules.schedule_created_at') }} as start_week_date
   
   from first_reply_time
   join ticket_schedules 

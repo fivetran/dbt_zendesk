@@ -277,9 +277,9 @@ with split_timezones as (
         end_time_utc,
         schedule_valid_from,
         schedule_valid_until,
-        -- use zendesk.week_start to ensure we truncate to Sunday
-        cast({{ zendesk.week_start('schedule_valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
-        cast({{ zendesk.week_start('schedule_valid_until') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
+        -- use zendesk.fivetran_week_start to ensure we truncate to Sunday
+        cast({{ zendesk.fivetran_week_start('schedule_valid_from') }} as {{ dbt.type_timestamp() }}) as schedule_starting_sunday,
+        cast({{ zendesk.fivetran_week_start('schedule_valid_until') }} as {{ dbt.type_timestamp() }}) as schedule_ending_sunday,
         -- Check if the start fo the schedule was from a schedule or timezone change for tracking downstream.
         case when schedule_valid_from = timezone_valid_from
             then 'timezone'

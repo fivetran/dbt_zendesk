@@ -16,8 +16,8 @@ with schedule as (
         schedule_id,
         cast({{ dbt.date_trunc('day', 'holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_valid_from,
         cast({{ dbt.date_trunc('day', 'holiday_end_date_at') }}  as {{ dbt.type_timestamp() }}) as holiday_valid_until,
-        cast({{ zendesk.week_start('holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
-        cast({{ zendesk.week_start(dbt.dateadd('week', 1, 'holiday_end_date_at')) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
+        cast({{ zendesk.fivetran_week_start('holiday_start_date_at') }} as {{ dbt.type_timestamp() }}) as holiday_starting_sunday,
+        cast({{ zendesk.fivetran_week_start(dbt.dateadd('week', 1, 'holiday_end_date_at')) }} as {{ dbt.type_timestamp() }}) as holiday_ending_sunday,
         -- Since the spine is based on weeks, holidays that span multiple weeks need to be broken up in to weeks. First step is to find those holidays.
         {{ dbt.datediff('holiday_start_date_at', 'holiday_end_date_at', 'week') }} + 1 as holiday_weeks_spanned
     from schedule_holiday

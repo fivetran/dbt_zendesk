@@ -1,12 +1,12 @@
-{%- macro week_start(dt) -%}
-{{ adapter.dispatch('week_start', 'zendesk') (dt) }}
+{%- macro fivetran_week_start(dt) -%}
+{{ adapter.dispatch('fivetran_week_start', 'zendesk') (dt) }}
 {%- endmacro -%}
 
-{%- macro default__week_start(dt) -%}
+{%- macro default__fivetran_week_start(dt) -%}
 cast({{ dbt.date_trunc('week', dt) }} as date)
 {%- endmacro %}
 
-{%- macro snowflake__week_start(dt) -%}
+{%- macro snowflake__fivetran_week_start(dt) -%}
     -- For Snowflake, adjust week start to Sunday
     cast(
         case 
@@ -16,11 +16,11 @@ cast({{ dbt.date_trunc('week', dt) }} as date)
     as date)
 {%- endmacro %}
 
-{%- macro postgres__week_start(dt) -%}
+{%- macro postgres__fivetran_week_start(dt) -%}
 -- Sunday as week start date
 cast({{ dbt.dateadd('day', -1, dbt.date_trunc('week', dbt.dateadd('day', 1, dt))) }} as date)
 {%- endmacro %}
 
-{%- macro duckdb__week_start(dt) -%}
-{{ return(zendesk.postgres__week_start(dt)) }}
+{%- macro duckdb__fivetran_week_start(dt) -%}
+{{ return(zendesk.postgres__fivetran_week_start(dt)) }}
 {%- endmacro %}
