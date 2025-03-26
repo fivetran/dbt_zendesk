@@ -118,7 +118,7 @@ vars:
   - Entry to clarify backfilling of schedule history. The most recent schedule is sourced from `stg_zendesk__schedule`, while historical changes are managed separately, allowing users to disable the history feature if needed.
 
 ## Under the Hood
-- Replaced instances of `dbt.date_trunc` with `dbt_date.week_start` to standardize week start dates to Sunday across all warehouses, since our schedule logic relies on consistent weeks.
+- Replaced instances of `dbt.date_trunc` with `zendesk.week_start` to standardize week start dates to Sunday across all warehouses, since our schedule logic relies on consistent weeks.
 - Replaced the deprecated `dbt.current_timestamp_backcompat()` function with `dbt.current_timestamp()` to ensure all timestamps are captured in UTC.
 - Added seed data for `audit_log` to enhance integration testing capabilities.
 - Introduced new helper macros, `clean_data` and `regex_extract`, to process complex text of the schedule changes extracted from audit logs.
@@ -310,7 +310,7 @@ Tiny release ahead!
 - Fixed the `total_agent_replies` field in `zendesk__ticket_metrics` so the value is derived from public agent comments logic, and also ignores ticket creation comments from an agent, matching the Zendesk definition. ([PR #102](https://github.com/fivetran/dbt_zendesk/pull/102))
 
 ## Under the Hood:
-- Leveraged `dbt_date.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
+- Leveraged `zendesk.week_start` in place of `dbt.date_trunc` for business hour metrics to more consistently capture the start of the week across warehouses. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 - Start of the week is now consistently set to Sunday. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 - Incorporated the new `fivetran_utils.drop_schemas_automation` macro into the end of each Buildkite integration test job. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
 - Updated the pull request templates. ([PR #98](https://github.com/fivetran/dbt_zendesk/pull/98))
