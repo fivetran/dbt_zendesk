@@ -7,13 +7,13 @@ cast({{ dbt.date_trunc('week', dt) }} as date)
 {%- endmacro %}
 
 {%- macro snowflake__fivetran_week_start(dt) -%}
-    -- For Snowflake, adjust week start to Sunday
-    cast(
-        case 
-            when dayofweekiso({{ dt }}) = 7 then {{ dt }} -- dayofweekiso returns 7 for Sunday
-            else {{ dbt.dateadd("day", "-1 * dayofweekiso(" ~ dt ~ ")", dt) }}
-        end
-    as date)
+-- Adjust week start to Sunday
+cast(
+    case 
+        when dayofweekiso({{ dt }}) = 7 then {{ dt }} -- dayofweekiso returns 7 for Sunday
+        else {{ dbt.dateadd("day", "-1 * dayofweekiso(" ~ dt ~ ")", dt) }}
+    end
+as date)
 {%- endmacro %}
 
 {%- macro postgres__fivetran_week_start(dt) -%}
