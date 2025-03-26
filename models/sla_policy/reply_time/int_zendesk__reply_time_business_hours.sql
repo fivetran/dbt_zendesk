@@ -196,7 +196,7 @@ with ticket_schedules as (
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
-    {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date
+    {{ zendesk.week_end("sla_applied_at") }} as week_end_date
   from intercepted_periods_with_breach_flag
 
 ), reply_time_business_hours_sla as (
