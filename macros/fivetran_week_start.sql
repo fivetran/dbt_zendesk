@@ -1,5 +1,5 @@
 {%- macro fivetran_week_start(dt) -%}
-{{ adapter.dispatch('fivetran_week_start', 'zendesk') (dt) }}
+{{ return(adapter.dispatch('fivetran_week_start', 'zendesk') (dt)) }}
 {%- endmacro -%}
 
 {%- macro default__fivetran_week_start(dt) -%}
