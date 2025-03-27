@@ -2,7 +2,7 @@ with historical_solved_status as (
 
     select 
       *,
-      row_number() over (partition by source_relation, ticket_id order by valid_starting_at desc) as row_num
+      row_number() over (partition by source_relation, ticket_id order by valid_starting_at asc) as row_num
     from {{ ref('int_zendesk__ticket_historical_status') }}
     where status in ('solved', 'closed') -- Ideally we are looking for solved timestamps, but Zendesk sometimes (very infrequently) closes tickets without marking them as solved
 
@@ -10,7 +10,7 @@ with historical_solved_status as (
 
     select *
     from historical_solved_status
-    where row_num = 1
+    where row_num = 1 -- Take the EARLIEST timestamp so that we grab solved records if possible. Otherwise the first closed record.
 
 ), ticket as (
 
