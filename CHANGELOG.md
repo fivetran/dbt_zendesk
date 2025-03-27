@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # dbt_zendesk v0.21.0-a2
 This pre-release builds upon the changes made in v0.21.0-a1.
 
@@ -20,6 +21,16 @@ vars:
     using_ticket_chat: True
 ```
 > Note: If `using_ticket_chat` is enabled, this update increases the model count of the package by **4 models**.
+=======
+# dbt_zendesk v0.21.0
+
+This release includes the following updates:
+
+## Dependency Changes
+- Removed the package dependency on [calogica/dbt_date](https://github.com/calogica/dbt-date), which is no longer actively maintained. Replaced the following macros with `fivetran_*` equivalents that provide the same functionality and have been tested for compatibility: ([#191](https://github.com/fivetran/dbt_zendesk/pull/191))
+  - `dbt_date.week_end` → `zendesk.fivetran_week_end`
+  - `dbt_date.week_start` → `zendesk.fivetran_week_start`
+>>>>>>> 1ad0a86859f8c589889e7a736130eadb04a4d6d2
 
 ## Documentation
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
