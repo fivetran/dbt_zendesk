@@ -66,12 +66,12 @@ with ticket_schedules as (
     sla_policy_applied.*,
     ticket_schedules.schedule_id,
     ({{ dbt.datediff(
-            "cast(" ~ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') ~ "as " ~ dbt.type_timestamp() ~ ")", 
+            "cast(" ~ zendesk.fivetran_week_start('sla_policy_applied.sla_applied_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
             "cast(sla_policy_applied.sla_applied_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} /60
           ) as start_time_in_minutes_from_week,
       schedule_business_hours.total_schedule_weekly_business_minutes,
-    {{ dbt_date.week_start('sla_policy_applied.sla_applied_at','UTC') }} as start_week_date
+    {{ zendesk.fivetran_week_start('sla_policy_applied.sla_applied_at') }} as start_week_date
 
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
@@ -183,20 +183,20 @@ with ticket_schedules as (
   select
     *,
     schedule_end_time + remaining_minutes as breached_at_minutes,
-    {{ dbt_date.week_start('sla_applied_at','UTC') }} as starting_point,
+    {{ zendesk.fivetran_week_start('sla_applied_at') }} as starting_point,
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt.type_int() ~ " )",
-        "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_breach_at,
+        "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_breach_at,
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_start_time) as " ~ dbt.type_int() ~ " )",
-        "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
+        "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
     {{ fivetran_utils.timestamp_add(
         "minute",
         "cast(((7*24*60) * week_number) + (schedule_end_time) as " ~ dbt.type_int() ~ " )",
-        "cast(" ~ dbt_date.week_start('sla_applied_at','UTC') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
-    {{ dbt_date.week_end("sla_applied_at", tz="America/UTC") }} as week_end_date
+        "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
+    {{ zendesk.fivetran_week_end("sla_applied_at") }} as week_end_date
   from intercepted_periods_with_breach_flag
 
 ), reply_time_business_hours_sla as (

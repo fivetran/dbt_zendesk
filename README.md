@@ -68,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.20.0", "<0.21.0"]
+    version: [">=0.21.0", "<0.22.0"]
 
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
@@ -304,9 +304,6 @@ packages:
 
     - package: dbt-labs/spark_utils
       version: [">=0.3.0", "<0.4.0"]
-
-    - package: calogica/dbt_date
-      version: [">=0.9.0", "<1.0.0"]
 ```
 ## How is this package maintained and can I contribute?
 ### Package Maintenance

@@ -1,4 +1,11 @@
-# dbt_zendesk version.version
+# dbt_zendesk v0.21.0
+
+This release includes the following updates:
+
+## Dependency Changes
+- Removed the package dependency on [calogica/dbt_date](https://github.com/calogica/dbt-date), which is no longer actively maintained. Replaced the following macros with `fivetran_*` equivalents that provide the same functionality and have been tested for compatibility: ([#191](https://github.com/fivetran/dbt_zendesk/pull/191))
+  - `dbt_date.week_end` → `zendesk.fivetran_week_end`
+  - `dbt_date.week_start` → `zendesk.fivetran_week_start`
 
 ## Documentation
 - Added Quickstart model counts to README. ([#183](https://github.com/fivetran/dbt_zendesk/pull/183))
