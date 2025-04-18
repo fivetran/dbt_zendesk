@@ -1,3 +1,7 @@
+# dbt_zendesk v0.22.0-a2 or v0.22.0 
+- Fixes issue causing `first_solved_at` and `last_solved_at` to be the same (the first solved date) for reoponed tickets.
+- (upstream in source) handles inconsistent formatting of `ticket_chat_event.actor_id`
+
 # dbt_zendesk v0.22.0-a1
 
 This pre-release builds upon the changes made in v0.21.0-a2 and v0.21.0-a1 and includes updates made in v0.21.0.

@@ -163,7 +163,6 @@ seeds:
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
     ticket_chat_event_data:
       +column_types:
-        actor_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         status_updated_at: timestamp
     ticket_chat_data:
