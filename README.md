@@ -68,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: 0.22.0-a1
+    version: 0.22.0-a2
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
 
@@ -294,7 +294,7 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: 0.16.0-a1
+      version: 0.16.0-a2
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]

@@ -1,6 +1,6 @@
-# dbt_zendesk v0.22.0-a2 or v0.22.0 
-- Fixes issue causing `first_solved_at` and `last_solved_at` to be the same (the first solved date) for reoponed tickets.
-- (upstream in source) handles inconsistent formatting of `ticket_chat_event.actor_id`
+# dbt_zendesk v0.22.0-a2
+- Fixes issue introduced in a previous pre-release causing `first_solved_at` and `last_solved_at` to be the same (the first solved date) for reopened tickets. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+- (Upstream in [zendesk_source](https://github.com/fivetran/dbt_zendesk_source/blob/main/CHANGELOG.md)) Handles inconsistent formatting of `ticket_chat_event.actor_id` to safely cast it as a bigint. ([Source PR #63](https://github.com/fivetran/dbt_zendesk_source/pull/63))
 
 # dbt_zendesk v0.22.0-a1
 
