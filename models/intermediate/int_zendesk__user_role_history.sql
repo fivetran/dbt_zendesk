@@ -12,54 +12,77 @@ with audit_logs as (
         lower(change_description) like '%support role changed from%'
         and source_type = 'user'
 
-), begin_splitting as (
+), find_support_role_changes as (
     select
         source_relation,
         user_id,
         user_name,
         created_at,
+        cast(created_at as date) as created_date,
         change_description,
-        -- grab everything AFTER this
-        {{ dbt.split_part('change_description', "'support role changed from '", 2) }} as first_split
+        -- extract change description for the support role
+        {{ zendesk.regex_extract_support_role_change('change_description') }} as support_role_change_description
     from audit_logs
 
-), split_out_from_role as (
+), split_to_from as (
     select
         source_relation,
         user_id,
         user_name,
         created_at,
         change_description,
-        {{ dbt.split_part('first_split', "' to '", 1) }} as from_role,
-        {{ dbt.split_part('first_split', "' to '", 2) }} as second_split
-    from begin_splitting
+        {{ dbt.split_part('support_role_change_description', "' to '", 1) }} as role_updated_from,
+        {{ dbt.split_part('support_role_change_description', "' to '", 2) }} as role_updated_to,
 
-), split_out_to_role as (
+        -- Identify the first change record so we know user's beginning role
+        min(created_at) over (partition by source_relation, user_id) as min_user_created_at,
+        
+        -- Identify multiple changes in a single day when row_number > 1
+        row_number() over (
+            partition by source_relation, user_id, created_date
+            order by created_at
+        ) as row_number
+    from find_support_role_changes
+
+), first_roles as (
     select
         source_relation,
         user_id,
         user_name,
-        created_at,
         change_description,
-        from_role,
-        -- role changes (support, guide, explore, chat) get batched together. let's make sure we're only looking at support roles
-        {{ dbt.split_part('second_split', "'\\n'", 1) }} as role_change
-    from split_out_from_role
+        cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_starting_at,
+        created_at as valid_ending_at,
+        role_updated_from as support_role,
+        role_updated_from != 'not set' as is_internal_role
+    from split_to_from
+    where created_at = min_user_created_at
 
-), user_history as (
-
+), role_changes as (
     select
         source_relation,
         user_id,
         user_name,
+        change_description,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by user_id, source_relation order by created_at asc) as valid_ending_at,
-        change_description,
-        role_change,
-        role_change != 'not set' as is_internal_role
+        coalesce(
+            lead(created_at) over (partition by source_relation, user_id order by created_at asc),
+            {{ dbt.current_timestamp() }}
+        ) as valid_ending_at,
+        role_updated_to as support_role,
+        role_updated_to != 'not set' as is_internal_role
+    from split_to_from
+    -- multiple changes can occur on one day, so we will keep only the latest change in a day.
+    where row_number = 1
 
-    from split_out_to_role
+), unioned as (
+    select *
+    from first_roles
+
+    union all
+
+    select *
+    from role_changes
 )
 
 select *
-from user_history
+from unioned
