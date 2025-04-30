@@ -1,6 +1,6 @@
 # dbt_zendesk v0.22.0-a3
 
-[PR #185](https://github.com/fivetran/dbt_zendesk/pull/185) includes the following updates:
+[PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates:
 
 - Fixes SLA and SLA breach calculations for historical tickets worked on by deleted users.
 - Resolves issue by incorporating the history of a user's role changes from the `audit_log` source to determine the user's role at the time of ticket or comment activity.
