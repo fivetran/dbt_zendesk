@@ -16,14 +16,13 @@
     regexp_substr({{ string }}, 'support role changed from (.*)', 1, 1, 'e', 1)
 {%- endmacro %}
 
-{% macro postgres__regex_extract_support_role_change(string) %}
-    (regexp_matches({{ string }}, 'support role changed from (.*)'))[1]
-{%- endmacro %}
-
-{% macro redshift__regex_extract_support_change_to_from(string) %}
+{% macro redshift__regex_extract_support_role_change(string) %}
     regexp_substr({{ string }}, 'support role changed from (.*)', 1, 1, 'e')
 {%- endmacro %}
 
+{% macro postgres__regex_extract_support_role_change(string) %}
+    (regexp_matches({{ string }}, 'support role changed from (.*)'))[1]
+{%- endmacro %}
 
 {% macro spark__regex_extract_support_role_change(string) %}
     regexp_extract({{ string }}, 'support role changed from (.*)', 1)
