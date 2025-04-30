@@ -1,4 +1,4 @@
-{{ config(enabled=var('using_schedules', True) and var('using_schedule_histories', False)) }}
+{{ config(enabled=var('using_schedules', True) and var('using_schedule_histories', True) and var('using_audit_log', False)) }}
 
 with audit_logs as (
     select

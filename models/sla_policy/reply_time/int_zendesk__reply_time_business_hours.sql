@@ -22,7 +22,8 @@ with ticket_schedules as (
   select *
   from {{ ref('int_zendesk__user_aggregates') }}
 
-{% if var('using_audit_log', True) %}
+{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
+{% if using_user_role_histories %}
 ), user_role_history as (
 
   select *
@@ -48,13 +49,13 @@ with ticket_schedules as (
     ticket_comment.source_relation,
     ticket_comment.ticket_id,
     ticket_comment.valid_starting_at as reply_at,
-    {{ 'user_role_history.role' if var('using_audit_log', True) else 'commenter.role' }}
+    {{ 'user_role_history.role' if using_user_role_histories else 'commenter.role' }}
   from ticket_updates as ticket_comment
   join users as commenter
     on commenter.user_id = ticket_comment.user_id
     and commenter.source_relation = ticket_comment.source_relation
 
-  {% if var('using_audit_log', True) %}
+  {% if using_user_role_histories %}
   left join user_role_history
     on user_role_history.user_id = commenter.user_id
     and user_role_history.source_relation = commenter.source_relation

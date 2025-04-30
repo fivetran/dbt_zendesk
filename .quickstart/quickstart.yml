@@ -4,29 +4,29 @@ schema_key: zendesk_schema
 dbt_versions: ">=1.3.0 <2.0.0"
 
 table_variables:
+  using_audit_log:
+    - audit_log
+  using_brands:
+    - brand
+  using_domain_names:
+    - domain_name
+  using_holidays:
+    - schedule_holiday
+  using_organizations:
+    - organization
+  using_organization_tags:
+    - organization_tag
   using_schedules:
     - daylight_time
     - schedule
     - time_zone
-  using_domain_names:
-    - domain_name
-  using_user_tags:
-    - user_tag
-  using_ticket_form_history:
-    - ticket_form_history
-  using_organization_tags:
-    - organization_tag
-  using_schedule_histories:
-    - audit_log
-  using_holidays:
-    - schedule_holiday
-  using_brands:
-    - brand
-  using_organizations:
-    - organization
   using_ticket_chat:
     - ticket_chat
     - ticket_chat_event
+  using_ticket_form_history:
+    - ticket_form_history
+  using_user_tags:
+    - user_tag
 
 destination_configurations:
   databricks:
@@ -35,10 +35,10 @@ destination_configurations:
         search_order: [ 'spark_utils', 'dbt_utils' ]
 
 public_models: [
-  "zendesk__ticket_enriched",
-  "zendesk__ticket_metrics",
-  "zendesk__ticket_summary",
-  "zendesk__ticket_field_history",
   "zendesk__sla_policies",
-  "zendesk__ticket_backlog"
+  "zendesk__ticket_backlog",
+  "zendesk__ticket_enriched",
+  "zendesk__ticket_field_history",
+  "zendesk__ticket_metrics",
+  "zendesk__ticket_summary"
 ]

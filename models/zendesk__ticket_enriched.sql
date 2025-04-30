@@ -24,7 +24,8 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__user_aggregates') }}
 
-{% if var('using_audit_log', True) %}
+{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
+{% if using_user_role_histories %}
 ), user_role_history as (
 
     select *
@@ -108,7 +109,7 @@ with ticket as (
         {% endif %}
         submitter.external_id as submitter_external_id,
 
-        {% if var('using_audit_log', True) %}
+        {% if using_user_role_histories %}
         user_role_history.role as submitter_role,
         case when user_role_history.role in ('agent','admin') 
             then true 
@@ -173,7 +174,7 @@ with ticket as (
         on submitter.user_id = ticket.submitter_id
         and submitter.source_relation = ticket.source_relation
 
-    {% if var('using_audit_log', True) %}
+    {% if using_user_role_histories %}
     left join user_role_history
         on user_role_history.user_id = submitter.user_id
         and user_role_history.source_relation = submitter.source_relation
@@ -211,7 +212,7 @@ with ticket as (
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
         and latest_satisfaction_ratings.source_relation = ticket.source_relation
 
-    {% if var('using_audit_log', True) %}
+    {% if using_user_role_histories %}
     where ticket.created_at >= user_role_history.valid_starting_at
     and ticket.created_at < user_role_history.valid_ending_at 
     {% endif %}

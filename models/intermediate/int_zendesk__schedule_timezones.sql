@@ -10,7 +10,7 @@ with split_timezones as (
         max(created_at) over (partition by source_relation, schedule_id) as max_created_at
     from {{ var('schedule') }}   
 
-{% if var('using_schedule_histories', False) %}
+{% if var('using_schedule_histories', True) and var('using_audit_log', False) %}
 ), schedule_history as (
     select *
     from {{ ref('int_zendesk__schedule_history') }}  

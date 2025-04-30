@@ -9,7 +9,8 @@ with ticket_comment as (
     select *
     from {{ var('user') }}
 
-{% if var('using_audit_log', True) %}
+{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
+{% if using_user_role_histories %}
 ), user_role_history as (
 
     select *
@@ -21,7 +22,7 @@ with ticket_comment as (
     select 
 
         ticket_comment.*,
-        {% if var('using_audit_log', True) %}
+        {% if using_user_role_histories %}
         case when user_role_history.is_internal_role then 'internal_comment'
             when user_role_history.role = 'end-user' then 'external_comment'
             else 'unknown' end as commenter_role
@@ -38,7 +39,7 @@ with ticket_comment as (
         on commenter.user_id = ticket_comment.user_id
         and commenter.source_relation = ticket_comment.source_relation
 
-    {% if var('using_audit_log', True) %}
+    {% if using_user_role_histories %}
     left join user_role_history
         on user_role_history.user_id = commenter.user_id
         and user_role_history.source_relation = commenter.source_relation
