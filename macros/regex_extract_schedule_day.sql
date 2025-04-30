@@ -1,6 +1,6 @@
 {% macro regex_extract_schedule_day(string, day) -%}
 
-{{ adapter.dispatch('regex_extract_schedule_day', 'zendesk') (string, day) }}
+{{ return(adapter.dispatch('regex_extract_schedule_day', 'zendesk') (string, day)) }}
 
 {%- endmacro %}
 

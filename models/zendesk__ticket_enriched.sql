@@ -24,6 +24,13 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__user_aggregates') }}
 
+{% if var('using_audit_log', True) %}
+), user_role_history as (
+
+    select *
+    from {{ ref('int_zendesk__user_role_history') }}
+{% endif %}
+
 ), requester_updates as (
 
     select *
@@ -100,11 +107,21 @@ with ticket as (
         requester_org.updated_at as requester_organization_updated_at,
         {% endif %}
         submitter.external_id as submitter_external_id,
-        submitter.role as submitter_role,
+
+        {% if var('using_audit_log', True) %}
+        user_role_history.role as submitter_role,
+        case when user_role_history.role in ('agent','admin') 
+            then true 
+            else false
+            end as is_agent_submitted,
+        {% else %}
+        submitter.role,
         case when submitter.role in ('agent','admin') 
             then true 
             else false
-                end as is_agent_submitted,
+            end as is_agent_submitted,
+        {% endif %}
+    
         submitter.email as submitter_email,
         submitter.name as submitter_name,
         submitter.is_active as is_submitter_active,
@@ -155,7 +172,13 @@ with ticket as (
     join users as submitter
         on submitter.user_id = ticket.submitter_id
         and submitter.source_relation = ticket.source_relation
-    
+
+    {% if var('using_audit_log', True) %}
+    left join user_role_history
+        on user_role_history.user_id = submitter.user_id
+        and user_role_history.source_relation = submitter.source_relation
+    {% endif %}
+
     --Assignee Joins
     left join users as assignee
         on assignee.user_id = ticket.assignee_id
@@ -187,6 +210,11 @@ with ticket as (
     left join latest_satisfaction_ratings
         on latest_satisfaction_ratings.ticket_id = ticket.ticket_id
         and latest_satisfaction_ratings.source_relation = ticket.source_relation
+
+    {% if var('using_audit_log', True) %}
+    where ticket.created_at >= user_role_history.valid_starting_at
+    and ticket.created_at < user_role_history.valid_ending_at 
+    {% endif %}
 )
 
 select *

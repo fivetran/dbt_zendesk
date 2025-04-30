@@ -1,6 +1,6 @@
 {% macro regex_extract_support_role_change(string) -%}
 
-{{ adapter.dispatch('regex_extract_support_role_change', 'zendesk') (string) }}
+{{ return(adapter.dispatch('regex_extract_support_role_change', 'zendesk') (string)) }}
 
 {%- endmacro %}
 

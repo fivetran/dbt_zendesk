@@ -7,22 +7,45 @@ with ticket_comment as (
 ), users as (
 
     select *
-    from {{ ref('stg_zendesk__user') }}
+    from {{ var('user') }}
+
+{% if var('using_audit_log', True) %}
+), user_role_history as (
+
+    select *
+    from {{ ref('int_zendesk__user_role_history') }}
+{% endif %}
 
 ), joined as (
 
     select 
 
         ticket_comment.*,
+        {% if var('using_audit_log', True) %}
+        case when user_role_history.is_internal_role then 'internal_comment'
+            when user_role_history.role = 'end-user' then 'external_comment'
+            else 'unknown' end as commenter_role
+
+        {% else %}
         case when commenter.role = 'end-user' then 'external_comment'
             when commenter.role in ('agent','admin') then 'internal_comment'
             else 'unknown' end as commenter_role
+        {% endif %}
     
     from ticket_comment
     
     join users as commenter
         on commenter.user_id = ticket_comment.user_id
         and commenter.source_relation = ticket_comment.source_relation
+
+    {% if var('using_audit_log', True) %}
+    left join user_role_history
+        on user_role_history.user_id = commenter.user_id
+        and user_role_history.source_relation = commenter.source_relation
+    
+    where ticket_comment.valid_starting_at >= user_role_history.valid_starting_at
+        and ticket_comment.valid_starting_at < user_role_history.valid_ending_at 
+    {% endif %}
 
 ), add_previous_commenter_role as (
     /*
