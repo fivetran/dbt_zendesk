@@ -4,14 +4,14 @@
 
 {% macro default__extract_support_role_changes(field) %}
     {{ dbt.split_part(
-        dbt.split_part({{ field }}, "'support role changed from '", 2),
+        dbt.split_part(field, "'support role changed from '", 2),
         "'\\n'", 1)
     }}
 {%- endmacro %}
 
 {% macro postgres__extract_support_role_changes(field) %}
     {{ dbt.split_part(
-        dbt.split_part({{ field }}, "'support role changed from '", 2),
+        dbt.split_part(field, "'support role changed from '", 2),
         "'\n'", 1)
     }}
 {%- endmacro %}

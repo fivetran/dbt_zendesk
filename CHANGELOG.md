@@ -1,5 +1,13 @@
 # dbt_zendesk v0.22.0-a3
 
+[PR #185](https://github.com/fivetran/dbt_zendesk/pull/185) includes the following updates:
+
+- Fixes SLA and SLA breach calculations for historical tickets worked on by deleted users.
+- Resolves issue by incorporating the history of a user's role changes from the `audit_log` source to determine the user's role at the time of ticket or comment activity.
+
+## Under the Hood
+- Updated variable logic: Added var `using_audit_log` to accomodate both schedule and user role histories. You can still disable downstream models related to either by toggling `using_schedule_histories` or `using_user_role_histories`.
+
 
 # dbt_zendesk v0.22.0-a2
 - Fixes issue introduced in a previous pre-release causing `first_solved_at` and `last_solved_at` to be the same (the first solved date) for reopened tickets. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
