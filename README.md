@@ -68,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: 0.22.0-a2
+    version: 0.22.0-a3
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
 
