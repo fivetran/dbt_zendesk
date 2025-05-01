@@ -1,13 +1,12 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.21.0'
+version: '0.22.0'
 
 profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests_63
-
   zendesk_source:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
@@ -27,10 +26,13 @@ vars:
     zendesk_user_identifier:                   "user_data"
     zendesk_user_tag_identifier:               "user_tag_data"
     zendesk_audit_log_identifier:              "audit_log_data"
+    zendesk_ticket_chat_identifier:            "ticket_chat_data"
+    zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
   # using_schedule_histories: True
+  # using_ticket_chat: true
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false
@@ -159,7 +161,15 @@ seeds:
     organization_tag_data_snowflake:
       +alias: organization_tag_data
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
-
+    ticket_chat_event_data:
+      +column_types:
+        created_at: timestamp
+        status_updated_at: timestamp
+    ticket_chat_data:
+      +column_types:
+        user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+        
 dispatch:
   - macro_namespace: dbt_utils
     search_order: ['spark_utils', 'dbt_utils']
