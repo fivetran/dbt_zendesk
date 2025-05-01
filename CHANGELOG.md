@@ -14,6 +14,11 @@ This release includes the following updates from pre-releases `v0.21.0-a1`, `v0.
 
 ## Feature Updates:
 - **Messaging Chat Channel Support:** Incorporated the `ticket_chat` and `ticket_chat_event` source tables to properly capture tickets created via `chat` and `native_messaging` channels in SLA Policy and other ticket metrics. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+  - This will impact the following end models:
+    - `zendesk__ticket_enriched`
+    - `zendesk__sla_policies`
+    - `zendesk__ticket_metrics`
+    - `zendesk__ticket_summary`
 - (Upstream in [zendesk_source](https://github.com/fivetran/dbt_zendesk_source/blob/main/CHANGELOG.md)) Handled inconsistent formatting of `ticket_chat_event.actor_id` to safely cast it as a bigint. ([Source PR #63](https://github.com/fivetran/dbt_zendesk_source/pull/63))
 - Added the `using_ticket_chat` variable to enable/disable `ticket_chat` and `ticket_chat_event` staging models and transformations. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
   - For Fivetran Quickstart users, `using_ticket_chat` is dynamically set based on the presence of the `ticket_chat` and `ticket_chat_event` source tables.
