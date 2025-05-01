@@ -1,4 +1,4 @@
-# dbt_zendesk v0.22.0-a3
+# dbt_zendesk v0.23.0-a1
 
 [PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates:
 
@@ -7,6 +7,38 @@
 
 ## Under the Hood
 - Updated variable logic: Added var `using_audit_log` to accomodate both schedule and user role histories. You can still disable downstream models related to either by toggling `using_schedule_histories` or `using_user_role_histories`.
+
+# dbt_zendesk v0.22.0
+
+This release includes the following updates from pre-releases `v0.21.0-a1`, `v0.21.0-a2`, `v0.22.0-a1`, and `v0.22.0-a2`:
+
+## Schema Updates
+
+**4 total changes • 0 possible breaking changes**
+| **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
+| ---------------- | --------------- | ------------ | ------------ | --------- |
+| [stg_zendesk__ticket_chat](https://fivetran.github.io/dbt_zendesk_source/#!/model/model.zendesk_source.stg_zendesk__ticket_chat) | New Model |   |   |  Uses `ticket_chat` source table  |
+| [stg_zendesk__ticket_chat_tmp](https://fivetran.github.io/dbt_zendesk_source/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_tmp) | New Temp Model |   |   |  Uses `ticket_chat` source table  |
+| [stg_zendesk__ticket_chat_event](https://fivetran.github.io/dbt_zendesk_source/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event) | New Model |   |   | Uses `ticket_chat_event` source table   |
+| [stg_zendesk__ticket_chat_event_tmp](https://fivetran.github.io/dbt_zendesk_source/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event_tmp) | New Temp Model |   |   | Uses `ticket_chat_event` source table   |
+
+## Feature Updates:
+- **Messaging Chat Channel Support:** Incorporated the `ticket_chat` and `ticket_chat_event` source tables to properly capture tickets created via `chat` and `native_messaging` channels in SLA Policy and other ticket metrics. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+  - This will impact the following end models:
+    - `zendesk__ticket_enriched`
+    - `zendesk__sla_policies`
+    - `zendesk__ticket_metrics`
+    - `zendesk__ticket_summary`
+- (Upstream in [zendesk_source](https://github.com/fivetran/dbt_zendesk_source/blob/main/CHANGELOG.md)) Handled inconsistent formatting of `ticket_chat_event.actor_id` to safely cast it as a bigint. ([Source PR #63](https://github.com/fivetran/dbt_zendesk_source/pull/63))
+- Added the `using_ticket_chat` variable to enable/disable `ticket_chat` and `ticket_chat_event` staging models and transformations. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
+  - For Fivetran Quickstart users, `using_ticket_chat` is dynamically set based on the presence of the `ticket_chat` and `ticket_chat_event` source tables.
+  - For other users, `using_ticket_chat` is set to **False** by default. To change this and enable the ticket chat models, add the following configuration (see [README](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-4-enabledisable-models-for-non-existent-sources) for details).
+
+```yml
+vars:
+  using_ticket_chat: True
+```
+- Adjusted Full Resolution Time logic to handle tickets that were marked as `closed` but not `solved`. This is not the norm for tickets, but a case that the Data Model will still accommodate by prioritizing the `solved` status if available and using the `closed` status record otherwise. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
 
 
 # dbt_zendesk v0.22.0-a2

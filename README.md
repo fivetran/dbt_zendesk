@@ -296,7 +296,7 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: 0.16.0-a2
+      version: 0.17.0-a1
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
