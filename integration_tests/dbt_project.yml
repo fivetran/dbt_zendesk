@@ -33,10 +33,7 @@ vars:
   # zendesk__unstructured_enabled: True
   # using_schedule_histories: True
   # using_ticket_chat: true
-<<<<<<< HEAD
   # using_audit_log: true
-=======
->>>>>>> main
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false
