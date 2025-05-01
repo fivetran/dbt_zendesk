@@ -26,10 +26,7 @@ This release includes the following updates from pre-releases `v0.21.0-a1`, `v0.
 
 ```yml
 vars:
-  zendesk_source:
-    using_ticket_chat: True
-  zendesk:
-    using_ticket_chat: True
+  using_ticket_chat: True
 ```
 - Adjusted Full Resolution Time logic to handle tickets that were marked as `closed` but not `solved`. This is not the norm for tickets, but a case that the Data Model will still accommodate by prioritizing the `solved` status if available and using the `closed` status record otherwise. ([PR #187](https://github.com/fivetran/dbt_zendesk/pull/187))
 
