@@ -1,3 +1,15 @@
+# dbt_zendesk v0.23.0
+This release includes the following updates from pre-release `v0.23.0-a1`:
+
+## Schema/Data Changes
+
+**4 total changes • 0 possible breaking changes**
+| **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
+| ---------------- | --------------- | ------------ | ------------ | --------- |
+| [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | |
+
+
 # dbt_zendesk v0.23.0-a1
 
 [PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates:
@@ -6,7 +18,7 @@
 - Resolves issue by incorporating the history of a user's role changes from the `audit_log` source to determine the user's role at the time of ticket or comment activity.
 
 ## Under the Hood
-- Updated variable logic: Added var `using_audit_log` to accomodate both schedule and user role histories. You can still disable downstream models related to either by toggling `using_schedule_histories` or `using_user_role_histories`.
+- Updated variable logic: Added var `using_audit_log` to accommodate both schedule and user role histories. You can still disable downstream models related to either by toggling `using_schedule_histories` or `using_user_role_histories`.
 
 # dbt_zendesk v0.22.0
 
