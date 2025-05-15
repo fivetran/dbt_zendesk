@@ -7,8 +7,20 @@ This release includes the following updates from pre-release `v0.23.0-a1`:
 | **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
 | ---------------- | --------------- | ------------ | ------------ | --------- |
 | [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
-| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`zendesk__ticket_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 
+## Updates
+- Explain the user role histories in the int models. 
+- Explain the new vars
+
+## Under the Hood
+- Added a new macro `extract_support_role_changes` to streamline extracting support role changes in audit log records.
+- Updated seed for `audit_log_data` to add support role changes.
 
 # dbt_zendesk v0.23.0-a1
 
