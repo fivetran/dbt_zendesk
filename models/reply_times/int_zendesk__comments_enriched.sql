@@ -24,8 +24,7 @@ with ticket_comment as (
         ticket_comment.*,
         {% if using_user_role_histories %}
         case when user_role_history.is_internal_role then 'internal_comment'
-            when user_role_history.role = 'end-user' then 'external_comment'
-            else 'unknown' end as commenter_role
+            else 'external_comment' end as commenter_role
 
         {% else %}
         case when commenter.role = 'end-user' then 'external_comment'

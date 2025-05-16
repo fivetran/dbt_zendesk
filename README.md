@@ -68,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: 0.23.0-a1
+    version: [">=0.23.0", "<0.24.0"]
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
 
@@ -145,8 +145,8 @@ This package takes into consideration that not every Zendesk Support account uti
 ```yml
 vars:
     using_audit_logs:           True          #Enable if you are using audit_logs for schedule and/or user_role histories
-    using_schedule_histories:   False         #Disable if you do not wish to use schedule histories with audit_log.
-    using_user_role_histories:  False         #Disable if you are using audit_logs for user_role histories with audit_log
+    using_schedule_histories:   False         #Enabled by default when using_audit_logs: true. Set to false to disable schedule histories with audit_log.
+    using_user_role_histories:  False         #Enabled by default when using_audit_logs: true. Set to false to disable user_role histories with audit_log.
     using_ticket_chat:          True          #Enable if you are using ticket_chat or ticket_chat_event
     using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
@@ -296,7 +296,7 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: 0.17.0-a1
+      version: [">=0.17.0", "<0.18.0"]
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
