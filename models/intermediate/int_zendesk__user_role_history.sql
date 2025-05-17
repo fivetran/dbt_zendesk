@@ -28,21 +28,23 @@ with audit_logs as (
         trim({{ dbt.split_part(zendesk.extract_support_role_changes('change_description'), "' to '", 2) }}) as to_role,
 
         -- Identify the first change record so we know user's beginning role
-        min(created_at) over (partition by source_relation, user_id) as min_user_created_at
+        min(created_at) over (partition by source_relation, user_id) as min_created_at_per_user
     from audit_logs
 
+-- Create a cte to isolate the first "from" role
 ), first_roles as (
     select
         source_relation,
         user_id,
         user_name,
         change_description,
-        cast('1970-01-01' as {{ dbt.type_timestamp() }}) as valid_starting_at,
-        created_at as valid_ending_at,
+        cast(null as {{ dbt.type_timestamp() }}) as valid_starting_at, --fill in with created_at of user later
+        created_at as valid_ending_at, -- this it the created_at of the audit log entry
         from_role as role
     from split_to_from
-    where created_at = min_user_created_at
+    where created_at = min_created_at_per_user
 
+-- This cte captures all subsequent "to" roles
 ), role_changes as (
     select
         source_relation,
@@ -70,14 +72,14 @@ with audit_logs as (
         coalesce(users.source_relation, unioned.source_relation) as source_relation,
         coalesce(users.user_id, unioned.user_id) as user_id,
         coalesce(unioned.role, users.role) as role,
-        coalesce(unioned.valid_starting_at, cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_starting_at,
+        coalesce(unioned.valid_starting_at, users.created_at, cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_starting_at,
         coalesce(unioned.valid_ending_at, {{ dbt.current_timestamp() }}) as valid_ending_at,
         coalesce(unioned.role != 'not set', users.role in ('agent','admin')) as is_internal_role,
         unioned.change_description
 
     from users
-    full outer join unioned
-    on users.user_id = unioned.user_id
+    left join unioned
+        on users.user_id = unioned.user_id
         and users.source_relation = unioned.source_relation
 )
 

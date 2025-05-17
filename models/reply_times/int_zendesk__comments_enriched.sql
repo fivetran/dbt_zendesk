@@ -42,8 +42,7 @@ with ticket_comment as (
     left join user_role_history
         on user_role_history.user_id = commenter.user_id
         and user_role_history.source_relation = commenter.source_relation
-    
-    where ticket_comment.valid_starting_at >= user_role_history.valid_starting_at
+        and ticket_comment.valid_starting_at >= user_role_history.valid_starting_at
         and ticket_comment.valid_starting_at < user_role_history.valid_ending_at 
     {% endif %}
 

@@ -49,29 +49,23 @@ with ticket_schedules as (
     ticket_comment.source_relation,
     ticket_comment.ticket_id,
     ticket_comment.valid_starting_at as reply_at,
-    {{ 'user_role_history.role' if using_user_role_histories else 'commenter.role' }}
+    {{ "commenter_role_history.role" if using_user_role_histories else "commenter.role" }}
   from ticket_updates as ticket_comment
   join users as commenter
     on commenter.user_id = ticket_comment.user_id
     and commenter.source_relation = ticket_comment.source_relation
 
   {% if using_user_role_histories %}
-  left join user_role_history
-    on user_role_history.user_id = commenter.user_id
-    and user_role_history.source_relation = commenter.source_relation
-
-  where field_name = 'comment' 
-    and ticket_comment.is_public
-    and user_role_history.is_internal_role
-    and ticket_comment.valid_starting_at >= user_role_history.valid_starting_at
-    and ticket_comment.valid_starting_at < user_role_history.valid_ending_at 
-
-  {% else %}
-
-  where field_name = 'comment' 
-    and ticket_comment.is_public
-    and commenter.role in ('agent','admin')
+  left join user_role_history as commenter_role_history
+    on commenter_role_history.user_id = commenter.user_id
+    and commenter_role_history.source_relation = commenter.source_relation
+    and ticket_comment.valid_starting_at >= commenter_role_history.valid_starting_at
+    and ticket_comment.valid_starting_at < commenter_role_history.valid_ending_at 
   {% endif %}
+
+  where field_name = 'comment' 
+    and ticket_comment.is_public
+    and {{"commenter_role_history.is_internal_role" if using_user_role_histories else "commenter.role in ('agent','admin')" }}
 
 ), schedule_business_hours as (
 
