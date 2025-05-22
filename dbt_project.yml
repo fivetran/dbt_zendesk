@@ -24,6 +24,8 @@ models:
     sla_policy:
       +schema: zendesk_intermediate
       +materialized: table
+      int_zendesk__commenter_reply_at:
+        +materialized: ephemeral
     ticket_history:
       +schema: zendesk_intermediate
       +materialized: ephemeral
