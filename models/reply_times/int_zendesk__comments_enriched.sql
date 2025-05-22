@@ -1,3 +1,5 @@
+{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
+
 with ticket_comment as (
 
     select *
@@ -7,43 +9,26 @@ with ticket_comment as (
 ), users as (
 
     select *
-    from {{ var('user') }}
-
-{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
-{% if using_user_role_histories %}
-), user_role_history as (
-
-    select *
-    from {{ ref('int_zendesk__user_role_history') }}
-{% endif %}
+    from {{ ref('int_zendesk__user_role_history' if using_user_role_histories else 'int_zendesk__user_aggregates') }}
 
 ), joined as (
 
     select 
 
         ticket_comment.*,
-        {% if using_user_role_histories %}
-        case when user_role_history.is_internal_role then 'internal_comment'
-            else 'external_comment' end as commenter_role
-
-        {% else %}
         case when commenter.role = 'end-user' then 'external_comment'
-            when commenter.role in ('agent','admin') then 'internal_comment'
-            else 'unknown' end as commenter_role
-        {% endif %}
+            when commenter.is_internal_role then 'internal_comment'
+            else 'unknown'
+            end as commenter_role
     
     from ticket_comment
-    
     join users as commenter
         on commenter.user_id = ticket_comment.user_id
         and commenter.source_relation = ticket_comment.source_relation
 
     {% if using_user_role_histories %}
-    left join user_role_history
-        on user_role_history.user_id = commenter.user_id
-        and user_role_history.source_relation = commenter.source_relation
-        and ticket_comment.valid_starting_at >= user_role_history.valid_starting_at
-        and ticket_comment.valid_starting_at < user_role_history.valid_ending_at 
+        and ticket_comment.valid_starting_at >= commenter.valid_starting_at
+        and ticket_comment.valid_starting_at < commenter.valid_ending_at 
     {% endif %}
 
 ), add_previous_commenter_role as (

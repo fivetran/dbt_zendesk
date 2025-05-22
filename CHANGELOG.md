@@ -19,6 +19,7 @@ This release includes the following updates from pre-release `v0.23.0-a1`:
 
 ## Under the Hood
 - Added a new macro `extract_support_role_changes` to streamline extracting support role changes in audit log records.
+- Renamed macro from `regex_extract` to `extract_schedule_day` to avoid confusion with the new macro.
 - Updated seed for `audit_log_data` to add support role changes.
 
 # dbt_zendesk v0.23.0-a1

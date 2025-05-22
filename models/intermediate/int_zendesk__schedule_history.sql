@@ -82,7 +82,7 @@ with audit_logs as (
         schedule_change,
         '{{ day }}' as day_of_week,
         cast('{{ day_number }}' as {{ dbt.type_int() }}) as day_of_week_number,
-        {{ zendesk.regex_extract_schedule_day('schedule_change', day) }} as day_of_week_schedule -- Extracts the schedule data specific to the current day from the schedule_change field.
+        {{ zendesk.extract_schedule_day('schedule_change', day) }} as day_of_week_schedule -- Extracts the schedule data specific to the current day from the schedule_change field.
     from consolidate_same_day_changes
     -- Exclude records with a null valid_until, which indicates it is the current schedule. 
     -- We will to pull in the live schedule downstream, which is necessary when not using schedule histories.
