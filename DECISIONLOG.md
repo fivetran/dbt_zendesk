@@ -1,5 +1,7 @@
 # Decision Log
 
+## User Role History
+
 ## Schedule History
 ### Handling Multiple Schedule Changes in a Day
 While integrating schedule changes from the audit_log source, we observed that multiple changes can occur on the same day, often when users are still finalizing a schedule. To maintain clarity and align with our day-based downstream logic, we decided to capture only the last change made on any given day. If this approach proves insufficient for your use case, please submit a [feature request](https://github.com/fivetran/dbt_zendesk/issues/new/choose) for enabling support for multiple changes within a single day.

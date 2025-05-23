@@ -74,7 +74,11 @@ with audit_logs as (
         coalesce(unioned.role, users.role) as role,
         coalesce(unioned.valid_starting_at, users.created_at, cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_starting_at,
         coalesce(unioned.valid_ending_at, {{ dbt.current_timestamp() }}) as valid_ending_at,
+        {% if var('internal_user_criteria', false) -%}
+        role in ('admin', 'agent') or {{ var('internal_user_criteria', false) }} then 'agent' as is_internal_role,
+        {% else -%}
         coalesce(unioned.role != 'not set', users.role in ('agent','admin')) as is_internal_role,
+        {% endif -%}
         unioned.change_description
 
     from users
