@@ -16,6 +16,7 @@ with audit_logs as (
     select *
     from {{ var('user') }}
 
+-- Split the change_description into "from" and "to" strings
 ), split_to_from as (
     select
         source_relation,
@@ -31,7 +32,7 @@ with audit_logs as (
         min(created_at) over (partition by source_relation, user_id) as min_created_at_per_user
     from audit_logs
 
--- Create a cte to isolate the first "from" role
+-- Isolates the first "from" role as the base
 ), first_roles as (
     select
         source_relation,
@@ -44,7 +45,7 @@ with audit_logs as (
     from split_to_from
     where created_at = min_created_at_per_user
 
--- This cte captures all subsequent "to" roles
+-- Captures all subsequent "to" roles
 ), role_changes as (
     select
         source_relation,
@@ -66,7 +67,6 @@ with audit_logs as (
     from role_changes
 
 ), users_joined as (
-
     -- create history records for users with no changes
     select
         users.user_id,

@@ -16,8 +16,8 @@ with users as (
   from ticket_updates as ticket_comment
 
   join users as commenter
-    on commenter.user_id = ticket_comment.user_id
-    and commenter.source_relation = ticket_comment.source_relation
+    on ticket_comment.user_id = commenter.user_id
+    and ticket_comment.source_relation = commenter.source_relation
   {% if using_user_role_histories %}
     and ticket_comment.valid_starting_at >= commenter.valid_starting_at
     and ticket_comment.valid_starting_at < commenter.valid_ending_at
