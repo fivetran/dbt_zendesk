@@ -1,5 +1,5 @@
 # dbt_zendesk v0.23.0
-This release includes the following updates from pre-release `v0.23.0-a1`:
+[PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates from pre-release `v0.23.0-a1`:
 
 ## Schema/Data Changes
 
