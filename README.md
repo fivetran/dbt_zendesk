@@ -145,8 +145,8 @@ This package takes into consideration that not every Zendesk Support account uti
 ```yml
 vars:
     using_audit_logs:           True          #Enable if you are using audit_logs for schedule and/or user_role histories
-    using_schedule_histories:   False         #Enabled by default when using_audit_logs: true. Set to false to disable schedule histories with audit_log.
-    using_user_role_histories:  False         #Enabled by default when using_audit_logs: true. Set to false to disable user_role histories with audit_log.
+    using_schedule_histories:   False         #Enabled by default, used in conjunction with using_audit_logs. Set to false to disable schedule histories with audit_log.
+    using_user_role_histories:  False         #Enabled by default, used in conjunction with using_audit_logs. Set to false to disable user_role histories with audit_log.
     using_ticket_chat:          True          #Enable if you are using ticket_chat or ticket_chat_event
     using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
@@ -205,18 +205,17 @@ vars:
 >
 > This old format will still work, as our passthrough-column macros are all backwards compatible.
 
-#### Mark Former Internal Users as Agents
-If a team member leaves your organization and their internal account is deactivated, their `USER.role` will switch from `agent` or `admin` to `end-user`. This will skew historical ticket SLA metrics, as we calculate reply times and other metrics based on `agent` or `admin` activity only.
+#### Mark Custom User Roles as Agents
+If a team member leaves your organization and their internal account is deactivated, their `USER.role` will switch from `agent` or `admin` to `end-user`. This can skew historical ticket SLA metrics, since reply times and other calculations are based on `agent` or `admin` activity only.
 
-To persist the integrity of historical ticket SLAs and mark these former team members as agents, provide the `internal_user_criteria` variable with a SQL clause to identify them, based on fields in the `USER` table. This SQL will be wrapped in a `case when` statement in the `stg_zendesk__user` model.
+To preserve the integrity of historical SLAs:
+- **If audit logs are NOT enabled** (var `using_audit_log` is false):  
+  Use the `internal_user_criteria` variable to define a SQL clause that identifies internal users based on fields in the `USER` table. This logic is applied via a `CASE WHEN` in the `stg_zendesk__user` model.
 
-Example usage:
-```yml
-# dbt_project.yml
-vars:
-  zendesk_source:
-    internal_user_criteria: "lower(email) like '%@fivetran.com' or external_id = '12345' or name in ('Garrett', 'Alfredo')" # can reference any non-custom field in USER
-```
+- **If audit logs and user role history ARE enabled** (vars `using_audit_log` and `using_user_role_histories` are true):  
+  Historical user roles will be imported. You can further control which roles are treated as internal by using the same `internal_user_criteria` variable. It will be evaluated as a boolean (`TRUE`/`FALSE`) in the `is_internal_role` field of the `int_zendesk__user_role_history` model. Note that `agent` and `admin` roles are always treated as internal by default, and your custom logic will be applied in addition to this.
+
+This configuration can also be used more broadly to classify what counts as an agent for any reporting or analytical use case. For more details, see the corresponding [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history) entry.
 
 #### Tracking Ticket Field History Columns
 The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your root `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.

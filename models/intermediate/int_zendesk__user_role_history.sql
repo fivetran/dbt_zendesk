@@ -68,24 +68,48 @@ with audit_logs as (
 ), users_joined as (
 
     -- create history records for users with no changes
-    select 
-        coalesce(users.source_relation, unioned.source_relation) as source_relation,
-        coalesce(users.user_id, unioned.user_id) as user_id,
-        coalesce(unioned.role, users.role) as role,
+    select
+        users.user_id,
+        users.source_relation,
+        lower(coalesce(unioned.role, users.role)) as role,
         coalesce(unioned.valid_starting_at, users.created_at, cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_starting_at,
         coalesce(unioned.valid_ending_at, {{ dbt.current_timestamp() }}) as valid_ending_at,
-        {% if var('internal_user_criteria', false) -%}
-        role in ('admin', 'agent') or {{ var('internal_user_criteria', false) }} then 'agent' as is_internal_role,
-        {% else -%}
-        coalesce(unioned.role != 'not set', users.role in ('agent','admin')) as is_internal_role,
-        {% endif -%}
-        unioned.change_description
-
+        unioned.change_description,
+        -- include these in case they're needed for the internal_user_criteria
+        users.external_id,
+        users.email,
+        users.last_login_at,
+        users.created_at,
+        users.updated_at,
+        users.name,
+        users.organization_id,
+        users.phone,
+        users.ticket_restriction,
+        users.time_zone,
+        users.locale,
+        users.is_active,
+        users.is_suspended
     from users
     left join unioned
         on users.user_id = unioned.user_id
         and users.source_relation = unioned.source_relation
+
+), final as (
+    select
+        user_id,
+        source_relation,
+        role,
+        valid_starting_at,
+        valid_ending_at,
+        change_description,
+
+        {% if var('internal_user_criteria', false) -%} -- apply the filter to historical roles if provided
+        role in ('admin', 'agent') or {{ var('internal_user_criteria', false) }} as is_internal_role
+        {% else -%}
+        role not in ('not set', 'end-user') as is_internal_role
+        {% endif -%}
+    from users_joined
 )
 
 select *
-from users_joined
+from final

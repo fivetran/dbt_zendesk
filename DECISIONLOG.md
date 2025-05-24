@@ -1,6 +1,14 @@
 # Decision Log
 
 ## User Role History
+### Broadened Definition of Internal Roles
+When not using the user role history, internal roles were limited to `'admin'`, `'agent'`, and `internal_user_criteria` custom definitions when identifying internal users. However, when using audit logs to reconstruct role history, this approach proved insufficient—particularly in orgs that leverage custom roles (e.g., “Light Agent”), which are stored as `'agent'` in the `users` table but appear differently in audit log `change_description`.
+
+When the `using_audit_log` variable is enabled, internal roles are now defined as any role *not equal to* `'end-user'` or `'not set'`. This better reflects actual internal users in environments with custom roles and aligns role history more closely with how roles behave operationally, however there is the chance that users are now over-included as users. 
+
+Future Considerations:
+- Investigating the `custom_role` table may allow finer control in distinguishing between support-enabled and limited-access roles (e.g., Light Agent vs Contributor).
+- For now, the broader internal role logic provides a reasonable balance between simplicity and accuracy.
 
 ## Schedule History
 ### Handling Multiple Schedule Changes in a Day

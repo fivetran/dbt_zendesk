@@ -7,15 +7,20 @@ This release includes the following updates from pre-release `v0.23.0-a1`:
 | **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
 | ---------------- | --------------- | ------------ | ------------ | --------- |
 | [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | New Model | | | Ephemeral model to consolidate repeat logic used in `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined` |
 | [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 | [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 | [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 | [`zendesk__ticket_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 
 ## Breaking Changes
-- Introduced user role histories to improve accuracy in time-lapsed calculations. Previously, only the most recent role from the `users` table was considered, which could lead to incorrect results if a user had changed roles or left the organization. We now parse the `audit_log` to build a timeline of each user’s role changes, allowing role-based logic to align with the timestamp of each event. This mirrors the approach already used for schedule histories and ensures, for example, that users are only counted as internal during the periods when they actually held an internal role.
-  - Audit log parsing is disabled by default but can be enabled by setting `using_audit_log: true` in your `dbt_project.yml`.
-  - Enabling `using_audit_log` automatically turns on both user role and schedule histories. To disable either one individually, set `using_user_roles: false` or `using_schedule_histories: false`.
+- **User Role History Support**: Introduced user role histories to improve accuracy in time-lapsed calculations. Previously, only the current role from the `users` table was considered, which could lead to incorrect results when users changed roles or left the organization. We have added the ability to parse the `audit_log` to reconstruct a timeline of each user’s role changes. This aligns role-based logic with event timestamps, mirroring the approach already used for schedule histories. This also ensures users are only treated as internal when they actually held an internal role.
+  - Audit log parsing is **disabled by default**. To enable it, set `using_audit_log: true` in your `dbt_project.yml`.
+  - Enabling `using_audit_log` will automatically activate both user role and schedule histories. You can disable them individually using `using_user_role_histories: false` or `using_schedule_histories: false`.
+  - **If both `using_audit_log` and `using_user_role_histories` are true**:  
+    - Historical user roles will be used to populate `int_zendesk__user_role_history`. The `is_internal_role` field will evaluate to `TRUE` for roles `'admin'` and `'agent'` by default, with support for further customization via the `internal_user_criteria` variable. See the related [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#mark-custom-user-roles-as-agents) entry for more information on customizing internal roles.
+  - This change may significantly impact results—especially if your organization uses custom roles, so review your outputs carefully after enabling this feature.
+    For more details, see the related [DECISIONLOG entry](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history).
 
 ## Under the Hood
 - Added a new macro `extract_support_role_changes` to streamline extracting support role changes in audit log records.
