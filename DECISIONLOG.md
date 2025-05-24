@@ -6,6 +6,8 @@ When not using the user role history, internal roles were limited to `'admin'`, 
 
 When the `using_audit_log` variable is enabled, internal roles are now defined as any role *not equal to* `'end-user'` or `'not set'`. This better reflects actual internal users in environments with custom roles and aligns role history more closely with how roles behave operationally, however there is the chance that users are now over-included as users. 
 
+In the `zendesk__ticket_enriched` model, the `is_agent_submitted` field will now evaluate to `true` if the submitter's role is determined as `is_internal_role = true` in the role history. If audit logs are not enabled, only `agent` or `admin` roles will evaluate to `true`.
+
 Future Considerations:
 - Investigating the `custom_role` table may allow finer control in distinguishing between support-enabled and limited-access roles (e.g., Light Agent vs Contributor).
 - For now, the broader internal role logic provides a reasonable balance between simplicity and accuracy.

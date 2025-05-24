@@ -19,8 +19,10 @@ This release includes the following updates from pre-release `v0.23.0-a1`:
   - Enabling `using_audit_log` will automatically activate both user role and schedule histories. You can disable them individually using `using_user_role_histories: false` or `using_schedule_histories: false`.
   - **If both `using_audit_log` and `using_user_role_histories` are true**:  
     - Historical user roles will be used to populate `int_zendesk__user_role_history`. The `is_internal_role` field will evaluate to `TRUE` for roles `'admin'` and `'agent'` by default, with support for further customization via the `internal_user_criteria` variable. See the related [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#mark-custom-user-roles-as-agents) entry for more information on customizing internal roles.
-  - This change may significantly impact results—especially if your organization uses custom roles, so review your outputs carefully after enabling this feature.
-    For more details, see the related [DECISIONLOG entry](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history).
+- **Impact**:
+  - Enabling this feature may significantly alter results, especially if your organization uses custom roles. Review your outputs carefully after activation.
+  - In the `zendesk__ticket_enriched` model, the `is_agent_submitted` field will now evaluate to `true` if the submitter's role is determined as `is_internal_role = true` in the role history. If audit logs are not enabled, this behavior remains unchanged from previous versions.
+  - For more details, see the related [DECISIONLOG entry](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history).
 
 ## Under the Hood
 - Added a new macro `extract_support_role_changes` to streamline extracting support role changes in audit log records.
