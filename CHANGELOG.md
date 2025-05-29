@@ -3,10 +3,11 @@
 
 ## Schema/Data Changes
 
-**6 total changes • 4 possible breaking changes**
+**7 total changes • 4 possible breaking changes**
 | **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
-| ---------------- | --------------- | ------------ | ------------ | --------- |
+| -------------- | --------------- | ------------ | ------------ | --------- |
 | [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
+| [`int_zendesk__user_aggregates`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_aggregates) | New Column | | `is_internal_role` | |
 | [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | New Model | | | Ephemeral model to consolidate repeat logic used in `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined` |
 | [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__comments_enriched) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 | [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
