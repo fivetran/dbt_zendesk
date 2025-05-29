@@ -8,10 +8,10 @@
 | ---------------- | --------------- | ------------ | ------------ | --------- |
 | [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
 | [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | New Model | | | Ephemeral model to consolidate repeat logic used in `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined` |
-| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
-| [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
-| [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
-| [`zendesk__ticket_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__comments_enriched) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_combined) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`zendesk__ticket_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
 
 ## Breaking Changes
 - **User Role History Support**: Introduced user role histories to improve accuracy in time-lapsed calculations. Previously, only the current role from the `users` table was considered, which could lead to incorrect results when users changed roles or left the organization. We have added the ability to parse the `audit_log` to reconstruct a timeline of each user’s role changes. This aligns role-based logic with event timestamps, mirroring the approach already used for schedule histories. This also ensures users are only treated as internal when they actually held an internal role.
