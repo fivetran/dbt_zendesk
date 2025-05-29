@@ -8,6 +8,8 @@ When the `using_audit_log` variable is enabled, internal roles are now defined a
 
 In the `zendesk__ticket_enriched` model, the `is_agent_submitted` field will now evaluate to `true` if the submitter's role is determined as `is_internal_role = true` in the role history. If audit logs are not enabled, only `agent` or `admin` roles will evaluate to `true`.
 
+If you encounter a scenario where this logic doesn't align with your expectations, please consider opening a [feature request](https://github.com/fivetran/dbt_zendesk/issues/new/choose) so we can evaluate it further.
+
 Future Considerations:
 - Investigating the `custom_role` table may allow finer control in distinguishing between support-enabled and limited-access roles (e.g., Light Agent vs Contributor).
 - For now, the broader internal role logic provides a reasonable balance between simplicity and accuracy.
