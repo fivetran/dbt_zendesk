@@ -1,5 +1,19 @@
 # Decision Log
 
+## User Role History
+### Broadened Definition of Internal Roles
+When not using the user role history, internal roles were limited to `'admin'`, `'agent'`, and `internal_user_criteria` custom definitions when identifying internal users. However, when using audit logs to reconstruct role history, this approach proved insufficient—particularly in orgs that leverage custom roles (e.g., “Light Agent”), which are stored as `'agent'` in the `users` table but appear differently in audit log `change_description`.
+
+When the `using_audit_log` variable is enabled, internal roles are now defined as any role *not equal to* `'end-user'` or `'not set'`. This better reflects actual internal users in environments with custom roles and aligns role history more closely with how roles behave operationally, however there is the chance that users are now over-included as users. 
+
+In the `zendesk__ticket_enriched` model, the `is_agent_submitted` field will now evaluate to `true` if the submitter's role is determined as `is_internal_role = true` in the role history. If audit logs are not enabled, only `agent` or `admin` roles will evaluate to `true`.
+
+If you encounter a scenario where this logic doesn't align with your expectations, please consider opening a [feature request](https://github.com/fivetran/dbt_zendesk/issues/new/choose) so we can evaluate it further.
+
+Future Considerations:
+- Investigating the `custom_role` table may allow finer control in distinguishing between support-enabled and limited-access roles (e.g., Light Agent vs Contributor).
+- For now, the broader internal role logic provides a reasonable balance between simplicity and accuracy.
+
 ## Schedule History
 ### Handling Multiple Schedule Changes in a Day
 While integrating schedule changes from the audit_log source, we observed that multiple changes can occur on the same day, often when users are still finalizing a schedule. To maintain clarity and align with our day-based downstream logic, we decided to capture only the last change made on any given day. If this approach proves insufficient for your use case, please submit a [feature request](https://github.com/fivetran/dbt_zendesk/issues/new/choose) for enabling support for multiple changes within a single day.

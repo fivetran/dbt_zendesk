@@ -24,6 +24,14 @@ with ticket as (
     select *
     from {{ ref('int_zendesk__user_aggregates') }}
 
+{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
+{% if using_user_role_histories %}
+), user_role_history as (
+
+    select *
+    from {{ ref('int_zendesk__user_role_history') }}
+{% endif %}
+
 ), requester_updates as (
 
     select *
@@ -75,7 +83,6 @@ with ticket as (
         requester.external_id as requester_external_id,
         requester.created_at as requester_created_at,
         requester.updated_at as requester_updated_at,
-        requester.role as requester_role,
         requester.email as requester_email,
         requester.name as requester_name,
         requester.is_active as is_requester_active,
@@ -99,19 +106,26 @@ with ticket as (
         requester_org.created_at as requester_organization_created_at,
         requester_org.updated_at as requester_organization_updated_at,
         {% endif %}
-        submitter.external_id as submitter_external_id,
+
+        {% if using_user_role_histories %}
+        requester_role_history.role as requester_role,
+        submitter_role_history.role as submitter_role,
+        submitter_role_history.is_internal_role as is_agent_submitted,
+        assignee_role_history.role as assignee_role,
+        {% else %}
+        requester.role as requester_role,
         submitter.role as submitter_role,
-        case when submitter.role in ('agent','admin') 
-            then true 
-            else false
-                end as is_agent_submitted,
+        submitter.role in ('agent','admin') as is_agent_submitted,
+        assignee.role as assignee_role,
+        {% endif %}
+    
+        submitter.external_id as submitter_external_id,
         submitter.email as submitter_email,
         submitter.name as submitter_name,
         submitter.is_active as is_submitter_active,
         submitter.locale as submitter_locale,
         submitter.time_zone as submitter_time_zone,
         assignee.external_id as assignee_external_id,
-        assignee.role as assignee_role,
         assignee.email as assignee_email,
         assignee.name as assignee_name,
         assignee.is_active as is_assignee_active,
@@ -155,7 +169,7 @@ with ticket as (
     join users as submitter
         on submitter.user_id = ticket.submitter_id
         and submitter.source_relation = ticket.source_relation
-    
+
     --Assignee Joins
     left join users as assignee
         on assignee.user_id = ticket.assignee_id
@@ -165,6 +179,28 @@ with ticket as (
         on assignee_updates.ticket_id = ticket.ticket_id
         and assignee_updates.assignee_id = ticket.assignee_id
         and assignee_updates.source_relation = ticket.source_relation
+
+    -- User Role History Joins
+    {% if using_user_role_histories %}
+    left join user_role_history as requester_role_history
+        on requester_role_history.user_id = requester.user_id
+        and requester_role_history.source_relation = requester.source_relation
+        and ticket.created_at >= requester_role_history.valid_starting_at
+        and ticket.created_at < requester_role_history.valid_ending_at
+
+    left join user_role_history as submitter_role_history
+        on submitter_role_history.user_id = submitter.user_id
+        and submitter_role_history.source_relation = submitter.source_relation
+        and ticket.created_at >= submitter_role_history.valid_starting_at
+        and ticket.created_at < submitter_role_history.valid_ending_at
+
+    left join user_role_history as assignee_role_history
+        on assignee_role_history.user_id = assignee.user_id
+        and assignee_role_history.source_relation = assignee.source_relation
+        and ticket.created_at >= assignee_role_history.valid_starting_at
+        and ticket.created_at < assignee_role_history.valid_ending_at
+
+    {% endif %}
 
     --Ticket, Org, and Brand Joins
     left join ticket_group

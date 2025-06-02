@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.22.0'
+version: '0.23.0'
 
 profile: 'integration_tests'
 
@@ -31,8 +31,8 @@ vars:
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True
-  # using_schedule_histories: True
   # using_ticket_chat: true
+  # using_audit_log: true
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false

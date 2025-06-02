@@ -43,7 +43,7 @@ The following table provides a detailed list of final tables materialized within
 Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
 
 ### Materialized Models
-Each Quickstart transformation job run materializes 78 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
+Each Quickstart transformation job run materializes 79 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
 <!--section-end-->
 
 ## How do I use the dbt package?
@@ -68,7 +68,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.22.0", "<0.23.0"]
+    version: [">=0.23.0", "<0.24.0"]
 ```
 > **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
 
@@ -137,14 +137,16 @@ vars:
     has_defined_sources: true
 ```
 
-### Step 4: Enable/Disable models for non-existent sources
+### Step 4: Enable/Disable models
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, or `ticket_chat_event` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_schedule_histories` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, or `ticket_chat_event` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_audit_logs`, `using_schedule_histories`, and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
 
 ```yml
 vars:
-    using_schedule_histories:   True          #Enable if you are using audit_logs for schedule histories
+    using_audit_logs:           True          #Enable if you are using audit_logs for schedule and/or user_role histories
+    using_schedule_histories:   False         #Used in conjunction with using_audit_logs. Set to false to disable schedule histories with audit_log.
+    using_user_role_histories:  False         #Used in conjunction with using_audit_logs. Set to false to disable user_role histories with audit_log.
     using_ticket_chat:          True          #Enable if you are using ticket_chat or ticket_chat_event
     using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
     using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
@@ -203,10 +205,17 @@ vars:
 >
 > This old format will still work, as our passthrough-column macros are all backwards compatible.
 
-#### Mark Former Internal Users as Agents
-If a team member leaves your organization and their internal account is deactivated, their `USER.role` will switch from `agent` or `admin` to `end-user`. This will skew historical ticket SLA metrics, as we calculate reply times and other metrics based on `agent` or `admin` activity only.
+#### Mark Custom User Roles as Agents
+If a team member leaves your organization and their internal account is deactivated, their `USER.role` will switch from `agent` or `admin` to `end-user`. This can skew historical ticket SLA metrics, since reply times and other calculations are based on `agent` or `admin` activity only.
 
-To persist the integrity of historical ticket SLAs and mark these former team members as agents, provide the `internal_user_criteria` variable with a SQL clause to identify them, based on fields in the `USER` table. This SQL will be wrapped in a `case when` statement in the `stg_zendesk__user` model.
+To preserve the integrity of historical SLAs:
+- **If audit logs are NOT enabled** (var `using_audit_log` is false):  
+  Use the `internal_user_criteria` variable to define a SQL clause that identifies internal users based on fields in the `USER` table. This logic is applied via a `CASE WHEN` in the `stg_zendesk__user` model.
+
+- **If audit logs and user role history ARE enabled** (vars `using_audit_log` and `using_user_role_histories` are true):  
+  Historical user roles will be imported. You can further control which roles are treated as internal by using the same `internal_user_criteria` variable. It will be evaluated as a boolean (`TRUE`/`FALSE`) in the `is_internal_role` field of the `int_zendesk__user_role_history` model. Note that `agent` and `admin` roles are always treated as internal by default, and your custom logic will be applied in addition to this.
+
+This configuration can also be used more broadly to classify what counts as an agent for any reporting or analytical use case. For more details, see the corresponding [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history) entry.
 
 Example usage:
 ```yml
@@ -294,7 +303,7 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 ```yml
 packages:
     - package: fivetran/zendesk_source
-      version: [">=0.16.0", "<0.17.0"]
+      version: [">=0.17.0", "<0.18.0"]
 
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]

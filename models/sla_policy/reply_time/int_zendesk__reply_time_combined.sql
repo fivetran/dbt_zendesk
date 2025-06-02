@@ -4,22 +4,20 @@ with reply_time_calendar_hours_sla as (
   from {{ ref('int_zendesk__reply_time_calendar_hours') }}
 
 {% if var('using_schedules', True) %}
-
 ), reply_time_business_hours_sla as (
 
   select *
   from {{ ref('int_zendesk__reply_time_business_hours') }}
-
 {% endif %}
 
 ), ticket_updates as (
   select *
   from {{ ref('int_zendesk__updates') }}
 
-), users as (
+), reply_time as (
 
   select *
-  from {{ ref('int_zendesk__user_aggregates') }}
+  from {{ ref('int_zendesk__commenter_reply_at') }}
 
 ), reply_time_breached_at as (
 
@@ -71,20 +69,6 @@ with reply_time_calendar_hours_sla as (
   from ticket_updates
   where field_name = 'status'
   and value in ('solved','closed')
-
-), reply_time as (
-  select 
-    ticket_comment.source_relation,
-    ticket_comment.ticket_id,
-    ticket_comment.valid_starting_at as reply_at,
-    commenter.role
-  from ticket_updates as ticket_comment
-  join users as commenter
-    on commenter.user_id = ticket_comment.user_id
-    and commenter.source_relation = ticket_comment.source_relation
-  where field_name = 'comment' 
-    and ticket_comment.is_public
-    and commenter.role in ('agent','admin')
 
 ), reply_time_breached_at_with_next_reply_timestamp as (
 

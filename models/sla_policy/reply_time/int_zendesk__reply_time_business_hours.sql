@@ -17,10 +17,10 @@ with ticket_schedules as (
   select *
   from {{ ref('int_zendesk__sla_policy_applied') }}
 
-), users as (
+), reply_time as (
 
   select *
-  from {{ ref('int_zendesk__user_aggregates') }}
+  from {{ ref('int_zendesk__commenter_reply_at') }}
 
 ), ticket_updates as (
 
@@ -35,20 +35,6 @@ with ticket_schedules as (
   from ticket_updates
   where field_name = 'status'
   and value in ('solved','closed')
-
-), reply_time as (
-  select 
-    ticket_comment.source_relation,
-    ticket_comment.ticket_id,
-    ticket_comment.valid_starting_at as reply_at,
-    commenter.role
-  from ticket_updates as ticket_comment
-  join users as commenter
-    on commenter.user_id = ticket_comment.user_id
-    and commenter.source_relation = ticket_comment.source_relation
-  where field_name = 'comment' 
-    and ticket_comment.is_public
-    and commenter.role in ('agent','admin')
 
 ), schedule_business_hours as (
 

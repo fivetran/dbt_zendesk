@@ -21,11 +21,12 @@ with users as (
 
 ), final as (
   select 
-    users.*
+    users.*,
+    users.role in ('agent','admin') as is_internal_role
 
     --If you use user tags this will be included, if not it will be ignored.
     {% if var('using_user_tags', True) %}
-    ,user_tag_aggregate.user_tags
+    , user_tag_aggregate.user_tags
     {% endif %}
   from users
 

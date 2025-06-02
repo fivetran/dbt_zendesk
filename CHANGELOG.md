@@ -1,3 +1,46 @@
+# dbt_zendesk v0.23.0
+[PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates from pre-release `v0.23.0-a1`:
+
+## Schema/Data Changes
+
+**7 total changes • 4 possible breaking changes**
+| **Data Model** | **Change type** | **Old name** | **New name** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`int_zendesk__user_role_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_role_history) | New Model | | | Uses `audit_log` source table |
+| [`int_zendesk__user_aggregates`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__user_aggregates) | New Column | | `is_internal_role` | |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | New Model | | | Ephemeral model to consolidate repeat logic used in `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined` |
+| [`int_zendesk__comments_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__comments_enriched) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_combined) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+| [`zendesk__ticket_enriched`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched) | Modified Model | | | Incorporates `int_zendesk__user_role_history`. Details below. | |
+
+## Breaking Changes
+- **User Role History Support**: Introduced user role histories to improve accuracy in time-lapsed calculations. Previously, only the current role from the `users` table was considered, which could lead to incorrect results when users changed roles or left the organization. We have added the ability to parse the `audit_log` to reconstruct a timeline of each user’s role changes. This aligns role-based logic with event timestamps, mirroring the approach already used for schedule histories. This also ensures users are only treated as internal when they actually held an internal role.
+  - Audit log parsing is **disabled by default**. To enable it, set `using_audit_log: true` in your `dbt_project.yml`.
+  - Enabling `using_audit_log` will automatically activate both user role and schedule histories. You can disable them individually using `using_user_role_histories: false` or `using_schedule_histories: false`.
+  - **If user role history is enabled (both `using_audit_log` and `using_user_role_histories` are true)**:
+    - Historical user roles will be used to populate `int_zendesk__user_role_history`. The `is_internal_role` field will evaluate to `TRUE` as any role *not equal to* `'end-user'` or `'not set'` by default. Further customization via the `internal_user_criteria` variable is available. See the related [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#mark-custom-user-roles-as-agents) entry for more information on customizing internal roles.
+  - **If user role history is disabled (either `using_audit_log` or `using_user_role_histories` is false)**:  
+    - The role from the `users` table will be used directly, without applying any historical context. This behavior matches previous versions and does not consider role changes over time.
+    - The `is_internal_role` field will evaluate to `TRUE` for roles `'admin'` and `'agent'` by default, with support for further customization via the `internal_user_criteria` variable.
+- **Impact**: Enabling this feature may significantly alter results for **historical** records, especially if your organization uses custom roles. Review your outputs carefully after activation. 
+  - In the `zendesk__ticket_enriched` model, the `is_agent_submitted` field will now evaluate to `true` if the submitter’s role is determined as `is_internal_role = true` in the role history. If audit logs are not enabled, behavior remains unchanged from previous versions.
+  - For more details, see the related [DECISIONLOG entry](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#user-role-history).
+
+## Under the Hood
+- Added a new macro `extract_support_role_changes` to streamline extracting support role changes in audit log records.
+- Renamed macro from `regex_extract` to `extract_schedule_day` to avoid confusion with the new macro.
+- Updated seed for `audit_log_data` to add support role changes.
+
+# dbt_zendesk v0.23.0-a1
+[PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates:
+
+- Fixes SLA and SLA breach calculations for historical tickets worked on by deleted users.
+- Resolves issue by incorporating the history of a user's role changes from the `audit_log` source to determine the user's role at the time of ticket or comment activity.
+
+## Under the Hood
+- Updated variable logic: Added var `using_audit_log` to accommodate both schedule and user role histories. You can still disable downstream models related to either by toggling `using_schedule_histories` or `using_user_role_histories`.
+
 # dbt_zendesk v0.22.0
 
 This release includes the following updates from pre-releases `v0.21.0-a1`, `v0.21.0-a2`, `v0.22.0-a1`, and `v0.22.0-a2`:
