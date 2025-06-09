@@ -1,3 +1,10 @@
+# dbt_zendesk v0.23.1
+
+[PR #195](https://github.com/fivetran/dbt_zendesk/pull/195) includes the following update:
+
+## Under the Hood
+- Added a system-facing `using_ticket_schedules` variable to the `quickstart.yml` to better support Quickstart. This variable is not available for use otherwise.
+
 # dbt_zendesk v0.23.0
 [PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates from pre-release `v0.23.0-a1`:
 
