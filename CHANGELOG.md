@@ -1,4 +1,4 @@
-# dbt_zendesk v0.23.1
+# dbt_zendesk v0.23.1-a1
 
 [PR #195](https://github.com/fivetran/dbt_zendesk/pull/195) includes the following update:
 
