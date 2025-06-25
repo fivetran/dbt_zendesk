@@ -10,6 +10,8 @@ table_variables:
     - daylight_time
     - schedule
     - time_zone
+  using_ticket_schedules:
+    - ticket_schedule
   using_domain_names:
     - domain_name
   using_user_tags:
