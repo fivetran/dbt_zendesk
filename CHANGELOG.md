@@ -1,6 +1,6 @@
 # dbt_zendesk v0.24.0
 
-[PR #194](https://github.com/fivetran/dbt_zendesk/pull/194) includes the following updates:
+[PR #199](https://github.com/fivetran/dbt_zendesk/pull/199) includes the following updates:
 
 ## Breaking Change for dbt Core < 1.9.6
 
