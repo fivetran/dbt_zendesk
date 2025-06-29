@@ -1,3 +1,10 @@
+# dbt_zendesk v0.24.1
+
+This release includes the following updates:
+
+## Documentation
+- Corrected references to connectors and connections in the README. ([#201](https://github.com/fivetran/dbt_zendesk/pull/201))
+
 # dbt_zendesk v0.24.0
 
 [PR #199](https://github.com/fivetran/dbt_zendesk/pull/199) includes the following updates:
