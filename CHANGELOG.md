@@ -1,3 +1,16 @@
+# dbt_zendesk v0.24.1
+
+This release includes the following updates:
+
+## Bug Fix
+- Replaced erroneous `description` key in the `zendesk.yml` docs file. ([PR #201](https://github.com/fivetran/dbt_zendesk/pull/201))
+
+## Under the Hood
+- Updated package maintainer PR template. ([PR #202](https://github.com/fivetran/dbt_zendesk/pull/202))
+
+## Contributors
+- [@raphaelvarieras](https://github.com/raphaelvarieras) ([PR #201](https://github.com/fivetran/dbt_zendesk/pull/201))
+
 # dbt_zendesk v0.24.0
 
 [PR #199](https://github.com/fivetran/dbt_zendesk/pull/199) includes the following updates:
@@ -24,6 +37,7 @@ If you are using dbt Core < 1.9.6 and want to continue running Zendesk freshness
 
 ## Under the Hood
 - Updates to ensure integration tests use latest version of dbt.
+
 # dbt_zendesk v0.23.0
 [PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates from pre-release `v0.23.0-a1`:
 
