@@ -6,7 +6,7 @@ This release includes the following updates:
 - Replaced erroneous `description` key in the `zendesk.yml` docs file. ([PR #201](https://github.com/fivetran/dbt_zendesk/pull/201))
 
 ## Under the Hood
-- Updated package maintainer PR template. 
+- Updated package maintainer PR template. ([PR #202](https://github.com/fivetran/dbt_zendesk/pull/202))
 
 ## Contributors
 - [@raphaelvarieras](https://github.com/raphaelvarieras) ([PR #201](https://github.com/fivetran/dbt_zendesk/pull/201))
