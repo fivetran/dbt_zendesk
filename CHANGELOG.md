@@ -1,3 +1,15 @@
+# dbt_zendesk v0.24.2
+
+[PR #202](https://github.com/fivetran/dbt_zendesk/pull/202) includes the following updates:
+
+## Schema/Data Changes
+
+**2 total change • 1 possible breaking change**
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | |
+| [`stg_zendesk__ticket_chat_event`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event) | Filter |  |  |  Excludes `ticket_chat_event` records where the `actor_id` is `__trigger` or `__system` (instead of the expected `######` or `agent:######` formats). This was done to avoid data-casting errors and maintain downstream joins and comment metrics ([Source PR #72](https://github.com/fivetran/dbt_zendesk_source/pull/72)) |
+
 # dbt_zendesk v0.24.1
 
 This release includes the following updates:
