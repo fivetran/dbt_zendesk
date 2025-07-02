@@ -1,14 +1,17 @@
 # dbt_zendesk v0.24.2
 
-[PR #203](https://github.com/fivetran/dbt_zendesk/pull/203) includes the following updates:
+This release includes the following updates:
 
 ## Schema/Data Changes
 
 **2 total change • 1 possible breaking change**
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
-| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | [PR #203](https://github.com/fivetran/dbt_zendesk/pull/203) |
 | [`stg_zendesk__ticket_chat_event`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event) | Filter |  |  |  Excludes `ticket_chat_event` records where the `actor_id` is `__trigger` or `__system` (instead of the expected `######` or `agent:######` formats). This was done to avoid data-casting errors and maintain downstream joins and comment metrics ([Source PR #72](https://github.com/fivetran/dbt_zendesk_source/pull/72)) |
+
+## Under the Hood
+- Added a system-facing `using_ticket_schedules` variable to the `quickstart.yml` to better support Quickstart. This variable is not available for use otherwise. ([PR #195](https://github.com/fivetran/dbt_zendesk/pull/195))
 
 # dbt_zendesk v0.24.1
 
@@ -49,6 +52,13 @@ If you are using dbt Core < 1.9.6 and want to continue running Zendesk freshness
 
 ## Under the Hood
 - Updates to ensure integration tests use latest version of dbt.
+
+# dbt_zendesk v0.23.1-a1
+
+[PR #195](https://github.com/fivetran/dbt_zendesk/pull/195) includes the following update:
+
+## Under the Hood
+- Added a system-facing `using_ticket_schedules` variable to the `quickstart.yml` to better support Quickstart. This variable is not available for use otherwise.
 
 # dbt_zendesk v0.23.0
 [PR #193](https://github.com/fivetran/dbt_zendesk/pull/193) includes the following updates from pre-release `v0.23.0-a1`:
