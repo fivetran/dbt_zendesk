@@ -4,11 +4,11 @@ This release includes the following updates:
 
 ## Schema/Data Changes
 
-**2 total changes • 1 possible breaking change**
+**2 total changes • 0 possible breaking changes**
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
-| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | [PR #203](https://github.com/fivetran/dbt_zendesk/pull/203) |
-| [`stg_zendesk__ticket_chat_event`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event) | Filter |  |  |  Excludes `ticket_chat_event` records where the `actor_id` is `__trigger` or `__system` (instead of the expected `######` or `agent:######` formats). This was done to avoid data-casting errors and maintain downstream joins and comment metrics ([Source PR #72](https://github.com/fivetran/dbt_zendesk_source/pull/72)) |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | This intermediate model is now ephemeral, meaning the view will no longer be updated in the warehouse. While the view will still exist in the warehouse, it will become outdated. We therefore recommend manually dropping the `int_zendesk__commenter_reply_at` view. ([PR #203](https://github.com/fivetran/dbt_zendesk/pull/203)) |
+| [`stg_zendesk__ticket_chat_event`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk_source.stg_zendesk__ticket_chat_event) | Filter |  |  |  Excludes `ticket_chat_event` records where the `actor_id` is `__trigger` or `__system` (instead of the expected `######` or `agent:######` formats). This was done to avoid data-casting errors and maintain downstream joins and comment metrics. ([Source PR #72](https://github.com/fivetran/dbt_zendesk_source/pull/72)) |
 
 ## Under the Hood
 - Added a system-facing `using_ticket_schedules` variable to the `quickstart.yml` to better support Quickstart. This variable is not available for use otherwise. ([PR #195](https://github.com/fivetran/dbt_zendesk/pull/195))
