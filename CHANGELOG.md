@@ -4,7 +4,7 @@ This release includes the following updates:
 
 ## Schema/Data Changes
 
-**2 total change • 1 possible breaking change**
+**2 total changes • 1 possible breaking change**
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
 | [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | View | Ephemeral | [PR #203](https://github.com/fivetran/dbt_zendesk/pull/203) |
