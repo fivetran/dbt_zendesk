@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '0.24.1'
+version: '0.24.2'
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
@@ -24,8 +24,9 @@ models:
     sla_policy:
       +schema: zendesk_intermediate
       +materialized: table
-      int_zendesk__commenter_reply_at:
-        +materialized: ephemeral
+      reply_time:
+        int_zendesk__commenter_reply_at:
+          +materialized: ephemeral
     ticket_history:
       +schema: zendesk_intermediate
       +materialized: ephemeral
