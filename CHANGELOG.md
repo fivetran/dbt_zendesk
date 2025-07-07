@@ -1,3 +1,26 @@
+# dbt_zendesk v0.24.3-a1
+
+[PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
+
+## Bug Fixes
+- Removes logic casting SLA and ticket metric values from floats to integers. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
+  - The following fields in the `zendesk__ticket_metrics` model will now be **floats**:
+    - `first_resolution_business_minutes`
+    - `full_resolution_business_minutes`
+    - `first_reply_time_business_minutes`
+    - `agent_wait_time_in_business_minutes`
+    - `requester_wait_time_in_business_minutes`
+    - `solve_time_in_business_minutes`
+    - `agent_work_time_in_business_minutes`
+    - `on_hold_time_in_business_minutes`
+    - `new_status_duration_in_business_minutes`
+    - `open_status_duration_in_business_minutes`
+  - For the following business-time `metric` values in the `zendesk__sla_policies` model, `sla_elapsed_time` was already a float, but intermediate models have been adjusted to ensure we are not rounding at any point in our calculations:
+    - `agent_work_time`
+    - `first_reply_time`
+    - `next_reply_time`
+    - `requester_wait_time`
+
 # dbt_zendesk v0.24.2
 
 This release includes the following updates:
