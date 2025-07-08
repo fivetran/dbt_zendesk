@@ -55,11 +55,11 @@ select
   ticket_enriched.*,
   case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
-    else round(ticket_reply_times_calendar.first_reply_time_calendar_minutes, 4)
+    else round(ticket_reply_times_calendar.first_reply_time_calendar_minutes * 1.0, 4)
       end as first_reply_time_calendar_minutes,
   case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
-    else round(ticket_reply_times_calendar.total_reply_time_calendar_minutes, 4)
+    else round(ticket_reply_times_calendar.total_reply_time_calendar_minutes * 1.0, 4)
       end as total_reply_time_calendar_minutes,
   coalesce(ticket_comments.count_agent_comments, 0) as count_agent_comments,
   coalesce(ticket_comments.count_public_agent_comments, 0) as count_public_agent_comments,
@@ -86,7 +86,7 @@ select
     then ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes
     else null
       end as last_assignment_to_resolution_calendar_minutes,
-  round(ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes, 4) as ticket_unassigned_duration_calendar_minutes,
+  round(ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes * 1.0, 4) as ticket_unassigned_duration_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
   ticket_resolution_times_calendar.total_resolutions as count_resolutions,

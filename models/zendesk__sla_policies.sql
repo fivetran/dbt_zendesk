@@ -130,7 +130,7 @@ select
   sla_breach_at,
   case when sla_elapsed_time is null
     then round(({{ dbt.datediff("sla_applied_at", dbt.current_timestamp(), 'second') }} / 60), 4)  --This will create an entry for active sla's
-    else round(sla_elapsed_time, 4)
+    else round(sla_elapsed_time * 1.0, 4)
       end as sla_elapsed_time,
   sla_breach_at > current_timestamp as is_active_sla,
   case when (sla_breach_at > {{ dbt.current_timestamp() }})
