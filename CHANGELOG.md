@@ -4,7 +4,7 @@
 
 ## Bug Fixes
 - Removes logic casting SLA and ticket metric values from floats to integers. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
-  - The following fields in the `zendesk__ticket_metrics` model will now be **floats**:
+  - The following fields in the `zendesk__ticket_metrics` model will now be **numerics**:
     - `first_resolution_business_minutes`
     - `full_resolution_business_minutes`
     - `first_reply_time_business_minutes`
@@ -20,7 +20,7 @@
     - `first_reply_time`
     - `next_reply_time`
     - `requester_wait_time`
-- Rounded the above metrics to the 4th decimal place, after all calculations have been completed.
+- Rounded the above metrics to the 4th decimal place and cast as numerics.
 
 # dbt_zendesk v0.24.2
 
