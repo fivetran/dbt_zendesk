@@ -1,4 +1,4 @@
-# dbt_zendesk v0.24.3-a1
+# dbt_zendesk v0.25.0-a1
 
 [PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
 
@@ -20,6 +20,7 @@
     - `first_reply_time`
     - `next_reply_time`
     - `requester_wait_time`
+- Rounded the above metrics to the 4th decimal place, after all calculations have been completed.
 
 # dbt_zendesk v0.24.2
 
