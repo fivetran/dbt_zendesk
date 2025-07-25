@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.24.2'
+version: '0.25.0'
 
 profile: 'integration_tests'
 
@@ -48,6 +48,8 @@ models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
+  +docs:
+    show: False
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
     +column_types:
@@ -176,3 +178,4 @@ dispatch:
 
 flags:
   send_anonymous_usage_stats: False
+  use_colors: True
