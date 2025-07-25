@@ -48,6 +48,8 @@ models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
+  +docs:
+    show: False
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
     +column_types:
@@ -176,3 +178,4 @@ dispatch:
 
 flags:
   send_anonymous_usage_stats: False
+  use_colors: True
