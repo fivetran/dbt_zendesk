@@ -2,33 +2,15 @@
 
 [PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
 
-## Bug Fixes
-- Removes logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
-  - This may impact the following fields in the `zendesk__ticket_metrics` model, which will now be **numerics** rounded to the fourth decimal place:
-    - `first_resolution_business_minutes`
-    - `full_resolution_business_minutes`
-    - `first_reply_time_business_minutes`
-    - `agent_wait_time_in_business_minutes`
-    - `requester_wait_time_in_business_minutes`
-    - `solve_time_in_business_minutes`
-    - `agent_work_time_in_business_minutes`
-    - `on_hold_time_in_business_minutes`
-    - `new_status_duration_in_business_minutes`
-    - `open_status_duration_in_business_minutes`
-    - `first_reply_time_calendar_minutes`
-    - `total_reply_time_calendar_minutes`
-    - `ticket_unassigned_duration_calendar_minutes`
-    - `requester_last_login_age_minutes`
-    - `assignee_last_login_age_minutes`
-    - `unsolved_ticket_age_minutes`
-    - `unsolved_ticket_age_since_update_minutes`
-  - Particularly for the following SLA policy metrics, this may impact `zendesk__sla_policies.sla_elapsed_time`, which is also now a **numeric** rounded to the fourth decimal place:
-    - `agent_work_time`
-    - `first_reply_time`
-    - `next_reply_time`
-    - `requester_wait_time`
+## Schema/Data Changes
 
-### Under the Hood - July 2025 Updates
+**2 total changes • 2 possible breaking changes**
+| **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`zendesk__ticket_metrics`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)<br>• `first_resolution_business_minutes`<br>• `first_reply_time_business_minutes`<br>• `agent_wait_time_in_business_minutes`<br>• `requester_wait_time_in_business_minutes`<br>• `solve_time_in_business_minutes`<br>• `agent_work_time_in_business_minutes`<br>• `on_hold_time_in_business_minutes`<br>• `new_status_duration_in_business_minutes`<br>• `open_status_duration_in_business_minutes`<br>• `first_reply_time_calendar_minutes`<br>• `total_reply_time_calendar_minutes`<br>• `ticket_unassigned_duration_calendar_minutes`<br>• `requester_last_login_age_minutes`<br>• `assignee_last_login_age_minutes`<br>• `unsolved_ticket_age_minutes`<br>• `unsolved_ticket_age_since_update_minutes` | Column Data Type | Integer | Numeric rounded to 4th decimal place | Removed logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. ([PR #204](https://github.com/fivetran/dbt_zendesk/pull/204)) |
+| [`zendesk__sla_policies.sla_elapsed_time`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Data Type | Integer | Numeric rounded to 4th decimal place | May particularly affect `agent_work_time`, `first_reply_time`, `next_reply_time`, and `requester_wait_time` SLA policy metrics. ([PR #204](https://github.com/fivetran/dbt_zendesk/pull/204)) |
+
+### Under the Hood
 
 [PR #205](https://github.com/fivetran/dbt_zendesk/pull/205) includes the following updates:
 
