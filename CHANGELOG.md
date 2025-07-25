@@ -1,6 +1,36 @@
-[PR #205](https://github.com/fivetran/dbt_zendesk/pull/205) includes the following updates:
+# dbt_zendesk v0.25.0
+
+[PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
+
+## Bug Fixes
+- Removes logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
+  - This may impact the following fields in the `zendesk__ticket_metrics` model, which will now be **numerics** rounded to the fourth decimal place:
+    - `first_resolution_business_minutes`
+    - `full_resolution_business_minutes`
+    - `first_reply_time_business_minutes`
+    - `agent_wait_time_in_business_minutes`
+    - `requester_wait_time_in_business_minutes`
+    - `solve_time_in_business_minutes`
+    - `agent_work_time_in_business_minutes`
+    - `on_hold_time_in_business_minutes`
+    - `new_status_duration_in_business_minutes`
+    - `open_status_duration_in_business_minutes`
+    - `first_reply_time_calendar_minutes`
+    - `total_reply_time_calendar_minutes`
+    - `ticket_unassigned_duration_calendar_minutes`
+    - `requester_last_login_age_minutes`
+    - `assignee_last_login_age_minutes`
+    - `unsolved_ticket_age_minutes`
+    - `unsolved_ticket_age_since_update_minutes`
+  - Particularly for the following SLA policy metrics, this may impact `zendesk__sla_policies.sla_elapsed_time`, which is also now a **numeric** rounded to the fourth decimal place:
+    - `agent_work_time`
+    - `first_reply_time`
+    - `next_reply_time`
+    - `requester_wait_time`
 
 ### Under the Hood - July 2025 Updates
+
+[PR #205](https://github.com/fivetran/dbt_zendesk/pull/205) includes the following updates:
 
 - Updated conditions in `.github/workflows/auto-release.yml`.
 - Added `.github/workflows/generate-docs.yml`.
@@ -16,6 +46,36 @@
   - `pipeline.yml` (under the `environment` block, after `CI_DATABRICKS_DBT_TOKEN`)
 - Added `certifi==2025.1.31` to `requirements.txt` (if missing).
 - Updated `.gitignore` to exclude additional DBT, Python, and system artifacts.
+
+# dbt_zendesk v0.25.0-a1
+
+[PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
+
+## Bug Fixes
+- Removes logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
+  - This may impact the following fields in the `zendesk__ticket_metrics` model, which will now be **numerics** rounded to the fourth decimal place:
+    - `first_resolution_business_minutes`
+    - `full_resolution_business_minutes`
+    - `first_reply_time_business_minutes`
+    - `agent_wait_time_in_business_minutes`
+    - `requester_wait_time_in_business_minutes`
+    - `solve_time_in_business_minutes`
+    - `agent_work_time_in_business_minutes`
+    - `on_hold_time_in_business_minutes`
+    - `new_status_duration_in_business_minutes`
+    - `open_status_duration_in_business_minutes`
+    - `first_reply_time_calendar_minutes`
+    - `total_reply_time_calendar_minutes`
+    - `ticket_unassigned_duration_calendar_minutes`
+    - `requester_last_login_age_minutes`
+    - `assignee_last_login_age_minutes`
+    - `unsolved_ticket_age_minutes`
+    - `unsolved_ticket_age_since_update_minutes`
+  - Particularly for the following SLA policy metrics, this may impact `zendesk__sla_policies.sla_elapsed_time`, which is also now a **numeric** rounded to the fourth decimal place:
+    - `agent_work_time`
+    - `first_reply_time`
+    - `next_reply_time`
+    - `requester_wait_time`
 
 # dbt_zendesk v0.24.2
 
