@@ -44,6 +44,7 @@ with audit_logs as (
         from_role as role
     from split_to_from
     where created_at = min_created_at_per_user
+    and from_role != to_role
 
 -- Captures all subsequent "to" roles
 ), role_changes as (
@@ -56,6 +57,7 @@ with audit_logs as (
         lead(created_at) over (partition by source_relation, user_id order by created_at asc) as valid_ending_at,
         to_role as role
     from split_to_from
+    where from_role != to_role
 
 ), unioned as (
     select *
