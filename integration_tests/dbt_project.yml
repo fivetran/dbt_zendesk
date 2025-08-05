@@ -32,7 +32,7 @@ vars:
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True # @docs-include
   # using_ticket_chat: true # @docs-include
-  using_audit_log: true # @docs-include
+  # using_audit_log: true # @docs-include
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false
