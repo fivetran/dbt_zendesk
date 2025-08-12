@@ -1,2 +1,4 @@
 id,updated_at,_fivetran_deleted,_fivetran_synced,active,created_at,display_name,end_user_visible,name
 360200,2019-12-18 18:52:02,FALSE,2021-02-16 20:08:55,FALSE,2019-11-07 23:14:54,2be0ef4b34cc85f6e3582b3bef65cd4e,TRUE,2be0ef4b34cc85f6e3582b3bef65cd4e
+360200,2019-12-19 18:52:02,FALSE,2021-02-16 20:08:55,FALSE,2019-11-07 23:14:54,2be0ef4b34cc85f6e3582b3bef65cd4e,TRUE,2be0ef4b34cc85f6e3582b3bef65cd4e
+360200,2019-12-20 18:52:02,FALSE,2021-02-16 20:08:55,TRUE,2019-11-07 23:14:54,2be0ef4b34cc85f6e3582b3bef65cd4e,TRUE,2be0ef4b34cc85f6e3582b3bef65cd4e
