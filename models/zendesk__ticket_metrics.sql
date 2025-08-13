@@ -55,11 +55,11 @@ select
   ticket_enriched.*,
   case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
-    else ticket_reply_times_calendar.first_reply_time_calendar_minutes
+    else round(cast(ticket_reply_times_calendar.first_reply_time_calendar_minutes as {{ dbt.type_numeric() }}), 4)
       end as first_reply_time_calendar_minutes,
   case when coalesce(ticket_comments.count_public_agent_comments, 0) = 0
     then null
-    else ticket_reply_times_calendar.total_reply_time_calendar_minutes
+    else round(cast(ticket_reply_times_calendar.total_reply_time_calendar_minutes as {{ dbt.type_numeric() }}), 4)
       end as total_reply_time_calendar_minutes,
   coalesce(ticket_comments.count_agent_comments, 0) as count_agent_comments,
   coalesce(ticket_comments.count_public_agent_comments, 0) as count_public_agent_comments,
@@ -86,7 +86,7 @@ select
     then ticket_resolution_times_calendar.last_assignment_to_resolution_calendar_minutes
     else null
       end as last_assignment_to_resolution_calendar_minutes,
-  ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes,
+  round(cast(ticket_resolution_times_calendar.ticket_unassigned_duration_calendar_minutes as {{ dbt.type_numeric() }}), 4) as ticket_unassigned_duration_calendar_minutes,
   ticket_resolution_times_calendar.first_resolution_calendar_minutes,
   ticket_resolution_times_calendar.final_resolution_calendar_minutes,
   ticket_resolution_times_calendar.total_resolutions as count_resolutions,
@@ -104,16 +104,16 @@ select
   coalesce(ticket_comments.count_agent_replies, 0) as total_agent_replies,
   
   case when ticket_enriched.is_requester_active = true and ticket_enriched.requester_last_login_at is not null
-    then ({{ dbt.datediff("ticket_enriched.requester_last_login_at", dbt.current_timestamp(), 'second') }} /60)
+    then round(cast(({{ dbt.datediff("ticket_enriched.requester_last_login_at", dbt.current_timestamp(), 'second') }} /60) as {{ dbt.type_numeric() }}), 4)
       end as requester_last_login_age_minutes,
   case when ticket_enriched.is_assignee_active = true and ticket_enriched.assignee_last_login_at is not null
-    then ({{ dbt.datediff("ticket_enriched.assignee_last_login_at", dbt.current_timestamp(), 'second') }} /60)
+    then round(cast(({{ dbt.datediff("ticket_enriched.assignee_last_login_at", dbt.current_timestamp(), 'second') }} /60) as {{ dbt.type_numeric() }}), 4)
       end as assignee_last_login_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
-    then ({{ dbt.datediff("ticket_enriched.created_at", dbt.current_timestamp(), 'second') }} /60)
+    then round(cast(({{ dbt.datediff("ticket_enriched.created_at", dbt.current_timestamp(), 'second') }} /60) as {{ dbt.type_numeric() }}), 4)
       end as unsolved_ticket_age_minutes,
   case when lower(ticket_enriched.status) not in ('solved','closed')
-    then ({{ dbt.datediff("ticket_enriched.updated_at", dbt.current_timestamp(), 'second') }} /60)
+    then round(cast(({{ dbt.datediff("ticket_enriched.updated_at", dbt.current_timestamp(), 'second') }} /60) as {{ dbt.type_numeric() }}), 4)
       end as unsolved_ticket_age_since_update_minutes,
   case when lower(ticket_enriched.status) in ('solved','closed') and ticket_comments.is_one_touch_resolution 
     then true
@@ -155,16 +155,16 @@ left join ticket_comments
   select 
     ticket_enriched.source_relation,
     ticket_enriched.ticket_id,
-    ticket_first_resolution_time_business.first_resolution_business_minutes,
-    ticket_full_resolution_time_business.full_resolution_business_minutes,
-    ticket_first_reply_time_business.first_reply_time_business_minutes,
-    ticket_work_time_business.agent_wait_time_in_business_minutes,
-    ticket_work_time_business.requester_wait_time_in_business_minutes,
-    ticket_work_time_business.solve_time_in_business_minutes,
-    ticket_work_time_business.agent_work_time_in_business_minutes,
-    ticket_work_time_business.on_hold_time_in_business_minutes,
-    ticket_work_time_business.new_status_duration_in_business_minutes,
-    ticket_work_time_business.open_status_duration_in_business_minutes
+    round(cast(ticket_first_resolution_time_business.first_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as first_resolution_business_minutes,
+    round(cast(ticket_full_resolution_time_business.full_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as full_resolution_business_minutes,
+    round(cast(ticket_first_reply_time_business.first_reply_time_business_minutes as {{ dbt.type_numeric() }}), 4) as first_reply_time_business_minutes,
+    round(cast(ticket_work_time_business.agent_wait_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as agent_wait_time_in_business_minutes,
+    round(cast(ticket_work_time_business.requester_wait_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as requester_wait_time_in_business_minutes,
+    round(cast(ticket_work_time_business.solve_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as solve_time_in_business_minutes,
+    round(cast(ticket_work_time_business.agent_work_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as agent_work_time_in_business_minutes,
+    round(cast(ticket_work_time_business.on_hold_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as on_hold_time_in_business_minutes,
+    round(cast(ticket_work_time_business.new_status_duration_in_business_minutes as {{ dbt.type_numeric() }}), 4) as new_status_duration_in_business_minutes,
+    round(cast(ticket_work_time_business.open_status_duration_in_business_minutes as {{ dbt.type_numeric() }}), 4) as open_status_duration_in_business_minutes
 
   from ticket_enriched
 

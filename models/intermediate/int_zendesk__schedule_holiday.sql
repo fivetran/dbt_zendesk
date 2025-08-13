@@ -2,11 +2,11 @@
 
 with schedule as (
     select *
-    from {{ var('schedule') }}   
+    from {{ ref('stg_zendesk__schedule') }}   
 
 ), schedule_holiday as (
     select *
-    from {{ var('schedule_holiday') }}  
+    from {{ ref('stg_zendesk__schedule_holiday') }}  
 
 -- Converts holiday_start_date_at and holiday_end_date_at into daily timestamps and finds the week starts/ends using week_start.
 ), schedule_holiday_ranges as (

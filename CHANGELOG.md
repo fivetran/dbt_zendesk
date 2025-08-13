@@ -1,3 +1,75 @@
+# dbt_zendesk v1.0.0
+
+[PR #211](https://github.com/fivetran/dbt_zendesk/pull/211) includes the following updates:
+
+## Breaking Changes
+
+### Source Package Consolidation
+- Removed the dependency on the `fivetran/zendesk_source` package.
+  - All functionality from the source package has been merged into this transformation package for improved maintainability and clarity.
+  - If you reference `fivetran/zendesk_source` in your `packages.yml`, you must remove this dependency to avoid conflicts.
+  - Any source overrides referencing the `fivetran/zendesk_source` package will also need to be removed or updated to reference this package.
+  - Update any zendesk_source-scoped variables to be scoped to only under this package. See the [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md) for how to configure the build schema of staging models.
+- As part of the consolidation, vars are no longer used to reference staging models, and only sources are represented by vars. Staging models are now referenced directly with `ref()` in downstream models.
+
+### dbt Fusion Compatibility Updates
+- Updated package to maintain compatibility with dbt-core versions both before and after v1.10.6, which introduced a breaking change to multi-argument test syntax (e.g., `unique_combination_of_columns`).
+- Temporarily removed unsupported tests to avoid errors and ensure smoother upgrades across different dbt-core versions. These tests will be reintroduced once a safe migration path is available.
+  - Removed all `dbt_utils.unique_combination_of_columns` tests.
+  - Removed all `accepted_values` tests.
+  - Moved `loaded_at_field: _fivetran_synced` under the `config:` block in `src_zendesk.yml`.
+
+# dbt_zendesk v0.25.0
+
+## Schema/Data Changes
+
+**2 total changes • 2 possible breaking changes**
+| **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`zendesk__ticket_metrics`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)<br>• `first_resolution_business_minutes`<br>• `first_reply_time_business_minutes`<br>• `agent_wait_time_in_business_minutes`<br>• `requester_wait_time_in_business_minutes`<br>• `solve_time_in_business_minutes`<br>• `agent_work_time_in_business_minutes`<br>• `on_hold_time_in_business_minutes`<br>• `new_status_duration_in_business_minutes`<br>• `open_status_duration_in_business_minutes`<br>• `first_reply_time_calendar_minutes`<br>• `total_reply_time_calendar_minutes`<br>• `ticket_unassigned_duration_calendar_minutes`<br>• `requester_last_login_age_minutes`<br>• `assignee_last_login_age_minutes`<br>• `unsolved_ticket_age_minutes`<br>• `unsolved_ticket_age_since_update_minutes` | Column Data Type | Integer | Numeric rounded to four decimal places | Removed logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. ([PR #204](https://github.com/fivetran/dbt_zendesk/pull/204)) |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)<br>• `sla_elapsed_time` | Data Type | Integer | Numeric rounded to four decimal places | May particularly affect `agent_work_time`, `first_reply_time`, `next_reply_time`, and `requester_wait_time` SLA policy metrics. ([PR #204](https://github.com/fivetran/dbt_zendesk/pull/204)) |
+
+### Under the Hood
+
+[PR #205](https://github.com/fivetran/dbt_zendesk/pull/205) includes the following updates:
+
+- Updated conditions in `.github/workflows/auto-release.yml`.
+- Added `.github/workflows/generate-docs.yml`.
+- Added `+docs: show: False` to `integration_tests/dbt_project.yml`.
+- Migrated `flags` (e.g., `send_anonymous_usage_stats`, `use_colors`) from `sample.profiles.yml` to `integration_tests/dbt_project.yml`.
+- Updated `maintainer_pull_request_template.md` with improved checklist.
+- Updated `.gitignore` to exclude additional DBT, Python, and system artifacts.
+
+# dbt_zendesk v0.25.0-a1
+
+[PR #204](https://github.com/fivetran/dbt_zendesk/pull/204) includes the following updates:
+
+## Bug Fixes
+- Removes logic casting ticket metric values as integers in intermediate models. This may have caused minor rounding discrepancies between the Zendesk data models and UI reports. 
+  - This may impact the following fields in the `zendesk__ticket_metrics` model, which will now be **numerics** rounded to the fourth decimal place:
+    - `first_resolution_business_minutes`
+    - `full_resolution_business_minutes`
+    - `first_reply_time_business_minutes`
+    - `agent_wait_time_in_business_minutes`
+    - `requester_wait_time_in_business_minutes`
+    - `solve_time_in_business_minutes`
+    - `agent_work_time_in_business_minutes`
+    - `on_hold_time_in_business_minutes`
+    - `new_status_duration_in_business_minutes`
+    - `open_status_duration_in_business_minutes`
+    - `first_reply_time_calendar_minutes`
+    - `total_reply_time_calendar_minutes`
+    - `ticket_unassigned_duration_calendar_minutes`
+    - `requester_last_login_age_minutes`
+    - `assignee_last_login_age_minutes`
+    - `unsolved_ticket_age_minutes`
+    - `unsolved_ticket_age_since_update_minutes`
+  - Particularly for the following SLA policy metrics, this may impact `zendesk__sla_policies.sla_elapsed_time`, which is also now a **numeric** rounded to the fourth decimal place:
+    - `agent_work_time`
+    - `first_reply_time`
+    - `next_reply_time`
+    - `requester_wait_time`
+
 # dbt_zendesk v0.24.2
 
 This release includes the following updates:

@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.24.2'
+version: '1.0.0'
 
 profile: 'integration_tests'
 
@@ -30,9 +30,9 @@ vars:
     zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
 
   ## Uncomment for docs generation
-  # zendesk__unstructured_enabled: True
-  # using_ticket_chat: true
-  # using_audit_log: true
+  # zendesk__unstructured_enabled: True # @docs-include
+  # using_ticket_chat: true # @docs-include
+  # using_audit_log: true # @docs-include
 
   # For validation testing. To be commented out before release.
   # using_domain_names: false
@@ -48,6 +48,8 @@ models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
+  +docs:
+    show: False
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
     +column_types:
@@ -176,3 +178,4 @@ dispatch:
 
 flags:
   send_anonymous_usage_stats: False
+  use_colors: True
