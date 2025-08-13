@@ -37,11 +37,17 @@ models:
       +materialized: ephemeral
     staging:
       +schema: zendesk_source
-      +materialized: view
+      +materialized: table
+      tmp:
+        +schema: view
 vars:
   zendesk:
     ticket_field_history_columns: ['assignee_id', 'status', 'priority']
     ticket_field_history_updater_columns: []
+    zendesk__ticket_passthrough_columns: []
+    zendesk__user_passthrough_columns: []
+    zendesk__organization_passthrough_columns: []
+    zendesk_sources: []
     audit_log: "{{ source('zendesk', 'audit_log') }}"
     brand: "{{ source('zendesk', 'brand') }}"
     daylight_time: "{{ source('zendesk', 'daylight_time') }}"
