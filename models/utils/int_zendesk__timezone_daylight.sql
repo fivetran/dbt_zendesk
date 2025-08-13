@@ -3,12 +3,12 @@
 with timezone as (
 
     select *
-    from {{ var('time_zone') }}
+    from {{ ref('stg_zendesk__time_zone') }}
 
 ), daylight_time as (
 
     select *
-    from {{ var('daylight_time') }}
+    from {{ ref('stg_zendesk__daylight_time') }}
 
 ), timezone_with_dt as (
 

@@ -68,9 +68,9 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=0.25.0", "<0.26.0"]
+    version: [">=1.0.0", "<1.1.0"]
 ```
-> **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
+> All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
 ### Step 3: Define database and schema variables
 #### Option A: Single connection
@@ -93,7 +93,7 @@ To use this functionality, you will need to set the `zendesk_sources` variable i
 # dbt_project.yml
 
 vars:
-  zendesk_sources:
+  zendesks:
     - database: connection_1_destination_name # Required
       schema: connection_1_schema_name # Rquired
       name: connection_1_source_name # Required only if following the step in the following subsection
@@ -133,7 +133,7 @@ sources:
 ```yml
 # dbt_project.yml
 vars:
-  zendesk_source:
+  zendesk:
     has_defined_sources: true
 ```
 
@@ -221,7 +221,7 @@ Example usage:
 ```yml
 # dbt_project.yml
 vars:
-  zendesk_source:
+  zendesk:
     internal_user_criteria: "lower(email) like '%@fivetran.com' or external_id = '12345' or name in ('Garrett', 'Alfredo')" # can reference any non-custom field in USER
 ```
 
@@ -265,16 +265,10 @@ By default this package will build the Zendesk Support staging models within a s
 
 ```yml
 models:
-  zendesk:
-    +schema: my_new_schema_name # leave blank for just the target_schema
-    intermediate:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    sla_policy:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    ticket_history:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-  zendesk_source:
-    +schema: my_new_schema_name # leave blank for just the target_schema
+    zendesk:
+      +schema: my_new_schema_name # Leave +schema: blank to use the default target_schema.
+      staging:
+        +schema: my_new_schema_name # Leave +schema: blank to use the default target_schema.
 ```
 
 #### Change the source table references
@@ -302,9 +296,6 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 
 ```yml
 packages:
-    - package: fivetran/zendesk_source
-      version: [">=0.18.0", "<0.19.0"]
-
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
 

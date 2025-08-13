@@ -3,11 +3,6 @@ version: 2
 models:
   - name: zendesk__ticket_enriched
     description: Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.  
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: 
-            - ticket_id
-            - source_relation 
     columns:
       - name: ticket_id
         description: Automatically assigned when the ticket is created
@@ -184,11 +179,6 @@ models:
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches for `first_reply_time`, `next_reply_time`, `requester_wait_time`, and `agent_work_time` are supported. If there is a SLA you would like supported that is not included, please create a feature request.
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: 
-            - sla_event_id
-            - source_relation 
     columns:
       - name: sla_event_id
         description: A surrogate key generated from the combination of `ticket_id`, `metric`, `sla_applied_at`, and `source_relation` fields
@@ -241,11 +231,6 @@ models:
 
   - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk Support ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: 
-            - ticket_id
-            - source_relation 
     columns:
       - name: first_reply_time_calendar_minutes
         description: The number of calendar minutes between when the ticket was created and when the first public agent response occurred

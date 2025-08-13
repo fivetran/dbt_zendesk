@@ -6,7 +6,7 @@ with audit_logs as (
         cast(source_id as {{ dbt.type_string() }}) as schedule_id,
         created_at,
         lower(change_description) as change_description
-    from {{ var('audit_log') }}
+    from {{ ref('stg_zendesk__audit_log') }}
     where lower(change_description) like '%workweek changed from%'
 
 -- the formats for change_description vary, so it needs to be cleaned
