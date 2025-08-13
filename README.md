@@ -1,4 +1,4 @@
-# Zendesk Support Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
+# Zendesk Support dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
 
 <p align="left">
     <a alt="License"
