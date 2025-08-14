@@ -40,7 +40,7 @@ models:
       +schema: zendesk_source
       +materialized: table
       tmp:
-        +schema: view
+        +materialized: view
 
 vars:
   zendesk:
