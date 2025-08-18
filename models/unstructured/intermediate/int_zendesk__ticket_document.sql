@@ -2,11 +2,11 @@
 
 with tickets as (
     select *
-    from {{ var('ticket') }}
+    from {{ ref('stg_zendesk__ticket') }}
 
 ), users as (
     select *
-    from {{ var('user') }}
+    from {{ ref('stg_zendesk__user') }}
 
 ), ticket_details as (
     select

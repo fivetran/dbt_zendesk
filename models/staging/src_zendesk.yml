@@ -1,0 +1,507 @@
+version: 2
+
+sources:
+  - name: zendesk
+    schema: "{{ var('zendesk_schema', 'zendesk') }}"
+    database: "{% if target.type != 'spark'%}{{ var('zendesk_database', target.database) }}{% endif %}"
+    loader: fivetran
+
+    config:
+      loaded_at_field: _fivetran_synced
+      enabled: "{{ var('zendesk_sources', []) == [] }}"
+      freshness:
+        warn_after: {count: 72, period: hour}
+        error_after: {count: 168, period: hour}
+
+    tables:
+      - name: audit_log
+        identifier: "{{ var('zendesk_audit_log_identifier', 'audit_log')}}"
+        config:
+          enabled: "{{ var('using_audit_log', False) }}"
+          freshness: null
+        description: >
+          The `audit_log` table captures historical changes and actions within Zendesk. It provides a record of modifications 
+          made to tickets, schedules, and other objects, allowing for a detailed audit trail. Each row represents an action 
+          performed by an actor, including the time of the action, the affected entity, and a description of the changes. This 
+          table is especially useful for tracking schedule modifications and maintaining a history of schedule changes.
+        columns:
+          - name: id
+            description: The unique identifier for each audit log entry, representing a distinct action or change.
+          - name: action
+            description: Describes the specific action performed within Zendesk, such as ticket updates or schedule modifications.
+          - name: actor_id
+            description: The unique identifier of the user or system responsible for performing the action.
+          - name: change_description
+            description: A detailed description of the changes made during the action, capturing what was altered.
+          - name: created_at
+            description: The timestamp indicating when the action was performed and recorded in the audit log.
+          - name: source_id
+            description: The unique identifier of the entity affected by the action, such as a ticket or schedule.
+          - name: source_label
+            description: A label that provides additional context about the affected entity, typically related to its type or name.
+          - name: source_type
+            description: Specifies the type of entity impacted by the action, such as a ticket, schedule, or user.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+
+      - name: ticket
+        identifier: "{{ var('zendesk_ticket_identifier', 'ticket')}}"
+        description: >
+          Tickets are the means through which your end users (customers) communicate with agents in Zendesk Support. Tickets can 
+          originate from a number of channels, including email, Help Center, chat, phone call, Twitter, Facebook, or the API.
+        columns:
+          - name: id
+            description: Automatically assigned when the ticket is created
+          - name: url
+            description: The API url of this ticket
+          - name: assignee_id
+            description: The agent currently assigned to the ticket
+          - name: brand_id
+            description: Enterprise only. The id of the brand this ticket is associated with
+          - name: created_at
+            description: When this record was created
+          - name: type
+            description: The type of this ticket, possible values are problem, incident, question or task
+          - name: subject
+            description: The value of the subject field for this ticket
+          - name: description
+            description: Read-only first comment on the ticket
+          - name: priority
+            description: The urgency with which the ticket should be addressed, possible values are urgent, high, normal and low
+          - name: status
+            description: The state of the ticket, possible values are new, open, pending, hold, solved and closed
+          - name: recipient
+            description: The original recipient e-mail address of the ticket
+          - name: requester_id
+            description: The user who requested this ticket
+          - name: submitter_id
+            description: The user who submitted the ticket. The submitter always becomes the author of the first comment on the ticket
+          - name: organization_id
+            description: The organization of the requester
+          - name: group_id
+            description: The group this ticket is assigned to
+          - name: due_at
+            description: If this is a ticket of type "task" it has a due date. Due date format uses ISO 8601 format.
+          - name: ticket_form_id
+            description: Enterprise only. The id of the ticket form to render for the ticket
+          - name: is_public
+            description: Is true if any comments are public, false otherwise
+          - name: updated_at
+            description: When this record last got updated
+          - name: via_channel
+            description: The channel the ticket was created from
+          - name: via_source_from_id
+            description: The channel the ticket was created from 
+          - name: via_source_from_title
+            description: The channel the ticket was created from
+          - name: via_source_rel
+            description: The rel the ticket was created from 
+          - name: via_source_to_address
+            description: The address of the source the ticket was created from
+          - name: via_source_to_name
+            description: The name of the source the ticket was created from    
+          - name: problem_id 
+            description: For tickets of type "incident", the ID of the problem the incident is linked to.
+          - name: external_id
+            description: An id you can use to link Zendesk Support tickets to local records.
+          - name: _fivetran_deleted
+            description: Boolean created by Fivetran to indicate whether the record has been deleted.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+
+      - name: brand
+        identifier: "{{ var('zendesk_brand_identifier', 'brand')}}"
+        config:
+          loaded_at_field: _fivetran_synced
+          enabled: "{{ var('using_brands', true) and var('zendesk_sources', []) == [] }}"
+        description: >
+          Brands are your customer-facing identities. They might represent multiple products or services, or they 
+          might literally be multiple brands owned and represented by your company.
+        columns:
+          - name: id
+            description: The ID automatically assigned when the brand is created
+          - name: brand_url
+            description: The url of the brand
+          - name: name
+            description: The name of the brand
+          - name: subdomain
+            description: The subdomain of the brand
+          - name: active
+            description: If the brand is set as active
+
+      - name: domain_name
+        identifier: "{{ var('zendesk_domain_name_identifier', 'domain_name')}}"
+        description: Domain names associated with an organization. An organization may have multiple domain names.
+        config:
+          enabled: "{{ var('using_domain_names', true) and var('zendesk_sources', []) == [] }}"
+        columns:
+          - name: organization_id
+            description: Reference to the organization
+          - name: domain_name
+            description: The name of the domain associated with the organization
+          - name: index
+            description: Index number of the domain name associated with the organization
+
+      - name: group
+        identifier: >
+          {% if target.type == 'snowflake' %}{{ var('zendesk_group_identifier', '"GROUP"') }}{% else %}{{ var('zendesk_group_identifier', 'group') }}{% endif %}
+        description: >
+          When support requests arrive in Zendesk Support, they can be assigned to a Group. Groups serve as the core
+          element of ticket workflow; support agents are organized into Groups and tickets can be assigned to a Group
+          only, or to an assigned agent within a Group. A ticket can never be assigned to an agent without also being
+          assigned to a Group.
+        config:
+          freshness: null
+        columns:
+          - name: id
+            description: Automatically assigned when creating groups
+          - name: name
+            description: The name of the group
+
+      - name: organization_tag
+        identifier: "{{ var('zendesk_organization_tag_identifier', 'organization_tag') }}"
+        description: The tags associated with an organization. An organization may have multiple tags.
+        config:
+          enabled: "{{ var('using_organization_tags', true) and var('using_organizations', true) and var('zendesk_sources', []) == [] }}"
+        columns:
+          - name: organization_id
+            description: Reference to the organization
+          - name: tag
+            description: Tag associated with the organization
+
+      - name: organization
+        identifier: "{{ var('zendesk_organization_identifier', 'organization') }}"
+        config:
+          enabled: "{{ var('using_organizations', true) and var('zendesk_sources', []) == [] }}"
+          freshness: null
+        description: >
+          Just as agents can be segmented into groups in Zendesk Support, your customers (end-users) can be segmented into
+          organizations. You can manually assign customers to an organization or automatically assign them to an organization
+          by their email address domain. Organizations can be used in business rules to route tickets to groups of agents or
+          to send email notifications.
+        columns:
+          - name: id
+            description: Automatically assigned when the organization is created
+          - name: name
+            description: A unique name for the organization
+          - name: details
+            description: Any details obout the organization, such as the address
+          - name: url
+            description: The API url of this organization
+          - name: external_id
+            description: A unique external id to associate organizations to an external record
+          - name: created_at
+            description: The time the organization was created
+          - name: updated_at
+            description: The time of the last update of the organization
+          - name: domain_names
+            description: An array of domain names associated with this organization
+          - name: details
+            description: Any details obout the organization, such as the address
+          - name: notes
+            description: Any notes you have about the organization
+          - name: group_id
+            description: New tickets from users in this organization are automatically put in this group
+          - name: shared_tickets
+            description: End users in this organization are able to see each other's tickets
+          - name: shared_comments
+            description: End users in this organization are able to see each other's comments on tickets
+          - name: tags
+            description: The tags of the organization
+          - name: organization_fields
+            description: Custom fields for this organization
+
+      - name: ticket_comment
+        identifier: "{{ var('zendesk_ticket_comment_identifier', 'ticket_comment') }}"
+        description: Ticket comments represent the conversation between requesters, collaborators, and agents. Comments can be public or private.
+        columns:
+          - name: id
+            description: Automatically assigned when the comment is created
+          - name: body
+            description: The comment string
+          - name: created
+            description: The time the comment was created
+          - name: public
+            description: Boolean field indicating if the comment is public (true), or if it is an internal note (false)
+          - name: ticket_id
+            description: The ticket id associated with this comment
+          - name: user_id
+            description: The id of the comment author
+          - name: facebook_comment
+            description: Boolean field indicating if the comment is a facebook comment
+          - name: tweet
+            description: Boolean field indicating if the comment is a twitter tweet
+          - name: voice_comment
+            description: Boolean field indicating if the comment is a voice comment
+          - name: _fivetran_deleted
+            description: Boolean created by Fivetran to indicate whether the record has been deleted.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+
+      - name: user_tag
+        identifier: "{{ var('zendesk_user_tag_identifier', 'user_tag') }}"
+        description: Table containing all tags associated with a user. Only present if your account has user tagging enabled.
+        config:
+          loaded_at_field: _fivetran_synced
+          enabled: "{{ var('using_user_tags', true) and var('zendesk_sources', []) == [] }}"
+        columns:
+          - name: user_id
+            description: Reference to the user
+          - name: tag
+            description: Tag associated with the user
+
+      - name: user
+        identifier: "{{ var('zendesk_user_identifier', 'user') }}"
+        description: Zendesk Support has three types of users, end-users (your customers), agents, and administrators.
+        config:
+          freshness: null
+        columns:
+          - name: id
+            description: Automatically assigned when the user is created
+          - name: email
+            description: The user's primary email address. *Writeable on create only. On update, a secondary email is added. See Email Address
+          - name: name
+            description: The user's name
+          - name: active
+            description: false if the user has been deleted
+          - name: created_at
+            description: The time the user was created
+          - name: organization_id
+            description: The id of the user's organization. If the user has more than one organization memberships, the id of the user's default organization
+          - name: phone
+            description: User's phone number.
+          - name: role
+            description: The user's role. Possible values are "end-user", "agent", or "admin"
+          - name: time_zone
+            description: The user's time zone. See Time Zone
+          - name: ticket_restriction
+            description: Specifies which tickets the user has access to. Possible values are organization, groups, assigned, requested and null
+          - name: suspended
+            description: Boolean representing whether the user has been suspended, meaning that they can no longer sign in and any new support requests you receive from them are sent to the suspended tickets queue.
+          - name: external_id
+            description: A unique identifier from another system. The API treats the id as case insensitive.
+          - name: updated_at 
+            description: The time the user was last updated.
+          - name: last_login_at
+            description: Last time the user signed in to Zendesk Support or made an API request using an API token or basic authentication.
+          - name: locale 
+            description: The user's locale. A BCP-47 compliant tag for the locale. If both "locale" and "locale_id" are present on create or update, "locale_id" is ignored and only "locale" is used.
+          - name: _fivetran_deleted
+            description: Boolean created by Fivetran to indicate whether the record has been deleted.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+            
+      - name: schedule
+        identifier: "{{ var('zendesk_schedule_identifier', 'schedule') }}"
+        description: The support schedules created with different business hours and holidays.
+        config:
+          freshness: null
+          enabled: "{{ var('using_schedules', true) and var('zendesk_sources', []) == [] }}"
+        columns:
+          - name: id
+            description: ID automatically assigned to the schedule upon creation
+          - name: name
+            description: Name of the schedule
+          - name: created_at
+            description: Time the schedule was created
+          - name: start_time
+            description: Start time of the schedule, in the schedule's time zone.
+          - name: end_time
+            description: End time of the schedule, in the schedule's time zone.
+          - name: time_zone
+            description: Timezone in which the schedule operates. 
+          
+      - name: ticket_schedule
+        identifier: "{{ var('zendesk_ticket_schedule_identifier', 'ticket_schedule') }}"
+        description: The schedules applied to tickets through a trigger.
+        config:
+          freshness: null
+        columns:
+          - name: ticket_id
+            description: The ID of the ticket assigned to the schedule
+          - name: created_at
+            description: The time the schedule was assigned to the ticket
+          - name: schedule_id
+            description: The ID of the schedule applied to the ticket
+      
+      - name: ticket_form_history
+        identifier: "{{ var('zendesk_ticket_form_history_identifier', 'ticket_form_history') }}"
+        description: Ticket forms allow an admin to define a subset of ticket fields for display to both agents and end users.
+        config:
+          enabled: "{{ var('using_ticket_form_history', true) and var('zendesk_sources', []) == [] }}"
+        columns:
+          - name: id
+            description: Automatically assigned when creating ticket form
+          - name: created_at
+            description: The time the ticket form was created
+          - name: updated_at
+            description: The time of the last update of the ticket form
+          - name: display_name
+            description: The name of the form that is displayed to an end user
+          - name: active
+            description: If the form is set as active
+          - name: name
+            description: The name of the form
+
+      - name: ticket_tag
+        identifier: "{{ var('zendesk_ticket_tag_identifier', 'ticket_tag') }}"
+        description: >
+          Tags are words, or combinations of words, you can use to add more context to tickets. The table lists all
+          tags currently associated with a ticket.
+        config:
+          freshness: null
+        columns:
+          - name: ticket_id
+            description: The ID of the ticket associated with the tag
+          - name: tags
+            description: The tag, or word(s), associated with the ticket
+
+      - name: ticket_field_history
+        identifier: "{{ var('zendesk_ticket_field_history_identifier', 'ticket_field_history') }}"
+        description: All fields and field values associated with tickets.
+        config:
+          freshness: null
+        columns:
+          - name: ticket_id
+            description: The ID of the ticket associated with the field
+          - name: field_name
+            description: The name of the ticket field
+          - name: updated
+            description: The time the ticket field value was created
+          - name: value
+            description: The value of the field
+          - name: user_id
+            description: The id of the user who made the update
+      
+      - name: daylight_time
+        identifier: "{{ var('zendesk_daylight_time_identifier', 'daylight_time') }}"
+        description: >
+          Appropriate offsets (from UTC) for timezones that engage or have engaged with Daylight Savings at some point since 1970.
+        config:
+          freshness: null
+        columns:
+          - name: daylight_end_utc
+            description: UTC timestamp of when Daylight Time ended in this year.
+          - name: daylight_offset
+            description: Number of **hours** added during Daylight Savings Time. 
+          - name: daylight_start_utc
+            description: UTC timestamp of when Daylight Time began in this year.
+          - name: time_zone
+            description: Name of the timezone. 
+          - name: year
+            description: Year in which daylight savings occurred. 
+
+      - name: time_zone
+        identifier: "{{ var('zendesk_time_zone_identifier', 'time_zone') }}"
+        description: Offsets (from UTC) for each timezone.
+        config:
+          freshness: null
+        columns:
+          - name: time_zone
+            description: Name of the time zone. 
+          - name: standard_offset 
+            description: Standard offset of the timezone (non-daylight savings hours). In `+/-hh:mm` format.
+      
+      - name: schedule_holiday
+        identifier: "{{ var('zendesk_schedule_holiday_identifier', 'schedule_holiday') }}"
+        description: Information about holidays for each specified schedule.
+        config:
+          freshness: null
+          enabled: "{{ var('using_schedules', true) and var('using_holidays', true) and var('zendesk_sources', []) == []  }}"
+        columns:
+          - name: end_date
+            description: ISO 8601 representation of the holiday end date.
+          - name: id
+            description: The ID of the scheduled holiday.
+          - name: name
+            description: Name of the holiday.
+          - name: schedule_id
+            description: The ID of the schedule.
+          - name: start_date
+            description: ISO 8601 representation of the holiday start date.
+
+      - name: ticket_chat
+        identifier: '{{ var("zendesk_ticket_chat_identifier", "ticket_chat") }}'
+        description: Information about ticket chat conversations.
+        config:
+          freshness: null
+          enabled: "{{ var('using_ticket_chat', false) and var('zendesk_sources', []) == []  }}"
+        columns:
+          - name: chat_id
+            description: Unique ID of the chat.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+          - name: authenticated
+            description: Boolean indicating whether the user has been given access to restricted Help Center content and authenticated Chat.
+          - name: backend
+            description: Indicates the underlying system or technology that is processing and managing the chat session associated with a ticket.
+          - name: channel
+            description: The channel the conversation was created from. Likely `native_messaging` or `chat`.
+          - name: conversation_id
+            description: ID of the conversation.
+          - name: integration_id
+            description: Identifier for the specific integration that created or is associated with the chat ticket.
+          - name: tags
+            description: JSON list of tags placed on the chat. 
+          - name: ticket_id
+            description: ID of the associated ticket.
+          - name: user_id
+            description: ID of the customer user who initiated the chat.
+          - name: visitor_id
+            description: >
+              Uniquely identify a visitor who is engaged in a chat session. This ID is typically assigned when a visitor starts a chat session on a platform integrated with Zendesk Chat. 
+              It helps track the visitor's interactions across different chat sessions and can be used to re-associate returning visits or sessions with the same visitor.
+          - name: webpath
+            description: JSON list of pages the customer navigated to during the chat.
+
+      - name: ticket_chat_event
+        identifier: '{{ var("zendesk_ticket_chat_event_identifier", "ticket_chat_event") }}'
+        description: Information about chat and messaging events on tickets.
+        config:
+          freshness: null
+          enabled: "{{ var('using_ticket_chat', false) and var('zendesk_sources', []) == []  }}"
+        columns:
+          - name: chat_id
+            description: The ID of the chat.
+          - name: created_at
+            description: Timestamp of the chat event.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+          - name: actor_id
+            description: Zendesk user id for the user or system that triggered the event.
+          - name: chat_index
+            description: Index of the chat 
+          - name: external_message_id
+            description: External identifier of the chat message.
+          - name: filename
+            description: Name of an attached file for `ChatFileAttachment` types of events.
+          - name: is_history_context
+            description: >
+              Boolean that signifies whether a specific chat event is part of the historical context being constructed within the table. This implies that the event is being recorded as a 
+              part of the historical data collection process, where previous interactions or statuses are captured to provide a complete view of changes over time.
+          - name: message
+            description: Body of the chat message.
+          - name: message_id
+            description: id of the chat message.
+          - name: message_source
+            description: Where the message originated from (e.g. `NATIVE_MESSAGING`)
+          - name: mime_type
+            description: MIME type of the document for `ChatFileAttachment` types of events.
+          - name: original_message
+            description: JSON storing information about the message event object.
+          - name: original_message_type
+            description: Type of message. Including but not limited to - `file`, `text`, `form_response`, `form`, and `image`.
+          - name: parent_message_id
+            description: id of the parent chat message.
+          - name: reason
+            description: The underlying cause or justification for a specific event (such as the session ending) within the chat.
+          - name: size
+            description: Size of an attached file for `ChatFileAttachment` types of events.
+          - name: status
+            description: Status of the chat - including but not limited to `READ`, `SEND_SUCCESS`, and `DELIVERY_SUCCESS`. Populated for `ChatMessageStatus` types of events.
+          - name: status_updated_at
+            description: Timestamp at which the status was updated. 
+          - name: type
+            description: Type of chat event. Including but not limited to - `ChatMessage`, `ChatJoin`, `ChatLeave`, `ChatMessageStatus`, `ChatFileAttachment`, `ChatAcdSkillsDetected`, `ChatDepartmentTransfer`, `ChatEmailChanged`, `ChatNameChanged`, `ChatRatingChanged`, and `ChatRatingCommentChanged`.
+          - name: url
+            description: URL of the attached file for `ChatFileAttachment` types of events.

@@ -1,9 +1,10 @@
 name: 'zendesk'
-version: '0.25.0'
+version: '1.0.0'
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
 on-run-start: '{{ fivetran_utils.empty_variable_warning("ticket_field_history_columns", "zendesk_ticket_field_history") }}'
+
 models:
   zendesk:
     +schema: zendesk
@@ -35,30 +36,40 @@ models:
       +materialized: table
     utils:
       +materialized: ephemeral
+    staging:
+      +schema: zendesk_source
+      +materialized: table
+      tmp:
+        +materialized: view
+
 vars:
   zendesk:
     ticket_field_history_columns: ['assignee_id', 'status', 'priority']
     ticket_field_history_updater_columns: []
-    audit_log: "{{ ref('stg_zendesk__audit_log') }}"
-    brand: "{{ ref('stg_zendesk__brand') }}"
-    daylight_time: "{{ ref('stg_zendesk__daylight_time') }}"
-    domain_name: "{{ ref('stg_zendesk__domain_name') }}"
-    field_history: "{{ ref('stg_zendesk__ticket_field_history') }}"
-    group: "{{ ref('stg_zendesk__group') }}"
-    organization_tag: "{{ ref('stg_zendesk__organization_tag') }}"
-    organization: "{{ ref('stg_zendesk__organization') }}"
-    schedule_holiday: "{{ ref('stg_zendesk__schedule_holiday') }}"
-    schedule: "{{ ref('stg_zendesk__schedule') }}"
-    ticket_comment: "{{ ref('stg_zendesk__ticket_comment') }}"
-    ticket_form_history: "{{ ref('stg_zendesk__ticket_form_history') }}"
-    ticket_schedule: "{{ ref('stg_zendesk__ticket_schedule') }}"
-    ticket_tag: "{{ ref('stg_zendesk__ticket_tag') }}"
-    ticket: "{{ ref('stg_zendesk__ticket') }}"
-    time_zone: "{{ ref('stg_zendesk__time_zone') }}"
-    user_tag: "{{ ref('stg_zendesk__user_tag') }}"
-    user: "{{ ref('stg_zendesk__user') }}"
-    ticket_chat: "{{ ref('stg_zendesk__ticket_chat') }}"
-    ticket_chat_event: "{{ ref('stg_zendesk__ticket_chat_event') }}"
+    zendesk__ticket_passthrough_columns: []
+    zendesk__user_passthrough_columns: []
+    zendesk__organization_passthrough_columns: []
+    zendesk_sources: []
+    audit_log: "{{ source('zendesk', 'audit_log') }}"
+    brand: "{{ source('zendesk', 'brand') }}"
+    daylight_time: "{{ source('zendesk', 'daylight_time') }}"
+    domain_name: "{{ source('zendesk', 'domain_name') }}"
+    field_history: "{{ source('zendesk', 'ticket_field_history') }}"
+    group: "{{ source('zendesk', 'group') }}"
+    organization_tag: "{{ source('zendesk', 'organization_tag') }}"
+    organization: "{{ source('zendesk', 'organization') }}"
+    schedule_holiday: "{{ source('zendesk', 'schedule_holiday') }}"
+    schedule: "{{ source('zendesk', 'schedule') }}"
+    ticket_comment: "{{ source('zendesk', 'ticket_comment') }}"
+    ticket_form_history: "{{ source('zendesk', 'ticket_form_history') }}"
+    ticket_schedule: "{{ source('zendesk', 'ticket_schedule') }}"
+    ticket_tag: "{{ source('zendesk', 'ticket_tag') }}"
+    ticket: "{{ source('zendesk', 'ticket') }}"
+    time_zone: "{{ source('zendesk', 'time_zone') }}"
+    user_tag: "{{ source('zendesk', 'user_tag') }}"
+    user: "{{ source('zendesk', 'user') }}"
+    ticket_chat: "{{ source('zendesk', 'ticket_chat') }}"
+    ticket_chat_event: "{{ source('zendesk', 'ticket_chat_event') }}"
 
     using_schedules: true
     using_domain_names: true
