@@ -112,7 +112,6 @@ sources:
       - name: brand
         identifier: "{{ var('zendesk_brand_identifier', 'brand')}}"
         config:
-          loaded_at_field: _fivetran_synced
           enabled: "{{ var('using_brands', true) and var('zendesk_sources', []) == [] }}"
         description: >
           Brands are your customer-facing identities. They might represent multiple products or services, or they 
@@ -242,7 +241,6 @@ sources:
         identifier: "{{ var('zendesk_user_tag_identifier', 'user_tag') }}"
         description: Table containing all tags associated with a user. Only present if your account has user tagging enabled.
         config:
-          loaded_at_field: _fivetran_synced
           enabled: "{{ var('using_user_tags', true) and var('zendesk_sources', []) == [] }}"
         columns:
           - name: user_id
