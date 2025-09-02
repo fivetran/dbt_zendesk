@@ -2,11 +2,11 @@
 
 with ticket_comments as (
     select *
-    from {{ var('ticket_comment') }}
+    from {{ ref('stg_zendesk__ticket_comment') }}
 
 ), users as (
     select *
-    from {{ var('user') }}
+    from {{ ref('stg_zendesk__user') }}
 
 ), comment_details as (
     select 

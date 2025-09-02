@@ -9,7 +9,7 @@ with spine as (
             min(cast(created_at as date)), 
             cast({{ dbt.dateadd("month", -1, "current_date") }} as date)
             ) as min_date
-    from {{ var('ticket') }}
+    from {{ ref('stg_zendesk__ticket') }}
     -- by default take all the data 
     where cast(created_at as date) >= {{ dbt.dateadd('year', 
         - var('ticket_field_history_timeframe_years', 50), "current_date") }}

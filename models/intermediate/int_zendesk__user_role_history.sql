@@ -6,14 +6,14 @@ with audit_logs as (
         source_id as user_id,
         created_at,
         lower(change_description) as change_description
-    from {{ var('audit_log') }}
+    from {{ ref('stg_zendesk__audit_log') }}
     where 
         lower(change_description) like '%support role changed from%'
         and source_type = 'user'
 
 ), users as (
     select *
-    from {{ var('user') }}
+    from {{ ref('stg_zendesk__user') }}
 
 -- Split the change_description into "from" and "to" strings
 ), split_to_from as (

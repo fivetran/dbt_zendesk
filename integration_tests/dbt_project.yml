@@ -1,13 +1,13 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '0.25.1'
+version: '1.1.0'
 
 profile: 'integration_tests'
 
 vars:
   zendesk_schema: zendesk_integration_tests_63
-  zendesk_source:
+  zendesk:
     zendesk_organization_identifier:           "organization_data"
     zendesk_schedule_identifier:               "schedule_data"
     zendesk_schedule_holiday_identifier:       "schedule_holiday_data"

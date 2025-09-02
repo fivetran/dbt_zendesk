@@ -1,4 +1,4 @@
-# Zendesk Support Modeling dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
+# Zendesk Support dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
 
 <p align="left">
     <a alt="License"
@@ -16,7 +16,7 @@
 </p>
 
 ## What does this dbt package do?
-- Produces modeled tables that leverage Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation) and build off the output of our [zendesk source package](https://github.com/fivetran/dbt_zendesk_source).
+- Produces modeled tables that leverage Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
 - Enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It performs the following actions:
   - Creates an enriched ticket model with relevant resolution, response time, and other metrics
   - Produces a historical ticket field history model to see velocity of your tickets over time
@@ -68,9 +68,9 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: "0.25.1-a1"
+    version: [">=1.1.0", "<1.2.0"]
 ```
-> **Note**: Do not include the Zendesk Support source package. The Zendesk Support transform package already has a dependency on the source in its own `packages.yml` file.
+> All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
 ### Step 3: Define database and schema variables
 #### Option A: Single connection
@@ -93,7 +93,7 @@ To use this functionality, you will need to set the `zendesk_sources` variable i
 # dbt_project.yml
 
 vars:
-  zendesk_sources:
+  zendesk:
     - database: connection_1_destination_name # Required
       schema: connection_1_schema_name # Rquired
       name: connection_1_source_name # Required only if following the step in the following subsection
@@ -109,7 +109,7 @@ vars:
 By default, this package defines one single-connection source, called `zendesk`, which will be disabled if you are unioning multiple connections. This means that your DAG will not include your Zendesk sources, though the package will run successfully.
 
 To properly incorporate all of your Zendesk connections into your project's DAG:
-1. Define each of your sources in a `.yml` file in your project. Utilize the following template for the `source`-level configurations, and, **most importantly**, copy and paste the table and column-level definitions from the package's `src_zendesk.yml` [file](https://github.com/fivetran/dbt_zendesk_source/blob/main/models/src_zendesk.yml#L15-L351).
+1. Define each of your sources in a `.yml` file in your project. Utilize the following template for the `source`-level configurations, and, **most importantly**, copy and paste the table and column-level definitions from the package's `src_zendesk.yml` [file](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L15-L351).
 
 ```yml
 # a .yml file in your root project
@@ -124,16 +124,16 @@ sources:
       warn_after: {count: 72, period: hour}
       error_after: {count: 168, period: hour}
 
-    tables: # copy and paste from zendesk_source/models/src_zendesk.yml - see https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/ for how to use anchors to only do so once
+    tables: # copy and paste from zendesk/models/staging/src_zendesk.yml - see https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/ for how to use anchors to only do so once
 ```
 
-> **Note**: If there are source tables you do not have (see [Step 4](https://github.com/fivetran/dbt_zendesk_source?tab=readme-ov-file#step-4-disable-models-for-non-existent-sources)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
+> **Note**: If there are source tables you do not have (see [Step 4](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-4-disable-models-for-non-existent-sources)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
 
-2. Set the `has_defined_sources` variable (scoped to the `zendesk_source` package) to `True`, like such:
+2. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
 ```yml
 # dbt_project.yml
 vars:
-  zendesk_source:
+  zendesk:
     has_defined_sources: true
 ```
 
@@ -221,7 +221,7 @@ Example usage:
 ```yml
 # dbt_project.yml
 vars:
-  zendesk_source:
+  zendesk:
     internal_user_criteria: "lower(email) like '%@fivetran.com' or external_id = '12345' or name in ('Garrett', 'Alfredo')" # can reference any non-custom field in USER
 ```
 
@@ -265,22 +265,18 @@ By default this package will build the Zendesk Support staging models within a s
 
 ```yml
 models:
-  zendesk:
-    +schema: my_new_schema_name # leave blank for just the target_schema
-    intermediate:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    sla_policy:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-    ticket_history:
-      +schema: my_new_schema_name # leave blank for just the target_schema
-  zendesk_source:
-    +schema: my_new_schema_name # leave blank for just the target_schema
+    zendesk:
+      +schema: my_new_schema_name # Leave +schema: blank to use the default target_schema.
+      intermediate:
+        +schema: my_new_schema_name # Leave +schema: blank to use the default target_schema.
+      staging:
+        +schema: my_new_schema_name # Leave +schema: blank to use the default target_schema.
 ```
 
 #### Change the source table references
 If an individual source table has a different name than the package expects, add the table name as it appears in your destination to the respective variable:
 
-> IMPORTANT: See this project's [`dbt_project.yml`](https://github.com/fivetran/dbt_zendesk_source/blob/main/dbt_project.yml) variable declarations to see the expected names.
+> IMPORTANT: See this project's [`dbt_project.yml`](https://github.com/fivetran/dbt_zendesk/blob/main/dbt_project.yml) variable declarations to see the expected names.
 
 ```yml
 vars:
@@ -302,9 +298,6 @@ This dbt package is dependent on the following dbt packages. These dependencies 
 
 ```yml
 packages:
-    - package: fivetran/zendesk_source
-      version: [">=0.18.0", "<0.19.0"]
-
     - package: fivetran/fivetran_utils
       version: [">=0.4.0", "<0.5.0"]
 
