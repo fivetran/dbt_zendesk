@@ -1,5 +1,8 @@
 # dbt_zendesk v1.0.1
-[PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
+This is the general release of v0.25.1-a1. [PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
+
+## Bug Fixes
+- Fixed uniqueness issue in `int_zendesk__user_role_history` by removing duplicate and erroneous logs with identical timestamps.
 
 # dbt_zendesk v1.0.0
 
