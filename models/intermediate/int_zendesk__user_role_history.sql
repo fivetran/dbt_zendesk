@@ -4,7 +4,6 @@ with audit_logs as (
     select
         source_relation,
         source_id as user_id,
-        source_label as user_name,
         created_at,
         lower(change_description) as change_description
     from {{ ref('stg_zendesk__audit_log') }}
@@ -21,9 +20,7 @@ with audit_logs as (
     select
         source_relation,
         user_id,
-        user_name,
         created_at,
-        change_description,
         -- extract and split change description for the support role
         trim({{ dbt.split_part(zendesk.extract_support_role_changes('change_description'), "' to '", 1) }}) as from_role,
         trim({{ dbt.split_part(zendesk.extract_support_role_changes('change_description'), "' to '", 2) }}) as to_role,
@@ -32,17 +29,27 @@ with audit_logs as (
         min(created_at) over (partition by source_relation, user_id) as min_created_at_per_user
     from audit_logs
 
+), split_to_from_deduped as (
+    select
+        source_relation,
+        user_id,
+        created_at,
+        from_role,
+        to_role,
+        min_created_at_per_user
+    from split_to_from
+    where from_role != to_role
+    {{ dbt_utils.group_by(6) }}
+
 -- Isolates the first "from" role as the base
 ), first_roles as (
     select
         source_relation,
         user_id,
-        user_name,
-        change_description,
         cast(null as {{ dbt.type_timestamp() }}) as valid_starting_at, --fill in with created_at of user later
         created_at as valid_ending_at, -- this it the created_at of the audit log entry
         from_role as role
-    from split_to_from
+    from split_to_from_deduped
     where created_at = min_created_at_per_user
 
 -- Captures all subsequent "to" roles
@@ -50,12 +57,10 @@ with audit_logs as (
     select
         source_relation,
         user_id,
-        user_name,
-        change_description,
         created_at as valid_starting_at,
         lead(created_at) over (partition by source_relation, user_id order by created_at asc) as valid_ending_at,
         to_role as role
-    from split_to_from
+    from split_to_from_deduped
 
 ), unioned as (
     select *
@@ -74,7 +79,6 @@ with audit_logs as (
         lower(coalesce(unioned.role, users.role)) as role,
         coalesce(unioned.valid_starting_at, users.created_at, cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_starting_at,
         coalesce(unioned.valid_ending_at, {{ dbt.current_timestamp() }}) as valid_ending_at,
-        unioned.change_description,
         -- include these in case they're needed for the internal_user_criteria
         users.external_id,
         users.email,
@@ -101,7 +105,6 @@ with audit_logs as (
         role,
         valid_starting_at,
         valid_ending_at,
-        change_description,
 
         {% if var('internal_user_criteria', false) -%} -- apply the filter to historical roles if provided
         role in ('admin', 'agent') or {{ var('internal_user_criteria', false) }} as is_internal_role

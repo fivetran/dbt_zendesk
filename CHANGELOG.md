@@ -1,3 +1,9 @@
+# dbt_zendesk v1.0.1
+This is the general release of v0.25.1-a1. [PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
+
+## Bug Fixes
+- Fixed uniqueness issue in `int_zendesk__user_role_history` by removing duplicate and erroneous logs with identical timestamps.
+
 # dbt_zendesk v1.0.0
 
 [PR #211](https://github.com/fivetran/dbt_zendesk/pull/211) includes the following updates:
@@ -17,6 +23,12 @@
 - Temporarily removed unsupported tests to avoid errors and ensure smoother upgrades across different dbt-core versions. These tests will be reintroduced once a safe migration path is available.
   - Removed all `dbt_utils.unique_combination_of_columns` tests.
   - Moved `loaded_at_field: _fivetran_synced` under the `config:` block in `src_zendesk.yml`.
+
+# dbt_zendesk v0.25.1-a1
+[PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
+
+## Bug Fixes
+- Fixed uniqueness issue in `int_zendesk__user_role_history` by removing duplicate and erroneous logs with identical timestamps.
 
 # dbt_zendesk v0.25.0
 
