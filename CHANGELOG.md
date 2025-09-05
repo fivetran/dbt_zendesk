@@ -1,3 +1,8 @@
+# dbt_zendesk v1.1.0-a1
+
+Materializing some int business-minute models as tables to avoid timeout issues.
+Include how dbt Core users can continue to keep ephemeral
+
 # dbt_zendesk v1.0.1
 This is the general release of v0.25.1-a1. [PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
 
