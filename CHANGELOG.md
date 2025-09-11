@@ -13,21 +13,22 @@
 | [`int_zendesk__ticket_first_resolution_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_first_resolution_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
 
 ## Feature Update
-- Materializes the above intermediate models as tables so as to optimize runs of `zendesk__ticket_metrics` and avoid potential timeout issues. If you would like maintain the ephemeral materialization of these models, add the following configuration to your `dbt_project.yml`:
+- Materializes the above intermediate models as tables so as to optimize runs of `zendesk__ticket_metrics` and avoid potential timeout issues. 
+  - If you would like maintain the ephemeral materialization of these models and are running the Zendesk package via dbt Core, add the following configuration to your `dbt_project.yml`:
 ```yml
 models:
   zendesk:
     agent_work_time:
       int_zendesk__ticket_work_time_business:
-        +materialized: table
+        +materialized: ephemeral
     reply_times:
       int_zendesk__ticket_first_reply_time_business:
-        +materialized: table
+        +materialized: ephemeral
     resolution_times:
       int_zendesk__ticket_full_resolution_time_business:
-        +materialized: table
+        +materialized: ephemeral
       int_zendesk__ticket_first_resolution_time_business:
-        +materialized: table
+        +materialized: ephemeral
 ```
 
 # dbt_zendesk v1.0.1
