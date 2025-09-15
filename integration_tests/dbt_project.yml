@@ -1,48 +1,54 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '1.0.1'
+version: '1.0.2'
 
 profile: 'integration_tests'
 
 vars:
-  zendesk_schema: zendesk_integration_tests_63
-  zendesk:
-    zendesk_organization_identifier:           "organization_data"
-    zendesk_schedule_identifier:               "schedule_data"
-    zendesk_schedule_holiday_identifier:       "schedule_holiday_data"
-    zendesk_ticket_identifier:                 "ticket_data"
-    zendesk_ticket_comment_identifier:         "ticket_comment_data"
-    zendesk_ticket_field_history_identifier:   "ticket_field_history_data"
-    zendesk_ticket_schedule_identifier:        "ticket_schedule_data"
-    zendesk_ticket_tag_identifier:             "ticket_tag_data"
-    zendesk_ticket_form_history_identifier:    "ticket_form_history_data"
-    zendesk_domain_name_identifier:            "domain_name_data"
-    zendesk_time_zone_identifier:              "time_zone_data"
-    zendesk_daylight_time_identifier:          "daylight_time_data"
-    zendesk_brand_identifier:                  "brand_data"
-    zendesk_group_identifier:                  "group_data" 
-    zendesk_organization_tag_identifier:       "organization_tag_data"
-    zendesk_user_identifier:                   "user_data"
-    zendesk_user_tag_identifier:               "user_tag_data"
-    zendesk_audit_log_identifier:              "audit_log_data"
-    zendesk_ticket_chat_identifier:            "ticket_chat_data"
-    zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
+
+  zendesk_database: digital-arbor-400
+  zendesk_schema: zendesk_new
+  
+  # zendesk_schema: zz_dbt_avinash_seed
+  # zendesk:
+  #   zendesk_organization_identifier:           "organization_data"
+  #   zendesk_schedule_identifier:               "schedule_data"
+  #   zendesk_schedule_holiday_identifier:       "schedule_holiday_data"
+  #   zendesk_ticket_identifier:                 "ticket_data"
+  #   zendesk_ticket_comment_identifier:         "ticket_comment_data"
+  #   zendesk_ticket_field_history_identifier:   "ticket_field_history_data"
+  #   zendesk_ticket_schedule_identifier:        "ticket_schedule_data"
+  #   zendesk_ticket_tag_identifier:             "ticket_tag_data"
+  #   zendesk_ticket_form_history_identifier:    "ticket_form_history_data"
+  #   zendesk_domain_name_identifier:            "domain_name_data"
+  #   zendesk_time_zone_identifier:              "time_zone_data"
+  #   zendesk_daylight_time_identifier:          "daylight_time_data"
+  #   zendesk_brand_identifier:                  "brand_data"
+  #   zendesk_group_identifier:                  "group_data" 
+  #   zendesk_organization_tag_identifier:       "organization_tag_data"
+  #   zendesk_user_identifier:                   "user_data"
+  #   zendesk_user_tag_identifier:               "user_tag_data"
+  #   zendesk_audit_log_identifier:              "audit_log_data"
+  #   zendesk_ticket_chat_identifier:            "ticket_chat_data"
+  #   zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
+
+  # using_user_role_histories: false
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True # @docs-include
-  # using_ticket_chat: true # @docs-include
-  # using_audit_log: true # @docs-include
+  using_ticket_chat: true # @docs-include
+  using_audit_log: true # @docs-include
 
   # For validation testing. To be commented out before release.
-  # using_domain_names: false
-  # using_user_tags: false
-  # using_organization_tags: false
-  # using_holidays: false
-  # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
-  # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
-  # fivetran_integrity_sla_count_match_tickets: (11109)
-  # consistency_test_exclude_fields: ['ticket_tags', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
+  using_domain_names: false
+  using_user_tags: false
+  using_organization_tags: false
+  using_holidays: false
+  fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80)
+  fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
+  fivetran_integrity_sla_count_match_tickets: (11109)
+  consistency_test_exclude_fields: ['ticket_tags', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
 
 models:
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
