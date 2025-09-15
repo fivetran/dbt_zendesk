@@ -1,3 +1,10 @@
+# dbt_zendesk v1.1.0-a2
+
+[PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates on top of `v1.1.0-a1`.
+
+## Bug Fix
+- Removes a filter in `int_zendesk__updates` that was erroneously filtering out some first reply messages. This filter was intended to remove "batched" chat messages stored in the `TICKET_COMMENT` table, but the filter is unnecessary (and in some cases problematic) for properly calculating downstream SLA metrics. 
+
 # dbt_zendesk v1.1.0-a1
 
 [PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates:
