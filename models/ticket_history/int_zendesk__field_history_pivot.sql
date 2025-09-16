@@ -44,7 +44,7 @@ with field_history as (
     select 
         *,
         row_number() over (
-            partition by source_relation, cast(valid_starting_at as date), ticket_id, field_name
+            partition by cast(valid_starting_at as date), ticket_id, field_name {{ partition_by_source_relation() }}
             order by valid_starting_at desc
             ) as row_num
     from field_history

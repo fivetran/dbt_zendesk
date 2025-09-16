@@ -53,8 +53,8 @@ with schedule_timezones as (
 ), valid_from_partition as(
     select
         join_holidays.*,
-        row_number() over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
-        count(*) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
+        row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by holiday_date, holiday_start_or_end) as valid_from_index,
+        count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }}) as max_valid_from_index
     from join_holidays
 
 -- Label the partition start and add a row to account for the partition end if there are multiple valid periods.
@@ -123,7 +123,7 @@ with schedule_timezones as (
             when holiday_start_or_end = 'partition_start'
                 then schedule_starting_sunday
             when holiday_start_or_end = '0_gap'
-                then lag(holiday_ending_sunday) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                then lag(holiday_ending_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by valid_from_index)
             when holiday_start_or_end = '1_holiday'
                 then holiday_starting_sunday
             when holiday_start_or_end = 'partition_end'
@@ -134,7 +134,7 @@ with schedule_timezones as (
             when holiday_start_or_end = 'partition_start'
                 then holiday_starting_sunday
             when holiday_start_or_end = '0_gap'
-                then lead(holiday_starting_sunday) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                then lead(holiday_starting_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by valid_from_index)
             when holiday_start_or_end = '1_holiday'
                 then holiday_ending_sunday
             when holiday_start_or_end = 'partition_end'
@@ -207,7 +207,7 @@ with schedule_timezones as (
             then holiday_name
             else cast(null as {{ dbt.type_string() }}) 
         end as holiday_name,
-        count(*) over (partition by source_relation, schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holidays_in_week
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc {{ partition_by_source_relation() }}) as number_holidays_in_week
     from valid_minutes
 
 -- Filter out records where holiday overlaps don't match, ensuring each schedule's holiday status is consistent.
@@ -223,7 +223,7 @@ with schedule_timezones as (
     -- Count the number of records for each schedule start_time_utc and end_time_utc for filtering later.
     select 
         distinct *,
-        cast(count(*) over (partition by source_relation, schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name {{ partition_by_source_relation() }} 
             as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
     where number_holidays_in_week > 1
