@@ -30,7 +30,7 @@ with ticket_field_history as (
     ticket_field_history.valid_starting_at,
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
-    case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ partition_by_source_relation() }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
+    case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ partition_by_source_relation(alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
     case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours

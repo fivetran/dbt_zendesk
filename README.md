@@ -93,9 +93,9 @@ To use this functionality, you will need to set the `zendesk_sources` variable i
 # dbt_project.yml
 
 vars:
-  zendesk:
+  zendesk_sources:
     - database: connection_1_destination_name # Required
-      schema: connection_1_schema_name # Rquired
+      schema: connection_1_schema_name # Required
       name: connection_1_source_name # Required only if following the step in the following subsection
 
     - database: connection_2_destination_name

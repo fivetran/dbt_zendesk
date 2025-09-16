@@ -11,7 +11,7 @@
 }}
 
 {% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results = run_query('select distinct field_name from ' ~ var('field_history') ) %}
+    {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 {% endif -%}
 

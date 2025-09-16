@@ -223,7 +223,7 @@ with schedule_timezones as (
     -- Count the number of records for each schedule start_time_utc and end_time_utc for filtering later.
     select 
         distinct *,
-        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name {{ partition_by_source_relation() }} 
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name {{ partition_by_source_relation() }})
             as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
     where number_holidays_in_week > 1
