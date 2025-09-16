@@ -265,9 +265,11 @@ with schedule_timezones as (
         schedule_id,
         valid_from,
         valid_until,
+        change_type,
+        
+        -- ensure only valid start and end times are used. Spillover is accounted for in the following unions.
         greatest(start_time_utc, 0) as start_time_utc,
-        least(end_time_utc, 7*24*60) as end_time_utc,
-        change_type
+        least(end_time_utc, 7*24*60) as end_time_utc
     from final
 
     union all
