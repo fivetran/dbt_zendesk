@@ -1,3 +1,43 @@
+# dbt_zendesk v1.1.0-a2
+
+[PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates on top of `v1.1.0-a1`.
+
+## Bug Fix
+- Removes a filter in `int_zendesk__updates` that was erroneously filtering out some first reply messages. This filter was intended to remove "batched" chat messages stored in the `TICKET_COMMENT` table, but the filter is unnecessary (and in some cases problematic) for properly calculating downstream SLA metrics. 
+
+# dbt_zendesk v1.1.0-a1
+
+[PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates:
+
+## Schema Changes
+
+**4 total changes • 0 possible breaking changes**
+| **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`int_zendesk__ticket_work_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_work_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_first_reply_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_first_reply_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_full_resolution_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_full_resolution_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_first_resolution_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_first_resolution_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+
+## Feature Update
+- Materializes the above intermediate models as tables so as to optimize runs of `zendesk__ticket_metrics` and avoid potential timeout issues. 
+  - If you would like maintain the ephemeral materialization of these models and are running the Zendesk package via dbt Core, add the following configuration to your `dbt_project.yml`:
+```yml
+models:
+  zendesk:
+    agent_work_time:
+      int_zendesk__ticket_work_time_business:
+        +materialized: ephemeral
+    reply_times:
+      int_zendesk__ticket_first_reply_time_business:
+        +materialized: ephemeral
+    resolution_times:
+      int_zendesk__ticket_full_resolution_time_business:
+        +materialized: ephemeral
+      int_zendesk__ticket_first_resolution_time_business:
+        +materialized: ephemeral
+```
+
 # dbt_zendesk v1.0.1
 This is the general release of v0.25.1-a1. [PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
 

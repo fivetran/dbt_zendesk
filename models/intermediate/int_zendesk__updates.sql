@@ -103,15 +103,6 @@ with ticket_history as (
     left join tickets
         on tickets.ticket_id = updates_union.ticket_id
         and tickets.source_relation = updates_union.source_relation
-
-    {# 
-    What's excluded: The chat conversation batches from ticket_comment. These are marked as `comment - not chat` and are associated with tickets from `chat` or `native_messaging` channels
-    What's included: 
-        - Individual chat messages from ticket_chat_event. These are marked as `comment - chat`
-        - True comments from ticket_comment. We know a record is a true ticket_comment if the ticket is NOT from `chat` or `native_messaging` channels
-    #}
-    where not (updates_union.field_name = 'comment - not chat' and lower(coalesce(tickets.created_channel, '')) in ('chat', 'native_messaging'))
-
 )
 
 select *
