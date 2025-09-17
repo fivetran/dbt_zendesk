@@ -13,7 +13,7 @@ grouped_comment_documents as (
     comment_tokens,
     comment_time,
     sum(comment_tokens) over (
-      partition by source_relation, ticket_id 
+      partition by ticket_id {{ partition_by_source_relation() }} 
       order by comment_time
       rows between unbounded preceding and current row
     ) as cumulative_length

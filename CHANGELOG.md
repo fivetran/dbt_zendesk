@@ -1,3 +1,8 @@
+# dbt_zendesk v1.1.0
+
+## Bug Fix
+- Fixed Redshift constant expression errors in window functions by creating a new `partition_by_source_relation()` macro that conditionally includes `source_relation` in partition clauses only when multiple Zendesk sources are configured (`zendesk_sources` variable contains 2+ items). This prevents constant expression errors that occurred when `source_relation` had the same value across all records in single-source configurations.
+
 # dbt_zendesk v1.0.1
 This is the general release of v0.25.1-a1. [PR #208](https://github.com/fivetran/dbt_zendesk/pull/208) includes the following updates:
 

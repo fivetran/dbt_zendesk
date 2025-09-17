@@ -29,10 +29,10 @@ with timezone as (
         *,
         -- will be null for timezones without any daylight savings records (and the first entry)
         -- we will coalesce the first entry date with .... the X years ago
-        lag(daylight_end_utc, 1) over (partition by source_relation, time_zone order by daylight_end_utc asc) as last_daylight_end_utc,
+        lag(daylight_end_utc, 1) over (partition by time_zone {{ partition_by_source_relation() }} order by daylight_end_utc asc) as last_daylight_end_utc,
         -- will be null for timezones without any daylight savings records (and the last entry)
         -- we will coalesce the last entry date with the current date 
-        lead(daylight_start_utc, 1) over (partition by source_relation, time_zone order by daylight_start_utc asc) as next_daylight_start_utc
+        lead(daylight_start_utc, 1) over (partition by time_zone {{ partition_by_source_relation() }} order by daylight_start_utc asc) as next_daylight_start_utc
 
     from timezone_with_dt
 

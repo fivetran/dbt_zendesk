@@ -29,7 +29,7 @@ with ticket as (
     select
       schedule_id,
       source_relation,
-      row_number() over (partition by source_relation order by created_at) = 1 as is_default_schedule
+      row_number() over ({{ partition_by_source_relation(has_other_partitions='no') }} order by created_at) = 1 as is_default_schedule
     from schedule
 
   ) as order_schedules
@@ -74,7 +74,7 @@ with ticket as (
     source_relation,
     schedule_id,
     schedule_created_at,
-    coalesce(lead(schedule_created_at) over (partition by source_relation, ticket_id order by schedule_created_at)
+    coalesce(lead(schedule_created_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by schedule_created_at)
             , {{ fivetran_utils.timestamp_add("hour", 1000, "" ~ dbt.current_timestamp() ~ "") }} ) as schedule_invalidated_at
   from schedule_events
 
