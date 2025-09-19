@@ -42,6 +42,15 @@ The following table provides a detailed list of final tables materialized within
 
 Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
 
+### Example Visualizations
+Curious what these tables can do? Check out example visualizations from the [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) table in the [Fivetran Zendesk Streamlit App](https://fivetran-zendesk.streamlit.app/), and see how you can use these tables in your own reporting. Below is a screenshot of an example report—explore the app for more.
+
+<p align="center">
+<a href="https://fivetran-zendesk.streamlit.app/">
+    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/release/v1.1.0/images/sla_policy_streamlit_example.png" alt="Zendesk Streamlit App" width="75%">
+</a>
+</p>
+
 ### Materialized Models
 Each Quickstart transformation job run materializes 79 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
 <!--section-end-->
