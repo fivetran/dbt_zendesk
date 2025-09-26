@@ -1,3 +1,19 @@
+# dbt_zendesk v1.1.0
+
+[PR #217](https://github.com/fivetran/dbt_zendesk/pull/217) includes the following updates:
+
+## Data Changes
+
+**6 total changes**
+| **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
+| ---------------------------- | --------------- | ------------ | ------------ | --------- |
+| `int_zendesk__agent_work_time_business_hours` | `fivetran_utils.timestamp_add` update  | Macro function performed in minutes on `sla_breach_at`.   |  Macro function performed in seconds on `sla_breach_at`.  |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.   |
+| `int_zendesk__agent_work_time_calendar_hours` | `fivetran_utils.timestamp_add` update   |  Macro function performed in minutes on `sla_breach_at`.   |   Macro function performed in seconds on `sla_breach_at`.   |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.         |
+| `int_zendesk__reply_time_business_hours` | `fivetran_utils.timestamp_add` update  |   Macro function performed in minutes on `sla_breach_at`, `sla_schedule_start_at`, and `sla_schedule__end_at`.     | Macro function performed in seconds on `sla_breach_at`, `sla_schedule_start_at`, and `sla_schedule__end_at`.       |    Removes rounding errors on SLA breach times and schedules that might cause discrepancies between Zendesk data models and UI reports.     |
+| `int_zendesk__reply_time_calendar_hours` | `fivetran_utils.timestamp_add` update |  Macro function performed in minutes on `sla_breach_at`.     |  Macro function performed in seconds on `sla_breach_at`.     |    Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.      |
+| `int_zendesk__requester_wait_time_business_hours` | `fivetran_utils.timestamp_add` update  |  Macro function performed in minutes on `sla_breach_at`.     |   Macro function performed in seconds on `sla_breach_at`.    |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
+| `int_zendesk__requester_wait_time_calendar_hours` | `fivetran_utils.timestamp_add` update  | Macro function performed in minutes on `sla_breach_at`.      |  Macro function performed in seconds on `sla_breach_at`.     |   Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
+
 # dbt_zendesk v1.1.0-a2
 
 [PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates on top of `v1.1.0-a1`.
