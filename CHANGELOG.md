@@ -1,21 +1,47 @@
 # dbt_zendesk v1.1.0
 
-[PR #217](https://github.com/fivetran/dbt_zendesk/pull/217) includes the following updates:
+This release includes the following updates:
 
-## Data Changes
+## Schema Changes
 
-**6 total changes**
+**4 total changes • 0 possible breaking changes**
 | **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
-| ---------------------------- | --------------- | ------------ | ------------ | --------- |
-| `int_zendesk__agent_work_time_business_hours` | `fivetran_utils.timestamp_add` update  | Macro function performed in minutes on `sla_breach_at`.   |  Macro function performed in seconds on `sla_breach_at`.  |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.   |
-| `int_zendesk__agent_work_time_calendar_hours` | `fivetran_utils.timestamp_add` update   |  Macro function performed in minutes on `sla_breach_at`.   |   Macro function performed in seconds on `sla_breach_at`.   |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.         |
-| `int_zendesk__reply_time_business_hours` | `fivetran_utils.timestamp_add` update  |   Macro function performed in minutes on `sla_breach_at`, `sla_schedule_start_at`, and `sla_schedule__end_at`.     | Macro function performed in seconds on `sla_breach_at`, `sla_schedule_start_at`, and `sla_schedule__end_at`.       |    Removes rounding errors on SLA breach times and schedules that might cause discrepancies between Zendesk data models and UI reports.     |
-| `int_zendesk__reply_time_calendar_hours` | `fivetran_utils.timestamp_add` update |  Macro function performed in minutes on `sla_breach_at`.     |  Macro function performed in seconds on `sla_breach_at`.     |    Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.      |
-| `int_zendesk__requester_wait_time_business_hours` | `fivetran_utils.timestamp_add` update  |  Macro function performed in minutes on `sla_breach_at`.     |   Macro function performed in seconds on `sla_breach_at`.    |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
-| `int_zendesk__requester_wait_time_calendar_hours` | `fivetran_utils.timestamp_add` update  | Macro function performed in minutes on `sla_breach_at`.      |  Macro function performed in seconds on `sla_breach_at`.     |   Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`int_zendesk__ticket_work_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_work_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_first_reply_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_first_reply_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_full_resolution_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_full_resolution_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
+| [`int_zendesk__ticket_first_resolution_time_business`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_first_resolution_time_business) | Materialization | Ephemeral | Table | This is intended to resolve potential timeout issues when running the `zendesk__ticket_metrics` model. |
 
-## Bug Fix
-- Fixed Redshift constant expression errors in window functions by creating a new `partition_by_source_relation()` macro that conditionally includes `source_relation` in partition clauses only when multiple Zendesk sources are configured (`zendesk_sources` variable contains 2+ items). This prevents constant expression errors that occurred when `source_relation` had the same value across all records in single-source configurations.
+## Feature Update
+- Materializes the above intermediate models as tables so as to optimize runs of `zendesk__ticket_metrics` and avoid potential timeout issues. ([PR #216](https://github.com/fivetran/dbt_zendesk/pull/216))
+  - If you would like maintain the ephemeral materialization of these models and are running the Zendesk package via dbt Core, add the following configuration to your `dbt_project.yml`:
+```yml
+models:
+  zendesk:
+    agent_work_time:
+      int_zendesk__ticket_work_time_business:
+        +materialized: ephemeral
+    reply_times:
+      int_zendesk__ticket_first_reply_time_business:
+        +materialized: ephemeral
+    resolution_times:
+      int_zendesk__ticket_full_resolution_time_business:
+        +materialized: ephemeral
+      int_zendesk__ticket_first_resolution_time_business:
+        +materialized: ephemeral
+```
+
+## Bug Fixes
+- Removes a filter in `int_zendesk__updates` that was erroneously filtering out some first reply messages. This filter was intended to remove "batched" chat messages stored in the `TICKET_COMMENT` table, but the filter is unnecessary (and in some cases problematic) for properly calculating downstream SLA metrics. ([PR #216](https://github.com/fivetran/dbt_zendesk/pull/216))
+- Created the `partition_by_source_relation()` macro to dynamically include `source_relation` in the partition clauses of **all** window functions based on whether multiple Zendesk sources are being used. Previously, Redshift users running the package on one Zendesk connection may have encountered constant expression errors due to `source_relation` containing the same value across all records. ([PR #219](https://github.com/fivetran/dbt_zendesk/pull/219))
+- Updated the logic in `int_zendesk__schedule_spine` to accommodate 24/7 schedules. Previously, tickets with 24/7 schedules may have experienced gaps in business time metrics. ([PR #218](https://github.com/fivetran/dbt_zendesk/pull/218))
+- Updated calculations of `sla_breach_at` from the `minute` to `second` level to avoid potential rounding errors that may have caused discrepancies between Zendesk data models and UI reports. This adjustment has been made in the following intermediate models ([PR #217](https://github.com/fivetran/dbt_zendesk/pull/217)):
+  - `int_zendesk__agent_work_time_business_hours`
+  - `int_zendesk__agent_work_time_calendar_hours`
+  - `int_zendesk__reply_time_business_hours`
+  - `int_zendesk__reply_time_calendar_hours`
+  - `int_zendesk__requester_wait_time_business_hours`
+  - `int_zendesk__requester_wait_time_calendar_hours`
 
 # dbt_zendesk v1.1.0-a2
 
