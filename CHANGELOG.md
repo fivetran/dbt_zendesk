@@ -33,15 +33,18 @@ models:
 
 ## Bug Fixes
 - Removes a filter in `int_zendesk__updates` that was erroneously filtering out some first reply messages. This filter was intended to remove "batched" chat messages stored in the `TICKET_COMMENT` table, but the filter is unnecessary (and in some cases problematic) for properly calculating downstream SLA metrics. ([PR #216](https://github.com/fivetran/dbt_zendesk/pull/216))
-- Created the `partition_by_source_relation()` macro to dynamically include `source_relation` in the partition clauses of **all** window functions based on whether multiple Zendesk sources are being used. Previously, Redshift users running the package on one Zendesk connection may have encountered constant expression errors due to `source_relation` containing the same value across all records. ([PR #219](https://github.com/fivetran/dbt_zendesk/pull/219))
-- Updated the logic in `int_zendesk__schedule_spine` to accommodate 24/7 schedules. Previously, tickets with 24/7 schedules may have experienced gaps in business time metrics. ([PR #218](https://github.com/fivetran/dbt_zendesk/pull/218))
-- Updated calculations of `sla_breach_at` from the `minute` to `second` level to avoid potential rounding errors that may have caused discrepancies between Zendesk data models and UI reports. This adjustment has been made in the following intermediate models ([PR #217](https://github.com/fivetran/dbt_zendesk/pull/217)):
+- Creates the `partition_by_source_relation()` macro to dynamically include `source_relation` in the partition clauses of **all** window functions based on whether multiple Zendesk sources are being used. Previously, Redshift users running the package on one Zendesk connection may have encountered constant expression errors due to `source_relation` containing the same value across all records. ([PR #219](https://github.com/fivetran/dbt_zendesk/pull/219))
+- Updates the logic in `int_zendesk__schedule_spine` to accommodate 24/7 schedules. Previously, tickets with 24/7 schedules may have experienced gaps in business time metrics. ([PR #218](https://github.com/fivetran/dbt_zendesk/pull/218))
+- Updates calculations of `sla_breach_at` from the `minute` to `second` level to avoid potential rounding errors that may have caused discrepancies between Zendesk data models and UI reports. This adjustment has been made in the following intermediate models ([PR #217](https://github.com/fivetran/dbt_zendesk/pull/217)):
   - `int_zendesk__agent_work_time_business_hours`
   - `int_zendesk__agent_work_time_calendar_hours`
   - `int_zendesk__reply_time_business_hours`
   - `int_zendesk__reply_time_calendar_hours`
   - `int_zendesk__requester_wait_time_business_hours`
   - `int_zendesk__requester_wait_time_calendar_hours`
+
+## Documentation
+- Renders a sample [SLA Policy report](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) from the [Zendesk Streamlit App](https://github.com/fivetran/streamlit_zendesk) in the README. ([PR #220](https://github.com/fivetran/dbt_zendesk/pull/220))
 
 # dbt_zendesk v1.1.0-a2
 
