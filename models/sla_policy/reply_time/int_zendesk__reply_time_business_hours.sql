@@ -171,16 +171,16 @@ with ticket_schedules as (
     schedule_end_time + remaining_minutes as breached_at_minutes,
     {{ zendesk.fivetran_week_start('sla_applied_at') }} as starting_point,
     {{ fivetran_utils.timestamp_add(
-        "minute",
-        "cast(((7*24*60) * week_number) + (schedule_end_time + remaining_minutes) as " ~ dbt.type_int() ~ " )",
+        "second",
+        "cast(((7*24*60*60) * week_number) + ((schedule_end_time + remaining_minutes) * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_breach_at,
     {{ fivetran_utils.timestamp_add(
-        "minute",
-        "cast(((7*24*60) * week_number) + (schedule_start_time) as " ~ dbt.type_int() ~ " )",
+        "second",
+        "cast(((7*24*60*60) * week_number) + (schedule_start_time * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
     {{ fivetran_utils.timestamp_add(
-        "minute",
-        "cast(((7*24*60) * week_number) + (schedule_end_time) as " ~ dbt.type_int() ~ " )",
+        "second",
+        "cast(((7*24*60*60) * week_number) + (schedule_end_time * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
     {{ zendesk.fivetran_week_end("sla_applied_at") }} as week_end_date
   from intercepted_periods_with_breach_flag

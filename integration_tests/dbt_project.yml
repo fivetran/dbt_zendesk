@@ -5,7 +5,7 @@ version: '1.1.0'
 
 profile: 'integration_tests'
 
-vars:
+vars:  
   zendesk_schema: zendesk_integration_tests_63
   zendesk:
     zendesk_organization_identifier:           "organization_data"
@@ -28,6 +28,8 @@ vars:
     zendesk_audit_log_identifier:              "audit_log_data"
     zendesk_ticket_chat_identifier:            "ticket_chat_data"
     zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
+
+  # using_user_role_histories: false
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True # @docs-include
