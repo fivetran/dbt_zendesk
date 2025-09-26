@@ -7,7 +7,7 @@ with split_timezones as (
 ), schedule as (
     select 
         *,
-        max(created_at) over (partition by source_relation, schedule_id) as max_created_at
+        max(created_at) over (partition by schedule_id {{ partition_by_source_relation() }}) as max_created_at
     from {{ ref('stg_zendesk__schedule') }}   
 
 {% if var('using_schedule_histories', True) and var('using_audit_log', False) %}
@@ -94,7 +94,7 @@ with split_timezones as (
             when schedule_id_index = 0
             -- get max valid_until from historical rows in the same schedule
             then max(case when schedule_id_index > 0 then valid_until end) 
-                over (partition by source_relation, schedule_id)
+                over (partition by schedule_id {{ partition_by_source_relation() }})
             else valid_from
             end,
             cast(created_at as date))
@@ -107,7 +107,7 @@ with split_timezones as (
 ), lag_valid_until as (
     select 
         fill_current_schedule.*,
-        lag(schedule_valid_until) over (partition by source_relation, schedule_id, start_time, end_time 
+        lag(schedule_valid_until) over (partition by schedule_id, start_time, end_time {{ partition_by_source_relation() }} 
             order by schedule_valid_from, schedule_valid_until) as previous_valid_until
     from fill_current_schedule
 
@@ -131,7 +131,7 @@ with split_timezones as (
     -- Adjacent schedules with the same start_time and end_time are grouped together, 
     -- while non-adjacent schedules are treated as separate groups.
         sum(case when previous_valid_until = schedule_valid_from then 0 else 1 end) -- find if this row is adjacent to the previous row
-            over (partition by source_relation, schedule_id, start_time, end_time 
+            over (partition by schedule_id, start_time, end_time {{ partition_by_source_relation() }} 
                 order by schedule_valid_from
                 rows between unbounded preceding and current row)
         as group_id
@@ -165,7 +165,7 @@ with split_timezones as (
         start_time,
         end_time,
         case 
-            when schedule_valid_from = min(schedule_valid_from) over (partition by source_relation, schedule_id) then '1970-01-01'
+            when schedule_valid_from = min(schedule_valid_from) over (partition by schedule_id {{ partition_by_source_relation() }}) then '1970-01-01'
             else schedule_valid_from
         end as schedule_valid_from,
         schedule_valid_until

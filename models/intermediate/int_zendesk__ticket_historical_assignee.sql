@@ -12,13 +12,13 @@ with assignee_updates as (
         value,
         ticket_created_date,
         valid_starting_at,
-        lag(valid_starting_at) over (partition by source_relation, ticket_id order by valid_starting_at) as previous_update,
-        lag(value) over (partition by source_relation, ticket_id order by valid_starting_at) as previous_assignee,
-        first_value(valid_starting_at) over (partition by source_relation, ticket_id order by valid_starting_at, ticket_id rows unbounded preceding) as first_agent_assignment_date,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at, ticket_id rows unbounded preceding) as first_assignee_id,
-        first_value(valid_starting_at) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_agent_assignment_date,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_assignee_id,
-        count(value) over (partition by source_relation, ticket_id) as assignee_stations_count
+        lag(valid_starting_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at) as previous_update,
+        lag(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at) as previous_assignee,
+        first_value(valid_starting_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at, ticket_id rows unbounded preceding) as first_agent_assignment_date,
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at, ticket_id rows unbounded preceding) as first_assignee_id,
+        first_value(valid_starting_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_agent_assignment_date,
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_assignee_id,
+        count(value) over (partition by ticket_id {{ partition_by_source_relation() }}) as assignee_stations_count
     from assignee_updates
 
 ), unassigned_time as (

@@ -53,8 +53,8 @@ with schedule_timezones as (
 ), valid_from_partition as(
     select
         join_holidays.*,
-        row_number() over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by holiday_date, holiday_start_or_end) as valid_from_index,
-        count(*) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from) as max_valid_from_index
+        row_number() over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by holiday_date, holiday_start_or_end) as valid_from_index,
+        count(*) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }}) as max_valid_from_index
     from join_holidays
 
 -- Label the partition start and add a row to account for the partition end if there are multiple valid periods.
@@ -123,7 +123,7 @@ with schedule_timezones as (
             when holiday_start_or_end = 'partition_start'
                 then schedule_starting_sunday
             when holiday_start_or_end = '0_gap'
-                then lag(holiday_ending_sunday) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                then lag(holiday_ending_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by valid_from_index)
             when holiday_start_or_end = '1_holiday'
                 then holiday_starting_sunday
             when holiday_start_or_end = 'partition_end'
@@ -134,7 +134,7 @@ with schedule_timezones as (
             when holiday_start_or_end = 'partition_start'
                 then holiday_starting_sunday
             when holiday_start_or_end = '0_gap'
-                then lead(holiday_starting_sunday) over (partition by source_relation, schedule_id, start_time_utc, schedule_valid_from order by valid_from_index)
+                then lead(holiday_starting_sunday) over (partition by schedule_id, start_time_utc, schedule_valid_from {{ partition_by_source_relation() }} order by valid_from_index)
             when holiday_start_or_end = '1_holiday'
                 then holiday_ending_sunday
             when holiday_start_or_end = 'partition_end'
@@ -207,7 +207,7 @@ with schedule_timezones as (
             then holiday_name
             else cast(null as {{ dbt.type_string() }}) 
         end as holiday_name,
-        count(*) over (partition by source_relation, schedule_id, valid_from, valid_until, start_time_utc, end_time_utc) as number_holidays_in_week
+        count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc {{ partition_by_source_relation() }}) as number_holidays_in_week
     from valid_minutes
 
 -- Filter out records where holiday overlaps don't match, ensuring each schedule's holiday status is consistent.
@@ -223,7 +223,7 @@ with schedule_timezones as (
     -- Count the number of records for each schedule start_time_utc and end_time_utc for filtering later.
     select 
         distinct *,
-        cast(count(*) over (partition by source_relation, schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name) 
+        cast(count(*) over (partition by schedule_id, valid_from, valid_until, start_time_utc, end_time_utc, holiday_name {{ partition_by_source_relation() }})
             as {{ dbt.type_int() }}) as number_records_for_schedule_start_end
     from find_holidays
     where number_holidays_in_week > 1
@@ -258,7 +258,59 @@ with schedule_timezones as (
         change_type
     from schedule_timezones
 {% endif %} 
+
+), adjust_spillover as(
+    select
+        source_relation,
+        schedule_id,
+        valid_from,
+        valid_until,
+        change_type,
+
+        -- ensure only valid start and end times are used. Spillover is accounted for in the following unions.
+        greatest(start_time_utc, 0) as start_time_utc,
+        least(end_time_utc, 7*24*60) as end_time_utc
+    from final
+
+    union all
+
+    -- Handle spillover for time zones ahead of UTC.
+    -- Occurs when start_time_utc < 0 after applying the local timezone offset. 
+    -- In these cases, there will be a gap at the end of the week and the spillover appears at the beginning.
+    -- Example: a UTC 24/7 schedule spans start_time_utc = 0 and end_time_utc = 10080.
+    -- After applying a +7 hour offset, the same schedule could become start_time_utc = -420 and end_time_utc = 9660.
+    -- Since values < 0 exceed the valid week range, add a compensating slice to cover the gap.
+
+    select
+        source_relation,
+        schedule_id,
+        valid_from,
+        valid_until,
+        change_type,
+        7*24*60 + start_time_utc as start_time_utc, -- "+" since in this case the start time would be negative
+        7*24*60 as end_time_utc
+    from final
+    where start_time_utc < 0
+
+    union all
+
+    -- Handle spillover for time zones behind UTC.
+    -- Occurs when end_time_utc > 10080 after applying the local timezone offset.
+    -- In these cases, there will be a gap at the beginning of the week and the spillover appears at the end.
+    -- Example: a UTC 24/7 schedule spans start_time_utc = 0 and end_time_utc = 10080.
+    -- After applying a -5 hour offset, the same schedule could become start_time_utc = 300 and end_time_utc = 10380.
+    -- Since values > 10080 exceed the valid week range, add a compensating slice to cover the gap.
+    select
+        source_relation,
+        schedule_id,
+        valid_from,
+        valid_until,
+        change_type,
+        0 as start_time_utc,
+        end_time_utc - 7*24*60 as end_time_utc
+    from final
+    where end_time_utc > 7*24*60
 )
 
 select *
-from final
+from adjust_spillover
