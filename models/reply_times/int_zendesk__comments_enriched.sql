@@ -39,7 +39,7 @@ with ticket_comment as (
     select
         *,
         coalesce(
-            lag(commenter_role) over (partition by source_relation, ticket_id order by valid_starting_at, commenter_role)
+            lag(commenter_role) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at, commenter_role)
             , 'first_comment') 
             as previous_commenter_role
     from joined
@@ -56,6 +56,6 @@ with ticket_comment as (
 
 select 
     *,
-    first_value(valid_starting_at) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_comment_added_at,
-    sum(case when not is_public then 1 else 0 end) over (partition by source_relation, ticket_id order by valid_starting_at rows between unbounded preceding and current row) as previous_internal_comment_count
+    first_value(valid_starting_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_comment_added_at,
+    sum(case when not is_public then 1 else 0 end) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at rows between unbounded preceding and current row) as previous_internal_comment_count
 from add_previous_commenter_role

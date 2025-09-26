@@ -14,6 +14,9 @@
 | `int_zendesk__requester_wait_time_business_hours` | `fivetran_utils.timestamp_add` update  |  Macro function performed in minutes on `sla_breach_at`.     |   Macro function performed in seconds on `sla_breach_at`.    |  Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
 | `int_zendesk__requester_wait_time_calendar_hours` | `fivetran_utils.timestamp_add` update  | Macro function performed in minutes on `sla_breach_at`.      |  Macro function performed in seconds on `sla_breach_at`.     |   Removes rounding errors on SLA breach times that might cause discrepancies between Zendesk data models and UI reports.       |
 
+## Bug Fix
+- Fixed Redshift constant expression errors in window functions by creating a new `partition_by_source_relation()` macro that conditionally includes `source_relation` in partition clauses only when multiple Zendesk sources are configured (`zendesk_sources` variable contains 2+ items). This prevents constant expression errors that occurred when `source_relation` had the same value across all records in single-source configurations.
+
 # dbt_zendesk v1.1.0-a2
 
 [PR #216](https://github.com/fivetran/dbt_zendesk/pull/216) includes the following updates on top of `v1.1.0-a1`.

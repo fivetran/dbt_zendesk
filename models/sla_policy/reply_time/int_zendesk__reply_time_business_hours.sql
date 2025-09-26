@@ -136,7 +136,7 @@ with ticket_schedules as (
     schedule.end_time_utc as schedule_end_time,
     (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
     sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
-      (partition by weekly_periods.source_relation, ticket_id, metric, sla_applied_at 
+      (partition by ticket_id, metric, sla_applied_at {{ partition_by_source_relation(alias='weekly_periods') }} 
         order by week_number, schedule.start_time_utc
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
   from weekly_periods
@@ -157,10 +157,10 @@ with ticket_schedules as (
     case when (target - sum_lapsed_business_minutes) < 0 
       and 
         (lag(target - sum_lapsed_business_minutes) over
-        (partition by source_relation, ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) >= 0 
+        (partition by ticket_id, metric, sla_applied_at {{ partition_by_source_relation() }} order by week_number, schedule_start_time) >= 0 
         or 
         lag(target - sum_lapsed_business_minutes) over
-        (partition by source_relation, ticket_id, metric, sla_applied_at order by week_number, schedule_start_time) is null) 
+        (partition by ticket_id, metric, sla_applied_at {{ partition_by_source_relation() }} order by week_number, schedule_start_time) is null) 
         then true else false end as is_breached_during_schedule -- this flags the scheduled period on which the breach took place
   from intercepted_periods
 
@@ -202,7 +202,7 @@ with ticket_schedules as (
     sla_breach_at,
     is_breached_during_schedule,
     total_schedule_weekly_business_minutes,
-    max(case when is_breached_during_schedule then sla_breach_at else null end) over (partition by source_relation, ticket_id, metric, sla_applied_at, target) as sla_breach_exact_time,
+    max(case when is_breached_during_schedule then sla_breach_at else null end) over (partition by ticket_id, metric, sla_applied_at, target {{ partition_by_source_relation() }}) as sla_breach_exact_time,
     week_number
   from intercepted_periods_with_breach_flag_calculated
 

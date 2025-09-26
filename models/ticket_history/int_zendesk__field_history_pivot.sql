@@ -11,7 +11,7 @@
 }}
 
 {% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results = run_query('select distinct field_name from ' ~ var('field_history') ) %}
+    {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 {% endif -%}
 
@@ -44,7 +44,7 @@ with field_history as (
     select 
         *,
         row_number() over (
-            partition by source_relation, cast(valid_starting_at as date), ticket_id, field_name
+            partition by cast(valid_starting_at as date), ticket_id, field_name {{ partition_by_source_relation() }}
             order by valid_starting_at desc
             ) as row_num
     from field_history

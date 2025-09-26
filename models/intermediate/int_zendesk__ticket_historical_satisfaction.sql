@@ -8,7 +8,7 @@ with satisfaction_updates as (
     select
         source_relation,
         ticket_id,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_reason
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_reason
     from satisfaction_updates
 
     where field_name = 'satisfaction_reason_code'
@@ -17,7 +17,7 @@ with satisfaction_updates as (
     select
         source_relation,
         ticket_id,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_comment
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_comment
     from satisfaction_updates
 
     where field_name = 'satisfaction_comment'
@@ -26,8 +26,8 @@ with satisfaction_updates as (
     select
         source_relation,
         ticket_id,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at, ticket_id rows unbounded preceding) as first_satisfaction_score,
-        first_value(value) over (partition by source_relation, ticket_id order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_score
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at, ticket_id rows unbounded preceding) as first_satisfaction_score,
+        first_value(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as latest_satisfaction_score
     from satisfaction_updates
 
     where field_name = 'satisfaction_score' and value != 'offered'
@@ -36,12 +36,12 @@ with satisfaction_updates as (
     select
         source_relation,
         ticket_id,
-        count(value) over (partition by source_relation, ticket_id) as count_satisfaction_scores,
-        case when lag(value) over (partition by source_relation, ticket_id order by valid_starting_at desc) = 'good' and value = 'bad'
+        count(value) over (partition by ticket_id {{ partition_by_source_relation() }}) as count_satisfaction_scores,
+        case when lag(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc) = 'good' and value = 'bad'
             then 1
             else 0
                 end as good_to_bad_score,
-        case when lag(value) over (partition by source_relation, ticket_id order by valid_starting_at desc) = 'bad' and value = 'good'
+        case when lag(value) over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at desc) = 'bad' and value = 'good'
             then 1
             else 0
                 end as bad_to_good_score

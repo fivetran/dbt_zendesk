@@ -26,7 +26,7 @@ with audit_logs as (
         trim({{ dbt.split_part(zendesk.extract_support_role_changes('change_description'), "' to '", 2) }}) as to_role,
 
         -- Identify the first change record so we know user's beginning role
-        min(created_at) over (partition by source_relation, user_id) as min_created_at_per_user
+        min(created_at) over (partition by user_id {{ partition_by_source_relation() }}) as min_created_at_per_user
     from audit_logs
 
 ), split_to_from_deduped as (
@@ -58,7 +58,7 @@ with audit_logs as (
         source_relation,
         user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by source_relation, user_id order by created_at asc) as valid_ending_at,
+        lead(created_at) over (partition by user_id {{ partition_by_source_relation() }} order by created_at asc) as valid_ending_at,
         to_role as role
     from split_to_from_deduped
 
