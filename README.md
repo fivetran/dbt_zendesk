@@ -52,7 +52,7 @@ Curious what these tables can do? Check out example visualizations from the [zen
 </p>
 
 ### Materialized Models
-Each Quickstart transformation job run materializes 79 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
+Each Quickstart transformation job run materializes 83 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
 <!--section-end-->
 
 ## How do I use the dbt package?
@@ -77,7 +77,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=1.0.0", "<1.1.0"]
+    version: 1.1.0-a2
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
