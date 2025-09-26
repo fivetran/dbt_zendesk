@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '1.0.2'
+version: '1.1.0'
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
@@ -11,6 +11,8 @@ models:
     +materialized: table
     agent_work_time:
       +materialized: ephemeral
+      int_zendesk__ticket_work_time_business:
+        +materialized: table
     intermediate:
       +schema: zendesk_intermediate
       +materialized: table
@@ -20,8 +22,14 @@ models:
         +materialized: ephemeral
     reply_times:
       +materialized: ephemeral
+      int_zendesk__ticket_first_reply_time_business:
+        +materialized: table
     resolution_times:
       +materialized: ephemeral
+      int_zendesk__ticket_full_resolution_time_business:
+        +materialized: table
+      int_zendesk__ticket_first_resolution_time_business:
+        +materialized: table
     sla_policy:
       +schema: zendesk_intermediate
       +materialized: table
