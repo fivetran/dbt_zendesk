@@ -14,7 +14,7 @@ This release includes the following updates:
 
 ## Feature Update
 - Materializes the above intermediate models as tables so as to optimize runs of `zendesk__ticket_metrics` and avoid potential timeout issues. ([PR #216](https://github.com/fivetran/dbt_zendesk/pull/216))
-  - If you would like maintain the ephemeral materialization of these models and are running the Zendesk package via dbt Core, add the following configuration to your `dbt_project.yml`:
+  - If you would like to maintain the ephemeral materialization of these models and are running the Zendesk package via dbt Core, add the following configuration to your `dbt_project.yml`:
 ```yml
 models:
   zendesk:

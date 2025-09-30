@@ -47,7 +47,7 @@ Curious what these tables can do? Check out example visualizations from the [zen
 
 <p align="center">
 <a href="https://fivetran-zendesk.streamlit.app/">
-    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/release/v1.1.0/images/sla_policy_streamlit_example.png" alt="Zendesk Streamlit App" width="75%">
+    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/sla_policy_streamlit_example.png" alt="Zendesk Streamlit App" width="75%">
 </a>
 </p>
 
@@ -77,7 +77,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: 1.1.0
+    version: [">=1.1.0", "<1.2.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
