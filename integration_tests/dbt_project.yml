@@ -29,7 +29,6 @@ vars:
     zendesk_ticket_chat_identifier:            "ticket_chat_data"
     zendesk_ticket_chat_event_identifier:      "ticket_chat_event_data"
 
-  # using_user_role_histories: false
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True # @docs-include
