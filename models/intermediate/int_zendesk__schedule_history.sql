@@ -14,7 +14,7 @@ with audit_logs as (
     select 
         source_relation,
         schedule_id,
-        rank() over (partition by schedule_id, source_relation order by created_at desc) as schedule_id_index,
+        rank() over (partition by schedule_id {{ partition_by_source_relation() }} order by created_at desc) as schedule_id_index,
         created_at,
         -- Clean up the change_description, sometimes has random html stuff in it
         replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(change_description,
@@ -47,7 +47,7 @@ with audit_logs as (
         schedule_change_from,
         schedule_change,
         row_number() over (
-            partition by source_relation, schedule_id, valid_from -- valid from is type date
+            partition by schedule_id, valid_from {{ partition_by_source_relation() }} -- valid from is type date
             -- ordering to get the latest change when there are multiple on one day
             order by schedule_id_index, schedule_change_from -- use the length of schedule_change_from to tie break, which will deprioritize empty "from" schedules
         ) as row_number
@@ -62,7 +62,7 @@ with audit_logs as (
         created_at,
         valid_from,
         lead(valid_from) over (
-            partition by source_relation, schedule_id order by schedule_id_index desc) as valid_until,
+            partition by schedule_id {{ partition_by_source_relation() }} order by schedule_id_index desc) as valid_until,
         schedule_change
     from find_same_day_changes
     where row_number = 1

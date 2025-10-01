@@ -102,10 +102,10 @@ with reply_time_calendar_hours_sla as (
 ), lagging_time_block as (
   select
     *,
-    row_number() over (partition by source_relation, ticket_id, metric, sla_applied_at order by sla_schedule_start_at) as day_index,
-    lead(sla_schedule_start_at) over (partition by source_relation, ticket_id, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at) as next_schedule_start,
-    min(sla_breach_at) over (partition by source_relation, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
-		coalesce(lag(sum_lapsed_business_minutes) over (partition by source_relation, sla_policy_name, metric, sla_applied_at order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
+    row_number() over (partition by ticket_id, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as day_index,
+    lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as next_schedule_start,
+    min(sla_breach_at) over (partition by sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
+		coalesce(lag(sum_lapsed_business_minutes) over (partition by sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
     {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'second') }} / 60 as total_runtime_minutes -- total minutes from sla_schedule_start_at and agent reply time, before taking into account SLA end time
   from reply_time_breached_at_with_next_reply_timestamp
 
@@ -128,9 +128,9 @@ with reply_time_calendar_hours_sla as (
   select
     *,
     {{ dbt.current_timestamp() }} as current_time_check,
-    lead(sla_applied_at) over (partition by source_relation, ticket_id, metric, in_business_hours order by sla_applied_at) as updated_sla_policy_starts_at,
+    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) as updated_sla_policy_starts_at,
     case when 
-      lead(sla_applied_at) over (partition by source_relation, ticket_id, metric, in_business_hours order by sla_applied_at) --updated sla policy start at time
+      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
     case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
                 or (sla_breach_at < agent_reply_at and next_solved_at is null)

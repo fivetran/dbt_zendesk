@@ -61,7 +61,7 @@ with ticket_history as (
         is_public,
         user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
+        lead(created_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by created_at) as valid_ending_at
     from ticket_comment
 
 {% if var('using_ticket_chat', False) %}
@@ -80,7 +80,7 @@ with ticket_history as (
         true as is_public,
         actor_id as user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by source_relation, ticket_id order by created_at) as valid_ending_at
+        lead(created_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by created_at) as valid_ending_at
     from ticket_chat_join
 {% endif %}
 
@@ -103,15 +103,6 @@ with ticket_history as (
     left join tickets
         on tickets.ticket_id = updates_union.ticket_id
         and tickets.source_relation = updates_union.source_relation
-
-    {# 
-    What's excluded: The chat conversation batches from ticket_comment. These are marked as `comment - not chat` and are associated with tickets from `chat` or `native_messaging` channels
-    What's included: 
-        - Individual chat messages from ticket_chat_event. These are marked as `comment - chat`
-        - True comments from ticket_comment. We know a record is a true ticket_comment if the ticket is NOT from `chat` or `native_messaging` channels
-    #}
-    where not (updates_union.field_name = 'comment - not chat' and lower(coalesce(tickets.created_channel, '')) in ('chat', 'native_messaging'))
-
 )
 
 select *

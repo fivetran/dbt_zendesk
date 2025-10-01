@@ -145,8 +145,8 @@ with agent_work_time_filtered_statuses as (
   
     select 
       *,
-      sum(scheduled_minutes) over 
-        (partition by source_relation, ticket_id, sla_applied_at 
+      sum(scheduled_minutes) over
+        (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }}
           order by valid_starting_at, week_number, schedule_end_time
           rows between unbounded preceding and current row)
         as running_total_scheduled_minutes
@@ -159,15 +159,15 @@ with agent_work_time_filtered_statuses as (
     intercepted_periods_with_running_total.*,
     target - running_total_scheduled_minutes as remaining_target_minutes,
     lag(target - running_total_scheduled_minutes) over
-          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) as lag_check,
+          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
       when (target - running_total_scheduled_minutes) < 0 
         and 
           (lag(target - running_total_scheduled_minutes) over
-          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) > 0 
+          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) > 0 
           or 
           lag(target - running_total_scheduled_minutes) over
-          (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at, week_number, schedule_end_time) is null) 
+          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) is null) 
           then true else false end as is_breached_during_schedule
           
   from  intercepted_periods_with_running_total
@@ -185,8 +185,8 @@ with agent_work_time_filtered_statuses as (
   select 
     *,
     {{ fivetran_utils.timestamp_add(
-      "minute",
-      "cast(((7*24*60) * week_number) + breach_minutes_from_week as " ~ dbt.type_int() ~ " )",
+      "second",
+      "cast(((7*24*60*60) * week_number) + (breach_minutes_from_week * 60) as " ~ dbt.type_int() ~ " )",
       "cast(" ~ zendesk.fivetran_week_start('valid_starting_at') ~ " as " ~ dbt.type_timestamp() ~ " )"
       ) }} as sla_breach_at
   from intercepted_periods_agent_filtered

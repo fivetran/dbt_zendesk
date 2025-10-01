@@ -80,7 +80,7 @@ with change_data as (
         {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
         , {{ col.name }}
         -- create a batch/partition once a new value is provided
-        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by source_relation, ticket_id
+        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by ticket_id {{ partition_by_source_relation() }}
             order by date_day rows unbounded preceding) as {{ col.name }}_field_partition
 
         {% endfor %}
@@ -98,7 +98,7 @@ fill_values as (
         {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
         -- grab the value that started this batch/partition
         , first_value( {{ col.name }} ) over (
-            partition by source_relation, ticket_id, {{ col.name }}_field_partition 
+            partition by ticket_id, {{ col.name }}_field_partition {{ partition_by_source_relation() }} 
             order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
         {% endfor %}
 

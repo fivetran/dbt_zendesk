@@ -17,7 +17,7 @@ with agent_work_time_filtered_statuses as (
             'valid_starting_at', 
             'valid_ending_at', 
             'minute') }} ) 
-      over (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at rows between unbounded preceding and current row) as running_total_calendar_minutes
+      over (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at rows between unbounded preceding and current row) as running_total_calendar_minutes
   from agent_work_time_filtered_statuses
 
 ), agent_work_time_calendar_minutes_flagged as (
@@ -28,10 +28,10 @@ select
   case when (target - running_total_calendar_minutes) < 0 
       and 
         (lag(target - running_total_calendar_minutes) over
-        (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at) >= 0 
+        (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at) >= 0 
         or 
         lag(target - running_total_calendar_minutes) over
-        (partition by source_relation, ticket_id, sla_applied_at order by valid_starting_at) is null) 
+        (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at) is null) 
         then true else false end as is_breached_during_schedule
         
 from  agent_work_time_calendar_minutes
@@ -41,9 +41,9 @@ from  agent_work_time_calendar_minutes
     *,
     (remaining_target_minutes + calendar_minutes) as breach_minutes,
     {{ fivetran_utils.timestamp_add(
-      'minute',
-      '(remaining_target_minutes + calendar_minutes)',
-      'valid_starting_at', 
+      "second",
+      "cast(((remaining_target_minutes + calendar_minutes) * 60) as " ~ dbt.type_int() ~ " )",
+      "valid_starting_at", 
       ) }} as sla_breach_at
   from agent_work_time_calendar_minutes_flagged
 
