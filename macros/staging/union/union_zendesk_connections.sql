@@ -38,6 +38,7 @@
     {%- endif -%}
 
     -- ** Values passed to adapter.get_relation:
+    {{ '-- using unioning: yes' }}
     {{ '-- full-identifier_var: ' ~ identifier_var }}
     {{ '-- database: ' ~ database }}
     {{ '-- schema: ' ~ schema }}
@@ -72,6 +73,7 @@
     -%}
 
     -- ** Values passed to adapter.get_relation:
+    {{ '-- using unioning: no' }}
     {{ '-- full-identifier_var: ' ~ identifier_var }}
     {{ '-- database: ' ~ database }}                            
     {{ '-- schema: ' ~ schema }}
