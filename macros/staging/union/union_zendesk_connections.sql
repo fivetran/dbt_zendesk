@@ -8,7 +8,7 @@
 
 {%- set exception_warning = "\n\nPlease be aware: The " ~ single_source_name|upper ~ "." ~ single_table_name|upper ~ " table was not found in your schema(s). The Fivetran Data Model will create a completely empty staging model as to not break downstream transformations. To turn off these warnings, set the `fivetran__remove_empty_table_warnings` variable to TRUE (see https://zendesk.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#union_data-source for details).\n"%}
 {%- set using_empty_table_warnings = (execute and not var('fivetran__remove_empty_table_warnings', false)) %}
-{%- set connections = var('connection_dictionary', []) %}
+{%- set connections = var(connection_dictionary, []) %}
 {%- set using_unioning = connections | length > 0 %}
 
 {%- if using_unioning %}
