@@ -1,3 +1,18 @@
+# dbt_zendesk v1.1.1-a1
+
+This pre-release includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 0 possible breaking changes**
+
+| Data Model(s) | Change type | Old | New | Notes |
+| ---------- | ----------- | -------- | -------- | ----- |
+| [`int_zendesk__commenter_reply_at`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__commenter_reply_at) | Materialization | Ephemeral | View | This intermediate model is now materialized as a view for better performance and debugging capabilities. The view will be created in the warehouse and available for direct querying. |
+
+## Feature Update
+- Changes the materialization of the `int_zendesk__commenter_reply_at` model from ephemeral to view to improve query performance and provide better visibility into comment reply timing calculations.
+
 # dbt_zendesk v1.1.0
 
 This release includes the following updates:
