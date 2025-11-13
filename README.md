@@ -1,48 +1,51 @@
-# Zendesk Support dbt Package ([Docs](https://fivetran.github.io/dbt_zendesk/))
+# Zendesk dbt Package
 
-<p align="left">
-    <a alt="License"
-        href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
-        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
-    <a alt="dbt-core">
-        <img src="https://img.shields.io/badge/dbt_Core™_version->=1.3.0_,<2.0.0-orange.svg" /></a>
-    <a alt="Maintained?">
-        <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" /></a>
-    <a alt="PRs">
-        <img src="https://img.shields.io/badge/Contributions-welcome-blueviolet" /></a>
-    <a alt="Fivetran Quickstart Compatible"
-        href="https://fivetran.com/docs/transformations/dbt/quickstart">
-        <img src="https://img.shields.io/badge/Fivetran_Quickstart_Compatible%3F-yes-green.svg" /></a>
-</p>
+This dbt package transforms data from Fivetran's Zendesk connector into analytics-ready tables.
+
+## Resources
+
+- Number of materialized models¹: 83
+- Connector documentation
+  - [Zendesk connector documentation](https://fivetran.com/docs/connectors/applications/zendesk)
+  - [Zendesk ERD](https://fivetran.com/docs/connectors/applications/zendesk#schemainformation)
+- dbt package documentation
+  - [GitHub repository](https://github.com/fivetran/dbt_zendesk)
+  - [dbt Docs](https://fivetran.github.io/dbt_zendesk/#!/overview)
+  - [DAG](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1)
+  - [Changelog](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md)
 
 ## What does this dbt package do?
-- Produces modeled tables that leverage Zendesk Support data from [Fivetran's connector](https://fivetran.com/docs/applications/zendesk) in the format described by [this ERD](https://fivetran.com/docs/applications/zendesk#schemainformation).
-- Enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It performs the following actions:
-  - Creates an enriched ticket model with relevant resolution, response time, and other metrics
-  - Produces a historical ticket field history model to see velocity of your tickets over time
-  - Converts metrics to business hours for Zendesk Support Professional or Enterprise users
-  - Calculates SLA policy breaches for Zendesk Support Professional or Enterprise users
-- Generates a comprehensive data dictionary of your source and modeled Zendesk Support data through the [dbt docs site](https://fivetran.github.io/dbt_zendesk/).
+
+This package enables you to better understand the performance of your Support team. It calculates metrics focused on response times, resolution times, and work times for you to analyze. It creates an enriched ticket model with relevant resolution, response time, and other metrics, produces a historical ticket field history model to see velocity of your tickets over time, converts metrics to business hours for Zendesk Support Professional or Enterprise users, and calculates SLA policy breaches for Zendesk Support Professional or Enterprise users.
 
 > Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat based tickets. This is a feature request that has been flagged.
 
-<!--section="zendesk_transformation_model"-->
-The following table provides a detailed list of final tables materialized within this package by default.
-> TIP: See more details about these tables in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
+### Output schema
+`<your_database>.<connector_name>_zendesk`
 
-| **Table**                    | **Description**                                                                                                                                                 |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [zendesk__ticket_metrics](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)       | Analyzes support team performance with metrics on reply times, resolution times, and total work times. Supports both calendar and business hours for flexible reporting. <br><br>**Example Analytics Questions:**<br>• What is the average first reply time for tickets by priority level or support team?<br>• How do resolution times compare across different ticket channels or customer segments?<br>• Which agents or groups have the longest work times relative to their ticket volume? |
-| [zendesk__ticket_enriched](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched)      | Provides complete context for every ticket including assignees, requesters, organizations, groups, and tags to understand relationships and patterns across the support operation. <br><br>**Example Analytics Questions:**<br>• Which tags or ticket categories generate the most support volume?<br>• How are tickets distributed across assignees, groups, and organizations?<br>• What types of requesters or organizations submit the highest-priority tickets? |
-| [zendesk__ticket_summary](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_summary)           | A high-level overview providing aggregate statistics about the entire support operation, including total tickets, active users, and key volume metrics. <br><br>**Example Analytics Questions:**<br>• What is the total volume of tickets and active users across the support system?<br>• How many tickets are currently open versus resolved?<br>• What percentage of tickets are being handled by active agents? |
-| [zendesk__ticket_backlog](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog)           | A daily snapshot of all open tickets (excluding closed, deleted, or solved), showing how ticket properties change over time for backlog analysis and trend monitoring. <br><br>**Example Analytics Questions:**<br>• How has the backlog size changed over time by status, priority, or assignee?<br>• Which groups or agents consistently carry the largest backlog?<br>• Are there seasonal trends or spikes in open ticket volume? |
+### Final output tables
+
+<!--section="zendesk_transformation_model"-->
+By default, this package materializes the following final tables:
+
+| Table | Description |
+| :---- | :---- |
+| [zendesk__ticket_metrics](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics) | Analyzes support team performance with metrics on reply times, resolution times, and total work times. Supports both calendar and business hours for flexible reporting. <br><br>**Example Analytics Questions:**<br>• What is the average first reply time for tickets by priority level or support team?<br>• How do resolution times compare across different ticket channels or customer segments?<br>• Which agents or groups have the longest work times relative to their ticket volume? |
+| [zendesk__ticket_enriched](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_enriched) | Provides complete context for every ticket including assignees, requesters, organizations, groups, and tags to understand relationships and patterns across the support operation. <br><br>**Example Analytics Questions:**<br>• Which tags or ticket categories generate the most support volume?<br>• How are tickets distributed across assignees, groups, and organizations?<br>• What types of requesters or organizations submit the highest-priority tickets? |
+| [zendesk__ticket_summary](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_summary) | A high-level overview providing aggregate statistics about the entire support operation, including total tickets, active users, and key volume metrics. <br><br>**Example Analytics Questions:**<br>• What is the total volume of tickets and active users across the support system?<br>• How many tickets are currently open versus resolved?<br>• What percentage of tickets are being handled by active agents? |
+| [zendesk__ticket_backlog](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) | A daily snapshot of all open tickets (excluding closed, deleted, or solved), showing how ticket properties change over time for backlog analysis and trend monitoring. <br><br>**Example Analytics Questions:**<br>• How has the backlog size changed over time by status, priority, or assignee?<br>• Which groups or agents consistently carry the largest backlog?<br>• Are there seasonal trends or spikes in open ticket volume? |
 | [zendesk__ticket_field_history](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_field_history) | A daily historical record tracking how ticket properties evolve throughout their lifecycle, including status changes, reassignments, and priority updates, along with who made each change. <br><br>**Example Analytics Questions:**<br>• How long do tickets spend in each status before moving to the next stage?<br>• How frequently are tickets reassigned between agents or groups?<br>• What is the typical lifecycle progression of tickets by priority or type? |
-| [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)           | Tracks SLA compliance and breach metrics for every policy event to help monitor whether tickets meet service level targets in both calendar and business hours. <br><br>**Example Analytics Questions:**<br>• What percentage of tickets are breaching their SLA targets by policy type?<br>• Which teams or agents have the highest SLA compliance rates?<br>• How do SLA breach rates differ between business hours and calendar hours? |
+| [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Tracks SLA compliance and breach metrics for every policy event to help monitor whether tickets meet service level targets in both calendar and business hours. <br><br>**Example Analytics Questions:**<br>• What percentage of tickets are breaching their SLA targets by policy type?<br>• Which teams or agents have the highest SLA compliance rates?<br>• How do SLA breach rates differ between business hours and calendar hours? |
 | [zendesk__document](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__document) | Prepares ticket text content for AI and machine learning applications by segmenting it into optimized chunks for vectorization, sentiment analysis, topic modeling, or automated categorization. Disabled by default. <br><br>**Example Analytics Questions:**<br>• What are the most common topics or themes in customer support tickets?<br>• How can we categorize ticket content for automated routing or tagging?<br>• Which text patterns correlate with high-priority or escalated tickets? |
+
+---
+¹ Each Quickstart transformation job run materializes these models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
+<!--section-end-->
+
+### Visualizations
 
 Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
 
-### Example Visualizations
 Curious what these tables can do? Check out example visualizations from the [zendesk__sla_policies](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) table in the [Fivetran Zendesk Streamlit App](https://fivetran-zendesk.streamlit.app/), and see how you can use these tables in your own reporting. Below is a screenshot of an example report—explore the app for more.
 
 <p align="center">
@@ -51,16 +54,11 @@ Curious what these tables can do? Check out example visualizations from the [zen
 </a>
 </p>
 
-### Materialized Models
-Each Quickstart transformation job run materializes 83 models if all components of this data model are enabled. This count includes all staging, intermediate, and final models materialized as `view`, `table`, or `incremental`.
-<!--section-end-->
+## Prerequisites
 
-## How do I use the dbt package?
-
-### Step 1: Prerequisites
 To use this dbt package, you must have the following:
 
-- At least one Fivetran zendesk connection syncing data into your destination.
+- At least one Fivetran Zendesk connection syncing data into your destination.
 - A **BigQuery**, **Snowflake**, **Redshift**, **PostgreSQL**, or **Databricks** destination.
 
 #### Databricks Dispatch Configuration
@@ -71,7 +69,14 @@ dispatch:
     search_order: ['spark_utils', 'dbt_utils']
 ```
 
-### Step 2: Install the package
+## How do I use the dbt package?
+
+You can either add this dbt package in the Fivetran dashboard or import it into your dbt project:
+
+- To add the package in the Fivetran dashboard, follow our [Quickstart guide](https://fivetran.com/docs/transformations/dbt).
+- To add the package to your dbt project, follow the setup instructions in the dbt package's [README file](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#how-do-i-use-the-dbt-package) to use this package.
+
+### Install the package
 Include the following zendesk package version in your `packages.yml` file:
 > TIP: Check [dbt Hub](https://hub.getdbt.com/) for the latest installation instructions or [read the dbt docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
 ```yml
@@ -81,7 +86,7 @@ packages:
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
-### Step 3: Define database and schema variables
+### Define database and schema variables
 #### Option A: Single connection
 By default, this package runs using your destination and the `zendesk` schema. If this is not where your zendesk data is (for example, if your zendesk schema is named `zendesk_fivetran`), update the following variables in your root `dbt_project.yml` file accordingly:
 
@@ -136,7 +141,7 @@ sources:
     tables: # copy and paste from zendesk/models/staging/src_zendesk.yml - see https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/ for how to use anchors to only do so once
 ```
 
-> **Note**: If there are source tables you do not have (see [Step 4](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#step-4-disable-models-for-non-existent-sources)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
+> **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enable-disable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
 
 2. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
 ```yml
@@ -146,7 +151,7 @@ vars:
     has_defined_sources: true
 ```
 
-### Step 4: Enable/Disable models
+### Enable/Disable models
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
 This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, or `ticket_chat_event` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_audit_log`, `using_schedule_histories`, and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
@@ -167,7 +172,7 @@ vars:
     using_organization_tags:    False         #Disable if you are not using organization tags
 ```
 
-### (Optional) Step 5: Additional configurations
+### (Optional) Additional configurations
 <details open><summary>Expand/Collapse details</summary>
 
 #### Enabling the unstructured document model for NLP
@@ -294,7 +299,7 @@ vars:
 
 </details>
 
-### (Optional) Step 6: Orchestrate your models with Fivetran Transformations for dbt Core™
+### (Optional) Orchestrate your models with Fivetran Transformations for dbt Core™
 <details><summary>Expand for details</summary>
 <br>
 
@@ -316,14 +321,16 @@ packages:
     - package: dbt-labs/spark_utils
       version: [">=0.3.0", "<0.4.0"]
 ```
+
 ## How is this package maintained and can I contribute?
+
 ### Package Maintenance
-The Fivetran team maintaining this package _only_ maintains the latest version of the package. We highly recommend you stay consistent with the [latest version](https://hub.getdbt.com/fivetran/zendesk/latest/) of the package and refer to the [CHANGELOG](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md) and release notes for more information on changes across versions.
+The Fivetran team maintaining this package only maintains the [latest version](https://hub.getdbt.com/fivetran/zendesk/latest/) of the package. We highly recommend you stay consistent with the latest version of the package and refer to the [CHANGELOG](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md) and release notes for more information on changes across versions.
 
 ### Contributions
 A small team of analytics engineers at Fivetran develops these dbt packages. However, the packages are made better by community contributions.
 
-We highly encourage and welcome contributions to this package. Check out [this dbt Discourse article](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657) on the best workflow for contributing to a package.
+We highly encourage and welcome contributions to this package. Learn how to contribute to a package in dbt's [Contributing to an external dbt package article](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657).
 
 ### Opinionated Modelling Decisions
 This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk Support UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md).
