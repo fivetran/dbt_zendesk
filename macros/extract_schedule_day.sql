@@ -17,9 +17,9 @@
 {%- endmacro %}
 
 {% macro snowflake__extract_schedule_day(string, day) %}
-    {% set regex = "'.*?" ~ day ~ ".*?({.*?})'" %}
+    {% set regex = '"' ~ day ~ '":({[^}]+})' %}
 
-    REGEXP_SUBSTR({{ string }}, {{ regex }}, 1, 1, 'e', 1 )
+    REGEXP_SUBSTR({{ string }}, '{{ regex }}', 1, 1, 'e', 1 )
 
 {%- endmacro %}
 
