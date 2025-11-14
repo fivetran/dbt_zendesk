@@ -182,7 +182,7 @@ vars:
 
 ##### Customizing Chunk Size for Vectorization
 
-The `zendesk__document` model was developed to limit approximate chunk sizes to 7,500 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
+The `zendesk__document` model was developed to limit approximate chunk sizes to 5,000 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
 
 ```yml
 vars:
