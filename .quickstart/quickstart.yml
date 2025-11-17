@@ -44,5 +44,66 @@ public_models: [
   "zendesk__ticket_summary",
   "zendesk__ticket_field_history",
   "zendesk__sla_policies",
-  "zendesk__ticket_backlog"
+  "zendesk__ticket_backlog",
+  "zendesk__document" # add here?
 ]
+
+supportedVars:
+  zendesk__unstructured_enabled: ## This deviates from the standard Quickstart model-disabling knobs. I think we should set to true by default for Quickstart at least.
+    value: false
+    type: boolean
+    displayName: "Enable Unstructured Model for NLP"
+    description: "Enable `zendesk__document`"
+
+  zendesk_max_tokens:
+    type: integer
+    value: 5000
+    description: "Maximum size of text chunks in `zendesk__document` (default value of 5,000 chunks is optimized for OpenAI models)"
+    displayName: "`zendesk__document` Chunk Size"
+
+  zendesk__ticket_passthrough_columns:
+    type: dictionary/list
+    description: "Custom Zendesk ticket columns to include in `zendesk__ticket_enriched` and `zendesk__ticket_metrics`"
+    displayName: "Custom/Pass-through Ticket Columns"
+    value: []
+
+  ticket_field_history_columns:
+    type: list
+    description: "Ticket fields tracked daily in `zendesk__ticket_field_history` and `zendesk__ticket_backlog`"
+    displayName: "[Daily/Tracked] Ticket Field History Columns"
+    value:
+      - "assignee_id"
+      - "status"
+      - "priority"
+
+  ticket_field_history_updater_columns: # If we can support
+    type: list
+    description: "Ticket field updater columns to be tracked in `zendesk__ticket_field_history`"
+    displayName: "Daily Ticket Field History Updater Columns"
+    value: []
+    enum_list: # Can we support this?
+      - "updater_user_id"
+      - "updater_name"
+      - "updater_role"
+      - "updater_email"
+      - "updater_external_id"
+      - "updater_locale"
+      - "updater_is_active"
+      - "updater_user_tags"
+      - "updater_last_login_at"
+      - "updater_time_zone"
+      - "updater_organization_id"
+      - "updater_organization_domain_names" 
+      - "updater_organization_organization_tags"
+
+ticket_field_history_extension_months:
+    type: integer
+    description: "Number of months that `zendesk__ticket_field_history` will track for each ticket after it has been closed" # option 2: "Extends the tracking of each ticket in `zendesk__ticket_field_history` for X months after the ticket close date"
+    displayName: "Ticket Field History Post-Close Extension (Months)" # option 2: "Extend Ticket Field History After Close (Months)"
+    value: 0
+
+ticket_field_history_timeframe_years:
+    type: integer
+    description: "Number of years into the past that `zendesk__ticket_field_history` will track" # option 2: "Limits the timeframe tracked in `zendesk__ticket_field_history` to the past X years"
+    displayName: "Ticket Field History Timeframe (Years)" # option 2: Limit Ticket Field History Lookback (Years)
+    value: 50
