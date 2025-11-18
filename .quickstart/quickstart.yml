@@ -51,14 +51,14 @@ supportedVars:
 
   zendesk__ticket_passthrough_columns:
     type: dictionary
-    description: "Custom Zendesk ticket columns to include in `zendesk__ticket_enriched` and `zendesk__ticket_metrics`"
+    description: "Additional ticket fields to include in `zendesk__ticket_enriched` and `zendesk__ticket_metrics`"
     displayName: "Additional Ticket Columns"
     value: []
 
   ticket_field_history_columns:
     type: list
     description: "Ticket fields tracked daily in `zendesk__ticket_field_history` and `zendesk__ticket_backlog`"
-    displayName: "Ticket Field History Columns" # Option 2 (remove Field): Ticket History Columns, Option 3: Tracked Ticket Fields
+    displayName: "Ticket History Columns" # Option 2 (add Field): Ticket Field History Columns, Option 3: Tracked Ticket Fields
     value:
       - "assignee_id"
       - "status"
@@ -67,11 +67,11 @@ supportedVars:
 ticket_field_history_extension_months:
     type: integer
     description: "Number of months that `zendesk__ticket_field_history` will track for each ticket after it has been closed"
-    displayName: "Post-Close Ticket Field History Extension (Months)" # Option 2 (remove Field): Post-Close Ticket History Extension (Months), Option 3: Post-Close Ticket [Field] History Timeframe (Months)
+    displayName: "Post-Close Ticket History Extension (Months)" # Option 2 (add Field): Post-Close Ticket Field History Extension (Months), Option 3: Post-Close Ticket [Field] History Timeframe (Months)
     value: 0
 
 ticket_field_history_timeframe_years:
     type: integer
     description: "Number of years into the past that `zendesk__ticket_field_history` and `zendesk__ticket_backlog` will track"
-    displayName: "Ticket Field History Timeframe (Years)" # Option 2 (remove Field): Ticket History Timeframe (Years)
+    displayName: "Ticket History Timeframe (Years)" # Option 2 (add Field): Ticket Field History Timeframe (Years)
     value: 50
