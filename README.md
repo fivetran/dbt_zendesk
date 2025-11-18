@@ -33,9 +33,9 @@ This dbt package transforms data from Fivetran's Zendesk connector into analytic
 
 ## What does this dbt package do?
 
-This package enables you to better understand the performance of your Support team and creates enriched ticket models with relevant resolution, response time, and other metrics. It calculates metrics focused on response times, resolution times, and work times.
+This package enables you to better understand the performance of your Support team. It creates enriched ticket models with metrics focused on relevant resolution, response time, and other metrics.
 
-> Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat based tickets. This is a feature request that has been flagged.
+> Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat-based tickets. This is a feature request that has been flagged.
 
 ### Output schema
 
@@ -64,7 +64,7 @@ By default, this package materializes the following final tables:
 
 ## Visualizations
 
-Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
+Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). View sample reports in [the Fivetran Streamlit app](https://fivetran-zendesk.streamlit.app/).
 
 <p align="center">
 <a href="https://fivetran-zendesk.streamlit.app/">
