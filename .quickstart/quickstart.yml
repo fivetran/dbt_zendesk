@@ -53,7 +53,6 @@ supportedVars:
     type: dictionary
     description: "Additional ticket fields to include in `zendesk__ticket_enriched` and `zendesk__ticket_metrics`"
     displayName: "Additional Ticket Columns"
-    value: []
 
   ticket_field_history_columns:
     type: list
