@@ -1,4 +1,4 @@
-# Zendesk dbt Package
+# Zendesk Support dbt Package
 
 <p align="left">
     <a alt="License"
