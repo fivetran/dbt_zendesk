@@ -1,3 +1,10 @@
+# dbt_zendesk v1.2.0
+
+This release includes the following updates:
+
+## Documentation
+- Updates the README to highlight essential information for Quickstart users.
+
 # dbt_zendesk v1.1.0
 
 This release includes the following updates:
