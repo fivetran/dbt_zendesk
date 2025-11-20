@@ -32,6 +32,11 @@ table_variables:
     - ticket_chat
     - ticket_chat_event
 
+  persist_group:
+    - group
+  persist_ticket_tag:
+    - ticket_tag
+
 destination_configurations:
   databricks:
     dispatch:
