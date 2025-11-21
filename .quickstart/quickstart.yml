@@ -32,9 +32,9 @@ table_variables:
     - ticket_chat
     - ticket_chat_event
 
-  persist_group:
+  _fivetran_quickstart_group:
     - group
-  persist_ticket_tag:
+  _fivetran_quickstart_tag:
     - ticket_tag
 
 destination_configurations:
