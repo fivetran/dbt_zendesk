@@ -1,3 +1,11 @@
+# dbt_zendesk v1.2.0-a2
+
+This release includes the following updates:
+
+## Quickstart Updates
+- Updates the naming of the table variables for non-essential sources from `persist_*` to `_fivetran_quickstart_*`.
+- Formatting updates.
+
 # dbt_zendesk v1.2.0-a1
 
 This release includes the following updates:
