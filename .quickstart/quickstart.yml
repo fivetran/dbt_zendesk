@@ -68,13 +68,13 @@ supportedVars:
       - "status"
       - "priority"
 
-ticket_field_history_extension_months:
+  ticket_field_history_extension_months:
     type: integer
     description: "Number of months that `zendesk__ticket_field_history` will track for each ticket after it has been closed"
     display_name: "Post-Close Ticket Field History Extension (Months)"
     value: 0
 
-ticket_field_history_timeframe_years:
+  ticket_field_history_timeframe_years:
     type: integer
     description: "Number of years into the past that `zendesk__ticket_field_history` and `zendesk__ticket_backlog` will track"
     display_name: "Ticket Field History Timeframe (Years)"
