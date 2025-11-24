@@ -1,3 +1,20 @@
+# dbt_zendesk v1.2.0-a2
+
+This release includes the following updates:
+
+## Quickstart Updates
+- Updates the naming of the table variables for non-essential sources from `persist_*` to `_fivetran_quickstart_*`.
+- Formatting updates.
+
+# dbt_zendesk v1.2.0-a1
+
+This release includes the following updates:
+
+## Quickstart Updates
+- Creates table variables for non-essential sources `group` and `ticket_tag`. This resolves Quickstart run errors when either `group` or `ticket_tag` are not selected by the customer in the Fivetran UI.
+- Adds `supportedVars` section to Quickstart configuration to allow customers to input and configure package variables directly through the Quickstart UI.
+- Updates the README to highlight essential information for Quickstart users.
+
 # dbt_zendesk v1.1.0
 
 This release includes the following updates:
