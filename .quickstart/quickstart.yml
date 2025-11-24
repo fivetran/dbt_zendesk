@@ -52,7 +52,7 @@ public_models: [
   "zendesk__ticket_backlog"
 ]
 
-supportedVars:
+supported_vars:
 
   zendesk__ticket_passthrough_columns:
     type: dictionary
