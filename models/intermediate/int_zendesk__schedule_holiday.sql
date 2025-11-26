@@ -28,8 +28,8 @@ with schedule as (
         schedule_holiday_ranges.*,
         cast(week_numbers.generated_number as {{ dbt.type_int() }}) as holiday_week_number
     from schedule_holiday_ranges
-    -- Generate a sequence of numbers from 0 to the max number of weeks spanned, assuming a holiday won't span more than 52 weeks
-    cross join ({{ dbt_utils.generate_series(upper_bound=52) }}) as week_numbers
+    -- Generate a sequence of numbers from 0 to the max number of weeks spanned, assuming a holiday won't span more than max_ticket_length_weeks/52 weeks
+    cross join ({{ dbt_utils.generate_series(upper_bound=var('max_ticket_length_weeks', 52)) }}) as week_numbers
     where schedule_holiday_ranges.holiday_weeks_spanned > 1
     and week_numbers.generated_number <= schedule_holiday_ranges.holiday_weeks_spanned
 
