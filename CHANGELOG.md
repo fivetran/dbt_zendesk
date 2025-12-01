@@ -1,3 +1,10 @@
+# dbt_zendesk v1.2.0
+
+[PR #239](https://github.com/fivetran/dbt_zendesk/pull/239) includes the following updates:
+
+## Features
+  - Increases the required dbt version upper limit to v3.0.0
+
 # dbt_zendesk v1.1.0
 
 This release includes the following updates:
