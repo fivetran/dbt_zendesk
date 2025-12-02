@@ -1,3 +1,12 @@
+# dbt_zendesk v1.2.1
+
+This release includes the following updates:
+
+## Feature Update
+- Introduces the `max_ticket_length_weeks` variable. This variable defines the maximum length of time, in weeks, that the package expects a ticket to be open for business hour calculations and SLA policy computations. 
+  - The default value is 52 weeks (one year)
+  - See the [README](https://github.com/fivetran/dbt_zendesk#configuring-maximum-ticket-length) for more details
+
 # dbt_zendesk v1.2.0
 
 [PR #239](https://github.com/fivetran/dbt_zendesk/pull/239) includes the following updates:
