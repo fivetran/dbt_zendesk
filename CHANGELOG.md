@@ -1,6 +1,6 @@
 # dbt_zendesk v1.2.1
 
-This release includes the following updates:
+[PR #240](https://github.com/fivetran/dbt_zendesk/pull/240) includes the following updates:
 
 ## Feature Update
 - Introduces the `max_ticket_length_weeks` variable. This variable defines the maximum length of time, in weeks, that the package expects a ticket to be open for business hour calculations and SLA policy computations. 
