@@ -278,7 +278,7 @@ If your organization has tickets that may remain open longer than 52 weeks, you 
 # dbt_project.yml
 vars:
   zendesk:
-    max_ticket_length_weeks: 208 # default = 52 (1 year)
+    max_ticket_length_weeks: 208 # Integer value: Ensure this is >= the longest period a ticket was open (in weeks). Default = 52 weeks (1 year)
 ```
 
 #### Changing the Build Schema
