@@ -11,7 +11,7 @@
 # dbt_project.yml
 vars:
   zendesk:
-    max_ticket_length_weeks: 208 # Integer value > 52
+    max_ticket_length_weeks: 208 # Integer value: Ensure this is >= the longest period a ticket was open (in weeks)
 ```
 
 # dbt_zendesk v1.2.0
