@@ -269,6 +269,18 @@ vars:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
 ```
 
+#### Configuring Maximum Ticket Length
+By default, this package assumes that tickets will not remain open for longer than 52 weeks (1 year). This assumption is used in business hour calculations and SLA policy computations to generate the appropriate number of week intervals for time-based calculations.
+
+If your organization has tickets that may remain open longer than 52 weeks, you may adjust this limit by configuring the `max_ticket_length_weeks` variable in your root `dbt_project.yml` file:
+
+```yml
+# dbt_project.yml
+vars:
+  zendesk:
+    max_ticket_length_weeks: 208 # Integer value: Ensure this is >= the longest period a ticket was open (in weeks). Default = 52 weeks (1 year)
+```
+
 #### Changing the Build Schema
 By default this package will build the Zendesk Support staging models within a schema titled (<target_schema> + `_zendesk_source`), the Zendesk Support intermediate models within a schema titled (<target_schema> + `_zendesk_intermediate`), and the Zendesk Support final models within a schema titled (<target_schema> + `_zendesk`) in your target database. If this is not where you would like your modeled Zendesk Support data to be written to, add the following configuration to your root `dbt_project.yml` file:
 
