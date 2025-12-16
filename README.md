@@ -24,8 +24,6 @@
   - Calculates SLA policy breaches for Zendesk Support Professional or Enterprise users
 - Generates a comprehensive data dictionary of your source and modeled Zendesk Support data through the [dbt docs site](https://fivetran.github.io/dbt_zendesk/).
 
-> Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat based tickets. This is a feature request that has been flagged.
-
 <!--section="zendesk_transformation_model"-->
 The following table provides a detailed list of final tables materialized within this package by default.
 > TIP: See more details about these tables in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
