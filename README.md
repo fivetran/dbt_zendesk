@@ -33,17 +33,9 @@ This dbt package transforms data from Fivetran's Zendesk connector into analytic
 
 ## What does this dbt package do?
 
-This package enables you to better understand the performance of your Support team. It creates enriched ticket models with metrics focused on relevant resolution, response time, and other metrics.
-
-> Note: Tickets from the Zendesk Support Chat channel will not populate in this package as the Fivetran connector does not currently support Chat-based tickets. This is a feature request that has been flagged.
-
-### Output schema
-
-Final output tables are generated in the following target schema:
-
-```
-<your_database>.<connector/schema_name>_zendesk
-```
+<!--section="zendesk_transformation_model"-->
+The following table provides a detailed list of final tables materialized within this package by default.
+> TIP: See more details about these tables in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
 
 ### Final output tables
 
@@ -93,7 +85,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: "1.2.0-a2"
+    version: [">=1.2.0", "<1.3.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -291,6 +283,18 @@ Conversely, you may want to only track the past X years of ticket field history.
 vars:
   zendesk:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
+```
+
+#### Configuring Maximum Ticket Length
+By default, this package assumes that tickets will not remain open for longer than 52 weeks (1 year). This assumption is used in business hour calculations and SLA policy computations to generate the appropriate number of week intervals for time-based calculations.
+
+If your organization has tickets that may remain open longer than 52 weeks, you may adjust this limit by configuring the `max_ticket_length_weeks` variable in your root `dbt_project.yml` file:
+
+```yml
+# dbt_project.yml
+vars:
+  zendesk:
+    max_ticket_length_weeks: 208 # Integer value: Ensure this is >= the longest period a ticket was open (in weeks). Default = 52 weeks (1 year)
 ```
 
 #### Changing the Build Schema

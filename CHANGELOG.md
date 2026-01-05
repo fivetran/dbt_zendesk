@@ -1,3 +1,19 @@
+# dbt_zendesk v1.2.1
+
+[PR #240](https://github.com/fivetran/dbt_zendesk/pull/240) includes the following updates:
+
+## Feature Update
+- Introduces the `max_ticket_length_weeks` variable. This variable defines the maximum length of time, in weeks, that the package expects a ticket to be open for business hour calculations and SLA policy computations. 
+  - The default value is 52 weeks (one year)
+  - If your organization has tickets that are open for more than a year, apply the following configuration in your root `dbt_project.yml` file:
+
+```yml
+# dbt_project.yml
+vars:
+  zendesk:
+    max_ticket_length_weeks: 208 # Integer value: Ensure this is >= the longest period a ticket was open (in weeks)
+```
+
 # dbt_zendesk v1.2.0-a2
 
 This release includes the following updates:
@@ -14,6 +30,13 @@ This release includes the following updates:
 - Creates table variables for non-essential sources `group` and `ticket_tag`. This resolves Quickstart run errors when either `group` or `ticket_tag` are not selected by the customer in the Fivetran UI.
 - Adds `supportedVars` section to Quickstart configuration to allow customers to input and configure package variables directly through the Quickstart UI.
 - Updates the README to highlight essential information for Quickstart users.
+
+# dbt_zendesk v1.2.0
+
+[PR #239](https://github.com/fivetran/dbt_zendesk/pull/239) includes the following updates:
+
+## Features
+  - Increases the required dbt version upper limit to v3.0.0
 
 # dbt_zendesk v1.1.0
 
