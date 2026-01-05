@@ -34,8 +34,15 @@ This dbt package transforms data from Fivetran's Zendesk connector into analytic
 ## What does this dbt package do?
 
 <!--section="zendesk_transformation_model"-->
-The following table provides a detailed list of final tables materialized within this package by default.
-> TIP: See more details about these tables in the package's [dbt docs site](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1).
+This package enables you to better understand the performance of your Support team. It creates enriched ticket models with metrics focused on relevant resolution, response time, and other metrics.
+
+### Output schema
+
+Final output tables are generated in the following target schema:
+
+```
+<your_database>.<connector/schema_name>_zendesk
+```
 
 ### Final output tables
 
