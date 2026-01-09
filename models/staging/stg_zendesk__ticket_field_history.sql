@@ -22,21 +22,19 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         ticket_id,
         field_name,
         cast(updated as {{ dbt.type_timestamp() }}) as valid_starting_at,
         cast(lead(updated) over (partition by ticket_id, field_name {{ partition_by_source_relation() }} order by updated) as {{ dbt.type_timestamp() }}) as valid_ending_at,
         value,
-        user_id,
-        source_relation
+        user_id
         
     from fields
 )

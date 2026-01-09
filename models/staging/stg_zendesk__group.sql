@@ -22,17 +22,15 @@ fields as (
             )
         }}
 
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as group_id,
-        name,
-        source_relation
+        name
 
     from fields
     where not coalesce(_fivetran_deleted, false)

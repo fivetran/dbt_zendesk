@@ -22,14 +22,13 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as ticket_comment_id,
         _fivetran_synced,
         _fivetran_deleted,
@@ -40,8 +39,7 @@ final as (
         user_id,
         facebook_comment as is_facebook_comment,
         tweet as is_tweet,
-        voice_comment as is_voice_comment,
-        source_relation
+        voice_comment as is_voice_comment
         
     from fields
 )

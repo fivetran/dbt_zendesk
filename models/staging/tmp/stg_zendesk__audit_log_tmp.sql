@@ -1,9 +1,6 @@
 {{ config(enabled=var('using_audit_log', False)) }}
 
-{{
-    zendesk.union_zendesk_connections(
-        connection_dictionary=var('zendesk_sources'), 
-        single_source_name='zendesk', 
-        single_table_name='audit_log'
-    )
-}}
+select 
+    cast(null as {{ dbt.type_string() }}) as source_relation,
+    *
+from {{ var('audit_log') }}

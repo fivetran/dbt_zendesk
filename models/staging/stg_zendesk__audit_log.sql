@@ -22,14 +22,13 @@ fields as (
                 staging_columns=get_audit_log_columns()
             )
         }}
-
-        {{ zendesk.apply_source_relation() }}
         
     from base
 ),
 
 final as (
-    select 
+    select
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         cast(id as {{ dbt.type_string() }}) as audit_log_id,
         action,
         actor_id,
@@ -38,8 +37,7 @@ final as (
         source_id,
         source_label,
         source_type,
-        _fivetran_synced,
-        source_relation
+        _fivetran_synced
 
     from fields
 )
