@@ -17,22 +17,20 @@ fields as (
             )
         }}
 
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         _fivetran_deleted,
         cast(_fivetran_synced as {{ dbt.type_timestamp() }} ) as _fivetran_synced,
         cast(end_date as {{ dbt.type_timestamp() }} ) as holiday_end_date_at,
         cast(id as {{ dbt.type_string() }} ) as holiday_id,
         name as holiday_name,
         cast(schedule_id as {{ dbt.type_string() }} ) as schedule_id,
-        cast(start_date as {{ dbt.type_timestamp() }} ) as holiday_start_date_at,
-        source_relation
+        cast(start_date as {{ dbt.type_timestamp() }} ) as holiday_start_date_at
         
     from fields
 )

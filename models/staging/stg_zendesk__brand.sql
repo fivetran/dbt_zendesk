@@ -22,8 +22,6 @@ fields as (
                 staging_columns=get_brand_columns()
             )
         }}
-
-        {{ zendesk.apply_source_relation() }}
         
     from base
 ),
@@ -31,12 +29,12 @@ fields as (
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as brand_id,
         brand_url,
         name,
         subdomain,
-        active as is_active,
-        source_relation
+        active as is_active
         
     from fields
     where not coalesce(_fivetran_deleted, false)

@@ -24,21 +24,19 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         daylight_end_utc,
         daylight_offset,
         daylight_start_utc,
         time_zone,
         year,
-        daylight_offset * 60 as daylight_offset_minutes,
-        source_relation
+        daylight_offset * 60 as daylight_offset_minutes
         
     from fields
 )

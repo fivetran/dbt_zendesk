@@ -22,21 +22,19 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         ticket_id,
         {% if target.type == 'redshift' %}
         "tag"
         {% else %}
         tag
-        {% endif %} as tags,
-        source_relation
+        {% endif %} as tags
 
     from fields
 )

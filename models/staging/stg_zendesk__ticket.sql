@@ -21,8 +21,6 @@ fields as (
                 staging_columns=get_ticket_columns()
             )
         }}
-
-        {{ zendesk.apply_source_relation() }}
         
     from base
 ),
@@ -30,6 +28,7 @@ fields as (
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as ticket_id,
         _fivetran_synced,
         _fivetran_deleted,
@@ -58,8 +57,7 @@ final as (
         via_source_from_title as source_from_title,
         via_source_rel as source_rel,
         via_source_to_address as source_to_address,
-        via_source_to_name as source_to_name,
-        source_relation
+        via_source_to_name as source_to_name
 
         {{ fivetran_utils.fill_pass_through_columns('zendesk__ticket_passthrough_columns') }}
 

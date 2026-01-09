@@ -23,21 +23,19 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as organization_id,
         created_at,
         updated_at,
         details,
         name,
-        external_id,
-        source_relation
+        external_id
 
         {{ fivetran_utils.fill_pass_through_columns('zendesk__organization_passthrough_columns') }}
 

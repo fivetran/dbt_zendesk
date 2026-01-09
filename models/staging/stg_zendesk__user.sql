@@ -22,14 +22,13 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as ( 
     
     select 
+        cast(null as {{ dbt.type_string() }}) as source_relation,
         id as user_id,
         external_id,
         _fivetran_synced,
@@ -53,8 +52,7 @@ final as (
         time_zone,
         locale,
         active as is_active,
-        suspended as is_suspended,
-        source_relation
+        suspended as is_suspended
 
         {{ fivetran_utils.fill_pass_through_columns('zendesk__user_passthrough_columns') }}
         

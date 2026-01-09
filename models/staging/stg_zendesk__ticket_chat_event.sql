@@ -16,15 +16,13 @@ fields as (
             )
         }}
 
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
-        source_relation, 
+        cast(null as {{ dbt.type_string() }}) as source_relation, 
         _fivetran_synced,
         {# Very infrequently, the actor_id field may look like agent:####### instead of just ####### #}
         cast( (case when actor_id like 'agent%' then nullif({{ dbt.split_part('actor_id', "'agent:'", 2) }},'') else actor_id end) as {{ dbt.type_bigint() }}) as actor_id,

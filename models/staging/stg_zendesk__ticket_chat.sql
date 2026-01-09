@@ -16,15 +16,13 @@ fields as (
             )
         }}
         
-        {{ zendesk.apply_source_relation() }}
-
-    from base
+            from base
 ),
 
 final as (
     
     select 
-        source_relation, 
+        cast(null as {{ dbt.type_string() }}) as source_relation, 
         _fivetran_synced,
         authenticated as is_authenticated,
         backend,
