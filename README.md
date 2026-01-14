@@ -154,7 +154,7 @@ sources:
     tables: # copy and paste from zendesk/models/staging/src_zendesk.yml - see https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/ for how to use anchors to only do so once
 ```
 
-> **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enable-disable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
+> **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enabledisable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
 
 2. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
 ```yml
