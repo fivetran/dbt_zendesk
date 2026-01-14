@@ -1,3 +1,15 @@
+# dbt_zendesk v1.3.0
+
+[PR #245](https://github.com/fivetran/dbt_zendesk/pull/245) includes the following updates:
+
+## Documentation
+- Updates README with standardized Fivetran formatting
+
+## Under the Hood
+- In the `.quickstart.yml` file:
+  - Adds `table_variables` for relevant sources to prevent missing sources from blocking downstream Quickstart models.
+  - Adds `supported_vars` for Quickstart UI customization,
+
 # dbt_zendesk v1.2.1
 
 [PR #240](https://github.com/fivetran/dbt_zendesk/pull/240) includes the following updates:
