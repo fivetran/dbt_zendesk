@@ -195,8 +195,6 @@ sources:
             description: The time of the last update of the organization
           - name: domain_names
             description: An array of domain names associated with this organization
-          - name: details
-            description: Any details obout the organization, such as the address
           - name: notes
             description: Any notes you have about the organization
           - name: group_id
