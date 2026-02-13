@@ -7,7 +7,7 @@
 **2 total changes • 0 possible breaking changes**
 | **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
-| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` and `initiator_type` | Reflects the persona that initiated the conversation (agent, end user, system, etc). |
+| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` and `initiator_type` | Reflects the persona that initiated the conversation (agent, end user, system, or unknown). |
 
 ## Bug Fixes
 - Updates Snowflake regex parsing in the `extract_schedule_day()` [macro](https://github.com/fivetran/dbt_zendesk/blob/main/macros/extract_schedule_day.sql).
