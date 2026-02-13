@@ -4,14 +4,14 @@
 
 ## Schema Changes
 
-**4 total changes • 0 possible breaking changes**
+**2 total changes • 0 possible breaking changes**
 | **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
 | [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` and `initiator_type` | Reflects the persona that initiated the conversation (agent, end user, system, etc). |
 
 ## Bug Fixes
 - Updates Snowflake regex parsing in the `extract_schedule_day()` [macro](https://github.com/fivetran/dbt_zendesk/blob/main/macros/extract_schedule_day.sql).
-- Aligns with Zendesk's method of calculating agent replies and comment metrics messaging/chat. Previously, we counted each individual chat message as a distinct comment. In accordance with Zendesk's [docs](https://support.zendesk.com/hc/en-us/articles/4408830458778-What-is-the-difference-between-public-comments-and-agent-replies-in-reporting), we now count active conversation sessions.
+- Aligns with Zendesk's method of calculating agent replies and comment metrics for messaging/chat. Previously, we counted each individual chat message as a distinct comment. In accordance with Zendesk's [docs](https://support.zendesk.com/hc/en-us/articles/4408830458778-What-is-the-difference-between-public-comments-and-agent-replies-in-reporting), we now count active conversation sessions.
   - For example, if an agent sends three messages in the same active conversation and then the conversation ends, that exchange counts as one Agent reply. Previously, we would have counted three replies.
 
 # dbt_zendesk v1.3.0
