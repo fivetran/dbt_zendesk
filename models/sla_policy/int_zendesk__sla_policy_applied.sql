@@ -4,7 +4,7 @@
 -- SLA policies are calculated for next_reply_time, first_reply_time, agent_work_time, requester_wait_time.  If you're company uses other SLA metrics, and would like this
 -- package to support those, please reach out to the Fivetran team on Slack.
 
-{% set check_sla_policy_metric_history = var('using_sla_policy_metric_history', False) and var('using_ticket_sla_policy', True) %}
+{% set check_sla_policy_metric_history = var('using_sla_policy_metric_history', True) and var('using_ticket_sla_policy', True) %}
 
 with ticket_field_history as (
 
@@ -73,7 +73,7 @@ with ticket_field_history as (
 
 ), final as (
 
-{% if var('using_sla_policy_metric_history', False) %}
+{% if check_sla_policy_metric_history %}
 
     select
       add_sla_policy_name.source_relation,
