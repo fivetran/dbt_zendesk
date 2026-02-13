@@ -1,3 +1,23 @@
+# dbt_zendesk v1.3.1
+
+## Feature Update
+- Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. These tables allow you to track historical changes to SLA policy targets and which policies have been applied to specific tickets. ([#XXX](https://github.com/fivetran/dbt_zendesk/pull/XXX))
+  - By default, these new tables are disabled. To enable them, add the following configuration to your `dbt_project.yml`:
+```yml
+vars:
+  using_sla_policy_metric_history: true
+  using_ticket_sla_policy: true
+```
+  - When enabled, the `int_zendesk__sla_policy_applied` model will use priority-specific SLA targets from the `sla_policy_metric_history` table rather than the default targets from the ticket field history.
+- Added the following new staging models:
+  - `stg_zendesk__sla_policy_metric_history` - Tracks historical SLA policy metric configurations by priority level
+  - `stg_zendesk__ticket_sla_policy` - Maps tickets to their applied SLA policies
+
+## Under the Hood
+- Added new macros `get_sla_policy_metric_history_columns()` and `get_ticket_sla_policy_columns()` to support the new staging models.
+- Updated `int_zendesk__sla_policy_applied` to incorporate priority-based SLA targets when `using_sla_policy_metric_history` is enabled.
+- Added integration test seed files for the new source tables.
+
 # dbt_zendesk v1.3.0
 
 [PR #245](https://github.com/fivetran/dbt_zendesk/pull/245) includes the following updates:

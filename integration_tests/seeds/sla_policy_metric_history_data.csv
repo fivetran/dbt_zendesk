@@ -1,0 +1,21 @@
+sla_policy_id,index,sla_policy_updated_at,business_hours,metric,priority,target,_fivetran_synced
+1001,0,2020-01-01 00:00:00,TRUE,first_reply_time,urgent,60,2020-01-01 01:00:00.000
+1001,1,2020-01-01 00:00:00,TRUE,first_reply_time,high,240,2020-01-01 01:00:00.000
+1001,2,2020-01-01 00:00:00,TRUE,first_reply_time,normal,480,2020-01-01 01:00:00.000
+1001,3,2020-01-01 00:00:00,TRUE,first_reply_time,low,1440,2020-01-01 01:00:00.000
+1001,0,2020-01-01 00:00:00,TRUE,next_reply_time,urgent,30,2020-01-01 01:00:00.000
+1001,1,2020-01-01 00:00:00,TRUE,next_reply_time,high,120,2020-01-01 01:00:00.000
+1001,2,2020-01-01 00:00:00,TRUE,next_reply_time,normal,240,2020-01-01 01:00:00.000
+1001,3,2020-01-01 00:00:00,TRUE,next_reply_time,low,720,2020-01-01 01:00:00.000
+1001,0,2020-06-01 00:00:00,TRUE,first_reply_time,urgent,45,2020-06-01 01:00:00.000
+1001,1,2020-06-01 00:00:00,TRUE,first_reply_time,high,180,2020-06-01 01:00:00.000
+1001,2,2020-06-01 00:00:00,TRUE,first_reply_time,normal,360,2020-06-01 01:00:00.000
+1001,3,2020-06-01 00:00:00,TRUE,first_reply_time,low,1440,2020-06-01 01:00:00.000
+1002,0,2020-01-01 00:00:00,FALSE,first_reply_time,urgent,120,2020-01-01 01:00:00.000
+1002,1,2020-01-01 00:00:00,FALSE,first_reply_time,high,480,2020-01-01 01:00:00.000
+1002,2,2020-01-01 00:00:00,FALSE,first_reply_time,normal,960,2020-01-01 01:00:00.000
+1002,3,2020-01-01 00:00:00,FALSE,first_reply_time,low,2880,2020-01-01 01:00:00.000
+1002,0,2020-01-01 00:00:00,FALSE,requester_wait_time,urgent,240,2020-01-01 01:00:00.000
+1002,1,2020-01-01 00:00:00,FALSE,requester_wait_time,high,960,2020-01-01 01:00:00.000
+1002,2,2020-01-01 00:00:00,FALSE,requester_wait_time,normal,1920,2020-01-01 01:00:00.000
+1002,3,2020-01-01 00:00:00,FALSE,requester_wait_time,low,5760,2020-01-01 01:00:00.000
