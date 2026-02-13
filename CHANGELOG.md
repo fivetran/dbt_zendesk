@@ -1,3 +1,13 @@
+# dbt_zendesk v1.3.1
+
+[PR #247](https://github.com/fivetran/dbt_zendesk/pull/247) includes the following updates:
+
+## Documentation
+- Updates the [instructions](https://github.com/fivetran/dbt_zendesk/tree/main?tab=readme-ov-file#recommended-incorporate-unioned-sources-into-dag) for running the package on unioned data sources and integrating source tables into your project's DAG.
+
+## Bug Fix
+- Aligns the `audit_log` DAG inclusion logic with other source tables to avoid failures during docs generation.
+
 # dbt_zendesk v1.3.0
 
 [PR #245](https://github.com/fivetran/dbt_zendesk/pull/245) includes the following updates:
