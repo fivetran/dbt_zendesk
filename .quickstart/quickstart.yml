@@ -31,6 +31,8 @@ table_variables:
   using_ticket_chat:
     - ticket_chat
     - ticket_chat_event
+  using_sla_policy_metric_history:
+    - sla_policy_metric_history
 
   _fivetran_quickstart_group:
     - group

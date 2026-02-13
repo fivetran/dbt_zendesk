@@ -4,6 +4,8 @@
 -- SLA policies are calculated for next_reply_time, first_reply_time, agent_work_time, requester_wait_time.  If you're company uses other SLA metrics, and would like this
 -- package to support those, please reach out to the Fivetran team on Slack.
 
+{% set check_sla_policy_metric_history = var('using_sla_policy_metric_history', True) and var('using_ticket_sla_policy', True) %}
+
 with ticket_field_history as (
 
   select *
@@ -21,6 +23,20 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__ticket_aggregates') }}
 
+{% if check_sla_policy_metric_history %}
+), sla_policy_metrics as (
+
+    select *
+    from {{ ref('stg_zendesk__sla_policy_metric_history') }}
+    where is_most_recent_record
+
+), ticket_sla_policy as (
+
+    select *
+    from {{ ref('stg_zendesk__ticket_sla_policy') }}
+
+{% endif %}
+
 ), sla_policy_applied as (
 
   select
@@ -33,7 +49,8 @@ with ticket_field_history as (
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ partition_by_source_relation(alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
     case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
-    {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours
+    {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
+    ticket.priority as current_priority
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
@@ -41,7 +58,8 @@ with ticket_field_history as (
   where ticket_field_history.value is not null
     and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
 
-), final as (
+), add_sla_policy_name as (
+
   select
     sla_policy_applied.*,
     sla_policy_name.value as sla_policy_name
@@ -52,6 +70,41 @@ with ticket_field_history as (
       and {{ dbt.date_trunc("second", "sla_policy_applied.valid_starting_at") }} >= {{ dbt.date_trunc("second", "sla_policy_name.valid_starting_at") }}
       and {{ dbt.date_trunc("second", "sla_policy_applied.valid_starting_at") }} < coalesce({{ dbt.date_trunc("second", "sla_policy_name.valid_ending_at") }}, {{ dbt.current_timestamp() }})
   where sla_policy_applied.latest_sla = 1
+
+), final as (
+
+{% if check_sla_policy_metric_history %}
+
+    select
+      add_sla_policy_name.source_relation,
+      add_sla_policy_name.ticket_id,
+      add_sla_policy_name.ticket_created_at,
+      add_sla_policy_name.valid_starting_at,
+      add_sla_policy_name.ticket_current_status,
+      add_sla_policy_name.metric,
+      add_sla_policy_name.latest_sla,
+      add_sla_policy_name.sla_applied_at,
+      coalesce(sla_policy_metrics.target, add_sla_policy_name.target) as target,
+      add_sla_policy_name.in_business_hours,
+      add_sla_policy_name.current_priority,
+      add_sla_policy_name.sla_policy_name
+
+    from add_sla_policy_name 
+    left join ticket_sla_policy -- Bringing this in for joining purposes only. Alternatively can join on sla_policy_name, but that is subject to change
+      on add_sla_policy_name.ticket_id = ticket_sla_policy.ticket_id
+      and add_sla_policy_name.source_relation = ticket_sla_policy.source_relation
+      and add_sla_policy_name.sla_applied_at = ticket_sla_policy.policy_applied_at
+    left join sla_policy_metrics
+      on add_sla_policy_name.metric = sla_policy_metrics.metric
+      and ticket_sla_policy.sla_policy_id = sla_policy_metrics.sla_policy_id
+      and add_sla_policy_name.current_priority = sla_policy_metrics.priority
+      and add_sla_policy_name.source_relation = sla_policy_metrics.source_relation
+
+{% else %}
+  
+  select *
+  from add_sla_policy_name
+{% endif %}
 )
 
 select *

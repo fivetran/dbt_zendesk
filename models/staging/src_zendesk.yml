@@ -501,3 +501,43 @@ sources:
             description: Type of chat event. Including but not limited to - `ChatMessage`, `ChatJoin`, `ChatLeave`, `ChatMessageStatus`, `ChatFileAttachment`, `ChatAcdSkillsDetected`, `ChatDepartmentTransfer`, `ChatEmailChanged`, `ChatNameChanged`, `ChatRatingChanged`, and `ChatRatingCommentChanged`.
           - name: url
             description: URL of the attached file for `ChatFileAttachment` types of events.
+
+      - name: sla_policy_metric_history
+        identifier: "{{ var('zendesk_sla_policy_metric_history_identifier', 'sla_policy_metric_history') }}"
+        description: Tracks historical changes to SLA policy targets at various ticket priority levels.
+        config:
+          freshness: null
+          enabled: "{{ var('using_sla_policy_metric_history', true) and var('zendesk_sources', []) == []  }}"
+        columns:
+          - name: index
+            description: Index number representing priority level within the SLA policy.
+          - name: sla_policy_id
+            description: The ID of the SLA policy associated with this metric.
+          - name: sla_policy_updated_at
+            description: Timestamp indicating when the SLA policy was last updated, used to track policy changes over time.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+          - name: business_hours
+            description: Boolean indicating whether the metric targets are being measured in business hours or calendar hours.
+          - name: metric
+            description: The type of SLA metric being tracked. Possible values include "agent_work_time", "first_reply_time", "next_reply_time", "pausable_update_time", "periodic_update_time", "requester_wait_time", and "total_resolution_time".
+          - name: priority
+            description: Priority that a ticket must match to be subject to this SLA metric, such as urgent, high, normal, or low.
+          - name: target
+            description: The total time within which the end-state for a metric should be met, measured in minutes
+
+      - name: ticket_sla_policy
+        identifier: "{{ var('zendesk_ticket_sla_policy_identifier', 'ticket_sla_policy') }}"
+        description: Tracks which SLA policies have been applied to tickets and when they were applied.
+        config:
+          freshness: null
+          enabled: "{{ var('using_ticket_sla_policy', true) and var('zendesk_sources', []) == []  }}"
+        columns:
+          - name: policy_applied_at
+            description: Timestamp indicating when the SLA policy was applied to the ticket.
+          - name: sla_policy_id
+            description: The ID of the SLA policy that was applied to the ticket.
+          - name: ticket_id
+            description: The ID of the ticket to which the SLA policy was applied.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
