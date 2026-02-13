@@ -449,6 +449,10 @@ sources:
               It helps track the visitor's interactions across different chat sessions and can be used to re-associate returning visits or sessions with the same visitor.
           - name: webpath
             description: JSON list of pages the customer navigated to during the chat.
+          - name: initiator
+            description: >
+              Identifies who initiated the chat. 1 = Agent-initiated (human Zendesk agent started the chat), 2 = End-user-initiated (customer/visitor clicked a web-widget, replied on WhatsApp, Instagram, etc.), 
+              3 = System-initiated (Zendesk’s Flow Builder, Answer Bot, or another automation created the conversation before any human agent stepped in)
 
       - name: ticket_chat_event
         identifier: '{{ var("zendesk_ticket_chat_event_identifier", "ticket_chat_event") }}'

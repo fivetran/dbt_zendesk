@@ -40,7 +40,9 @@ with ticket_history as (
         ticket_id,
         field_name,
         value,
-        null as is_public,
+        cast(null as {{ dbt.type_string() }}) as chat_id,
+        cast(null as {{ dbt.type_boolean() }}) as is_chat_comment,
+        cast(null as {{ dbt.type_boolean() }}) as is_public,
         user_id,
         valid_starting_at,
         valid_ending_at
@@ -51,13 +53,10 @@ with ticket_history as (
     select
         source_relation,
         ticket_id,
-        {# 
-        We want to be able to differentiate between ticket_comment and ticket_chat comments in the next CTE 
-        This is necessary because ticket_comment will batch together individual chat messages to the conversation level (in 1 record). 
-        We want to remove these aggregate conversations in favor of the individual messages
-        #}
-        cast('comment - not chat' as {{ dbt.type_string() }}) as field_name,
+        cast('comment' as {{ dbt.type_string() }}) as field_name,
         body as value,
+        cast(null as {{ dbt.type_string() }}) as chat_id,
+        false as is_chat_comment,
         is_public,
         user_id,
         created_at as valid_starting_at,
@@ -70,13 +69,10 @@ with ticket_history as (
     select
         source_relation,
         ticket_id,
-        {# 
-        We want to be able to differentiate between ticket_comment and ticket_chat comments in the next CTE 
-        This is necessary because ticket_comment will batch together individual chat messages to the conversation level (in 1 record). 
-        We want to remove these aggregate conversations in favor of the individual messages
-        #}
-        cast('comment - chat' as {{ dbt.type_string() }}) as field_name,
+        cast('comment' as {{ dbt.type_string() }}) as field_name,
         message as value,
+        chat_id,
+        true as is_chat_comment,
         true as is_public,
         actor_id as user_id,
         created_at as valid_starting_at,
@@ -88,11 +84,10 @@ with ticket_history as (
     select
         updates_union.source_relation,
         updates_union.ticket_id,
-        {# Now group comments back together since the conversation batches are filtered out in the where clause #}
-        case 
-            when updates_union.field_name in ('comment - chat', 'comment - not chat') then 'comment' 
-        else updates_union.field_name end as field_name,
+        updates_union.field_name,
         updates_union.value,
+        updates_union.chat_id,
+        updates_union.is_chat_comment,
         updates_union.is_public,
         updates_union.user_id,
         updates_union.valid_starting_at,
