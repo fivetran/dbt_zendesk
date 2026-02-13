@@ -1,4 +1,6 @@
-# dbt_zendesk v1.3.1
+# dbt_zendesk v1.3.1-a1
+
+[PR #248](https://github.com/fivetran/dbt_zendesk/pull/248) includes the following updates:
 
 ## Schema Changes
 

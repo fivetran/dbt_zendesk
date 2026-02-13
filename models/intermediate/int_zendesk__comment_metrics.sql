@@ -4,6 +4,19 @@ with ticket_comments as (
     from {{ ref('int_zendesk__comments_enriched') }}
 ),
 
+handoff_counts as (
+    select
+        source_relation,
+        ticket_id,
+        count(distinct case when commenter_role = 'internal_comment'
+            then user_id
+                end) as count_ticket_handoffs
+    from ticket_comments
+
+    group by 1, 2
+
+),
+
 comment_counts as (
     select
         source_relation,
@@ -30,9 +43,6 @@ comment_counts as (
             else 0
                 end) as count_internal_comments,
         count(*) as total_comments,
-        count(distinct case when commenter_role = 'internal_comment'
-            then user_id
-                end) as count_ticket_handoffs,
         sum(case when commenter_role = 'internal_comment' and is_public = true and previous_commenter_role != 'first_comment'
             then 1
             else 0
@@ -73,9 +83,6 @@ chat_comment_counts as (
             else null
                 end) as count_internal_comments,
         count(distinct chat_id) as total_comments,
-        count(distinct case when commenter_role = 'internal_comment'
-            then user_id
-                end) as count_ticket_handoffs,
         count(distinct case when commenter_role = 'internal_comment' and is_public = true and previous_commenter_role != 'first_comment'
             then chat_id
             else null
@@ -106,7 +113,6 @@ consolidate_comment_counts as (
         sum(count_public_comments) as count_public_comments,
         sum(count_internal_comments) as count_internal_comments,
         sum(total_comments) as total_comments,
-        sum(count_ticket_handoffs) as count_ticket_handoffs,
         sum(count_agent_replies) as count_agent_replies
     from comment_count_union
 
@@ -115,10 +121,14 @@ consolidate_comment_counts as (
 
 final as (
     select
-        *,
-        count_public_agent_comments = 1 as is_one_touch_resolution,
-        count_public_agent_comments = 2 as is_two_touch_resolution
+        consolidate_comment_counts.*,
+        handoff_counts.count_ticket_handoffs,
+        consolidate_comment_counts.count_public_agent_comments = 1 as is_one_touch_resolution,
+        consolidate_comment_counts.count_public_agent_comments = 2 as is_two_touch_resolution
     from consolidate_comment_counts
+    left join handoff_counts
+        on consolidate_comment_counts.source_relation = handoff_counts.source_relation
+        and consolidate_comment_counts.ticket_id = handoff_counts.ticket_id
 )
 
 select * 
