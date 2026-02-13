@@ -55,7 +55,7 @@ with ticket_history as (
         ticket_id,
         cast('comment' as {{ dbt.type_string() }}) as field_name,
         body as value,
-        cast(null as {{ dbt.type_string() }}) as chat_id, -- or hash
+        cast(null as {{ dbt.type_string() }}) as chat_id,
         false as is_chat_comment,
         is_public,
         user_id,
