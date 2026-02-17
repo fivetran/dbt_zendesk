@@ -87,7 +87,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=1.3.0", "<1.4.0"]
+    version: 1.4.0-a1
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -167,22 +167,24 @@ vars:
 ### Enable/Disable models
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, or `ticket_chat_event` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_audit_log`, `using_schedule_histories`, and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, `ticket_chat_event`, `sla_policy_metric_history`, or `ticket_sla_policy` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_audit_log` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
 
 ```yml
 vars:
-    using_audit_log:            True          #Enable if you are using audit_log for schedule and/or user_role histories
-    using_schedule_histories:   False         #Used in conjunction with using_audit_log. Set to false to disable schedule histories with audit_log.
-    using_user_role_histories:  False         #Used in conjunction with using_audit_log. Set to false to disable user_role histories with audit_log.
-    using_ticket_chat:          True          #Enable if you are using ticket_chat or ticket_chat_event
-    using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
-    using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
-    using_domain_names:         False         #Disable if you are not using domain names
-    using_user_tags:            False         #Disable if you are not using user tags
-    using_ticket_form_history:  False         #Disable if you are not using ticket form history
-    using_brands:               False         #Disable if you are not using brands
-    using_organizations:        False         #Disable if you are not using organizations. Setting this to False will also disable organization tags. 
-    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_ticket_chat:                  True          #Enable if you are using ticket_chat or ticket_chat_event
+    using_audit_log:                    True          #Enable if you are using audit_log for schedule and/or user_role histories
+    using_schedule_histories:           False         #Used in conjunction with using_audit_log. Set to false to disable schedule histories with audit_log.
+    using_user_role_histories:          False         #Used in conjunction with using_audit_log. Set to false to disable user_role histories with audit_log.
+    using_sla_policy_metric_history:    False         #Disable if you are using sla_policy_metric_history
+    using_ticket_sla_policy:            False         #Disable if you are using ticket_sla_policy
+    using_schedules:                    False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone
+    using_holidays:                     False         #Disable if you are not using schedule_holidays for holidays
+    using_domain_names:                 False         #Disable if you are not using domain names
+    using_user_tags:                    False         #Disable if you are not using user tags
+    using_ticket_form_history:          False         #Disable if you are not using ticket form history
+    using_brands:                       False         #Disable if you are not using brands
+    using_organizations:                False         #Disable if you are not using organizations. Setting this to False will also disable organization tags.
+    using_organization_tags:            False         #Disable if you are not using organization tags
 ```
 
 ### (Optional) Additional configurations

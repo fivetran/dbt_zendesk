@@ -1,3 +1,27 @@
+# dbt_zendesk v1.4.0-a1
+
+[PR #249](https://github.com/fivetran/dbt_zendesk/pull/249) includes the following updates:
+
+## Schema Changes
+
+**4 total changes • 0 possible breaking changes**
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`stg_zendesk__sla_policy_metric_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history) | New staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy) | New staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+| [`stg_zendesk__sla_policy_metric_history_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history_tmp) | New tmp staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy_tmp) | New tmp staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+
+## Feature Update
+- Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. 
+  - These new tables are dynamically enabled in Fivetran Quickstart based on whether they are being actively synced. For dbt Core users, the tables are enabled by default but can be disabled with the following configuration in your `dbt_project.yml`:
+```yml
+vars:
+  using_sla_policy_metric_history: false
+  using_ticket_sla_policy: false
+```
+- Adjusts SLA policy logic to use the **current** ticket priority level's targets for calculating metrics. Previously, targets were taken from the priority that a ticket was *first* assigned to.
+
 # dbt_zendesk v1.3.0
 
 [PR #245](https://github.com/fivetran/dbt_zendesk/pull/245) includes the following updates:

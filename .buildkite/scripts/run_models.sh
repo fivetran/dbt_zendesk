@@ -21,7 +21,7 @@ dbt source freshness --target "$db" || echo "...Only verifying freshness runs…
 dbt run --target "$db" --full-refresh
 dbt run --target "$db"
 dbt test --target "$db"
-dbt run --vars '{using_audit_log: true, zendesk__unstructured_enabled: true, using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false, using_organizations: false, using_ticket_chat: true}' --target "$db" --full-refresh
+dbt run --vars '{using_sla_policy_metric_history: false, using_ticket_sla_policy: false, using_audit_log: true, zendesk__unstructured_enabled: true, using_schedules: false, using_domain_names: false, using_user_tags: false, using_ticket_form_history: false, using_organization_tags: false, using_organizations: false, using_ticket_chat: true}' --target "$db" --full-refresh
 dbt test --target "$db"
 dbt run --vars '{using_audit_log: true, internal_user_criteria: "role like '\''%agent%'\''", using_schedule_histories: false, using_holidays: false, using_ticket_chat: true}' --target "$db" --full-refresh
 dbt test --target "$db"
