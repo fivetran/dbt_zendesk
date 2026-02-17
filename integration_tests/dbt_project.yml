@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '1.3.0'
+version: '1.3.1'
 
 profile: 'integration_tests'
 
@@ -40,9 +40,9 @@ vars:
   # using_user_tags: false
   # using_organization_tags: false
   # using_holidays: false
-  # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80,11095)
-  # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80)
-  # fivetran_integrity_sla_count_match_tickets: (11109, 11129, 11144, 11145, 11146, 11147)
+  # fivetran_integrity_sla_metric_parity_exclusion_tickets: (56,80,11095,11157)
+  # fivetran_integrity_sla_first_reply_time_exclusion_tickets: (56,80,11157)
+  # fivetran_integrity_sla_count_match_tickets: (11109, 11129, 11144, 11145, 11146, 11147,11157)
   # consistency_test_exclude_fields: ['ticket_tags', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
 
 models:

@@ -1,4 +1,4 @@
---To enable this model, set the using_sla_policy_metric_history variable within your dbt_project.yml file to True.
+--To disable this model, set the using_sla_policy_metric_history variable within your dbt_project.yml file to False.
 {{ config(enabled=var('using_sla_policy_metric_history', True)) }}
 
 with base as (
@@ -47,5 +47,5 @@ final as (
 
 select 
     *,
-    row_number() over (partition by source_relation, sla_policy_id, metric, priority order by sla_policy_updated_at desc) = 1 as is_most_recent_record
+    row_number() over (partition by sla_policy_id, metric, priority {{ partition_by_source_relation() }} order by sla_policy_updated_at desc) = 1 as is_most_recent_record
 from final

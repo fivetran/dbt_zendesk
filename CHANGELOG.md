@@ -1,4 +1,4 @@
-# dbt_zendesk v1.3.1
+# dbt_zendesk v1.3.1-b1
 
 ## Schema Changes
 
