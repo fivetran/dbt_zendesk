@@ -14,14 +14,12 @@
 
 ## Feature Update
 - Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. 
-  - These new tables are dynamically enabled in Fivetran Quickstart and enabled by default otherwise. To disable them, add the following configuration to your `dbt_project.yml`:
+  - These new tables are dynamically enabled in Fivetran Quickstart based on whether they are being actively synced. For dbt Core users, the tables are enabled by default but can be disabled with the following configuration in your `dbt_project.yml`:
 ```yml
 vars:
   using_sla_policy_metric_history: false
   using_ticket_sla_policy: false
 ```
-
-## Bug Fix
 - Adjusts SLA policy logic to use the **current** ticket priority level's targets for calculating metrics. Previously, targets were taken from the priority that a ticket was *first* assigned to.
 
 # dbt_zendesk v1.3.0
