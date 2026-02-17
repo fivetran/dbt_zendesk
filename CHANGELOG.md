@@ -1,4 +1,6 @@
-# dbt_zendesk v1.3.1-b1
+# dbt_zendesk v1.4.0-a1
+
+[PR #249](https://github.com/fivetran/dbt_zendesk/pull/249) includes the following updates:
 
 ## Schema Changes
 
@@ -12,7 +14,7 @@
 
 ## Feature Update
 - Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. 
-  - These new tables are dynamically enabled in Fivetran Quickstart and true by default otherwise. To disable them, add the following configuration to your `dbt_project.yml`:
+  - These new tables are dynamically enabled in Fivetran Quickstart and enabled by default otherwise. To disable them, add the following configuration to your `dbt_project.yml`:
 ```yml
 vars:
   using_sla_policy_metric_history: false

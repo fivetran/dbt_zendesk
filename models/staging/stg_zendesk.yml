@@ -519,7 +519,7 @@ models:
         description: Timestamp indicating when the SLA policy was last updated, used to track policy changes over time.
       - name: _fivetran_synced
         description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
-      - name: business_hours
+      - name: in_business_hours
         description: Boolean indicating whether the metric targets are being measured in business hours or calendar hours.
       - name: metric
         description: The type of SLA metric being tracked. Possible values include "agent_work_time", "first_reply_time", "next_reply_time", "pausable_update_time", "periodic_update_time", "requester_wait_time", and "total_resolution_time".
