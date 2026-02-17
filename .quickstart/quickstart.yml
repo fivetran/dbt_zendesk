@@ -33,6 +33,8 @@ table_variables:
     - ticket_chat_event
   using_sla_policy_metric_history:
     - sla_policy_metric_history
+  using_ticket_sla_policy:
+    - ticket_sla_policy
 
   _fivetran_quickstart_group:
     - group

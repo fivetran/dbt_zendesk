@@ -29,6 +29,7 @@ vars:
     zendesk_ticket_chat_identifier:                       "ticket_chat_data"
     zendesk_ticket_chat_event_identifier:                 "ticket_chat_event_data"
     zendesk_sla_policy_metric_history_identifier:         "sla_policy_metric_history_data"
+    zendesk_ticket_sla_policy_identifier:                 "ticket_sla_policy_data"
 
   ## Uncomment for docs generation
   # zendesk__unstructured_enabled: True # @docs-include
