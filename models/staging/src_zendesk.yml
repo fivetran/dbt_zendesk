@@ -17,7 +17,7 @@ sources:
       - name: audit_log
         identifier: "{{ var('zendesk_audit_log_identifier', 'audit_log')}}"
         config:
-          enabled: "{{ var('using_audit_log', False) and var('zendesk_sources', []) == [] }}"
+          enabled: "{{ var('using_audit_log', False) }}"
           freshness: null
         description: >
           The `audit_log` table captures historical changes and actions within Zendesk. It provides a record of modifications 
