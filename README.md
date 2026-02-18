@@ -156,7 +156,20 @@ sources:
 
 > **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enabledisable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
 
-2. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
+2. In the above `.yml` file, remove the `and var('zendesk_sources', []) == []` condition from the enabled config for the following source tables (if you have the tables in your schemas):
+- [`audit_log`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L20)
+- [`brand`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L115)
+- [`domain_name`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L135)
+- [`organization_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L164)
+- [`organization`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L174)
+- [`user_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L242)
+- [`schedule`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L295)
+- [`ticket_form_history`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L327)
+- [`schedule_holiday`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L406)\
+- [`ticket_chat`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#424)
+- [`ticket_chat_event`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L458)
+
+3. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
 ```yml
 # dbt_project.yml
 vars:
