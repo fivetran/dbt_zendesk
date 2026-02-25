@@ -455,7 +455,14 @@ models:
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
           Empty string if you are not.
-
+      - name: initiator
+        description: >
+          Identifies who initiated the chat. 1 = Agent-initiated (human Zendesk agent started the chat), 2 = End-user-initiated (customer/visitor clicked a web-widget, replied on WhatsApp, Instagram, etc.), 
+          3 = System-initiated (Zendesk’s Flow Builder, Answer Bot, or another automation created the conversation before any human agent stepped in)
+      - name: initiator_type
+        description: >
+          A more human readable version of the `initiator` column. Possible values are `agent`, `end-user`, `system`, and `unknown`.
+          
   - name: stg_zendesk__ticket_chat_event
     description: Information about chat and messaging events on tickets. Excludes records in which the `actor_id` is either `__trigger` or `__system`.
     columns:

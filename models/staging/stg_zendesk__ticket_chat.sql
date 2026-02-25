@@ -34,10 +34,18 @@ final as (
         integration_id,
         ticket_id,
         user_id,
-        visitor_id
+        visitor_id,
+        cast(initiator as {{ dbt.type_string() }}) as initiator
 
     from fields
 )
 
-select *
+select 
+    *,
+    case 
+        when initiator = '1' then 'agent'
+        when initiator = '2' then 'end-user'
+        when initiator = '5' then 'system'
+        else 'unknown' 
+    end as initiator_type
 from final
