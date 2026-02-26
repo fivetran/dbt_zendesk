@@ -64,6 +64,8 @@ vars:
 
 # dbt_zendesk v1.3.1-a1
 
+> This pre-release is folded into [v1.4.0](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md#dbt_zendesk-v140). It is not included in v1.3.1.
+
 [PR #248](https://github.com/fivetran/dbt_zendesk/pull/248) includes the following updates:
 
 ## Schema Changes
