@@ -47,6 +47,9 @@ vars:
   # consistency_test_exclude_fields: ['ticket_tags', 'assignee_ticket_last_update_at', 'assignee_last_login_at', 'requester_created_at', 'requester_updated_at', 'requester_ticket_last_update_at','requester_organization_created_at', 'requester_organization_updated_at', 'requester_last_login_at', 'created_at', 'updated_at'] 
 
 models:
+  +persist_docs:
+    relation: true
+    columns: "{{ false if target.type in ('databricks') else true }}"
   +schema: "zendesk_{{ var('directed_schema','dev') }}"
 
 seeds:
