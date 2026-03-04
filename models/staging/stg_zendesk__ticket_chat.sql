@@ -40,12 +40,5 @@ final as (
     from fields
 )
 
-select 
-    *,
-    case 
-        when initiator = '1' then 'agent'
-        when initiator = '2' then 'end-user'
-        when initiator = '5' then 'system'
-        else 'unknown' 
-    end as initiator_type
+select *
 from final

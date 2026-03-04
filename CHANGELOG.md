@@ -7,7 +7,7 @@
 **5 total changes • 0 possible breaking changes**
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------------ | ------------ | --------- |
-| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` and `initiator_type` | Reflects the persona that initiated the conversation (agent, end user, system, or unknown). |
+| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` | Reflects the persona that initiated the conversation (agent, end user, or system). |
 | [`stg_zendesk__sla_policy_metric_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history) | New staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
 | [`stg_zendesk__ticket_sla_policy`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy) | New staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
 | [`stg_zendesk__sla_policy_metric_history_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history_tmp) | New temp staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
