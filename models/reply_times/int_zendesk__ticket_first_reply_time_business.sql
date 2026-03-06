@@ -61,7 +61,7 @@ with ticket_reply_times as (
 
 ), weeks as (
 
-    {{ dbt_utils.generate_series(52) }}
+    {{ dbt_utils.generate_series(var('max_ticket_length_weeks', 52)) }}
 
 ), weeks_cross_ticket_first_reply as (
     -- because time is reported in minutes since the beginning of the week, we have to split up time spent on the ticket into calendar weeks

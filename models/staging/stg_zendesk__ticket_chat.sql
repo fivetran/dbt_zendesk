@@ -34,7 +34,8 @@ final as (
         integration_id,
         ticket_id,
         user_id,
-        visitor_id
+        visitor_id,
+        cast(initiator as {{ dbt.type_string() }}) as initiator
 
     from fields
 )

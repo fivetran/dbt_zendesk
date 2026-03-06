@@ -1,7 +1,7 @@
 database_key: zendesk_database
 schema_key: zendesk_schema
 
-dbt_versions: ">=1.3.0 <2.0.0"
+dbt_versions: ">=1.3.0 <3.0.0"
 
 table_variables:
   using_audit_log:
@@ -31,6 +31,15 @@ table_variables:
   using_ticket_chat:
     - ticket_chat
     - ticket_chat_event
+  using_sla_policy_metric_history:
+    - sla_policy_metric_history
+  using_ticket_sla_policy:
+    - ticket_sla_policy
+
+  _fivetran_quickstart_group:
+    - group
+  _fivetran_quickstart_ticket_tag:
+    - ticket_tag
 
 destination_configurations:
   databricks:
@@ -46,3 +55,31 @@ public_models: [
   "zendesk__sla_policies",
   "zendesk__ticket_backlog"
 ]
+
+supported_vars:
+  zendesk__ticket_passthrough_columns:
+    type: dictionary
+    description: "Additional `TICKET` columns to include in `zendesk__ticket_enriched` and `zendesk__ticket_metrics`"
+    display_name: "Additional Ticket Columns"
+
+  ticket_field_history_columns:
+    type: list
+    value:
+      - "assignee_id"
+      - "status"
+      - "priority"
+    description: "Ticket fields tracked daily in `zendesk__ticket_field_history` and `zendesk__ticket_backlog`"
+    display_name: "Ticket Field History Columns"
+
+  ticket_field_history_extension_months:
+    type: integer
+    value: 0
+    description: "Number of months that `zendesk__ticket_field_history` will track for each ticket after it has been closed"
+    display_name: "Post-Close Ticket Field History Extension (Months)"
+
+  ticket_field_history_timeframe_years:
+    type: integer
+    value: 50
+    description: "Number of years into the past that `zendesk__ticket_field_history` and `zendesk__ticket_backlog` will track"
+    display_name: "Ticket Field History Timeframe (Years)"
+
