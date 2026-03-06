@@ -1,9 +1,9 @@
 # dbt_zendesk v1.4.1
 
-[PR #254](https://github.com/fivetran/dbt_zendesk/pull/254) includes the following updates:
+[PR #254](https://github.com/fivetran/dbt_zendesk/pull/254) includes the following update:
 
-## Bug Fixes
-- Removed documentation from `zendesk.yml` for dynamic columns from `zendesk__ticket_field_history` and `zendesk__ticket_backlog`. Documenting these columns that might not exist in the materialized tables can cause `persist_docs` failures.
+## Bug Fix
+- Removed documentation from `zendesk.yml` for dynamic columns from `zendesk__ticket_field_history` and `zendesk__ticket_backlog` to prevent `persist_docs` errors when these columns are not present. 
 
 # dbt_zendesk v1.4.0
 
