@@ -2,7 +2,7 @@
 
 [PR #254](https://github.com/fivetran/dbt_zendesk/pull/254) includes the following update:
 
-## Bug Fix
+## Documentation
 - Removed documentation from `zendesk.yml` for dynamic columns from `zendesk__ticket_field_history` and `zendesk__ticket_backlog` to prevent `persist_docs` errors when these columns are not present. 
 
 # dbt_zendesk v1.4.0
