@@ -1,3 +1,22 @@
+# dbt_zendesk v1.5.0
+
+[PR #256](https://github.com/fivetran/dbt_zendesk/pull/256) includes the following updates:
+
+## Schema/Data Change
+
+**4 total changes • 2 possible breaking changes**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| `int_zendesk__ticket_first_resolution_time_business` **(Breaking)** | Removed field/model | | | Consolidated into `int_zendesk__ticket_resolution_time_business_combined`. |
+| `int_zendesk__ticket_full_resolution_time_business` **(Breaking)** | Removed field/model | | | Consolidated into `int_zendesk__ticket_resolution_time_business_combined`. |
+| [`int_zendesk__ticket_resolution_time_business_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_resolution_time_business_combined) | New field/model | | | Consolidates `int_zendesk__ticket_first_resolution_time_business` and `int_zendesk__ticket_full_resolution_time_business` into a single model that outputs both `first_resolution_business_minutes` and `full_resolution_business_minutes`. |
+| [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) | Changed field/model | `ticket_status_counter`, `unique_status_counter` | | Columns are deprecated as of March 2026 and will be removed in a future release. |
+
+## Under the Hood
+
+- Replaced reference to `stg__zendesk_user` with `int_zendesk__user_aggregates` in `zendesk__ticket_summary` to better align with dbt DAG best practices.
+
 # dbt_zendesk v1.4.0
 
 [PR #252](https://github.com/fivetran/dbt_zendesk/pull/252) includes the following updates:

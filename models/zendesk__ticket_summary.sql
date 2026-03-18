@@ -4,7 +4,7 @@ with ticket_metrics as (
 
 ), user_table as (
     select *
-    from {{ ref('stg_zendesk__user') }}
+    from {{ ref('int_zendesk__user_aggregates') }}
 
 ), user_sum as (
     select
