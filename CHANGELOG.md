@@ -17,6 +17,13 @@
 
 - Replaced reference to `stg__zendesk_user` with `int_zendesk__user_aggregates` in `zendesk__ticket_summary` to better align with dbt DAG best practices.
 
+# dbt_zendesk v1.4.1
+
+[PR #254](https://github.com/fivetran/dbt_zendesk/pull/254) includes the following update:
+
+## Documentation
+- Removed documentation from `zendesk.yml` for dynamic columns from `zendesk__ticket_field_history` and `zendesk__ticket_backlog` to prevent `persist_docs` errors when these columns are not present. 
+
 # dbt_zendesk v1.4.0
 
 [PR #252](https://github.com/fivetran/dbt_zendesk/pull/252) includes the following updates:
