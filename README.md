@@ -5,7 +5,7 @@ This dbt package transforms data from Fivetran's Zendesk connector into analytic
 
 ## Resources
 
-- Number of materialized models¹: 83
+- Number of materialized models¹: 82
 - Connector documentation
   - [Zendesk connector documentation](https://fivetran.com/docs/connectors/applications/zendesk)
   - [Zendesk ERD](https://fivetran.com/docs/connectors/applications/zendesk#schemainformation)
