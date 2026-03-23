@@ -1,21 +1,6 @@
 <!--section="zendesk_transformation_model"-->
 # Zendesk dbt Package
 
-<p align="left">
-    <a alt="License"
-        href="https://github.com/fivetran/dbt_zendesk/blob/main/LICENSE">
-        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
-    <a alt="dbt-core">
-        <img src="https://img.shields.io/badge/dbt_Core™_version->=1.3.0,_<3.0.0-orange.svg" /></a>
-    <a alt="Maintained?">
-        <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" /></a>
-    <a alt="PRs">
-        <img src="https://img.shields.io/badge/Contributions-welcome-blueviolet" /></a>
-    <a alt="Fivetran Quickstart Compatible"
-        href="https://fivetran.com/docs/transformations/data-models/quickstart-management#quickstartmanagement">
-        <img src="https://img.shields.io/badge/Fivetran_Quickstart_Compatible%3F-yes-green.svg" /></a>
-</p>
-
 This dbt package transforms data from Fivetran's Zendesk connector into analytics-ready tables.
 
 ## Resources
@@ -29,6 +14,8 @@ This dbt package transforms data from Fivetran's Zendesk connector into analytic
   - [dbt Docs](https://fivetran.github.io/dbt_zendesk/#!/overview)
   - [DAG](https://fivetran.github.io/dbt_zendesk/#!/overview?g_v=1)
   - [Changelog](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md)
+- dbt Core™ supported versions
+  - `>=1.3.0, <3.0.0`
 
 ## What does this dbt package do?
 This package enables you to better understand the performance of your Support team and analyze ticket velocity over time. It creates enriched models with metrics focused on response times, resolution times, and work times.
@@ -87,7 +74,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=1.3.0", "<1.4.0"]
+    version: [">=1.4.0", "<1.5.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -156,7 +143,20 @@ sources:
 
 > **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enabledisable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
 
-2. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
+2. In the above `.yml` file, remove the `and var('zendesk_sources', []) == []` condition from the enabled config for the following source tables (if you have the tables in your schemas):
+- [`audit_log`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L20)
+- [`brand`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L115)
+- [`domain_name`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L135)
+- [`organization_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L164)
+- [`organization`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L174)
+- [`user_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L242)
+- [`schedule`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L295)
+- [`ticket_form_history`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L327)
+- [`schedule_holiday`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L406)\
+- [`ticket_chat`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#424)
+- [`ticket_chat_event`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L458)
+
+3. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
 ```yml
 # dbt_project.yml
 vars:
@@ -167,22 +167,26 @@ vars:
 ### Enable/Disable models
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, or `ticket_chat_event` features, and allows you to disable the corresponding functionality. By default, all variables' values are assumed to be `true`, except for `using_audit_log`, `using_schedule_histories`, and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, `ticket_chat_event`, `sla_policy_metric_history`, or `ticket_sla_policy` features, and allows you to disable the corresponding functionality.
+> 
+> By default, all variables' values are assumed to be `true`, except for `using_audit_log` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
 
 ```yml
 vars:
-    using_audit_log:            True          #Enable if you are using audit_log for schedule and/or user_role histories
-    using_schedule_histories:   False         #Used in conjunction with using_audit_log. Set to false to disable schedule histories with audit_log.
-    using_user_role_histories:  False         #Used in conjunction with using_audit_log. Set to false to disable user_role histories with audit_log.
-    using_ticket_chat:          True          #Enable if you are using ticket_chat or ticket_chat_event
-    using_schedules:            False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone  
-    using_holidays:             False         #Disable if you are not using schedule_holidays for holidays
-    using_domain_names:         False         #Disable if you are not using domain names
-    using_user_tags:            False         #Disable if you are not using user tags
-    using_ticket_form_history:  False         #Disable if you are not using ticket form history
-    using_brands:               False         #Disable if you are not using brands
-    using_organizations:        False         #Disable if you are not using organizations. Setting this to False will also disable organization tags. 
-    using_organization_tags:    False         #Disable if you are not using organization tags
+    using_ticket_chat:                  True          #Enable if you are using ticket_chat or ticket_chat_event
+    using_audit_log:                    True          #Enable if you are using audit_log for schedule and/or user_role histories
+    using_schedule_histories:           False         #Used in conjunction with using_audit_log. Set to false to disable schedule histories with audit_log.
+    using_user_role_histories:          False         #Used in conjunction with using_audit_log. Set to false to disable user_role histories with audit_log.
+    using_sla_policy_metric_history:    False         #Disable if you are using sla_policy_metric_history
+    using_ticket_sla_policy:            False         #Disable if you are using ticket_sla_policy
+    using_schedules:                    False         #Disable if you are not using schedules, which requires source tables ticket_schedule, daylight_time, and time_zone
+    using_holidays:                     False         #Disable if you are not using schedule_holidays for holidays
+    using_domain_names:                 False         #Disable if you are not using domain names
+    using_user_tags:                    False         #Disable if you are not using user tags
+    using_ticket_form_history:          False         #Disable if you are not using ticket form history
+    using_brands:                       False         #Disable if you are not using brands
+    using_organizations:                False         #Disable if you are not using organizations. Setting this to False will also disable organization tags.
+    using_organization_tags:            False         #Disable if you are not using organization tags
 ```
 
 ### (Optional) Additional configurations
@@ -200,7 +204,7 @@ vars:
 
 ##### Customizing Chunk Size for Vectorization
 
-The `zendesk__document` model was developed to limit approximate chunk sizes to 7,500 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
+The `zendesk__document` model was developed to limit approximate chunk sizes to 5,000 tokens, optimized for OpenAI models. However, you can adjust this limit by setting the `max_tokens` variable in your `dbt_project.yml`:
 
 ```yml
 vars:

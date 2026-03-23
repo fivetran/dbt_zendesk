@@ -1,3 +1,85 @@
+# dbt_zendesk v1.4.0
+
+[PR #252](https://github.com/fivetran/dbt_zendesk/pull/252) includes the following updates:
+
+## Schema Changes
+
+**5 total changes • 0 possible breaking changes**
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` | Reflects the persona that initiated the conversation (agent, end user, or system). |
+| [`stg_zendesk__sla_policy_metric_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history) | New staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy) | New staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+| [`stg_zendesk__sla_policy_metric_history_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history_tmp) | New temp staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy_tmp) | New temp staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+
+## Feature Update
+- Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. 
+  - These new tables are dynamically enabled in Fivetran Quickstart based on whether they are being actively synced. For dbt Core users, the tables are enabled by default but can be disabled with the following configuration in your `dbt_project.yml`:
+```yml
+vars:
+  using_sla_policy_metric_history: false
+  using_ticket_sla_policy: false
+```
+- Adjusts SLA policy logic to use the **current** ticket priority level's targets for calculating metrics. Previously, targets were taken from the priority that a ticket was *first* assigned to.
+
+## Bug Fixes
+- Updates Snowflake regex parsing in the `extract_schedule_day()` [macro](https://github.com/fivetran/dbt_zendesk/blob/main/macros/extract_schedule_day.sql).
+- Aligns with Zendesk's method of calculating agent replies and comment metrics for messaging/chat. Previously, we counted each individual chat message as a distinct comment. In accordance with Zendesk's [docs](https://support.zendesk.com/hc/en-us/articles/4408830458778-What-is-the-difference-between-public-comments-and-agent-replies-in-reporting), we now count active conversation sessions.
+  - For example, if an agent sends three messages in the same active conversation and then the conversation ends, that exchange counts as one Agent reply. Previously, we would have counted three replies.
+
+# dbt_zendesk v1.4.0-a1
+
+[PR #249](https://github.com/fivetran/dbt_zendesk/pull/249) includes the following updates:
+
+## Schema Changes
+
+**4 total changes • 0 possible breaking changes**
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`stg_zendesk__sla_policy_metric_history`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history) | New staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy) | New staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+| [`stg_zendesk__sla_policy_metric_history_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__sla_policy_metric_history_tmp) | New tmp staging model |  |  | Tracks historical changes to SLA policy targets at various ticket priority levels. Can be disabled by setting the `using_sla_policy_metric_history` variable to `False`. |
+| [`stg_zendesk__ticket_sla_policy_tmp`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_sla_policy_tmp) | New tmp staging model |  |  | Tracks which SLA policies have been applied to tickets and when they were applied. Can be disabled by setting the `using_ticket_sla_policy` variable to `False`. |
+
+## Feature Update
+- Adds support for the `sla_policy_metric_history` and `ticket_sla_policy` source tables to enable more granular SLA policy tracking based on ticket priority levels. 
+  - These new tables are dynamically enabled in Fivetran Quickstart based on whether they are being actively synced. For dbt Core users, the tables are enabled by default but can be disabled with the following configuration in your `dbt_project.yml`:
+```yml
+vars:
+  using_sla_policy_metric_history: false
+  using_ticket_sla_policy: false
+```
+- Adjusts SLA policy logic to use the **current** ticket priority level's targets for calculating metrics. Previously, targets were taken from the priority that a ticket was *first* assigned to.
+
+# dbt_zendesk v1.3.1
+
+[PR #247](https://github.com/fivetran/dbt_zendesk/pull/247) includes the following updates:
+
+## Documentation
+- Updates the [instructions](https://github.com/fivetran/dbt_zendesk/tree/main?tab=readme-ov-file#recommended-incorporate-unioned-sources-into-dag) for running the package on unioned data sources and integrating source tables into your project's DAG.
+
+## Bug Fix
+- Aligns the `audit_log` DAG inclusion logic with other source tables to avoid failures during docs generation.
+
+# dbt_zendesk v1.3.1-a1
+
+> This pre-release is folded into [v1.4.0](https://github.com/fivetran/dbt_zendesk/blob/main/CHANGELOG.md#dbt_zendesk-v140). It is not included in v1.3.1.
+
+[PR #248](https://github.com/fivetran/dbt_zendesk/pull/248) includes the following updates:
+
+## Schema Changes
+
+**2 total changes • 0 possible breaking changes**
+| **Data Model/Column** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------------ | ------------ | --------- |
+| [`stg_zendesk__ticket_chat`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_chat) | New Columns |  | `initiator` and `initiator_type` | Reflects the persona that initiated the conversation (agent, end user, system, or unknown). |
+
+## Bug Fixes
+- Updates Snowflake regex parsing in the `extract_schedule_day()` [macro](https://github.com/fivetran/dbt_zendesk/blob/main/macros/extract_schedule_day.sql).
+- Aligns with Zendesk's method of calculating agent replies and comment metrics for messaging/chat. Previously, we counted each individual chat message as a distinct comment. In accordance with Zendesk's [docs](https://support.zendesk.com/hc/en-us/articles/4408830458778-What-is-the-difference-between-public-comments-and-agent-replies-in-reporting), we now count active conversation sessions.
+  - For example, if an agent sends three messages in the same active conversation and then the conversation ends, that exchange counts as one Agent reply. Previously, we would have counted three replies.
+
 # dbt_zendesk v1.3.0
 
 [PR #245](https://github.com/fivetran/dbt_zendesk/pull/245) includes the following updates:
