@@ -218,12 +218,6 @@ models:
         description: A ticket's unique identifier, it is automatically assigned when the ticket is created
       - name: ticket_day_id
         description: The unique key of the table, a surrogate key of `date_day`, `ticket_id`, and `source_relation`.
-      - name: assignee_id
-        description: The assignee id assigned to the ticket
-      - name: status
-        description: The status of the ticket
-      - name: priority
-        description: The tickets priority ranking
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -576,10 +570,6 @@ models:
         description: The status of the ticket
       - name: created_channel
         description: The channel where the ticket was created
-      - name: assignee_name
-        description: The assignee name assigned to the ticket
-      - name: priority
-        description: The tickets priority ranking
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
