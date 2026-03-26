@@ -1,5 +1,3 @@
--- To do -- can we delete ticket_status_counter and unique_status_counter?
-
 with ticket_status_history as (
 
     select *
@@ -18,8 +16,7 @@ with ticket_status_history as (
         "coalesce(valid_ending_at, " ~ dbt.current_timestamp() ~ ")",
         'minute') }} as status_duration_calendar_minutes,
     value as status,
-    -- MIGHT BE ABLE TO DELETE ROWS BELOW
-    row_number() over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at) as ticket_status_counter,
-    row_number() over (partition by ticket_id, value {{ partition_by_source_relation() }} order by valid_starting_at) as unique_status_counter
+    row_number() over (partition by ticket_id {{ partition_by_source_relation() }} order by valid_starting_at) as ticket_status_counter, -- Deprecated as of March, 2026. Will be removed in future release.
+    row_number() over (partition by ticket_id, value {{ partition_by_source_relation() }} order by valid_starting_at) as unique_status_counter -- Deprecated as of March, 2026. Will be removed in future release.
 
   from ticket_status_history

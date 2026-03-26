@@ -26,15 +26,10 @@ with ticket_enriched as (
 -- business hour CTEs
 {% if var('using_schedules', True) %}
 
-), ticket_first_resolution_time_business as (
+), ticket_resolution_time_business as (
 
   select *
-  from {{ ref('int_zendesk__ticket_first_resolution_time_business') }}
-
-), ticket_full_resolution_time_business as (
-
-  select *
-  from {{ ref('int_zendesk__ticket_full_resolution_time_business') }}
+  from {{ ref('int_zendesk__ticket_resolution_time_business_combined') }}
 
 ), ticket_work_time_business as (
 
@@ -155,8 +150,8 @@ left join ticket_comments
   select 
     ticket_enriched.source_relation,
     ticket_enriched.ticket_id,
-    round(cast(ticket_first_resolution_time_business.first_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as first_resolution_business_minutes,
-    round(cast(ticket_full_resolution_time_business.full_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as full_resolution_business_minutes,
+    round(cast(ticket_resolution_time_business.first_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as first_resolution_business_minutes,
+    round(cast(ticket_resolution_time_business.full_resolution_business_minutes as {{ dbt.type_numeric() }}), 4) as full_resolution_business_minutes,
     round(cast(ticket_first_reply_time_business.first_reply_time_business_minutes as {{ dbt.type_numeric() }}), 4) as first_reply_time_business_minutes,
     round(cast(ticket_work_time_business.agent_wait_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as agent_wait_time_in_business_minutes,
     round(cast(ticket_work_time_business.requester_wait_time_in_business_minutes as {{ dbt.type_numeric() }}), 4) as requester_wait_time_in_business_minutes,
@@ -168,13 +163,9 @@ left join ticket_comments
 
   from ticket_enriched
 
-  left join ticket_first_resolution_time_business
-    on ticket_enriched.ticket_id = ticket_first_resolution_time_business.ticket_id 
-    and ticket_enriched.source_relation = ticket_first_resolution_time_business.source_relation
-
-  left join ticket_full_resolution_time_business
-    on ticket_enriched.ticket_id = ticket_full_resolution_time_business.ticket_id 
-    and ticket_enriched.source_relation = ticket_full_resolution_time_business.source_relation
+  left join ticket_resolution_time_business
+    on ticket_enriched.ticket_id = ticket_resolution_time_business.ticket_id 
+    and ticket_enriched.source_relation = ticket_resolution_time_business.source_relation
   
   left join ticket_first_reply_time_business
     on ticket_enriched.ticket_id = ticket_first_reply_time_business.ticket_id 
