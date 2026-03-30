@@ -102,7 +102,7 @@ with reply_time_calendar_hours_sla as (
 ), lagging_time_block as (
   select
     *,
-    row_number() over (partition by ticket_id, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as day_index,
+    row_number() over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as day_index,
     lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as next_schedule_start,
     min(sla_breach_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
 		coalesce(lag(sum_lapsed_business_minutes) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
