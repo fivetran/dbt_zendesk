@@ -105,7 +105,7 @@ with reply_time_calendar_hours_sla as (
     row_number() over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as day_index,
     lead(sla_schedule_start_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at) as next_schedule_start,
     min(sla_breach_at) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at rows unbounded preceding) as first_sla_breach_at,
-		coalesce(lag(sum_lapsed_business_minutes) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
+    coalesce(lag(sum_lapsed_business_minutes) over (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation() }} order by sla_schedule_start_at), 0) as sum_lapsed_business_minutes_new,
     {{ dbt.datediff("sla_schedule_start_at", "agent_reply_at", 'second') }} / 60 as total_runtime_minutes -- total minutes from sla_schedule_start_at and agent reply time, before taking into account SLA end time
   from reply_time_breached_at_with_next_reply_timestamp
 

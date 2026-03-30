@@ -1,3 +1,11 @@
+# dbt_zendesk v1.5.1
+
+[PR #255](https://github.com/fivetran/dbt_zendesk/pull/255) includes the following update:
+
+## Bug Fix
+
+- Fixes incorrect SLA reply time calculations in [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) and [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_combined) for tickets with multiple SLA policies. Previously, `lapsed_business_minutes` and breach calculations mixed results across policies when the same `ticket_id`, `metric`, and `sla_applied_at` had more than one `sla_policy_name`. Window functions now partition by `sla_policy_name` to correctly isolate each policy's calculation.
+
 # dbt_zendesk v1.5.0
 
 [PR #256](https://github.com/fivetran/dbt_zendesk/pull/256) includes the following updates:
@@ -12,6 +20,7 @@
 | `int_zendesk__ticket_full_resolution_time_business` **(Breaking)** | Removed model | | | Consolidated into `int_zendesk__ticket_resolution_time_business_combined`. This table will no longer be updated in your target warehouse and can be dropped manually if desired. |
 | [`int_zendesk__ticket_resolution_time_business_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_resolution_time_business_combined) | New model | | | Consolidates `int_zendesk__ticket_first_resolution_time_business` and `int_zendesk__ticket_full_resolution_time_business` into a single model that outputs both fields: `first_resolution_business_minutes` and `full_resolution_business_minutes`, improving model runtime. |
 | [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) | Deprecated fields | `ticket_status_counter`, `unique_status_counter` | | Columns are deprecated as of March 2026 and will be removed in a future release. See [Github Issue](https://github.com/fivetran/dbt_zendesk/issues/257) for details. |
+
 
 ## Under the Hood
 
