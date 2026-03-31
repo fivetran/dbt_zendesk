@@ -4,7 +4,7 @@
 
 ## Bug Fix
 
-- Fixes incorrect SLA reply time calculations in [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) and [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_combined) for tickets with multiple SLA policies. Previously, `lapsed_business_minutes` and breach calculations mixed results across policies when the same `ticket_id`, `metric`, and `sla_applied_at` had more than one `sla_policy_name`. Window functions now partition by `sla_policy_name` to correctly isolate each policy's calculation.
+- Fixes non-deterministic SLA reply time calculations in [`int_zendesk__reply_time_business_hours`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_business_hours) and [`int_zendesk__reply_time_combined`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__reply_time_combined) for tickets with multiple SLA policies. Previously, `lapsed_business_minutes` and breach calculations mixed results across policies when the same `ticket_id`, `metric`, and `sla_applied_at` had more than one `sla_policy_name`. Window functions now partition by `sla_policy_name` to correctly isolate each policy's calculation.
 
 # dbt_zendesk v1.5.0
 

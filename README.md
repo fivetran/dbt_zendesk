@@ -167,9 +167,10 @@ vars:
 ### Enable/Disable models
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
+
 This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, `ticket_chat_event`, `sla_policy_metric_history`, or `ticket_sla_policy` features, and allows you to disable the corresponding functionality.
-> 
-> By default, all variables' values are assumed to be `true`, except for `using_audit_log` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
+
+By default, all variables' values are assumed to be `true`, except for `using_audit_log` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
 
 ```yml
 vars:
