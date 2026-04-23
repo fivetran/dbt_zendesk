@@ -8,6 +8,8 @@
     {"name": "priority", "datatype": dbt.type_string()},
     {"name": "sla_policy_id", "datatype": dbt.type_int()},
     {"name": "sla_policy_updated_at", "datatype": dbt.type_timestamp()},
+    {"name": "valid_starting_at", "datatype": dbt.type_timestamp()},
+    {"name": "valid_ending_at", "datatype": dbt.type_timestamp()},
     {"name": "target", "datatype": dbt.type_int()}
 ] %}
 
