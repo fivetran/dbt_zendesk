@@ -1,4 +1,4 @@
-# dbt_zendesk v1.6.0
+# dbt_zendesk v1.6.0-a1
 
 ## Schema/Data Change (--full-refresh required after upgrading)
 
