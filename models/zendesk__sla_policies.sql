@@ -37,7 +37,7 @@ with reply_time_sla as (
     sla_applied_at,
     target,
     in_business_hours,
-    historical_priority,
+    priority_applied,
     sla_update_at as sla_breach_at,
     sla_elapsed_time,
     is_sla_breached
@@ -53,7 +53,7 @@ union all
     sla_applied_at,
     target,
     false as in_business_hours,
-    historical_priority,
+    priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
@@ -71,7 +71,7 @@ union all
     sla_applied_at,
     target,
     false as in_business_hours,
-    historical_priority,
+    priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
@@ -92,7 +92,7 @@ union all
     sla_applied_at,
     target,
     true as in_business_hours,
-    historical_priority,
+    priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
@@ -110,7 +110,7 @@ union all
     sla_applied_at,
     target,
     true as in_business_hours,
-    historical_priority,
+    priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
     {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
@@ -132,7 +132,7 @@ select
   sla_applied_at,
   target,
   in_business_hours,
-  historical_priority,
+  priority_applied,
   sla_breach_at,
   case when sla_elapsed_time is null
     then round(cast(({{ dbt.datediff("sla_applied_at", dbt.current_timestamp(), 'second') }} / 60) as {{ dbt.type_numeric() }}), 4)  --This will create an entry for active sla's

@@ -33,7 +33,7 @@ with reply_time_calendar_hours_sla as (
     cast(null as {{ dbt.type_numeric() }}) as sum_lapsed_business_minutes,
     target,
     in_business_hours,
-    historical_priority,
+    priority_applied,
     sla_breach_at,
     cast(null as {{ dbt.type_numeric() }}) as week_number,
     cast(null as {{ dbt.type_numeric() }}) as total_schedule_weekly_business_minutes
@@ -55,7 +55,7 @@ with reply_time_calendar_hours_sla as (
     sum_lapsed_business_minutes,
     target,
     in_business_hours,
-    historical_priority,
+    priority_applied,
     sla_breach_exact_time as sla_breach_at,
     week_number,
     total_schedule_weekly_business_minutes
@@ -84,7 +84,7 @@ with reply_time_calendar_hours_sla as (
     reply_time_breached_at.sum_lapsed_business_minutes,
     reply_time_breached_at.target,
     reply_time_breached_at.in_business_hours,
-    reply_time_breached_at.historical_priority,
+    reply_time_breached_at.priority_applied,
     reply_time_breached_at.sla_breach_at,
     reply_time_breached_at.week_number,
     min(reply_time_breached_at.sla_schedule_start_at) as sla_schedule_start_at,

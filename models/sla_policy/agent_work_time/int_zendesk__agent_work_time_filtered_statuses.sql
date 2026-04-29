@@ -25,7 +25,7 @@ with agent_work_time_sla as (
     agent_work_time_sla.sla_policy_name,
     agent_work_time_sla.ticket_created_at,
     agent_work_time_sla.in_business_hours,
-    agent_work_time_sla.historical_priority
+    agent_work_time_sla.priority_applied
   from ticket_historical_status
   join agent_work_time_sla
     on ticket_historical_status.ticket_id = agent_work_time_sla.ticket_id

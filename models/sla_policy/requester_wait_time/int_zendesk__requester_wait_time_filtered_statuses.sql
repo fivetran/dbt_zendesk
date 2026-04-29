@@ -25,7 +25,7 @@ with requester_wait_time_sla as (
     requester_wait_time_sla.sla_policy_name,
     requester_wait_time_sla.ticket_created_at,
     requester_wait_time_sla.in_business_hours,
-    requester_wait_time_sla.historical_priority
+    requester_wait_time_sla.priority_applied
   from ticket_historical_status
   join requester_wait_time_sla
     on ticket_historical_status.ticket_id = requester_wait_time_sla.ticket_id

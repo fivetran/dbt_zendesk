@@ -85,7 +85,7 @@ with ticket_field_history as (
 
     select
         add_sla_policy_name.*,
-        coalesce(ticket_priority_history.priority, add_sla_policy_name.current_priority) as historical_priority
+        coalesce(ticket_priority_history.priority, add_sla_policy_name.current_priority) as priority_applied
     from add_sla_policy_name
     left join ticket_priority_history
         on add_sla_policy_name.ticket_id = ticket_priority_history.ticket_id
@@ -109,7 +109,7 @@ with ticket_field_history as (
       coalesce(sla_policy_metrics.target, add_historical_priority.target) as target,
       add_historical_priority.in_business_hours,
       add_historical_priority.current_priority,
-      add_historical_priority.historical_priority,
+      add_historical_priority.priority_applied,
       add_historical_priority.sla_policy_name
 
     from add_historical_priority
@@ -120,7 +120,7 @@ with ticket_field_history as (
     left join sla_policy_metrics
       on add_historical_priority.metric = sla_policy_metrics.metric
       and ticket_sla_policy.sla_policy_id = sla_policy_metrics.sla_policy_id
-      and add_historical_priority.historical_priority = sla_policy_metrics.priority
+      and add_historical_priority.priority_applied = sla_policy_metrics.priority
       and add_historical_priority.source_relation = sla_policy_metrics.source_relation
       and add_historical_priority.sla_applied_at >= sla_policy_metrics.valid_starting_at
       and add_historical_priority.sla_applied_at < coalesce(sla_policy_metrics.valid_ending_at, {{ dbt.current_timestamp() }})
