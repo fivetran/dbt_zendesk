@@ -2,7 +2,7 @@
 
 ## Schema/Data Change (--full-refresh required after upgrading)
 
-**1 total changes • 1 possible breaking changes**
+**1 total change • 1 possible breaking change**
 
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------- | ------- | --------- |
