@@ -19,3 +19,5 @@ sla_policy_id,index,sla_policy_updated_at,business_hours,metric,priority,target,
 1002,1,2020-01-01 00:00:00,FALSE,requester_wait_time,high,960,2020-01-01 01:00:00.000
 1002,2,2020-01-01 00:00:00,FALSE,requester_wait_time,normal,1920,2020-01-01 01:00:00.000
 1002,3,2020-01-01 00:00:00,FALSE,requester_wait_time,low,5760,2020-01-01 01:00:00.000
+1002,4,2020-01-01 00:00:00,FALSE,first_reply_time,medium,720,2020-01-01 01:00:00.000
+1002,5,2020-01-01 00:00:00,FALSE,requester_wait_time,medium,1440,2020-01-01 01:00:00.000
