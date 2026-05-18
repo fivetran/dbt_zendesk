@@ -1,3 +1,11 @@
+# dbt_zendesk v1.6.0-a2
+
+## Under the Hood
+  - Introduced the `using_deliberate_quoting` variable (default `true`) to control whether column identifiers are quoted in staging tmp models. Set to `false` to use each warehouse's native default casing instead.
+  - Added a new `zendesk_star` macro as a replacement for `dbt_utils.star` that leverages the `using_deliberate_quoting` variable.
+  - Updated `union_zendesk_connections` and all 28 tmp staging models so that `zendesk_<table>_identifier` variable overrides are respected in both single-source and multi-source (union) mode.
+  - Updated `zendesk_union_relations` to leverage the `using_deliberate_quoting` variable when aliasing unioned columns.
+
 # dbt_zendesk v1.5.1
 
 [PR #255](https://github.com/fivetran/dbt_zendesk/pull/255) includes the following update:
