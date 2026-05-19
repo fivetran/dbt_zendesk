@@ -1,3 +1,15 @@
+# dbt_zendesk v1.6.0
+
+[PR #261](https://github.com/fivetran/dbt_zendesk/pull/261) includes the following update:
+
+## Schema/Data Change
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) **(Breaking)** | New columns | | `assignee_id`, `requester_id` | You will need to run a full refresh to backfill historical values. |
+
 # dbt_zendesk v1.5.1
 
 [PR #255](https://github.com/fivetran/dbt_zendesk/pull/255) includes the following update:
