@@ -1,14 +1,16 @@
 # dbt_zendesk v1.6.0
 
-[PR #261](https://github.com/fivetran/dbt_zendesk/pull/261) includes the following update:
+[PR #261](https://github.com/fivetran/dbt_zendesk/pull/261) includes the following updates:
 
-## Schema/Data Change
+## Schema/Data Changes
 
-**1 total change • 1 possible breaking change**
+**3 total changes • 2 possible breaking changes**
 
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------- | ------- | --------- |
-| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) **(Breaking)** | New columns | | `assignee_id`, `requester_id` | You will need to run a full refresh to backfill historical values. |
+| [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) **(Breaking)** | Removed fields | `ticket_status_counter`, `unique_status_counter` | | Columns were deprecated in v1.5.0 and are now removed. |
+| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) **(Breaking)** | New field | | `assignee_id` | Added by default when `assignee_id` is in `ticket_field_history_columns`. You will need to run a full refresh to backfill historical values. |
+| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) | New field | | `requester_id` | Added when `requester_id` is included in the `ticket_field_history_columns` variable. You will need to run a full refresh to backfill historical values.  |
 
 # dbt_zendesk v1.5.1
 
