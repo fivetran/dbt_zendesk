@@ -28,7 +28,6 @@ with ticket_field_history as (
 
     select *
     from {{ ref('stg_zendesk__sla_policy_metric_history') }}
-    where is_most_recent_record
 
 ), ticket_sla_policy as (
 
@@ -71,39 +70,65 @@ with ticket_field_history as (
       and {{ dbt.date_trunc("second", "sla_policy_applied.valid_starting_at") }} < coalesce({{ dbt.date_trunc("second", "sla_policy_name.valid_ending_at") }}, {{ dbt.current_timestamp() }})
   where sla_policy_applied.latest_sla = 1
 
+), ticket_priority_history as (
+
+    select
+        ticket_id,
+        source_relation,
+        valid_starting_at,
+        valid_ending_at,
+        value as priority
+    from {{ ref('int_zendesk__updates') }}
+    where field_name = 'priority'
+
+), add_historical_priority as (
+
+    select
+        add_sla_policy_name.*,
+        coalesce(ticket_priority_history.priority, add_sla_policy_name.current_priority) as priority_applied
+    from add_sla_policy_name
+    left join ticket_priority_history
+        on add_sla_policy_name.ticket_id = ticket_priority_history.ticket_id
+        and add_sla_policy_name.source_relation = ticket_priority_history.source_relation
+        and add_sla_policy_name.sla_applied_at >= ticket_priority_history.valid_starting_at
+        and add_sla_policy_name.sla_applied_at < coalesce(ticket_priority_history.valid_ending_at, {{ dbt.current_timestamp() }})
+
 ), final as (
 
 {% if check_sla_policy_metric_history %}
 
     select
-      add_sla_policy_name.source_relation,
-      add_sla_policy_name.ticket_id,
-      add_sla_policy_name.ticket_created_at,
-      add_sla_policy_name.valid_starting_at,
-      add_sla_policy_name.ticket_current_status,
-      add_sla_policy_name.metric,
-      add_sla_policy_name.latest_sla,
-      add_sla_policy_name.sla_applied_at,
-      coalesce(sla_policy_metrics.target, add_sla_policy_name.target) as target,
-      add_sla_policy_name.in_business_hours,
-      add_sla_policy_name.current_priority,
-      add_sla_policy_name.sla_policy_name
+      add_historical_priority.source_relation,
+      add_historical_priority.ticket_id,
+      add_historical_priority.ticket_created_at,
+      add_historical_priority.valid_starting_at,
+      add_historical_priority.ticket_current_status,
+      add_historical_priority.metric,
+      add_historical_priority.latest_sla,
+      add_historical_priority.sla_applied_at,
+      coalesce(sla_policy_metrics.target, add_historical_priority.target) as target,
+      add_historical_priority.in_business_hours,
+      add_historical_priority.current_priority,
+      add_historical_priority.priority_applied,
+      add_historical_priority.sla_policy_name
 
-    from add_sla_policy_name 
+    from add_historical_priority
     left join ticket_sla_policy -- Bringing this in for joining purposes only. Alternatively can join on sla_policy_name, but that is subject to change
-      on add_sla_policy_name.ticket_id = ticket_sla_policy.ticket_id
-      and add_sla_policy_name.source_relation = ticket_sla_policy.source_relation
-      and add_sla_policy_name.sla_applied_at = ticket_sla_policy.policy_applied_at
+      on add_historical_priority.ticket_id = ticket_sla_policy.ticket_id
+      and add_historical_priority.source_relation = ticket_sla_policy.source_relation
+      and add_historical_priority.sla_applied_at = ticket_sla_policy.policy_applied_at
     left join sla_policy_metrics
-      on add_sla_policy_name.metric = sla_policy_metrics.metric
+      on add_historical_priority.metric = sla_policy_metrics.metric
       and ticket_sla_policy.sla_policy_id = sla_policy_metrics.sla_policy_id
-      and add_sla_policy_name.current_priority = sla_policy_metrics.priority
-      and add_sla_policy_name.source_relation = sla_policy_metrics.source_relation
+      and add_historical_priority.priority_applied = sla_policy_metrics.priority
+      and add_historical_priority.source_relation = sla_policy_metrics.source_relation
+      and add_historical_priority.sla_applied_at >= sla_policy_metrics.valid_starting_at
+      and add_historical_priority.sla_applied_at < coalesce(sla_policy_metrics.valid_ending_at, {{ dbt.current_timestamp() }})
 
 {% else %}
-  
+
   select *
-  from add_sla_policy_name
+  from add_historical_priority
 {% endif %}
 )
 

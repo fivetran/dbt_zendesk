@@ -1,3 +1,18 @@
+# dbt_zendesk v1.6.0-a1
+
+## Schema/Data Change (--full-refresh required after upgrading)
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | New column | | `priority_applied` | The priority level that was active when each SLA event was applied. |
+
+## Feature Enhancement
+
+- Updates SLA models to use historical priority levels when applying SLA targets. SLA events now reference the priority that was in effect at the time the event occurred, rather than the current priority. This ensures tickets with priority changes over time receive accurate SLA target calculations.
+
+
 # dbt_zendesk v1.5.1
 
 [PR #255](https://github.com/fivetran/dbt_zendesk/pull/255) includes the following update:

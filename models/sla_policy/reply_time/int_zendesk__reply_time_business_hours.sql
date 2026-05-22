@@ -92,6 +92,7 @@ with ticket_schedules as (
     ticket_sla_applied_with_schedule_week_info.sla_applied_at,
     ticket_sla_applied_with_schedule_week_info.target,
     ticket_sla_applied_with_schedule_week_info.in_business_hours,
+    ticket_sla_applied_with_schedule_week_info.priority_applied,
     ticket_sla_applied_with_schedule_week_info.sla_policy_name,
     ticket_sla_applied_with_schedule_week_info.schedule_id,
     ticket_sla_applied_with_schedule_week_info.schedule_invalidated_at,
@@ -110,7 +111,7 @@ with ticket_schedules as (
     on ticket_sla_applied_with_schedule_week_info.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > ticket_sla_applied_with_schedule_week_info.sla_applied_at
     and ticket_solved_times.source_relation = ticket_sla_applied_with_schedule_week_info.source_relation
-  {{ dbt_utils.group_by(n=17) }}
+  {{ dbt_utils.group_by(n=18) }}
 
 ), week_index_calc as (
     select
@@ -221,6 +222,7 @@ with ticket_schedules as (
     target,
     sum_lapsed_business_minutes,
     in_business_hours,
+    priority_applied,
     sla_breach_at,
     is_breached_during_schedule,
     total_schedule_weekly_business_minutes,
