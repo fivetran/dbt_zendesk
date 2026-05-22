@@ -47,63 +47,80 @@ with ticket_schedules as (
   group by 1, 2
 
 ), ticket_sla_applied_with_schedules as (
-
-  select 
+  -- Join to ALL schedule periods that overlap with the SLA period, not just the one
+  -- active at sla_applied_at. This handles tickets that start under a 24/7 default
+  -- schedule and are later routed to a business-hours schedule via a trigger.
+  select
     sla_policy_applied.*,
     ticket_schedules.schedule_id,
-    ({{ dbt.datediff(
-            "cast(" ~ zendesk.fivetran_week_start('sla_policy_applied.sla_applied_at') ~ "as " ~ dbt.type_timestamp() ~ ")", 
-            "cast(sla_policy_applied.sla_applied_at as " ~ dbt.type_timestamp() ~ ")",
-            'second') }} /60
-          ) as start_time_in_minutes_from_week,
-      schedule_business_hours.total_schedule_weekly_business_minutes,
-    {{ zendesk.fivetran_week_start('sla_policy_applied.sla_applied_at') }} as start_week_date
+    ticket_schedules.schedule_invalidated_at,
+    greatest(sla_policy_applied.sla_applied_at, ticket_schedules.schedule_created_at) as schedule_period_start,
+    schedule_business_hours.total_schedule_weekly_business_minutes
 
   from sla_policy_applied
   left join ticket_schedules on sla_policy_applied.ticket_id = ticket_schedules.ticket_id
     and sla_policy_applied.source_relation = ticket_schedules.source_relation
-    and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_created_at') }} <= sla_policy_applied.sla_applied_at
-    and {{ fivetran_utils.timestamp_add('second', -1, 'ticket_schedules.schedule_invalidated_at') }} > sla_policy_applied.sla_applied_at
-  left join schedule_business_hours 
+    and ticket_schedules.schedule_invalidated_at > sla_policy_applied.sla_applied_at
+  left join schedule_business_hours
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
     and ticket_schedules.source_relation = schedule_business_hours.source_relation
   where sla_policy_applied.in_business_hours
     and metric in ('next_reply_time', 'first_reply_time')
 
+), ticket_sla_applied_with_schedule_week_info as (
+  -- Compute week-relative start fields from schedule_period_start so the
+  -- fivetran_week_start macro receives a simple column reference, not an expression.
+  select
+    *,
+    ({{ dbt.datediff(
+            "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ "as " ~ dbt.type_timestamp() ~ ")",
+            "cast(schedule_period_start as " ~ dbt.type_timestamp() ~ ")",
+            'second') }} /60
+          ) as start_time_in_minutes_from_week,
+    {{ zendesk.fivetran_week_start('sla_applied_at') }} as start_week_date
+  from ticket_sla_applied_with_schedules
+
 ), first_reply_solve_times as (
   select
-    ticket_sla_applied_with_schedules.source_relation,
-    ticket_sla_applied_with_schedules.ticket_id,
-    ticket_sla_applied_with_schedules.ticket_created_at,
-    ticket_sla_applied_with_schedules.valid_starting_at,
-    ticket_sla_applied_with_schedules.ticket_current_status,
-    ticket_sla_applied_with_schedules.metric,
-    ticket_sla_applied_with_schedules.latest_sla,
-    ticket_sla_applied_with_schedules.sla_applied_at,
-    ticket_sla_applied_with_schedules.target,
-    ticket_sla_applied_with_schedules.in_business_hours,
-    ticket_sla_applied_with_schedules.sla_policy_name,
-    ticket_sla_applied_with_schedules.schedule_id,
-    ticket_sla_applied_with_schedules.start_time_in_minutes_from_week,
-    ticket_sla_applied_with_schedules.total_schedule_weekly_business_minutes,
-    ticket_sla_applied_with_schedules.start_week_date,
+    ticket_sla_applied_with_schedule_week_info.source_relation,
+    ticket_sla_applied_with_schedule_week_info.ticket_id,
+    ticket_sla_applied_with_schedule_week_info.ticket_created_at,
+    ticket_sla_applied_with_schedule_week_info.valid_starting_at,
+    ticket_sla_applied_with_schedule_week_info.ticket_current_status,
+    ticket_sla_applied_with_schedule_week_info.metric,
+    ticket_sla_applied_with_schedule_week_info.latest_sla,
+    ticket_sla_applied_with_schedule_week_info.sla_applied_at,
+    ticket_sla_applied_with_schedule_week_info.target,
+    ticket_sla_applied_with_schedule_week_info.in_business_hours,
+    ticket_sla_applied_with_schedule_week_info.sla_policy_name,
+    ticket_sla_applied_with_schedule_week_info.schedule_id,
+    ticket_sla_applied_with_schedule_week_info.schedule_invalidated_at,
+    ticket_sla_applied_with_schedule_week_info.schedule_period_start,
+    ticket_sla_applied_with_schedule_week_info.start_time_in_minutes_from_week,
+    ticket_sla_applied_with_schedule_week_info.total_schedule_weekly_business_minutes,
+    ticket_sla_applied_with_schedule_week_info.start_week_date,
     min(reply_time.reply_at) as first_reply_time,
     min(ticket_solved_times.solved_at) as first_solved_time
-  from ticket_sla_applied_with_schedules
+  from ticket_sla_applied_with_schedule_week_info
   left join reply_time
-    on reply_time.ticket_id = ticket_sla_applied_with_schedules.ticket_id
-    and reply_time.reply_at > ticket_sla_applied_with_schedules.sla_applied_at
-    and reply_time.source_relation = ticket_sla_applied_with_schedules.source_relation
+    on reply_time.ticket_id = ticket_sla_applied_with_schedule_week_info.ticket_id
+    and reply_time.reply_at > ticket_sla_applied_with_schedule_week_info.sla_applied_at
+    and reply_time.source_relation = ticket_sla_applied_with_schedule_week_info.source_relation
   left join ticket_solved_times
-    on ticket_sla_applied_with_schedules.ticket_id = ticket_solved_times.ticket_id
-    and ticket_solved_times.solved_at > ticket_sla_applied_with_schedules.sla_applied_at
-    and ticket_solved_times.source_relation = ticket_sla_applied_with_schedules.source_relation
-  {{ dbt_utils.group_by(n=15) }}
+    on ticket_sla_applied_with_schedule_week_info.ticket_id = ticket_solved_times.ticket_id
+    and ticket_solved_times.solved_at > ticket_sla_applied_with_schedule_week_info.sla_applied_at
+    and ticket_solved_times.source_relation = ticket_sla_applied_with_schedule_week_info.source_relation
+  {{ dbt_utils.group_by(n=17) }}
 
 ), week_index_calc as (
-    select 
+    select
         *,
-        {{ dbt.datediff("sla_applied_at", "least(coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ "))", "week") }} + 1 as week_index
+        {{ dbt.datediff("sla_applied_at", "least(coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ "))", "week") }} + 1 as week_index,
+        -- Minutes this schedule period contributes, capped at the earlier of: period end, first reply, or ticket solved.
+        greatest(0, {{ dbt.datediff(
+            "cast(schedule_period_start as " ~ dbt.type_timestamp() ~ ")",
+            "cast(least(schedule_invalidated_at, coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ ")) as " ~ dbt.type_timestamp() ~ ")",
+            'second') }} / 60) as raw_delta_in_minutes
     from first_reply_solve_times
 
 ), weeks as (
@@ -125,7 +142,7 @@ with ticket_schedules as (
   select 
     weeks_cross_ticket_sla_applied.*,
     greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
-    (7*24*60) as ticket_week_end_time
+    least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), 7*24*60) as ticket_week_end_time
   from weeks_cross_ticket_sla_applied
 
 ), intercepted_periods as (
@@ -134,8 +151,8 @@ with ticket_schedules as (
     weekly_periods.*,
     schedule.start_time_utc as schedule_start_time,
     schedule.end_time_utc as schedule_end_time,
-    (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
-    sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
+    (least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
+    sum(least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
       (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation(alias='weekly_periods') }} 
         order by week_number, schedule.start_time_utc
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
@@ -178,10 +195,10 @@ with ticket_schedules as (
         "second",
         "cast(((7*24*60*60) * week_number) + (schedule_start_time * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
-    {{ fivetran_utils.timestamp_add(
+    least({{ fivetran_utils.timestamp_add(
         "second",
         "cast(((7*24*60*60) * week_number) + (schedule_end_time * 60) as " ~ dbt.type_int() ~ " )",
-        "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_end_at,
+        "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }}, schedule_invalidated_at) as sla_schedule_end_at,
     {{ zendesk.fivetran_week_end("sla_applied_at") }} as week_end_date
   from intercepted_periods_with_breach_flag
 
