@@ -116,10 +116,12 @@ with ticket_schedules as (
     select
         *,
         {{ dbt.datediff("sla_applied_at", "least(coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ "))", "week") }} + 1 as week_index,
-        -- Minutes this schedule period contributes, capped at the earlier of: period end, first reply, or ticket solved.
+        -- Minutes this schedule period contributes, capped at when the period ends.
+        -- Do NOT clip at first_reply_time here — that causes rows to drop from intercepted_periods
+        -- when the reply falls before any business hours window opens in that week.
         greatest(0, {{ dbt.datediff(
             "cast(schedule_period_start as " ~ dbt.type_timestamp() ~ ")",
-            "cast(least(schedule_invalidated_at, coalesce(first_reply_time, " ~ dbt.current_timestamp() ~ "), coalesce(first_solved_time, " ~ dbt.current_timestamp() ~ ")) as " ~ dbt.type_timestamp() ~ ")",
+            "cast(schedule_invalidated_at as " ~ dbt.type_timestamp() ~ ")",
             'second') }} / 60) as raw_delta_in_minutes
     from first_reply_solve_times
 
@@ -136,6 +138,9 @@ with ticket_schedules as (
     from week_index_calc
     cross join weeks
     where week_index >= generated_number - 1
+      -- also filter at the schedule-period level so short-lived periods don't generate
+      -- weeks they don't extend into (which would produce negative ticket_week_end_time)
+      and (start_time_in_minutes_from_week + raw_delta_in_minutes) > (cast(weeks.generated_number as {{ dbt.type_int() }}) - 1) * (7*24*60)
 
 ), weekly_periods as (
   
@@ -211,7 +216,7 @@ with ticket_schedules as (
     metric,
     ticket_created_at,
     sla_applied_at,
-    greatest(sla_applied_at,sla_schedule_start_at) as sla_schedule_start_at,
+    greatest(schedule_period_start, sla_schedule_start_at) as sla_schedule_start_at,
     sla_schedule_end_at,
     target,
     sum_lapsed_business_minutes,

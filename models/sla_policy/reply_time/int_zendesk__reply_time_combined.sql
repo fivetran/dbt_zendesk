@@ -28,12 +28,12 @@ with reply_time_calendar_hours_sla as (
     metric,
     ticket_created_at,
     sla_applied_at,
-    sla_applied_at as sla_schedule_start_at,
-    cast(null as timestamp) as sla_schedule_end_at,
+    cast(sla_applied_at as {{ dbt.type_timestamp() }}) as sla_schedule_start_at,
+    cast(null as {{ dbt.type_timestamp() }}) as sla_schedule_end_at,
     cast(null as {{ dbt.type_numeric() }}) as sum_lapsed_business_minutes,
     target,
     in_business_hours,
-    sla_breach_at,
+    cast(sla_breach_at as {{ dbt.type_timestamp() }}) as sla_breach_at,
     cast(null as {{ dbt.type_numeric() }}) as week_number,
     cast(null as {{ dbt.type_numeric() }}) as total_schedule_weekly_business_minutes
   from reply_time_calendar_hours_sla
