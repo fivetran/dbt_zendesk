@@ -572,6 +572,8 @@ models:
         description: The channel where the ticket was created
       - name: assignee_id
         description: The agent currently assigned to the ticket
+      - name: assignee_name
+        description: The name of the agent currently assigned to the ticket
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
