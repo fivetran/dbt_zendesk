@@ -127,12 +127,37 @@ with reply_time_calendar_hours_sla as (
       ) and sla_schedule_start_at <= {{ dbt.current_timestamp() }}) -- To help limit the data we do not want to bring through any schedule rows in the future.
     or not in_business_hours
 
+), filtered_reply_times_ranked as (
+  -- When a ticket transitions between schedules, the upstream fan-out in
+  -- int_zendesk__reply_time_business_hours can produce multiple rows per SLA period
+  -- (one per schedule). Deduplicate here before the lead()/lag() window functions
+  -- so stale-SLA detection and elapsed-time calculations operate on a clean stream.
+  select
+    *,
+    row_number() over (
+      partition by ticket_id, sla_policy_name, metric, sla_applied_at, in_business_hours {{ partition_by_source_relation() }}
+      order by
+        -- prefer the row where the reply falls inside the schedule window
+        case when agent_reply_at is not null
+             and agent_reply_at >= sla_schedule_start_at
+             and agent_reply_at <= sla_schedule_end_at
+             then 0 else 1 end asc,
+        -- prefer the row where the ticket was solved inside the schedule window
+        case when agent_reply_at is null
+             and next_solved_at is not null
+             and next_solved_at >= sla_schedule_start_at
+             and (next_solved_at < next_schedule_start or next_schedule_start is null)
+             then 0 else 1 end asc,
+        sla_schedule_start_at desc
+    ) as dedup_rn
+  from filtered_reply_times
+
 ), reply_time_breached_at_remove_old_sla as (
   select
     *,
     {{ dbt.current_timestamp() }} as current_time_check,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) as updated_sla_policy_starts_at,
-    case when 
+    case when
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
     case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
@@ -142,8 +167,9 @@ with reply_time_calendar_hours_sla as (
       then true
       else false
         end as is_sla_breached,
-    sum_lapsed_business_minutes_new + total_runtime_minutes as total_new_minutes -- add total runtime to sum_lapsed_business_minutes_new (the sum_lapsed_business_minutes from prior row)
-  from filtered_reply_times
+    sum_lapsed_business_minutes_new + total_runtime_minutes as total_new_minutes
+  from filtered_reply_times_ranked
+  where dedup_rn = 1
 
 ), reply_time_breach as ( 
   select  
