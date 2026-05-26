@@ -1,3 +1,8 @@
+# dbt_zendesk v1.6.0-a2
+
+## Bug Fix
+- Ensures first reply time records in `zendesk__sla_policies` use the proper schedule when calculating elapsed business minutes.
+
 # dbt_zendesk v1.6.0-a1
 
 ## Schema/Data Change (--full-refresh required after upgrading)
