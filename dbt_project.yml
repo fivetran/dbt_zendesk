@@ -1,5 +1,5 @@
 name: 'zendesk'
-version: '1.5.1'
+version: '1.6.0'
 
 config-version: 2
 require-dbt-version: [">=1.3.0", "<3.0.0"]
@@ -55,7 +55,6 @@ vars:
     zendesk__ticket_passthrough_columns: []
     zendesk__user_passthrough_columns: []
     zendesk__organization_passthrough_columns: []
-    zendesk_sources: []
     audit_log: "{{ source('zendesk', 'audit_log') }}"
     brand: "{{ source('zendesk', 'brand') }}"
     daylight_time: "{{ source('zendesk', 'daylight_time') }}"

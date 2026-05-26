@@ -110,7 +110,7 @@
                     {%- set col = column_superset[col_name] %}
                     {%- set col_type = column_override.get(col.column, col.data_type) %}
                     {%- set col_name = adapter.quote(col_name) if col_name in relation_columns[relation] else 'null' %}
-                    cast({{ col_name }} as {{ col_type }}) as {{ col.quoted }} {% if not loop.last %},{% endif -%}
+                    cast({{ col_name }} as {{ col_type }}) as {{ col.quoted if var('using_standard_source_selection', True) else (adapter.quote(col.column | upper) if target.type == 'snowflake' else adapter.quote(col.column)) }} {% if not loop.last %},{% endif -%}
 
                 {%- endfor %}
             
