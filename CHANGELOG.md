@@ -8,9 +8,9 @@
 
 | **Data Model** | **Change type** | **Old** | **New** | **Notes** |
 | -------------- | --------------- | ------- | ------- | --------- |
-| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) **(Breaking)** | New field | | `assignee_id` | Added by default when `assignee_id` is in `ticket_field_history_columns`. You will need to run a full refresh to backfill historical values. |
-| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) **(Breaking)** | New field | | `requester_id` | Added when `requester_id` is included in the `ticket_field_history_columns` variable. You will need to run a full refresh to backfill historical values.  |
-| [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) **(Breaking)** | Removed fields | `ticket_status_counter`, `unique_status_counter` | | Columns were deprecated in v1.5.0 and are now removed. |
+| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) | New field | | `assignee_id` | Added by default when `assignee_id` is in the **Ticket Field History Columns** variable (`ticket_field_history_columns`). Previously, only `assignee_name` was included. **(Breaking Change)** dbt users will need to run a full refresh to backfill historical values. |
+| [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog)| New field | | `requester_id` | Added when `requester_id` is in the **Ticket Field History Columns** variable (`ticket_field_history_columns`). Previously, only `requester_name` was included. **(Breaking Change)** dbt users will need to run a full refresh to backfill historical values.  |
+| [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) | Removed fields | `ticket_status_counter`, `unique_status_counter` | | **(Breaking Chanage)** Columns were deprecated in v1.5.0 and are now removed. |
 
 # dbt_zendesk v1.5.1
 
