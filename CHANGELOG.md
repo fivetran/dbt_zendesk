@@ -1,7 +1,8 @@
 # dbt_zendesk v1.6.0-a4
 [PR #263](https://github.com/fivetran/dbt_zendesk/pull/263) includes the following updates:
 
-
+## Feature Update
+- Adds support for Fivetran Managed Data Lakes (MDLS).
 
 # dbt_zendesk v1.6.0
 
