@@ -1,4 +1,4 @@
-# dbt_zendesk v1.6.0-a4
+# dbt_zendesk v1.7.0-a1
 [PR #263](https://github.com/fivetran/dbt_zendesk/pull/263) includes the following updates:
 
 ## Feature Update
