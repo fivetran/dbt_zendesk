@@ -22,7 +22,7 @@ fields as (
             )
         }}
 
-        {{ zendesk.apply_source_relation() }}
+        {{ fivetran_utils.apply_source_relation() }}
         
     from base
 ),

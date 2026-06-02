@@ -17,6 +17,11 @@ test_scenarios:
     vars: {}
     include_incremental: true
 
+  - name: "MDLS"
+    vars:
+      using_deliberate_quoting: false
+    include_incremental: false
+
   - name: "features disabled"
     vars:
       using_sla_policy_metric_history: false

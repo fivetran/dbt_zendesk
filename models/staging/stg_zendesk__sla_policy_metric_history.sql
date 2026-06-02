@@ -24,7 +24,7 @@ fields as (
             )
         }}
 
-        {{ zendesk.apply_source_relation() }}
+        {{ fivetran_utils.apply_source_relation() }}
 
     from base
 ),
@@ -47,5 +47,5 @@ final as (
 
 select 
     *,
-    row_number() over (partition by sla_policy_id, metric, priority {{ partition_by_source_relation() }} order by sla_policy_updated_at desc) = 1 as is_most_recent_record
+    row_number() over (partition by sla_policy_id, metric, priority {{ fivetran_utils.partition_by_source_relation('zendesk') }} order by sla_policy_updated_at desc) = 1 as is_most_recent_record
 from final
