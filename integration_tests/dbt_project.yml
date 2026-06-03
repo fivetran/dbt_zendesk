@@ -170,7 +170,7 @@ seeds:
       +alias: user_tag_data
       +column_types:
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+      +enabled: "{{ target.type == 'snowflake' and var('using_deliberate_quoting', true) }}"
     organization_tag_data:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -180,7 +180,7 @@ seeds:
       +alias: organization_tag_data
       +column_types:
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' else false }}"
+      +enabled: "{{ target.type == 'snowflake' and var('using_deliberate_quoting', true) }}"
     ticket_chat_event_data:
       +column_types:
         created_at: timestamp
