@@ -165,7 +165,7 @@ seeds:
       +column_types:
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'snowflake' else false }}"  
+      +enabled: "{{ target.type != 'snowflake' or not var('using_deliberate_quoting', true) }}" 
     user_tag_data_snowflake:
       +alias: user_tag_data
       +column_types:
@@ -175,7 +175,7 @@ seeds:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'snowflake' else false }}"  
+      +enabled: "{{ target.type != 'snowflake' or not var('using_deliberate_quoting', true) }}"
     organization_tag_data_snowflake:
       +alias: organization_tag_data
       +column_types:
