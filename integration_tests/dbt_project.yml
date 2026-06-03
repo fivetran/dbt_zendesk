@@ -146,13 +146,13 @@ seeds:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'postgres' else false }}"
+      +enabled: "{{ target.type != 'postgres' or not var('using_deliberate_quoting', true) }}"
     brand_data_postgres:
       +alias: brand_data
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'postgres' else false }}"
+      +enabled: "{{ target.type == 'postgres' and var('using_deliberate_quoting', true) }}"
     ticket_form_history_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
