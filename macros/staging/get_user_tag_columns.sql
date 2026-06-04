@@ -8,7 +8,7 @@
 {% if target.type == 'redshift' %}
     {{ columns.append( {"name": "tag", "datatype": dbt.type_string(), "quote": True } ) }}
 
-{% elif target.type == 'snowflake' %}
+{% elif target.type == 'snowflake' and not var('fivetran_using_source_casing', false) %}
     {{ columns.append( {"name": "TAG", "datatype": dbt.type_string(), "quote": True } ) }}
 
 {% else %}
