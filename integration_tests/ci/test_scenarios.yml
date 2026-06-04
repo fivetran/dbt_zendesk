@@ -49,6 +49,6 @@ test_scenarios:
 
   - name: "MDLS"
     vars:
-      fivetran_using_source_casing: false
+      fivetran_using_source_casing: true
     include_incremental: false
     include_dbt_seed: true
