@@ -117,52 +117,8 @@ vars:
       name: connection_2_source_name
 ```
 
-##### Recommended: Incorporate unioned sources into DAG
-> *If you are running the package through [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt#transformationsfordbtcore), the below step is necessary in order to synchronize model runs with your Zendesk connections. Alternatively, you may choose to run the package through Fivetran [Quickstart](https://fivetran.com/docs/transformations/quickstart), which would create separate sets of models for each Zendesk source rather than one set of unioned models.*
-
-By default, this package defines one single-connection source, called `zendesk`, which will be disabled if you are unioning multiple connections. This means that your DAG will not include your Zendesk sources, though the package will run successfully.
-
-To properly incorporate all of your Zendesk connections into your project's DAG:
-1. Define each of your sources in a `.yml` file in your project. Utilize the following template for the `source`-level configurations, and, **most importantly**, copy and paste the table and column-level definitions from the package's `src_zendesk.yml` [file](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L15-L351).
-
-```yml
-# a .yml file in your root project
-sources:
-  - name: <name> # ex: Should match name in zendesk_sources
-    schema: <schema_name>
-    database: <database_name>
-    loader: fivetran
-    loaded_at_field: _fivetran_synced
-
-    freshness: # feel free to adjust to your liking
-      warn_after: {count: 72, period: hour}
-      error_after: {count: 168, period: hour}
-
-    tables: # copy and paste from zendesk/models/staging/src_zendesk.yml - see https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/ for how to use anchors to only do so once
-```
-
-> **Note**: If there are source tables you do not have (see [Enable/Disable models](https://github.com/fivetran/dbt_zendesk?tab=readme-ov-file#enabledisable-models)), you may still include them, as long as you have set the right variables to `False`. Otherwise, you may remove them from your source definition.
-
-2. In the above `.yml` file, remove the `and var('zendesk_sources', []) == []` condition from the enabled config for the following source tables (if you have the tables in your schemas):
-- [`audit_log`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L20)
-- [`brand`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L115)
-- [`domain_name`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L135)
-- [`organization_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L164)
-- [`organization`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L174)
-- [`user_tag`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L242)
-- [`schedule`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L295)
-- [`ticket_form_history`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L327)
-- [`schedule_holiday`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L406)\
-- [`ticket_chat`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#424)
-- [`ticket_chat_event`](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml#L458)
-
-3. Set the `has_defined_sources` variable (scoped to the `zendesk` package) to `True`, like such:
-```yml
-# dbt_project.yml
-vars:
-  zendesk:
-    has_defined_sources: true
-```
+##### Optional: Incorporate unioned sources into DAG
+If you use [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt#transformationsfordbtcore) and are unioning multiple Zendesk connections, you can define your sources in a property `.yml` [file](https://github.com/fivetran/dbt_jira/blob/main/models/staging/src_jira.yml), using [this as a template](https://github.com/fivetran/dbt_jira/blob/main/models/staging/src_jira.yml). Set the variable `has_defined_sources: true` under the Zendesk namespace in your `dbt_project.yml`. Otherwise, your Zendesk connections won't appear in your DAG. See the `union_connections` macro [documentation](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#optional-union-connections-defined-sources-configuration) for full configuration details.
 
 ### Enable/Disable models
 
