@@ -90,8 +90,8 @@ with ticket_field_history as (
     left join ticket_priority_history
         on add_sla_policy_name.ticket_id = ticket_priority_history.ticket_id
         and add_sla_policy_name.source_relation = ticket_priority_history.source_relation
-        and add_sla_policy_name.sla_applied_at >= ticket_priority_history.valid_starting_at
-        and add_sla_policy_name.sla_applied_at < coalesce(ticket_priority_history.valid_ending_at, {{ dbt.current_timestamp() }})
+        and {{ dbt.date_trunc("second", "add_sla_policy_name.sla_applied_at") }} >= {{ dbt.date_trunc("second", "ticket_priority_history.valid_starting_at") }}
+        and {{ dbt.date_trunc("second", "add_sla_policy_name.sla_applied_at") }} < coalesce({{ dbt.date_trunc("second", "ticket_priority_history.valid_ending_at") }}, {{ dbt.current_timestamp() }})
 
 ), final as (
 

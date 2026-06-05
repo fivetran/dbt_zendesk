@@ -1,3 +1,8 @@
+# dbt_zendesk v1.6.0-a5
+
+## Bug Fix
+- Ensures the proper `priority` SLA target is used in cases where the priority was changed immediately after ticket creation.
+
 # dbt_zendesk v1.6.0-a3
 
 ## Bug Fix
