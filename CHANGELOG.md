@@ -2,15 +2,8 @@
 
 [PR #263](https://github.com/fivetran/dbt_zendesk/pull/263) includes the following updates:
 
-## Schema/Data Change
-**1 total change • 1 possible breaking change**
-
-| Data Model(s) | Change type | Old | New | Notes |
-| ------------- | ----------- | --- | --- | ----- |
-| All staging models | `source_relation` value for `zendesk_sources` users | `<zendesk_database>.<zendesk_schema>` | `<zendesk_database>.<zendesk_schema>.<zendesk_table>` | Only affects customers using the `zendesk_sources` variable to union multiple connections. |
-
 ## Under the Hood
-- Migrates the `union_connections`, `apply_source_relation`, and `partition_by_source_relation` macros to the `dbt_fivetran_utils` package.
+- Migrates the `union_connections`, `apply_source_relation`, and `partition_by_source_relation` macros to the `dbt_fivetran_utils` package. The `_dbt_source_relation` column continues to use the `<database>.<schema>` format (the table is intentionally excluded).
 - Adds the `fivetran_using_source_casing` variable for case-sensitive destination support. When enabled, downstream transformations respect source casing to ensure consistent results. See the [Additional Configurations](https://github.com/fivetran/dbt_zendesk/#source-casing-for-case-sensitive-destinations) section of the README for details.
 
 # dbt_zendesk v1.6.0
