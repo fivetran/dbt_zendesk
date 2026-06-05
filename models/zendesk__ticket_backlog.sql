@@ -46,9 +46,11 @@ with ticket_field_history as (
         ,tickets.created_channel
         {% for col in var('ticket_field_history_columns') if col != 'status' %} --Looking at all history fields the users passed through in their dbt_project.yml file
             {% if col in ['assignee_id'] %} --Standard ID field where the name can easily be joined from stg model.
+                ,ticket_field_history.assignee_id
                 ,assignee.name as assignee_name
 
             {% elif col in ['requester_id'] %} --Standard ID field where the name can easily be joined from stg model.
+                ,ticket_field_history.requester_id
                 ,requester.name as requester_name
 
             {% elif col in ['ticket_form_id'] %} --Standard ID field where the name can easily be joined from stg model.

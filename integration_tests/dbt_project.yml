@@ -6,7 +6,7 @@ version: '1.6.0'
 profile: 'integration_tests'
 
 vars:  
-  zendesk_schema: zendesk_integration_tests_63
+  zendesk_schema: zendesk_integration_tests
   zendesk:
     zendesk_organization_identifier:                      "organization_data"
     zendesk_schedule_identifier:                          "schedule_data"
@@ -57,20 +57,21 @@ seeds:
     show: False
   +quote_columns: "{{ true if target.type == 'redshift' else false }}"
   zendesk_integration_tests:
-    +column_types:
-      _fivetran_synced: timestamp
     group_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         updated_at: timestamp
     organization_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         updated_at: timestamp
     schedule_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         end_time: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         start_time: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -79,15 +80,18 @@ seeds:
         created_at: timestamp
     schedule_holiday_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_comment_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created: timestamp
     ticket_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
         due_at: timestamp
@@ -104,16 +108,19 @@ seeds:
         ticket_form_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_field_history_data:
       +column_types:
+        _fivetran_synced: timestamp
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         updated: timestamp
     ticket_schedule_data:
       +column_types:
+        _fivetran_synced: timestamp
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         schedule_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         created_at: timestamp
     user_data:
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -125,6 +132,7 @@ seeds:
     user_data_snowflake:
       +alias: user_data
       +column_types:
+        _fivetran_synced: timestamp
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         external_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         locale_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -159,6 +167,8 @@ seeds:
       +enabled: "{{ true if target.type != 'snowflake' else false }}"  
     user_tag_data_snowflake:
       +alias: user_tag_data
+      +column_types:
+        _fivetran_synced: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
     organization_tag_data:
       +column_types:
@@ -167,6 +177,8 @@ seeds:
       +enabled: "{{ true if target.type != 'snowflake' else false }}"  
     organization_tag_data_snowflake:
       +alias: organization_tag_data
+      +column_types:
+        _fivetran_synced: timestamp
       +enabled: "{{ true if target.type == 'snowflake' else false }}"
     ticket_chat_event_data:
       +column_types:
@@ -174,8 +186,28 @@ seeds:
         status_updated_at: timestamp
     ticket_chat_data:
       +column_types:
+        _fivetran_synced: timestamp
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
+    daylight_time_data:
+      +column_types:
+        _fivetran_synced: timestamp
+    time_zone_data:
+      +column_types:
+        _fivetran_synced: timestamp
+    ticket_tag_data:
+      +column_types:
+        _fivetran_synced: timestamp
+    sla_policy_metric_history_data:
+      +column_types:
+        _fivetran_synced: timestamp
+    ticket_sla_policy_data:
+      +column_types:
+        _fivetran_synced: timestamp
+    audit_log_data:
+      +column_types:
+        _fivetran_synced: timestamp
+        created_at: timestamp
         
 dispatch:
   - macro_namespace: dbt_utils
