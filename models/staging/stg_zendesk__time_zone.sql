@@ -18,7 +18,7 @@ fields as (
             )
         }}
         
-        {{ fivetran_utils.apply_source_relation() }}
+        {{ fivetran_utils.apply_source_relation('zendesk') }}
 
     from base
 ),
