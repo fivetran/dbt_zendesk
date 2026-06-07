@@ -118,7 +118,6 @@ vars:
 ```
 
 #### Optional: Incorporate unioned sources into DAG
-
 If you use [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt#transformationsfordbtcore) and are unioning multiple Zendesk connections, you can define your sources in a property `.yml` file, [using this as a template](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml). Set the variable `has_defined_sources: true` under the Zendesk namespace in your `dbt_project.yml`. Otherwise, your Zendesk connections won't appear in your DAG. See the `union_connections` macro [documentation](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#optional-union-connections-defined-sources-configuration) for full configuration details.
 
 ### Enable/Disable models
