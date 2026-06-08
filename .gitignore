@@ -71,6 +71,3 @@ env/
 env.bak/
 venv/
 venv.bak/
-
-# CLAUDE
-AGENT_PLAN.md
