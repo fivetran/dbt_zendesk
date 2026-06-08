@@ -74,7 +74,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: 1.7.0-a1
+    version: [">=1.7.0", "<1.8.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -118,7 +118,6 @@ vars:
 ```
 
 #### Optional: Incorporate unioned sources into DAG
-
 If you use [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/transformations/dbt#transformationsfordbtcore) and are unioning multiple Zendesk connections, you can define your sources in a property `.yml` file, [using this as a template](https://github.com/fivetran/dbt_zendesk/blob/main/models/staging/src_zendesk.yml). Set the variable `has_defined_sources: true` under the Zendesk namespace in your `dbt_project.yml`. Otherwise, your Zendesk connections won't appear in your DAG. See the `union_connections` macro [documentation](https://github.com/fivetran/dbt_fivetran_utils/tree/releases/v0.4.latest#optional-union-connections-defined-sources-configuration) for full configuration details.
 
 ### Enable/Disable models
@@ -169,7 +168,7 @@ vars:
   zendesk_max_tokens: 5000 # Default value
 ```
 
-### Add passthrough columns
+#### Add passthrough columns
 This package includes all source columns defined in the macros folder. You can add more columns from the `TICKET`, `USER`, and `ORGANIZATION` tables using our pass-through column variables.
 
 These variables allow for the pass-through fields to be aliased (`alias`) and casted (`transform_sql`) if desired, but not required. Datatype casting is configured via a sql snippet within the `transform_sql` key. You may add the desired sql while omitting the `as field_name` at the end and your custom pass-through fields will be casted accordingly. Use the below format for declaring the respective pass-through variables:
