@@ -1,3 +1,11 @@
+# dbt_zendesk v1.7.0
+
+[PR #265](https://github.com/fivetran/dbt_zendesk/pull/265) includes the following updates:
+
+## Under the Hood
+- Migrates the `union_connections`, `apply_source_relation`, and `partition_by_source_relation` macros to the `dbt_fivetran_utils` package.
+- Adds the `fivetran_using_source_casing` variable for case-sensitive destination support. When enabled, downstream transformations respect source casing to ensure consistent results. See the [Additional Configurations](https://github.com/fivetran/dbt_zendesk/#source-casing-for-case-sensitive-destinations) section of the README for details.
+
 # dbt_zendesk v1.6.0
 
 [PR #261](https://github.com/fivetran/dbt_zendesk/pull/261) includes the following updates:

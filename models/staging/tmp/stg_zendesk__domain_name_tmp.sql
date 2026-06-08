@@ -2,7 +2,7 @@
 {{ config(enabled=var('using_domain_names', True)) }}
 
 {{
-    zendesk.union_zendesk_connections(
+    fivetran_utils.union_connections(
         connection_dictionary=var('zendesk_sources'), 
         single_source_name='zendesk', 
         single_table_name='domain_name'
