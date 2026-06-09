@@ -7,6 +7,7 @@ profile: 'integration_tests'
 
 vars:  
   zendesk_schema: zendesk_integration_tests
+
   zendesk:
     zendesk_organization_identifier:                      "organization_data"
     zendesk_schedule_identifier:                          "schedule_data"
@@ -128,7 +129,7 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
         updated_at: timestamp
-      +enabled: "{{ true if target.type != 'snowflake' or var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type != 'snowflake' or var('fivetran_using_source_casing', false) }}"
     user_data_snowflake:
       +alias: user_data
       +column_types:
@@ -140,18 +141,18 @@ seeds:
         created_at: timestamp
         last_login_at: timestamp
         updated_at: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' and not var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type == 'snowflake' and not var('fivetran_using_source_casing', false) }}"
     brand_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'postgres' or var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type != 'postgres' or var('fivetran_using_source_casing', false) }}"
     brand_data_postgres:
       +alias: brand_data
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'postgres' and not var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type == 'postgres' and not var('fivetran_using_source_casing', false) }}"
     ticket_form_history_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
@@ -164,22 +165,22 @@ seeds:
       +column_types:
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'snowflake' or var('fivetran_using_source_casing', false) else false }}"  
+      +enabled: "{{ target.type != 'snowflake' or var('fivetran_using_source_casing', false) }}"
     user_tag_data_snowflake:
       +alias: user_tag_data
       +column_types:
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' and not var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type == 'snowflake' and not var('fivetran_using_source_casing', false) }}"
     organization_tag_data:
       +column_types:
         organization_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type != 'snowflake' or var('fivetran_using_source_casing', false) else false }}"  
+      +enabled: "{{ target.type != 'snowflake' or var('fivetran_using_source_casing', false) }}"
     organization_tag_data_snowflake:
       +alias: organization_tag_data
       +column_types:
         _fivetran_synced: timestamp
-      +enabled: "{{ true if target.type == 'snowflake' and not var('fivetran_using_source_casing', false) else false }}"
+      +enabled: "{{ target.type == 'snowflake' and not var('fivetran_using_source_casing', false) }}"
     ticket_chat_event_data:
       +column_types:
         created_at: timestamp
