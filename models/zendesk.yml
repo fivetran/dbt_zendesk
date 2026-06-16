@@ -202,6 +202,8 @@ models:
         description: Boolean field indicating that the SLA event is currently active and not breached (true) or past (false)
       - name: is_sla_breach
         description: Boolean field indicating if the SLA has been breached (true) or was achieved (false)
+      - name: priority_applied
+        description: The ticket priority level that was in effect when the SLA event was applied.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.

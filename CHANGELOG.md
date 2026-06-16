@@ -1,3 +1,41 @@
+# dbt_zendesk v1.6.1
+
+[PR #262](https://github.com/fivetran/dbt_zendesk/pull/262) includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)<br>`int_zendesk__agent_work_time_business_hours`<br>`int_zendesk__agent_work_time_filtered_statuses`<br>`int_zendesk__reply_time_business_hours`<br>`int_zendesk__reply_time_combined`<br>`int_zendesk__requester_wait_time_business_hours`<br>`int_zendesk__requester_wait_time_filtered_statuses`<br>`int_zendesk__sla_policy_applied` | New column | | `priority_applied` | The priority level that was active when each SLA event was applied. |
+
+## Feature Enhancement
+- Updates SLA models to use historical priority levels when applying SLA targets. SLA events now reference the priority that was in effect at the time the event occurred, rather than the current priority. This ensures tickets with priority changes over time receive accurate SLA target calculations.
+
+## Bug Fix
+- Ensures first reply time records in `zendesk__sla_policies` use the proper schedule when calculating elapsed business minutes.
+- Ensures the proper `priority` SLA target is used in cases where the priority was changed immediately after ticket creation.
+
+# dbt_zendesk v1.6.1-a1
+
+[PR #262](https://github.com/fivetran/dbt_zendesk/pull/262) includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies)<br>`int_zendesk__agent_work_time_business_hours`<br>`int_zendesk__agent_work_time_filtered_statuses`<br>`int_zendesk__reply_time_business_hours`<br>`int_zendesk__reply_time_combined`<br>`int_zendesk__requester_wait_time_business_hours`<br>`int_zendesk__requester_wait_time_filtered_statuses`<br>`int_zendesk__sla_policy_applied` | New column | | `priority_applied` | The priority level that was active when each SLA event was applied. |
+
+## Feature Enhancement
+- Updates SLA models to use historical priority levels when applying SLA targets. SLA events now reference the priority that was in effect at the time the event occurred, rather than the current priority. This ensures tickets with priority changes over time receive accurate SLA target calculations.
+
+## Bug Fix
+- Ensures first reply time records in `zendesk__sla_policies` use the proper schedule when calculating elapsed business minutes.
+- Ensures the proper `priority` SLA target is used in cases where the priority was changed immediately after ticket creation.
+
 # dbt_zendesk v1.6.0
 
 [PR #261](https://github.com/fivetran/dbt_zendesk/pull/261) includes the following updates:
@@ -11,6 +49,25 @@
 | [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog) | New field | | `assignee_id` | Added by default when `assignee_id` is in the **Ticket Field History Columns** variable (`ticket_field_history_columns`). Previously, only `assignee_name` was included. **(Breaking Change)** dbt users will need to run a full refresh to backfill historical values. |
 | [`zendesk__ticket_backlog`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_backlog)| New field | | `requester_id` | Added when `requester_id` is in the **Ticket Field History Columns** variable (`ticket_field_history_columns`). Previously, only `requester_name` was included. **(Breaking Change)** dbt users will need to run a full refresh to backfill historical values.  |
 | [`int_zendesk__ticket_historical_status`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.int_zendesk__ticket_historical_status) | Removed fields | `ticket_status_counter`, `unique_status_counter` | | **(Breaking Chanage)** Columns were deprecated in v1.5.0 and are now removed. |
+
+# dbt_zendesk v1.6.0-a3
+
+## Bug Fix
+- Ensures first reply time records in `zendesk__sla_policies` use the proper schedule when calculating elapsed business minutes.
+
+# dbt_zendesk v1.6.0-a1
+
+## Schema/Data Change (--full-refresh required after upgrading)
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | New column | | `priority_applied` | The priority level that was active when each SLA event was applied. |
+
+## Feature Enhancement
+
+- Updates SLA models to use historical priority levels when applying SLA targets. SLA events now reference the priority that was in effect at the time the event occurred, rather than the current priority. This ensures tickets with priority changes over time receive accurate SLA target calculations.
 
 # dbt_zendesk v1.5.1
 

@@ -21,19 +21,20 @@ with reply_time_calendar_hours_sla as (
 
 ), reply_time_breached_at as (
 
-  select 
+  select
     source_relation,
     ticket_id,
     sla_policy_name,
     metric,
-    ticket_created_at,
-    sla_applied_at,
-    sla_applied_at as sla_schedule_start_at,
-    cast(null as timestamp) as sla_schedule_end_at,
+    cast(ticket_created_at as {{ dbt.type_timestamp() }}) as ticket_created_at,
+    cast(sla_applied_at as {{ dbt.type_timestamp() }}) as sla_applied_at,
+    cast(sla_applied_at as {{ dbt.type_timestamp() }}) as sla_schedule_start_at,
+    cast(null as {{ dbt.type_timestamp() }}) as sla_schedule_end_at,
     cast(null as {{ dbt.type_numeric() }}) as sum_lapsed_business_minutes,
     target,
     in_business_hours,
-    sla_breach_at,
+    priority_applied,
+    cast(sla_breach_at as {{ dbt.type_timestamp() }}) as sla_breach_at,
     cast(null as {{ dbt.type_numeric() }}) as week_number,
     cast(null as {{ dbt.type_numeric() }}) as total_schedule_weekly_business_minutes
   from reply_time_calendar_hours_sla
@@ -42,19 +43,20 @@ with reply_time_calendar_hours_sla as (
 
   union all
 
-  select 
+  select
     source_relation,
     ticket_id,
     sla_policy_name,
     metric,
-    ticket_created_at,
-    sla_applied_at,
-    sla_schedule_start_at,
-    sla_schedule_end_at,
+    cast(ticket_created_at as {{ dbt.type_timestamp() }}) as ticket_created_at,
+    cast(sla_applied_at as {{ dbt.type_timestamp() }}) as sla_applied_at,
+    cast(sla_schedule_start_at as {{ dbt.type_timestamp() }}) as sla_schedule_start_at,
+    cast(sla_schedule_end_at as {{ dbt.type_timestamp() }}) as sla_schedule_end_at,
     sum_lapsed_business_minutes,
     target,
     in_business_hours,
-    sla_breach_exact_time as sla_breach_at,
+    priority_applied,
+    cast(sla_breach_exact_time as {{ dbt.type_timestamp() }}) as sla_breach_at,
     week_number,
     total_schedule_weekly_business_minutes
   from reply_time_business_hours_sla
@@ -72,7 +74,7 @@ with reply_time_calendar_hours_sla as (
 
 ), reply_time_breached_at_with_next_reply_timestamp as (
 
-  select 
+  select
     reply_time_breached_at.source_relation,
     reply_time_breached_at.ticket_id,
     reply_time_breached_at.sla_policy_name,
@@ -82,6 +84,7 @@ with reply_time_calendar_hours_sla as (
     reply_time_breached_at.sum_lapsed_business_minutes,
     reply_time_breached_at.target,
     reply_time_breached_at.in_business_hours,
+    reply_time_breached_at.priority_applied,
     reply_time_breached_at.sla_breach_at,
     reply_time_breached_at.week_number,
     min(reply_time_breached_at.sla_schedule_start_at) as sla_schedule_start_at,
@@ -97,7 +100,7 @@ with reply_time_calendar_hours_sla as (
     on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
     and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
     and ticket_solved_times.source_relation = reply_time_breached_at.source_relation
-  {{ dbt_utils.group_by(n=11) }}
+  {{ dbt_utils.group_by(n=12) }}
 
 ), lagging_time_block as (
   select
@@ -124,12 +127,37 @@ with reply_time_calendar_hours_sla as (
       ) and sla_schedule_start_at <= {{ dbt.current_timestamp() }}) -- To help limit the data we do not want to bring through any schedule rows in the future.
     or not in_business_hours
 
+), filtered_reply_times_ranked as (
+  -- When a ticket transitions between schedules, the upstream fan-out in
+  -- int_zendesk__reply_time_business_hours can produce multiple rows per SLA period
+  -- (one per schedule). Deduplicate here before the lead()/lag() window functions
+  -- so stale-SLA detection and elapsed-time calculations operate on a clean stream.
+  select
+    *,
+    row_number() over (
+      partition by ticket_id, sla_policy_name, metric, sla_applied_at, in_business_hours {{ partition_by_source_relation() }}
+      order by
+        -- prefer the row where the reply falls inside the schedule window
+        case when agent_reply_at is not null
+             and agent_reply_at >= sla_schedule_start_at
+             and agent_reply_at <= sla_schedule_end_at
+             then 0 else 1 end asc,
+        -- prefer the row where the ticket was solved inside the schedule window
+        case when agent_reply_at is null
+             and next_solved_at is not null
+             and next_solved_at >= sla_schedule_start_at
+             and (next_solved_at < next_schedule_start or next_schedule_start is null)
+             then 0 else 1 end asc,
+        sla_schedule_start_at desc
+    ) as dedup_rn
+  from filtered_reply_times
+
 ), reply_time_breached_at_remove_old_sla as (
   select
     *,
     {{ dbt.current_timestamp() }} as current_time_check,
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) as updated_sla_policy_starts_at,
-    case when 
+    case when
       lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
     case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
@@ -139,8 +167,9 @@ with reply_time_calendar_hours_sla as (
       then true
       else false
         end as is_sla_breached,
-    sum_lapsed_business_minutes_new + total_runtime_minutes as total_new_minutes -- add total runtime to sum_lapsed_business_minutes_new (the sum_lapsed_business_minutes from prior row)
-  from filtered_reply_times
+    sum_lapsed_business_minutes_new + total_runtime_minutes as total_new_minutes
+  from filtered_reply_times_ranked
+  where dedup_rn = 1
 
 ), reply_time_breach as ( 
   select  
