@@ -29,6 +29,7 @@ with requester_wait_time_filtered_statuses as (
       requester_wait_time_filtered_statuses.sla_applied_at,
       requester_wait_time_filtered_statuses.target,
       requester_wait_time_filtered_statuses.sla_policy_name,
+      requester_wait_time_filtered_statuses.priority_applied,
       ticket_schedules.schedule_id,
 
       -- take the intersection of the intervals in which the status and the schedule were both active, for calculating the business minutes spent working on the ticket
@@ -50,12 +51,13 @@ with requester_wait_time_filtered_statuses as (
 
 ), ticket_full_solved_time as (
 
-    select 
+    select
       source_relation,
       ticket_id,
       sla_applied_at,
       target,
       sla_policy_name,
+      priority_applied,
       schedule_id,
       valid_starting_at,
       valid_ending_at,
@@ -74,7 +76,7 @@ with requester_wait_time_filtered_statuses as (
     {{ zendesk.fivetran_week_start('ticket_status_crossed_with_schedule.valid_starting_at') }} as start_week_date
 
     from ticket_status_crossed_with_schedule
-    {{ dbt_utils.group_by(n=11) }}
+    {{ dbt_utils.group_by(n=12) }}
 
 ), weeks as (
 
@@ -91,7 +93,7 @@ with requester_wait_time_filtered_statuses as (
 
 ), weekly_period_requester_wait_time as (
 
-    select 
+    select
       source_relation,
       ticket_id,
       sla_applied_at,
@@ -101,6 +103,7 @@ with requester_wait_time_filtered_statuses as (
       status_valid_ending_at,
       target,
       sla_policy_name,
+      priority_applied,
       valid_starting_at_in_minutes_from_week,
       raw_delta_in_minutes,
       week_number,
@@ -113,12 +116,13 @@ with requester_wait_time_filtered_statuses as (
 
 ), intercepted_periods_agent as (
   
-    select 
+    select
       weekly_period_requester_wait_time.source_relation,
       weekly_period_requester_wait_time.ticket_id,
       weekly_period_requester_wait_time.sla_applied_at,
       weekly_period_requester_wait_time.target,
       weekly_period_requester_wait_time.sla_policy_name,
+      weekly_period_requester_wait_time.priority_applied,
       weekly_period_requester_wait_time.valid_starting_at,
       weekly_period_requester_wait_time.valid_ending_at,
       weekly_period_requester_wait_time.week_number,

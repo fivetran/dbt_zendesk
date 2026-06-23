@@ -24,6 +24,15 @@ Although the schedule history extracted from the audit log includes the most rec
 ## Tracking Ticket SLA Policies Into the Future
 In our models we generate a future time series for ticket SLA policies. This is limited to a year to maintain performance. 
 
+## SLA Priority Applied at Event Time
+When a ticket's priority changes, Zendesk stores the current priority on the ticket record. If we used `current_priority` to look up SLA targets, a priority change would retroactively alter the target applied to every prior SLA event — including events that were already breached or met under the original priority.
+
+Instead, we join SLA events to the ticket's priority history (sourced from `int_zendesk__updates`) to determine the priority that was active at `sla_applied_at`. This value is stored as `priority_applied` and is what drives the SLA target lookup in `int_zendesk__sla_policy_applied` and all downstream SLA models.
+
+`current_priority` is still available on each row and reflects the ticket's priority at query time. When a ticket's priority has never changed, `priority_applied` and `current_priority` are identical.
+
+If no history record covers the `sla_applied_at` timestamp (e.g., priority was set at the same instant the ticket was created and the event predates the first history row), we fall back to `current_priority` via a `coalesce`.
+
 ## Zendesk Support First Reply Time SLA Opinionated Logic
 The logic for `first_reply_time` breach/achievement metrics within the `zendesk__ticket_metrics` and `zendesk__sla_policies` models are structured on the Zendesk Support definition of [first reply time SLA events](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time?page=2#topic_jvw_nqd_1hb). For example, this data model calculates first reply time to be the duration of time (business or calendar) between the creation of the ticket and the first public comment from either an `agent` or `admin`. This holds true regardless of when the first reply time SLA was applied to the ticket.
 

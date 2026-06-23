@@ -36,6 +36,11 @@ final as (
         sla_policy_id,
         cast(index as {{ dbt.type_int() }}) as index,
         cast(sla_policy_updated_at as {{ dbt.type_timestamp() }}) as sla_policy_updated_at,
+        cast(sla_policy_updated_at as {{ dbt.type_timestamp() }}) as valid_starting_at,
+        cast(lead(sla_policy_updated_at) over (
+            partition by sla_policy_id, metric, priority {{ partition_by_source_relation() }}
+            order by sla_policy_updated_at
+        ) as {{ dbt.type_timestamp() }}) as valid_ending_at,
         business_hours as in_business_hours,
         lower(cast(metric as {{ dbt.type_string() }})) as metric,
         lower(cast(priority as {{ dbt.type_string() }})) as priority,

@@ -535,6 +535,10 @@ models:
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
           Empty string if you are not.
+      - name: valid_starting_at
+        description: The time at which the SLA policy metric targets became valid.
+      - name: valid_ending_at
+        description: The time at which the SLA policy metric targets were invalidated.
 
   - name: stg_zendesk__ticket_sla_policy
     description: >
