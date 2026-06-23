@@ -156,15 +156,9 @@ with reply_time_calendar_hours_sla as (
   select
     *,
     {{ dbt.current_timestamp() }} as current_time_check,
-<<<<<<< HEAD
     lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by sla_applied_at) as updated_sla_policy_starts_at,
-    case when 
-      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by sla_applied_at) --updated sla policy start at time
-=======
-    lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) as updated_sla_policy_starts_at,
     case when
-      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ partition_by_source_relation() }} order by sla_applied_at) --updated sla policy start at time
->>>>>>> 0baeb69a6aa5badcd3c8b0281b8f17416d1cbc13
+      lead(sla_applied_at) over (partition by ticket_id, metric, in_business_hours {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by sla_applied_at) --updated sla policy start at time
       < sla_breach_at then true else false end as is_stale_sla_policy,
     case when (sla_breach_at < agent_reply_at and sla_breach_at < next_solved_at)
                 or (sla_breach_at < agent_reply_at and next_solved_at is null)

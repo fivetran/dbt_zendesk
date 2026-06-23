@@ -157,15 +157,9 @@ with ticket_schedules as (
     weekly_periods.*,
     schedule.start_time_utc as schedule_start_time,
     schedule.end_time_utc as schedule_end_time,
-<<<<<<< HEAD
-    (schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
-    sum(schedule.end_time_utc - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
-      (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='weekly_periods') }} 
-=======
     (least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time,schedule.start_time_utc)) as lapsed_business_minutes,
     sum(least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time,schedule.start_time_utc)) over 
-      (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ partition_by_source_relation(alias='weekly_periods') }} 
->>>>>>> 0baeb69a6aa5badcd3c8b0281b8f17416d1cbc13
+      (partition by ticket_id, sla_policy_name, metric, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='weekly_periods') }} 
         order by week_number, schedule.start_time_utc
         rows between unbounded preceding and current row) as sum_lapsed_business_minutes
   from weekly_periods
