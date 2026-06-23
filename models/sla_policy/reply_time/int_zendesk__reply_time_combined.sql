@@ -135,7 +135,7 @@ with reply_time_calendar_hours_sla as (
   select
     *,
     row_number() over (
-      partition by ticket_id, sla_policy_name, metric, sla_applied_at, in_business_hours {{ partition_by_source_relation() }}
+      partition by ticket_id, sla_policy_name, metric, sla_applied_at, in_business_hours {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
       order by
         -- prefer the row where the reply falls inside the schedule window
         case when agent_reply_at is not null

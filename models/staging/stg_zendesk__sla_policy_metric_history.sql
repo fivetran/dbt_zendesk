@@ -38,7 +38,7 @@ final as (
         cast(sla_policy_updated_at as {{ dbt.type_timestamp() }}) as sla_policy_updated_at,
         cast(sla_policy_updated_at as {{ dbt.type_timestamp() }}) as valid_starting_at,
         cast(lead(sla_policy_updated_at) over (
-            partition by sla_policy_id, metric, priority {{ partition_by_source_relation() }}
+            partition by sla_policy_id, metric, priority {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
             order by sla_policy_updated_at
         ) as {{ dbt.type_timestamp() }}) as valid_ending_at,
         business_hours as in_business_hours,
