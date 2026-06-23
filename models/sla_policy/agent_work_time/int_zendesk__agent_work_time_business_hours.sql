@@ -150,7 +150,7 @@ with agent_work_time_filtered_statuses as (
     select 
       *,
       sum(scheduled_minutes) over
-        (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }}
+        (partition by ticket_id, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
           order by valid_starting_at, week_number, schedule_end_time
           rows between unbounded preceding and current row)
         as running_total_scheduled_minutes
@@ -163,15 +163,15 @@ with agent_work_time_filtered_statuses as (
     intercepted_periods_with_running_total.*,
     target - running_total_scheduled_minutes as remaining_target_minutes,
     lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) as lag_check,
+          (partition by ticket_id, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at, week_number, schedule_end_time) as lag_check,
     case when (target - running_total_scheduled_minutes) = 0 then true
       when (target - running_total_scheduled_minutes) < 0 
         and 
           (lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) > 0 
+          (partition by ticket_id, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at, week_number, schedule_end_time) > 0 
           or 
           lag(target - running_total_scheduled_minutes) over
-          (partition by ticket_id, sla_applied_at {{ partition_by_source_relation() }} order by valid_starting_at, week_number, schedule_end_time) is null) 
+          (partition by ticket_id, sla_applied_at {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at, week_number, schedule_end_time) is null) 
           then true else false end as is_breached_during_schedule
           
   from  intercepted_periods_with_running_total

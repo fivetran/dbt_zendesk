@@ -44,7 +44,7 @@ with field_history as (
     select 
         *,
         row_number() over (
-            partition by cast(valid_starting_at as date), ticket_id, field_name {{ partition_by_source_relation() }}
+            partition by cast(valid_starting_at as date), ticket_id, field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
             order by valid_starting_at desc
             ) as row_num
     from field_history

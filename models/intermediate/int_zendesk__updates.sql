@@ -60,7 +60,7 @@ with ticket_history as (
         is_public,
         user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by created_at) as valid_ending_at
+        lead(created_at) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by created_at) as valid_ending_at
     from ticket_comment
 
 {% if var('using_ticket_chat', False) %}
@@ -76,7 +76,7 @@ with ticket_history as (
         true as is_public,
         actor_id as user_id,
         created_at as valid_starting_at,
-        lead(created_at) over (partition by ticket_id {{ partition_by_source_relation() }} order by created_at) as valid_ending_at
+        lead(created_at) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by created_at) as valid_ending_at
     from ticket_chat_join
 {% endif %}
 
