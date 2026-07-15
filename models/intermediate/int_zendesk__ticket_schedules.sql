@@ -47,7 +47,7 @@ with ticket as (
     on ticket.source_relation = default_schedules.source_relation
   left join ticket_schedule as first_schedule
     on first_schedule.ticket_id = ticket.ticket_id
-    and {{ fivetran_utils.timestamp_add('second', -5, 'first_schedule.created_at') }} <= ticket.created_at
+    and {{ dbt.dateadd('second', -5, 'first_schedule.created_at') }} <= ticket.created_at
     and first_schedule.created_at >= ticket.created_at   
     and first_schedule.source_relation = ticket.source_relation
   where first_schedule.ticket_id is null
@@ -75,7 +75,7 @@ with ticket as (
     schedule_id,
     schedule_created_at,
     coalesce(lead(schedule_created_at) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by schedule_created_at)
-            , {{ fivetran_utils.timestamp_add("hour", 1000, "" ~ dbt.current_timestamp() ~ "") }} ) as schedule_invalidated_at
+            , {{ dbt.dateadd("hour", 1000, "" ~ dbt.current_timestamp() ~ "") }} ) as schedule_invalidated_at
   from schedule_events
 
 )

@@ -40,10 +40,10 @@ from  requester_wait_time_calendar_minutes
   select
     *,
     (remaining_target_minutes + calendar_minutes) as breach_minutes,
-    {{ fivetran_utils.timestamp_add(
+    {{ dbt.dateadd(
       "second",
       "cast(((remaining_target_minutes + calendar_minutes) * 60) as " ~ dbt.type_int() ~ " )",
-      "valid_starting_at", 
+      "valid_starting_at"
       ) }} as sla_breach_at
   from requester_wait_time_calendar_minutes_flagged
 

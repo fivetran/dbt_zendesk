@@ -188,7 +188,7 @@ with agent_work_time_filtered_statuses as (
   
   select 
     *,
-    {{ fivetran_utils.timestamp_add(
+    {{ dbt.dateadd(
       "second",
       "cast(((7*24*60*60) * week_number) + (breach_minutes_from_week * 60) as " ~ dbt.type_int() ~ " )",
       "cast(" ~ zendesk.fivetran_week_start('valid_starting_at') ~ " as " ~ dbt.type_timestamp() ~ " )"
