@@ -193,15 +193,15 @@ with ticket_schedules as (
     *,
     schedule_end_time + remaining_minutes as breached_at_minutes,
     {{ zendesk.fivetran_week_start('sla_applied_at') }} as starting_point,
-    {{ dbt.dateadd(
+    {{ fivetran_utils.timestamp_add(
         "second",
         "cast(((7*24*60*60) * week_number) + ((schedule_end_time + remaining_minutes) * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_breach_at,
-    {{ dbt.dateadd(
+    {{ fivetran_utils.timestamp_add(
         "second",
         "cast(((7*24*60*60) * week_number) + (schedule_start_time * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }} as sla_schedule_start_at,
-    least({{ dbt.dateadd(
+    least({{ fivetran_utils.timestamp_add(
         "second",
         "cast(((7*24*60*60) * week_number) + (schedule_end_time * 60) as " ~ dbt.type_int() ~ " )",
         "cast(" ~ zendesk.fivetran_week_start('sla_applied_at') ~ " as " ~ dbt.type_timestamp() ~ ")" ) }}, schedule_invalidated_at) as sla_schedule_end_at,

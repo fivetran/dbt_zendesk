@@ -6,7 +6,7 @@ version: '1.7.0'
 profile: 'integration_tests'
 
 vars:  
-  zendesk_schema: zz_dbt_catherine #zendesk_integration_tests
+  zendesk_schema: zendesk_integration_tests
 
   zendesk:
     zendesk_organization_identifier:                      "organization_data"
@@ -211,6 +211,8 @@ seeds:
         created_at: timestamp
         
 dispatch:
+  - macro_namespace: fivetran_utils
+    search_order: ['zendesk', 'fivetran_utils']
   - macro_namespace: dbt_utils
     search_order: ['spark_utils', 'dbt_utils']
 

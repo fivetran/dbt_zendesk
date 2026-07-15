@@ -40,7 +40,7 @@ from  agent_work_time_calendar_minutes
   select
     *,
     (remaining_target_minutes + calendar_minutes) as breach_minutes,
-    {{ dbt.dateadd(
+    {{ fivetran_utils.timestamp_add(
       "second",
       "cast(((remaining_target_minutes + calendar_minutes) * 60) as " ~ dbt.type_int() ~ " )",
       "valid_starting_at"
