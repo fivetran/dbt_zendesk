@@ -1,3 +1,11 @@
+# dbt_zendesk v1.7.1
+
+[PR #267](https://github.com/fivetran/dbt_zendesk/pull/267) includes the following updates:
+
+## Feature Updates
+- Adds DuckDB as a supported destination.
+
+
 # dbt_zendesk v1.7.0
 
 [PR #265](https://github.com/fivetran/dbt_zendesk/pull/265) includes the following updates:
