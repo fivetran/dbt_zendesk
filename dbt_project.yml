@@ -48,10 +48,6 @@ models:
       tmp:
         +materialized: view
 
-dispatch:
-  - macro_namespace: fivetran_utils
-    search_order: ['zendesk', 'fivetran_utils']
-
 vars:
   zendesk:
     ticket_field_history_columns: ['assignee_id', 'status', 'priority']

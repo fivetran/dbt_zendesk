@@ -211,8 +211,6 @@ seeds:
         created_at: timestamp
         
 dispatch:
-  - macro_namespace: fivetran_utils
-    search_order: ['zendesk', 'fivetran_utils']
   - macro_namespace: dbt_utils
     search_order: ['spark_utils', 'dbt_utils']
 
