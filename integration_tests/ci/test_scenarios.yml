@@ -53,3 +53,8 @@ test_scenarios:
       fivetran_using_source_casing: true
     include_incremental: false
     include_dbt_seed: true
+
+  - name: "numeric custom field history column"
+    vars:
+      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '42429884459031']
+    include_incremental: false
