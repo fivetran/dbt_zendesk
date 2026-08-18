@@ -1,3 +1,11 @@
+# dbt_zendesk v1.7.2
+
+[PR #269](https://github.com/fivetran/dbt_zendesk/pull/269) includes the following updates:
+
+## Bug Fix
+- Fixes a compilation error in `int_zendesk__field_history_pivot` that occurred when a numeric ID (such as a custom ticket field ID) was included in the `ticket_field_history_columns` variable. The generated column name is now run through `dbt_utils.slugify` so it resolves to a valid identifier (for example, `42429884459031` becomes `_42429884459031`) instead of failing.
+
+
 # dbt_zendesk v1.7.1
 
 [PR #268](https://github.com/fivetran/dbt_zendesk/pull/268) includes the following updates:
