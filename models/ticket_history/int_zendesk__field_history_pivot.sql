@@ -68,7 +68,7 @@ with field_history as (
         cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
-            {% set col_xf = col|lower %}
+            {% set col_xf = dbt_utils.slugify(col) %}
             ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
             --Only runs if the user passes updater fields through the final ticket field history model
@@ -76,7 +76,7 @@ with field_history as (
 
                 {% for upd in var('ticket_field_history_updater_columns') %}
 
-                    {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
+                    {% set upd_xf = (col_xf + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
 
                     {% if upd == 'updater_is_active' and target.type in ('postgres', 'redshift') %}
 

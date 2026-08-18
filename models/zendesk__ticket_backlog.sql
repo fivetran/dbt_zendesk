@@ -69,7 +69,7 @@ with ticket_field_history as (
                 ,assignee.locale as local_name
 
             {% else %} --All other fields are not ID's and can simply be included in the query.
-                ,ticket_field_history.{{ col }}
+                ,ticket_field_history.{{ dbt_utils.slugify(col) }}
             {% endif %}
         {% endfor %}
 
