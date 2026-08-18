@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '1.7.0'
+version: '1.7.1'
 
 profile: 'integration_tests'
 
@@ -146,13 +146,13 @@ seeds:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ target.type != 'postgres' or var('fivetran_using_source_casing', false) }}"
+      +enabled: "{{ target.type not in ('postgres', 'duckdb') or var('fivetran_using_source_casing', false) }}"
     brand_data_postgres:
       +alias: brand_data
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         _fivetran_synced: timestamp
-      +enabled: "{{ target.type == 'postgres' and not var('fivetran_using_source_casing', false) }}"
+      +enabled: "{{ target.type in ('postgres', 'duckdb') and not var('fivetran_using_source_casing', false) }}"
     ticket_form_history_data:
       +column_types:
         id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"

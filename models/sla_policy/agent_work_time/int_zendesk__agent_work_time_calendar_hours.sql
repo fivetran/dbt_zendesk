@@ -43,7 +43,7 @@ from  agent_work_time_calendar_minutes
     {{ fivetran_utils.timestamp_add(
       "second",
       "cast(((remaining_target_minutes + calendar_minutes) * 60) as " ~ dbt.type_int() ~ " )",
-      "valid_starting_at", 
+      "valid_starting_at"
       ) }} as sla_breach_at
   from agent_work_time_calendar_minutes_flagged
 
