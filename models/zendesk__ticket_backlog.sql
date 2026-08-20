@@ -1,5 +1,20 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
+-- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
+
+{% if execute and flags.WHICH in ('run', 'build') -%}
+    -- Mirrors the custom field name resolution in int_zendesk__field_history_pivot so the column names referenced
+    -- below match what that model actually produced.
+    {% set custom_field_names = {} %}
+    {% if var('using_ticket_custom_field', True) %}
+        {% set custom_field_results = run_query('select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from ' ~ ref('stg_zendesk__ticket_custom_field')) %}
+        {% for row in custom_field_results.rows %}
+            {% if row[1] %}
+                {% do custom_field_names.update({row[0] | string: row[1]}) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endif -%}
 
 with ticket_field_history as (
     select *
@@ -69,7 +84,8 @@ with ticket_field_history as (
                 ,assignee.locale as local_name
 
             {% else %} --All other fields are not ID's and can simply be included in the query.
-                ,ticket_field_history.{{ col }}
+                {% set resolved_name = custom_field_names.get(col | string, col) %}
+                ,ticket_field_history.{{ dbt_utils.slugify(resolved_name) }}
             {% endif %}
         {% endfor %}
 

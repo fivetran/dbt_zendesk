@@ -124,7 +124,7 @@ If you use [Fivetran Transformations for dbt Core™](https://fivetran.com/docs/
 
 > _This step is optional if you are unioning multiple connections together in the previous step. The `union_data` macro will create empty staging models for sources that are not found in any of your Zendesk schemas/databases. However, you can still leverage the below variables if you would like to avoid this behavior._
 
-This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, `ticket_chat_event`, `sla_policy_metric_history`, or `ticket_sla_policy` features, and allows you to disable the corresponding functionality.
+This package takes into consideration that not every Zendesk Support account utilizes the `schedule`, `schedule_holiday`, `ticket_schedule`, `daylight_time`, `time_zone`, `audit_log`, `domain_name`, `user_tag`, `brand`,`organization`, `organization_tag`, `ticket_form_history`, `ticket_chat`, `ticket_chat_event`, `sla_policy_metric_history`, `ticket_sla_policy`, or `ticket_custom_field` features, and allows you to disable the corresponding functionality.
 
 By default, all variables' values are assumed to be `true`, except for `using_audit_log` and `using_ticket_chat`. Add variables for only the tables you want to enable/disable:
 
@@ -144,6 +144,7 @@ vars:
     using_brands:                       False         #Disable if you are not using brands
     using_organizations:                False         #Disable if you are not using organizations. Setting this to False will also disable organization tags.
     using_organization_tags:            False         #Disable if you are not using organization tags
+    using_ticket_custom_field:          False         #Disable if you are not using ticket_custom_field. This is used to resolve custom ticket field IDs in ticket_field_history_columns to their readable names.
 ```
 
 ### (Optional) Additional configurations
@@ -226,6 +227,14 @@ vars:
                                             ]
 ```
 *Note: This package only integrates the above ticket_field_history_updater_columns values. If you'd like to include additional updater fields, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
+
+##### Tracking Custom Ticket Fields
+Custom ticket fields can also be included in `ticket_field_history_columns` by passing the field's numeric ID (Zendesk stores custom field history using this ID, not the field's name). When `using_ticket_custom_field` is enabled (the default), the package resolves this ID to the custom field's readable title and uses that as the resulting column name, rather than the raw ID.
+
+```yml
+vars:
+    ticket_field_history_columns: ['status', 'priority', '360000000000'] # 360000000000 is a custom field ID
+```
 
 #### Extending and Limiting the Ticket Field History
 This package will create a row in `zendesk__ticket_field_history` for each day that a ticket is open, starting at its creation date. A Zendesk Support ticket cannot be altered after being closed, so its field values will not change after this date. However, you may want to extend a ticket's history past its closure date for easier reporting and visualizing. To do so, add the following configuration to your root `dbt_project.yml` file:

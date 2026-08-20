@@ -1,18 +1,31 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+-- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
 
-{{ 
+{{
     config(
         materialized='incremental',
         partition_by = {'field': 'date_day', 'data_type': 'date', 'granularity': 'month'} if target.type not in ['spark', 'databricks', 'duckdb'] else ['date_day'],
         unique_key='ticket_day_id',
         incremental_strategy = 'merge' if target.type not in ('snowflake', 'postgres', 'redshift') else 'delete+insert',
         file_format='delta'
-        ) 
+        )
 }}
 
 {% if execute and flags.WHICH in ('run', 'build') -%}
     {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
     {% set results_list = results.columns[0].values() %}
+
+    -- Custom ticket field IDs are stored as the raw numeric ID in field_name. Resolve them to their human-readable
+    -- title here so the pivoted column names are readable instead of just a valid-but-opaque numeric identifier.
+    {% set custom_field_names = {} %}
+    {% if var('using_ticket_custom_field', True) %}
+        {% set custom_field_results = run_query('select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from ' ~ ref('stg_zendesk__ticket_custom_field')) %}
+        {% for row in custom_field_results.rows %}
+            {% if row[1] %}
+                {% do custom_field_names.update({row[0] | string: row[1]}) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 {% endif -%}
 
 with field_history as (
@@ -68,7 +81,8 @@ with field_history as (
         cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
         {% for col in results_list if col in var('ticket_field_history_columns') %}
-            {% set col_xf = col|lower %}
+            {% set resolved_name = custom_field_names.get(col | string, col) %} --Falls back to the raw field_name (e.g. for standard fields like status/priority) when there's no matching custom field.
+            {% set col_xf = dbt_utils.slugify(resolved_name) %}
             ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
             --Only runs if the user passes updater fields through the final ticket field history model
@@ -76,7 +90,7 @@ with field_history as (
 
                 {% for upd in var('ticket_field_history_updater_columns') %}
 
-                    {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
+                    {% set upd_xf = (col_xf + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
 
                     {% if upd == 'updater_is_active' and target.type in ('postgres', 'redshift') %}
 

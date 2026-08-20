@@ -1,0 +1,2 @@
+id,title,raw_title,key,type,active,_fivetran_synced,_fivetran_deleted
+123456pokemon,Pokemon Field,Pokemon Field,pokemon_field,text,true,2020-10-02 14:08:33.216,false

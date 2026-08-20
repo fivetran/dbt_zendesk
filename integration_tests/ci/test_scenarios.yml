@@ -31,6 +31,7 @@ test_scenarios:
       using_organization_tags: false
       using_organizations: false
       using_ticket_chat: true
+      using_ticket_custom_field: false
     include_incremental: false
 
   - name: "custom user criteria"
@@ -46,6 +47,11 @@ test_scenarios:
     vars:
       using_holidays: true
       using_ticket_chat: true
+    include_incremental: false
+
+  - name: "numeric custom field history column"
+    vars:
+      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '123456pokemon']
     include_incremental: false
 
   - name: "MDLS"

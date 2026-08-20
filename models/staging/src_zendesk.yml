@@ -368,7 +368,33 @@ sources:
             description: The value of the field
           - name: user_id
             description: The id of the user who made the update
-      
+
+      - name: ticket_custom_field
+        identifier: "{{ var('zendesk_ticket_custom_field_identifier', 'ticket_custom_field') }}"
+        description: >
+          Definitions for custom ticket fields, including their title and type. Used to resolve the numeric field IDs
+          stored in `ticket_field_history.field_name` to their human-readable names.
+        config:
+          enabled: "{{ var('using_ticket_custom_field', true) and var('zendesk_sources', []) == [] }}"
+          freshness: null
+        columns:
+          - name: id
+            description: The unique identifier for the custom field, matching the value stored in `ticket_field_history.field_name` for custom fields.
+          - name: title
+            description: The formatted display title of the custom field.
+          - name: raw_title
+            description: The unformatted title of the custom field.
+          - name: key
+            description: The unique key assigned to the custom field, if one has been defined.
+          - name: type
+            description: The type of the custom field, such as `checkbox`, `date`, `decimal`, `dropdown`, `integer`, `regexp`, `text`, or `textarea`.
+          - name: active
+            description: Boolean indicating whether the custom field is currently active in Zendesk.
+          - name: _fivetran_deleted
+            description: Boolean created by Fivetran to indicate whether the record has been deleted.
+          - name: _fivetran_synced
+            description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+
       - name: daylight_time
         identifier: "{{ var('zendesk_daylight_time_identifier', 'daylight_time') }}"
         description: >

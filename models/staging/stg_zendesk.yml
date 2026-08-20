@@ -369,6 +369,29 @@ models:
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
           Empty string if you are not.
 
+  - name: stg_zendesk__ticket_custom_field
+    description: >
+      Definitions for custom ticket fields, including their title and type. Used to resolve the numeric field IDs
+      stored in `stg_zendesk__ticket_field_history.field_name` to their human-readable names. Can be disabled by
+      setting the `using_ticket_custom_field` variable to `False`.
+    columns:
+      - name: ticket_custom_field_id
+        description: The unique identifier for the custom field, matching the value stored in `ticket_field_history.field_name` for custom fields.
+      - name: title
+        description: The formatted display title of the custom field.
+      - name: raw_title
+        description: The unformatted title of the custom field.
+      - name: key
+        description: The unique key assigned to the custom field, if one has been defined.
+      - name: type
+        description: The type of the custom field, such as `checkbox`, `date`, `decimal`, `dropdown`, `integer`, `regexp`, `text`, or `textarea`.
+      - name: active
+        description: Boolean indicating whether the custom field is currently active in Zendesk.
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.
+
   - name: stg_zendesk__daylight_time
     description: >
       Appropriate offsets (from UTC) for timezones that engage or have engaged with Daylight Savings at some point since 1970.
