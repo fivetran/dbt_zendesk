@@ -1,3 +1,21 @@
+# dbt_zendesk v1.8.0-a1
+
+[PR #270](https://github.com/fivetran/dbt_zendesk/pull/270) includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 1 possible breaking change**
+
+| **Data Model** | **Change type** | **Old** | **New** | **Notes** |
+| -------------- | --------------- | ------- | ------- | --------- |
+| [`stg_zendesk__ticket_custom_field`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_custom_field) | New staging model | | | Definitions for custom ticket fields, including their title and type. Can be disabled by setting the `using_ticket_custom_field` variable to `False`. |
+
+## Feature Update
+- Adds the `ticket_custom_field` source table so that custom ticket field IDs passed through the `ticket_field_history_columns` variable resolve to their actual field title (rather than the raw numeric ID) as the resulting column name in `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. Standard fields (`status`, `priority`, etc.) are unaffected.
+
+> This is a pre-release. It has not yet been validated against real `ticket_custom_field` data and does not yet handle two custom fields resolving to the same column name.
+
+
 # dbt_zendesk v1.7.1
 
 [PR #268](https://github.com/fivetran/dbt_zendesk/pull/268) includes the following updates:
