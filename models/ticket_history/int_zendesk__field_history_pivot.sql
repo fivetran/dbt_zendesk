@@ -22,7 +22,7 @@
     {% set results_list = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) %}
 
     {% if var('using_ticket_custom_field', True) %}
-        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
+        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(title, raw_title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
         {% if custom_field_results %}
             {% for id, name in zip(custom_field_results['ticket_custom_field_id'], custom_field_results['resolved_name']) %}
                 {% if name %}
