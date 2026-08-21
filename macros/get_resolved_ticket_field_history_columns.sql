@@ -15,15 +15,15 @@
 {% if execute and flags.WHICH in ('run', 'build') -%}
     -- int_zendesk__field_history_column_names already resolved each tracked field to its human-readable name
     -- (or its own raw name for standard fields) as an actual table, so this is a cheap read, not a re-join.
-    {% set resolved_results = dbt_utils.get_query_results_as_dict("select field_name, resolved_name from " ~ ref('int_zendesk__field_history_column_names')) %}
+    -- Uses positional row access (not a name-keyed dict) since some adapters (e.g. Snowflake) fold unquoted
+    -- result column names to uppercase, which would silently break a lookup keyed on the lowercase alias.
+    {% set resolved_results = run_query("select field_name, resolved_name from " ~ ref('int_zendesk__field_history_column_names')) %}
 
     -- First pass: slugify each column's resolved name (not yet deduplicated).
     {% set slugified_names = {} %}
-    {% if resolved_results %}
-        {% for col, resolved_name in zip(resolved_results['field_name'], resolved_results['resolved_name']) %}
-            {% do slugified_names.update({col: dbt_utils.slugify(resolved_name)}) %}
-        {% endfor %}
-    {% endif %}
+    {% for row in resolved_results.rows %}
+        {% do slugified_names.update({row[0]: dbt_utils.slugify(row[1])}) %}
+    {% endfor %}
 
     -- Count how many columns land on the same slugified name so we know which ones need disambiguating.
     {% set name_counts = {} %}
