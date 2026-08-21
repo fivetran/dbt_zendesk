@@ -229,11 +229,11 @@ vars:
 *Note: This package only integrates the above ticket_field_history_updater_columns values. If you'd like to include additional updater fields, please create an [issue](https://github.com/fivetran/dbt_zendesk/issues) specifying which ones.*
 
 ##### Tracking Custom Ticket Fields
-Custom ticket fields can also be included in `ticket_field_history_columns` by passing the field's numeric ID (Zendesk stores custom field history using this ID, not the field's name). When `using_ticket_custom_field` is enabled (the default), the package resolves this ID to the custom field's readable title and uses that as the resulting column name, rather than the raw ID.
+Custom ticket fields can also be included in `ticket_field_history_columns` by passing either the field's numeric ID or its title (Zendesk stores custom field history using the numeric ID, not the field's name, but you don't need to look that ID up). When `using_ticket_custom_field` is enabled (the default), the package resolves either form to the custom field's readable title and uses that as the resulting column name.
 
 ```yml
 vars:
-    ticket_field_history_columns: ['status', 'priority', '360000000000'] # 360000000000 is a custom field ID
+    ticket_field_history_columns: ['status', 'priority', 'Support Tier'] # 'Support Tier' is a custom field title; its numeric ID would also work
 ```
 
 #### Extending and Limiting the Ticket Field History

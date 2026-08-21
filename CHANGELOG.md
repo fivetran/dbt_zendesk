@@ -12,7 +12,7 @@
 | `int_zendesk__field_history_column_names` | New intermediate model | | | Resolves each tracked `ticket_field_history_columns` entry to its human-readable name once, shared by `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. |
 
 ## Feature Update
-- Adds the `ticket_custom_field` source table so that custom ticket field IDs passed through the `ticket_field_history_columns` variable resolve to their actual field title (rather than the raw numeric ID) as the resulting column name in `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. Standard fields (`status`, `priority`, etc.) are unaffected. If two custom fields resolve to the same title, the raw field ID is appended to keep column names unique.
+- Adds the `ticket_custom_field` source table so that custom ticket fields passed through the `ticket_field_history_columns` variable resolve to their actual field title (rather than the raw numeric ID) as the resulting column name in `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. Custom fields can be referenced either by their numeric ID or by their title/raw_title directly. Standard fields (`status`, `priority`, etc.) are unaffected. If two custom fields resolve to the same title, the raw field ID is appended to keep column names unique.
 
 > This is a pre-release, validated against real `ticket_custom_field` data. Titles long enough to exceed a destination's identifier length limit (e.g. Postgres' 63-byte limit) are not yet truncated/handled.
 
