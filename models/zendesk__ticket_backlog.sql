@@ -1,10 +1,12 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
--- depends_on: {{ ref('int_zendesk__field_history_column_names') }}
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
--- Reuses the same resolution (and collision handling) as int_zendesk__field_history_pivot so the column names
--- referenced below always match what that model actually produced.
-{% set resolved_columns = get_resolved_ticket_field_history_columns() %}
+-- Rather than re-resolving custom field names (int_zendesk__field_history_pivot already did that), this just
+-- introspects the columns that model actually produced and passes through whatever isn't already handled below.
+{% set ticket_field_history_relation_columns = adapter.get_columns_in_relation(ref('zendesk__ticket_field_history')) %}
+{% set handled_columns = ['source_relation', 'date_day', 'ticket_id', 'status', 'ticket_day_id',
+                          'assignee_id', 'requester_id', 'ticket_form_id', 'organization_id',
+                          'brand_id', 'group_id', 'locale_id'] %}
 
 with ticket_field_history as (
     select *
@@ -73,9 +75,10 @@ with ticket_field_history as (
             {% elif col in ['locale_id'] %} --Standard ID field where the name can easily be joined from stg model.
                 ,assignee.locale as local_name
 
-            {% else %} --All other fields are not ID's and can simply be included in the query.
-                ,ticket_field_history.{{ resolved_columns.get(col, dbt_utils.slugify(col)) }}
             {% endif %}
+        {% endfor %}
+        {% for column in ticket_field_history_relation_columns if column.name|lower not in handled_columns %} --Passes through every other tracked column (including resolved custom field names) generically.
+            ,ticket_field_history.{{ column.name }}
         {% endfor %}
 
     from ticket_field_history
