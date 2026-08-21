@@ -19,16 +19,17 @@
 {% set custom_field_names = {} %}
 
 {% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
-    {% set results_list = results.columns[0].values() %}
+    {% set results_list = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) %}
 
     {% if var('using_ticket_custom_field', True) %}
-        {% set custom_field_results = run_query('select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from ' ~ ref('stg_zendesk__ticket_custom_field')) %}
-        {% for row in custom_field_results.rows %}
-            {% if row[1] %}
-                {% do custom_field_names.update({row[0] | string: row[1]}) %}
-            {% endif %}
-        {% endfor %}
+        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
+        {% if custom_field_results %}
+            {% for id, name in zip(custom_field_results['ticket_custom_field_id'], custom_field_results['resolved_name']) %}
+                {% if name %}
+                    {% do custom_field_names.update({id | string: name}) %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
     {% endif %}
 {% endif -%}
 
