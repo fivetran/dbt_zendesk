@@ -4,23 +4,9 @@
 {% endif -%}
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
--- Mirrors the custom field name resolution in int_zendesk__field_history_pivot so the column names referenced
--- below match what that model actually produced. Declared unconditionally so it's always defined, even outside
--- the run/build guard below (e.g. during dbt compile).
-{% set custom_field_names = {} %}
-
-{% if execute and flags.WHICH in ('run', 'build') -%}
-    {% if var('using_ticket_custom_field', True) %}
-        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(title, raw_title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
-        {% if custom_field_results %}
-            {% for id, name in zip(custom_field_results['ticket_custom_field_id'], custom_field_results['resolved_name']) %}
-                {% if name %}
-                    {% do custom_field_names.update({id | string: name}) %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endif %}
-{% endif -%}
+-- Reuses the same resolution (and collision handling) as int_zendesk__field_history_pivot so the column names
+-- referenced below always match what that model actually produced.
+{% set resolved_columns = get_resolved_ticket_field_history_columns() %}
 
 with ticket_field_history as (
     select *
@@ -90,8 +76,7 @@ with ticket_field_history as (
                 ,assignee.locale as local_name
 
             {% else %} --All other fields are not ID's and can simply be included in the query.
-                {% set resolved_name = custom_field_names.get(col | string, col) %}
-                ,ticket_field_history.{{ dbt_utils.slugify(resolved_name) }}
+                ,ticket_field_history.{{ resolved_columns.get(col, dbt_utils.slugify(col)) }}
             {% endif %}
         {% endfor %}
 

@@ -11,9 +11,9 @@
 | [`stg_zendesk__ticket_custom_field`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.stg_zendesk__ticket_custom_field) | New staging model | | | Definitions for custom ticket fields, including their title and type. Can be disabled by setting the `using_ticket_custom_field` variable to `False`. |
 
 ## Feature Update
-- Adds the `ticket_custom_field` source table so that custom ticket field IDs passed through the `ticket_field_history_columns` variable resolve to their actual field title (rather than the raw numeric ID) as the resulting column name in `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. Standard fields (`status`, `priority`, etc.) are unaffected.
+- Adds the `ticket_custom_field` source table so that custom ticket field IDs passed through the `ticket_field_history_columns` variable resolve to their actual field title (rather than the raw numeric ID) as the resulting column name in `int_zendesk__field_history_pivot` and `zendesk__ticket_backlog`. Standard fields (`status`, `priority`, etc.) are unaffected. If two custom fields resolve to the same title, the raw field ID is appended to keep column names unique.
 
-> This is a pre-release. It has not yet been validated against real `ticket_custom_field` data and does not yet handle two custom fields resolving to the same column name.
+> This is a pre-release, validated against real `ticket_custom_field` data. Titles long enough to exceed a destination's identifier length limit (e.g. Postgres' 63-byte limit) are not yet truncated/handled.
 
 
 # dbt_zendesk v1.7.1

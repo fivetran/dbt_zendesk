@@ -13,25 +13,10 @@
         )
 }}
 
--- Custom ticket field IDs are stored as the raw numeric ID in field_name. Resolve them to their human-readable
--- title here so the pivoted column names are readable instead of just a valid-but-opaque numeric identifier.
--- Declared unconditionally so it's always defined, even outside the run/build guard below (e.g. during dbt compile).
-{% set custom_field_names = {} %}
-
-{% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results_list = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) %}
-
-    {% if var('using_ticket_custom_field', True) %}
-        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(title, raw_title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
-        {% if custom_field_results %}
-            {% for id, name in zip(custom_field_results['ticket_custom_field_id'], custom_field_results['resolved_name']) %}
-                {% if name %}
-                    {% do custom_field_names.update({id | string: name}) %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endif %}
-{% endif -%}
+-- Custom ticket field IDs are stored as the raw numeric ID in field_name. This resolves them to their
+-- human-readable title (deduplicated so no two columns collide) instead of just a valid-but-opaque numeric
+-- identifier. Returns {} outside the run/build guard (e.g. during dbt compile), so this is always safe to call.
+{% set resolved_columns = get_resolved_ticket_field_history_columns() %}
 
 with field_history as (
 
@@ -85,9 +70,7 @@ with field_history as (
         ticket_id,
         cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
-        {% for col in results_list if col in var('ticket_field_history_columns') %}
-            {% set resolved_name = custom_field_names.get(col | string, col) %} --Falls back to the raw field_name (e.g. for standard fields like status/priority) when there's no matching custom field.
-            {% set col_xf = dbt_utils.slugify(resolved_name) %}
+        {% for col, col_xf in resolved_columns.items() %}
             ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
             --Only runs if the user passes updater fields through the final ticket field history model
