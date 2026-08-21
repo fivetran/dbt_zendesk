@@ -50,7 +50,7 @@ test_scenarios:
 
   - name: "numeric custom field history column"
     vars:
-      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '123456pokemon']
+      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '123456789012']
     include_incremental: false
 
   - name: "MDLS"
