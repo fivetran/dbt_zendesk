@@ -1,7 +1,5 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
-{% if var('using_ticket_custom_field', True) -%}
--- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
-{% endif -%}
+-- depends_on: {{ ref('int_zendesk__field_history_column_names') }}
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
 -- Reuses the same resolution (and collision handling) as int_zendesk__field_history_pivot so the column names

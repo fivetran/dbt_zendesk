@@ -13,28 +13,17 @@
 {% set resolved_columns = {} %}
 
 {% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results_list = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) %}
+    -- int_zendesk__field_history_column_names already resolved each tracked field to its human-readable name
+    -- (or its own raw name for standard fields) as an actual table, so this is a cheap read, not a re-join.
+    {% set resolved_results = dbt_utils.get_query_results_as_dict("select field_name, resolved_name from " ~ ref('int_zendesk__field_history_column_names')) %}
 
-    {% set custom_field_names = {} %}
-    {% if var('using_ticket_custom_field', True) %}
-        {% set custom_field_results = dbt_utils.get_query_results_as_dict("select ticket_custom_field_id, coalesce(title, raw_title) as resolved_name from " ~ ref('stg_zendesk__ticket_custom_field')) %}
-        {% if custom_field_results %}
-            {% for id, name in zip(custom_field_results['ticket_custom_field_id'], custom_field_results['resolved_name']) %}
-                {% if name %}
-                    {% do custom_field_names.update({id | string: name}) %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endif %}
-
-    {% set columns_to_pivot = results_list | select("in", var('ticket_field_history_columns')) | list %}
-
-    -- First pass: resolve each column to its (not yet deduplicated) slugified name.
+    -- First pass: slugify each column's resolved name (not yet deduplicated).
     {% set slugified_names = {} %}
-    {% for col in columns_to_pivot %}
-        {% set resolved_name = custom_field_names.get(col | string, col) %}
-        {% do slugified_names.update({col: dbt_utils.slugify(resolved_name)}) %}
-    {% endfor %}
+    {% if resolved_results %}
+        {% for col, resolved_name in zip(resolved_results['field_name'], resolved_results['resolved_name']) %}
+            {% do slugified_names.update({col: dbt_utils.slugify(resolved_name)}) %}
+        {% endfor %}
+    {% endif %}
 
     -- Count how many columns land on the same slugified name so we know which ones need disambiguating.
     {% set name_counts = {} %}
