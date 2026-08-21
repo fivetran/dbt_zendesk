@@ -30,7 +30,7 @@ with tracked_field_history_names as (
 , tracked_entries as (
 
     {% for entry in var('ticket_field_history_columns') %}
-    select lower('{{ entry | replace("'", "''") }}') as entry_value_lower
+    select lower({{ "'" ~ (entry | replace("'", "''")) ~ "'" }}) as entry_value_lower
     {% if not loop.last %} union all {% endif %}
     {% endfor %}
 
