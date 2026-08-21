@@ -6,7 +6,9 @@
 
 with tracked_fields as (
 
-    select distinct field_name
+    select distinct
+        source_relation,
+        field_name
     from {{ ref('stg_zendesk__ticket_field_history') }}
     where lower(field_name) in ({{ "'" ~ (var('ticket_field_history_columns') | map('lower') | join("','")) ~ "'" }})
 
@@ -16,34 +18,44 @@ with tracked_fields as (
 , custom_fields as (
 
     select
+        source_relation,
         cast(ticket_custom_field_id as {{ dbt.type_string() }}) as ticket_custom_field_id,
         coalesce(title, raw_title) as resolved_name
     from {{ ref('stg_zendesk__ticket_custom_field') }}
     where coalesce(title, raw_title) is not null
 
-), custom_fields_deduped as (
+), resolved_per_connection as (
 
-    -- A given custom field id could theoretically resolve to a different title across unioned source connections.
-    -- max() keeps this deterministic rather than depending on row order.
+    -- Scoped by source_relation so a custom field id from one unioned connection can't get matched against a
+    -- different (and unrelated) custom field that happens to share the same id in another connection.
     select
-        ticket_custom_field_id,
+        tracked_fields.field_name,
+        coalesce(custom_fields.resolved_name, tracked_fields.field_name) as resolved_name
+    from tracked_fields
+    left join custom_fields
+        on cast(tracked_fields.field_name as {{ dbt.type_string() }}) = custom_fields.ticket_custom_field_id
+        and tracked_fields.source_relation = custom_fields.source_relation
+
+), resolved_deduped as (
+
+    -- The pivot's column list has to be one shared shape regardless of source_relation, so if two connections
+    -- genuinely resolve the same field id to different names, max() picks one deterministically rather than
+    -- depending on row order.
+    select
+        field_name,
         max(resolved_name) as resolved_name
-    from custom_fields
+    from resolved_per_connection
     group by 1
 
 )
-{% endif %}
 
 select
-    tracked_fields.field_name
-    {% if var('using_ticket_custom_field', True) -%}
-    ,coalesce(custom_fields_deduped.resolved_name, tracked_fields.field_name) as resolved_name
-
+    field_name,
+    resolved_name
+from resolved_deduped
+{% else %}
+select distinct
+    field_name,
+    field_name as resolved_name
 from tracked_fields
-left join custom_fields_deduped
-    on cast(tracked_fields.field_name as {{ dbt.type_string() }}) = custom_fields_deduped.ticket_custom_field_id
-    {%- else %}
-    ,tracked_fields.field_name as resolved_name
-
-from tracked_fields
-    {%- endif %}
+{% endif %}
