@@ -29,6 +29,7 @@ with tracked_fields as (
     -- Scoped by source_relation so a custom field id from one unioned connection can't get matched against a
     -- different (and unrelated) custom field that happens to share the same id in another connection.
     select
+        tracked_fields.source_relation,
         tracked_fields.field_name,
         coalesce(custom_fields.resolved_name, tracked_fields.field_name) as resolved_name
     from tracked_fields
