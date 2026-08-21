@@ -1,5 +1,7 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+{% if var('using_ticket_custom_field', True) -%}
 -- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
+{% endif -%}
 
 {{
     config(
