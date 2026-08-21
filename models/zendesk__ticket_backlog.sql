@@ -2,10 +2,12 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
+-- Mirrors the custom field name resolution in int_zendesk__field_history_pivot so the column names referenced
+-- below match what that model actually produced. Declared unconditionally so it's always defined, even outside
+-- the run/build guard below (e.g. during dbt compile).
+{% set custom_field_names = {} %}
+
 {% if execute and flags.WHICH in ('run', 'build') -%}
-    -- Mirrors the custom field name resolution in int_zendesk__field_history_pivot so the column names referenced
-    -- below match what that model actually produced.
-    {% set custom_field_names = {} %}
     {% if var('using_ticket_custom_field', True) %}
         {% set custom_field_results = run_query('select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from ' ~ ref('stg_zendesk__ticket_custom_field')) %}
         {% for row in custom_field_results.rows %}

@@ -119,6 +119,7 @@ seeds:
         _fivetran_synced: timestamp
         _fivetran_deleted: boolean
         active: boolean
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_schedule_data:
       +column_types:
         _fivetran_synced: timestamp

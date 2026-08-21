@@ -11,13 +11,15 @@
         )
 }}
 
+-- Custom ticket field IDs are stored as the raw numeric ID in field_name. Resolve them to their human-readable
+-- title here so the pivoted column names are readable instead of just a valid-but-opaque numeric identifier.
+-- Declared unconditionally so it's always defined, even outside the run/build guard below (e.g. during dbt compile).
+{% set custom_field_names = {} %}
+
 {% if execute and flags.WHICH in ('run', 'build') -%}
     {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
     {% set results_list = results.columns[0].values() %}
 
-    -- Custom ticket field IDs are stored as the raw numeric ID in field_name. Resolve them to their human-readable
-    -- title here so the pivoted column names are readable instead of just a valid-but-opaque numeric identifier.
-    {% set custom_field_names = {} %}
     {% if var('using_ticket_custom_field', True) %}
         {% set custom_field_results = run_query('select ticket_custom_field_id, coalesce(raw_title, title) as resolved_name from ' ~ ref('stg_zendesk__ticket_custom_field')) %}
         {% for row in custom_field_results.rows %}
