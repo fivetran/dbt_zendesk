@@ -23,7 +23,3 @@
 {% macro duckdb__sql_slugify(column) %}
     regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 'g'), '[^a-z0-9_]+', '', 'g')
 {%- endmacro %}
-
-{% macro redshift__sql_slugify(column) %}
-    regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 1, 'g'), '[^a-z0-9_]+', '', 1, 'g')
-{%- endmacro %}
