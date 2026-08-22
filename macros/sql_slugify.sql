@@ -13,93 +13,17 @@
 #}
 
 {% macro default__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_'
-        ),
-        '[^a-z0-9_]+',
-        ''
-    )
-{%- endmacro %}
-
-{% macro bigquery__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_'
-        ),
-        '[^a-z0-9_]+',
-        ''
-    )
-{%- endmacro %}
-
-{% macro snowflake__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_'
-        ),
-        '[^a-z0-9_]+',
-        ''
-    )
-{%- endmacro %}
-
-{% macro spark__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_'
-        ),
-        '[^a-z0-9_]+',
-        ''
-    )
+    regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_'), '[^a-z0-9_]+', '')
 {%- endmacro %}
 
 {% macro postgres__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_',
-            'g'
-        ),
-        '[^a-z0-9_]+',
-        '',
-        'g'
-    )
+    regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 'g'), '[^a-z0-9_]+', '', 'g')
 {%- endmacro %}
 
 {% macro duckdb__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_',
-            'g'
-        ),
-        '[^a-z0-9_]+',
-        '',
-        'g'
-    )
+    regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 'g'), '[^a-z0-9_]+', '', 'g')
 {%- endmacro %}
 
 {% macro redshift__sql_slugify(column) %}
-    regexp_replace(
-        regexp_replace(
-            lower({{ column }}),
-            '[ -]+',
-            '_',
-            1,
-            'g'
-        ),
-        '[^a-z0-9_]+',
-        '',
-        1,
-        'g'
-    )
+    regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 1, 'g'), '[^a-z0-9_]+', '', 1, 'g')
 {%- endmacro %}
