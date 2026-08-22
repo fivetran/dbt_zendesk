@@ -20,6 +20,13 @@
     regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 'g'), '[^a-z0-9_]+', '', 'g')
 {%- endmacro %}
 
+{#- Redshift's adapter dispatch falls back to postgres__ when no redshift__ variant exists, but Redshift's
+    regexp_replace (unlike Postgres') already replaces every match by default and rejects a 'g' parameter
+    outright -- so this explicitly redirects back to the flag-free default__ instead of inheriting postgres__. #}
+{% macro redshift__sql_slugify(column) %}
+    {{ default__sql_slugify(column) }}
+{%- endmacro %}
+
 {% macro duckdb__sql_slugify(column) %}
     regexp_replace(regexp_replace(lower({{ column }}), '[ -]+', '_', 'g'), '[^a-z0-9_]+', '', 'g')
 {%- endmacro %}
