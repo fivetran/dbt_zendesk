@@ -29,10 +29,10 @@ with tracked_field_history_names as (
 
 , tracked_entries as (
 
-    -- Slugified here (at compile time, in Jinja) so it's directly comparable to the SQL-side sql_slugify() of
+    -- Slugified here (at compile time, in Jinja) so it's directly comparable to the SQL-side string_cleaner() of
     -- field_name/resolved_name below -- both sides end up lowercased with no spaces or punctuation, so a
     -- title entered with different spacing/punctuation than Zendesk's stored title still matches. Strips
-    -- dbt_utils.slugify()'s leading-underscore-on-digit prefix back off, since sql_slugify() doesn't add it
+    -- dbt_utils.slugify()'s leading-underscore-on-digit prefix back off, since string_cleaner() doesn't add it
     -- either -- that prefix only matters for producing a valid identifier, not for matching purposes here.
     {% for entry in var('ticket_field_history_columns') %}
         {% set entry_slug = dbt_utils.slugify(entry) %}
@@ -62,9 +62,9 @@ with tracked_field_history_names as (
         and tracked_field_history_names.source_relation = custom_fields.source_relation
     {% endif %}
     inner join tracked_entries
-        on {{ sql_slugify('tracked_field_history_names.field_name') }} = tracked_entries.entry_slug
+        on {{ string_cleaner('tracked_field_history_names.field_name') }} = tracked_entries.entry_slug
         {% if var('using_ticket_custom_field', True) -%}
-        or (custom_fields.resolved_name is not null and {{ sql_slugify('custom_fields.resolved_name') }} = tracked_entries.entry_slug)
+        or (custom_fields.resolved_name is not null and {{ string_cleaner('custom_fields.resolved_name') }} = tracked_entries.entry_slug)
         {%- endif %}
 
 ), resolved_per_connection as (
