@@ -33,9 +33,9 @@ with tracked_field_history_names as (
     -- field_name/resolved_name below -- both replicate dbt_utils.slugify() exactly (including its
     -- leading-underscore-on-digit prefix), so a title entered with different spacing/punctuation than
     -- Zendesk's stored title still matches.
-    {% for entry in var('ticket_field_history_columns') %}
-    select {{ "'" ~ dbt_utils.slugify(entry) ~ "'" }} as entry_slug
-    {% if not loop.last %} union all {% endif %}
+    {% for field in var('ticket_field_history_columns') %}
+    select {{ "'" ~ dbt_utils.slugify(entry) ~ "'" }} as field_slug
+    {% "union all" if not loop.last %}
     {% endfor %}
 
 ), matched as (
@@ -57,9 +57,9 @@ with tracked_field_history_names as (
         and tracked_field_history_names.source_relation = custom_fields.source_relation
     {% endif %}
     inner join tracked_entries
-        on {{ string_cleaner('tracked_field_history_names.field_name') }} = tracked_entries.entry_slug
+        on {{ string_cleaner('tracked_field_history_names.field_name') }} = tracked_entries.field_slug
         {% if var('using_ticket_custom_field', True) -%}
-        or (custom_fields.resolved_name is not null and {{ string_cleaner('custom_fields.resolved_name') }} = tracked_entries.entry_slug)
+        or (custom_fields.resolved_name is not null and {{ string_cleaner('custom_fields.resolved_name') }} = tracked_entries.field_slug)
         {%- endif %}
 
 ), resolved_per_connection as (
