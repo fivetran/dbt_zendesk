@@ -30,16 +30,11 @@ with tracked_field_history_names as (
 , tracked_entries as (
 
     -- Slugified here (at compile time, in Jinja) so it's directly comparable to the SQL-side string_cleaner() of
-    -- field_name/resolved_name below -- both sides end up lowercased with no spaces or punctuation, so a
-    -- title entered with different spacing/punctuation than Zendesk's stored title still matches. Strips
-    -- dbt_utils.slugify()'s leading-underscore-on-digit prefix back off, since string_cleaner() doesn't add it
-    -- either -- that prefix only matters for producing a valid identifier, not for matching purposes here.
+    -- field_name/resolved_name below -- both replicate dbt_utils.slugify() exactly (including its
+    -- leading-underscore-on-digit prefix), so a title entered with different spacing/punctuation than
+    -- Zendesk's stored title still matches.
     {% for entry in var('ticket_field_history_columns') %}
-        {% set entry_slug = dbt_utils.slugify(entry) %}
-        {% if entry[0].isdigit() %}
-            {% set entry_slug = entry_slug[1:] %}
-        {% endif %}
-    select {{ "'" ~ entry_slug ~ "'" }} as entry_slug
+    select {{ "'" ~ dbt_utils.slugify(entry) ~ "'" }} as entry_slug
     {% if not loop.last %} union all {% endif %}
     {% endfor %}
 
