@@ -1,4 +1,7 @@
--- depends_on: {{ ref('int_zendesk__field_history_column_names') }}
+-- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+{% if var('using_ticket_custom_field', True) -%}
+-- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
+{% endif -%}
 
 {{
     config(
@@ -10,41 +13,10 @@
         )
 }}
 
--- Custom ticket field IDs are stored as the raw numeric ID in field_name. int_zendesk__field_history_column_names
--- already resolved each tracked field to its human-readable title (or its own name for standard fields like
--- status/priority) as an actual table, so this is a cheap read, not a re-join. What's left here is purely the
--- Jinja-side work of turning that into valid, deduplicated SQL identifiers -- resolved_columns stays {} outside
--- the run/build guard (e.g. during dbt compile), so this is always safe to reference below.
-{% set resolved_columns = {} %}
-
-{% if execute and flags.WHICH in ('run', 'build') -%}
-    -- Uses positional row access (not a name-keyed dict) since some adapters (e.g. Snowflake) fold unquoted
-    -- result column names to uppercase, which would silently break a lookup keyed on the lowercase alias.
-    {% set resolved_results = run_query("select field_name, resolved_name from " ~ ref('int_zendesk__field_history_column_names')) %}
-
-    -- First pass: slugify each column's resolved name (not yet deduplicated).
-    {% set slugified_names = {} %}
-    {% for row in resolved_results.rows %}
-        {% do slugified_names.update({row[0]: dbt_utils.slugify(row[1])}) %}
-    {% endfor %}
-
-    -- Count how many columns land on the same slugified name so we know which ones need disambiguating.
-    {% set name_counts = {} %}
-    {% for col, name in slugified_names.items() %}
-        {% do name_counts.update({name: name_counts.get(name, 0) + 1}) %}
-    {% endfor %}
-
-    -- Second pass: append the raw id/name to any column whose slugified name collides with another's.
-    {% for col, name in slugified_names.items() %}
-        {% if name_counts[name] > 1 %}
-            {% set suffix = dbt_utils.slugify(col | string) %}
-            {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
-            {% do resolved_columns.update({col: name ~ '_' ~ suffix}) %}
-        {% else %}
-            {% do resolved_columns.update({col: name}) %}
-        {% endif %}
-    {% endfor %}
-{% endif -%}
+-- Custom ticket field IDs are stored as the raw numeric ID in field_name, so this resolves each tracked field to
+-- a readable column alias (the custom field's title, where there is one). Returns an empty dict outside of a
+-- run/build, e.g. during dbt compile.
+{% set resolved_columns = resolve_ticket_field_history_columns() %}
 
 with field_history as (
 
