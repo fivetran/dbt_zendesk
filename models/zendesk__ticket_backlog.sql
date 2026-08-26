@@ -1,8 +1,7 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
--- Rather than re-resolving custom field names (int_zendesk__field_history_pivot already did that), this just
--- introspects the columns that model actually produced and passes through whatever isn't already handled below.
+--Passes through the upstream columns as-is, rather than re-resolving custom field names.
 {% set ticket_field_history_relation_columns = adapter.get_columns_in_relation(ref('zendesk__ticket_field_history')) %}
 {% set handled_columns = ['source_relation', 'date_day', 'ticket_id', 'status', 'ticket_day_id',
                           'assignee_id', 'requester_id', 'ticket_form_id', 'organization_id',
