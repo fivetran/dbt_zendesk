@@ -1,3 +1,5 @@
 id,title,raw_title,key,type,active,_fivetran_synced,_fivetran_deleted
 123456789012,Support Tier,Support Tier,support_tier,text,true,2020-10-02 14:08:33.216,false
 123456789013,Support Tier,Support Tier,support_tier_legacy,text,true,2020-10-02 14:08:33.216,false
+987654321098,Escalation Reason,Escalation Reason,escalation_reason,dropdown,true,2020-10-02 14:08:33.216,false
+555000111222,Channel Group,{{zd.channel_group_ticket_field}},channel_group,dropdown,true,2020-10-02 14:08:33.216,false

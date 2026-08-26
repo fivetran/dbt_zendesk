@@ -49,9 +49,12 @@ test_scenarios:
       using_ticket_chat: true
     include_incremental: false
 
-  - name: "numeric custom field history column"
+  # Covers a custom field referenced by ID ('987654321098'), by title ('Escalation Reason'), by a title shared
+  # with another field ('Support Tier'), and by a title whose raw_title is a dynamic content template
+  # ('Channel Group').
+  - name: "custom field history columns"
     vars:
-      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '123456789012', 'Support Tier']
+      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '987654321098', 'Escalation Reason', 'Support Tier', 'Channel Group']
     include_incremental: false
 
   - name: "MDLS"
