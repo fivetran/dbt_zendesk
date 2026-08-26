@@ -53,6 +53,8 @@
     {% set aliases = {} %}
     {% for field_name in field_names %}
         {% set title = titles_by_id.get(field_name | string) %}
+        {# The `title and` guard matters: standard fields have no title, and slugify(none) is an empty string,
+           which would match every standard field if an entry in the variable also slugified to empty. #}
         {% if dbt_utils.slugify(field_name) in requested_slugs or (title and dbt_utils.slugify(title) in requested_slugs) %}
             {% do aliases.update({field_name: dbt_utils.slugify(title if title else field_name)}) %}
         {% endif %}
