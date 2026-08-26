@@ -13,9 +13,7 @@
         )
 }}
 
--- Custom ticket field IDs are stored as the raw numeric ID in field_name, so this resolves each tracked field to
--- a readable column alias (the custom field's title, where there is one). Returns an empty dict outside of a
--- run/build, e.g. during dbt compile.
+--Maps each tracked field_name to the column alias it should be pivoted into.
 {% set resolved_columns = resolve_ticket_field_history_columns() %}
 
 with field_history as (
