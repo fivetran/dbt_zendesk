@@ -11,14 +11,16 @@
     {% set field_names = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) | sort %}
 
     {# Custom field ID -> title, since history is recorded under the ID; max() breaks ties across connections. #}
+    {# Deliberately not falling back to raw_title: it either repeats title or holds an unsubstituted dynamic
+       content template ({{zd.*}}), which would name the column after the template rather than the field. #}
     {% set titles_by_id = {} %}
     {% if var('using_ticket_custom_field', True) %}
         {% set custom_field_query %}
             select
                 cast(ticket_custom_field_id as {{ dbt.type_string() }}),
-                max(coalesce(title, raw_title))
+                max(title)
             from {{ ref('stg_zendesk__ticket_custom_field') }}
-            where coalesce(title, raw_title) is not null
+            where title is not null
             group by 1
         {% endset %}
 
