@@ -26,12 +26,16 @@
        for a given ID; the pivot emits one global set of columns, so a single name has to win either way. #}
     {% set titles_by_id = {} %}
     {% if var('using_ticket_custom_field', True) %}
-        {% set custom_fields = run_query(
-            "select cast(ticket_custom_field_id as " ~ dbt.type_string() ~ "), max(coalesce(title, raw_title))"
-            ~ " from " ~ ref('stg_zendesk__ticket_custom_field')
-            ~ " where coalesce(title, raw_title) is not null"
-            ~ " group by 1"
-        ) %}
+        {% set custom_field_query %}
+            select
+                cast(ticket_custom_field_id as {{ dbt.type_string() }}),
+                max(coalesce(title, raw_title))
+            from {{ ref('stg_zendesk__ticket_custom_field') }}
+            where coalesce(title, raw_title) is not null
+            group by 1
+        {% endset %}
+
+        {% set custom_fields = run_query(custom_field_query) %}
 
         {# Positional access, since adapters differ on the casing of unquoted result column names. #}
         {% for row in custom_fields.rows %}
