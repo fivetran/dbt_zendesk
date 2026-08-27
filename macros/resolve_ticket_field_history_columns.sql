@@ -30,7 +30,7 @@
         {% endfor %}
     {% endif %}
 
-    {# Slugify what the customer asked for so matching ignores spacing and punctuation differences. #}
+    {# Slugify what the input, so matching ignores spacing and punctuation differences. #}
     {% set requested_slugs = [] %}
     {% for entry in var('ticket_field_history_columns') %}
         {% do requested_slugs.append(dbt_utils.slugify(entry)) %}
