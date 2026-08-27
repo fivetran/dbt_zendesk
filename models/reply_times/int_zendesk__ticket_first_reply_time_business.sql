@@ -72,7 +72,7 @@ with ticket_reply_times as (
 
     from ticket_first_reply_time
     cross join weeks
-    where floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number - 1
+    where (start_time_in_minutes_from_week + raw_delta_in_minutes) >= (generated_number - 1) * (7*24*60)
 
 ), weekly_periods as (
   

@@ -75,7 +75,7 @@ with ticket_historical_status as (
       cast(generated_number - 1 as {{ dbt.type_int() }}) as week_number
     from ticket_full_solved_time
     cross join weeks
-    where floor((start_time_in_minutes_from_week + raw_delta_in_minutes) / (7*24*60)) >= generated_number -1
+    where (start_time_in_minutes_from_week + raw_delta_in_minutes) >= (generated_number - 1) * (7*24*60)
 
 ), weekly_periods as (
 
