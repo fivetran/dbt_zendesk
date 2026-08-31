@@ -25,8 +25,7 @@ fields as (
 
 final as (
 
-    -- Intentionally not filtering out _fivetran_deleted records here. Deleted custom fields must still resolve to
-    -- their title so historical ticket_field_history values remain readable after the field is removed in Zendesk.
+    -- Intentionally not filtering out _fivetran_deleted records
     select
         cast(id as {{ dbt.type_string() }}) as ticket_custom_field_id,
         title,
