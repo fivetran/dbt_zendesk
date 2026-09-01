@@ -233,7 +233,7 @@ Custom ticket fields can also be included in `ticket_field_history_columns` by p
 
 ```yml
 vars:
-    ticket_field_history_columns: ['status', 'priority', 'Support Tier'] # 'Support Tier' is a custom field title; its numeric ID would also work
+    ticket_field_history_columns: ['status', 'priority', 'Support Tier'] # 'Support Tier' is a custom field title; its numeric ID is also a valid input.
 ```
 
 #### Extending and Limiting the Ticket Field History
