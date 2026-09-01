@@ -70,7 +70,7 @@ supported_vars:
       - "assignee_id"
       - "status"
       - "priority"
-    description: "Ticket fields tracked daily in `zendesk__ticket_field_history` and `zendesk__ticket_backlog`; custom fields can be referenced by their ID or title"
+    description: "Ticket fields tracked daily in `zendesk__ticket_field_history` and `zendesk__ticket_backlog`; custom fields can be input as either ID or title"
     display_name: "Ticket Field History Columns"
 
   ticket_field_history_extension_months:
