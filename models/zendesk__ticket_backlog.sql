@@ -1,6 +1,29 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
+--Passes through the upstream columns as-is, rather than re-resolving custom field names.
+{% set ticket_field_history_relation_columns = adapter.get_columns_in_relation(ref('zendesk__ticket_field_history')) %}
+
+--ID fields that resolve to a readable name via a join, declared once so the passthrough loop below can exclude
+--exactly what was handled here. A field left out of this mapping passes through as its raw ID instead.
+{% set id_fields_with_names = {
+    'assignee_id': 'ticket_field_history.assignee_id, assignee.name as assignee_name',
+    'requester_id': 'ticket_field_history.requester_id, requester.name as requester_name',
+    'ticket_form_id': 'ticket_forms.name as ticket_form_name',
+    'group_id': 'group_names.name as group_name',
+    'locale_id': 'assignee.locale as local_name'
+} %}
+{% if var('using_organizations', True) %}
+    {% do id_fields_with_names.update({'organization_id': 'organizations.name as organization_name'}) %}
+{% endif %}
+{% if var('using_brands', True) %}
+    {% do id_fields_with_names.update({'brand_id': 'brands.name as brand_name'}) %}
+{% endif %}
+
+--Columns selected explicitly below, either as part of the grain or by the mapping above.
+{% set columns_already_selected = ['source_relation', 'date_day', 'ticket_id', 'status', 'ticket_day_id']
+                                  + (id_fields_with_names.keys() | list) %}
+
 with ticket_field_history as (
     select *
     from {{ ref('zendesk__ticket_field_history') }}
@@ -44,33 +67,11 @@ with ticket_field_history as (
         ,ticket_field_history.ticket_id
         ,ticket_field_history.status
         ,tickets.created_channel
-        {% for col in var('ticket_field_history_columns') if col != 'status' %} --Looking at all history fields the users passed through in their dbt_project.yml file
-            {% if col in ['assignee_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,ticket_field_history.assignee_id
-                ,assignee.name as assignee_name
-
-            {% elif col in ['requester_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,ticket_field_history.requester_id
-                ,requester.name as requester_name
-
-            {% elif col in ['ticket_form_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,ticket_forms.name as ticket_form_name
-
-            {% elif var('using_organizations', True) and col in ['organization_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,organizations.name as organization_name
-
-            {% elif var('using_brands', True) and col in ['brand_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,brands.name as brand_name
-
-            {% elif col in ['group_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,group_names.name as group_name
-
-            {% elif col in ['locale_id'] %} --Standard ID field where the name can easily be joined from stg model.
-                ,assignee.locale as local_name
-
-            {% else %} --All other fields are not ID's and can simply be included in the query.
-                ,ticket_field_history.{{ col }}
-            {% endif %}
+        {% for col in var('ticket_field_history_columns') if col in id_fields_with_names %} --Standard ID fields where the name can easily be joined from stg model.
+            ,{{ id_fields_with_names[col] }}
+        {% endfor %}
+        {% for column in ticket_field_history_relation_columns if column.name|lower not in columns_already_selected %} --Everything else, including resolved custom field names, passes through as-is.
+            ,ticket_field_history.{{ column.name }}
         {% endfor %}
 
     from ticket_field_history
