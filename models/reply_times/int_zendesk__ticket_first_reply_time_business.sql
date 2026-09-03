@@ -75,37 +75,47 @@ with ticket_reply_times as (
     where (start_time_in_minutes_from_week + raw_delta_in_minutes) >= (generated_number - 1) * (7*24*60)
 
 ), weekly_periods as (
-  
-    select 
-      weeks_cross_ticket_first_reply.*, 
+
+    select
+      weeks_cross_ticket_first_reply.*,
       -- for each week, at what minute do we start counting?
       greatest(0, start_time_in_minutes_from_week - week_number * (7*24*60)) as ticket_week_start_time,
       -- for each week, at what minute do we stop counting?
       least(start_time_in_minutes_from_week + raw_delta_in_minutes - week_number * (7*24*60), (7*24*60)) as ticket_week_end_time
     from weeks_cross_ticket_first_reply
 
+), weekly_periods_bounds as (
+
+    select
+      weekly_periods.*,
+      -- precomputed here, one CTE ahead of the schedule join below, so that join can compare
+      -- materialized columns instead of evaluating dateadd() as part of its predicate
+      cast( {{ dbt.dateadd(datepart='minute', interval='cast(week_number * (7*24*60) + ticket_week_end_time as ' ~ dbt.type_int() ~ ")", from_date_or_timestamp='start_week_date') }} as date) as ticket_week_end_at,
+      cast( {{ dbt.dateadd(datepart='minute', interval='cast(week_number * (7*24*60) + ticket_week_start_time as ' ~ dbt.type_int() ~ ")", from_date_or_timestamp='start_week_date') }} as date) as ticket_week_start_at
+    from weekly_periods
+
 ), intercepted_periods as (
 
-  select 
-      weekly_periods.source_relation,
+  select
+      weekly_periods_bounds.source_relation,
       ticket_id,
       week_number,
-      weekly_periods.schedule_id,
+      weekly_periods_bounds.schedule_id,
       ticket_week_start_time,
       ticket_week_end_time,
       schedule.start_time_utc as schedule_start_time,
       schedule.end_time_utc as schedule_end_time,
       least(ticket_week_end_time, schedule.end_time_utc) - greatest(ticket_week_start_time, schedule.start_time_utc) as scheduled_minutes
-  from weekly_periods
-  join schedule on ticket_week_start_time <= schedule.end_time_utc 
+  from weekly_periods_bounds
+  join schedule on ticket_week_start_time <= schedule.end_time_utc
     and ticket_week_end_time >= schedule.start_time_utc
-    and weekly_periods.schedule_id = schedule.schedule_id
-    and weekly_periods.source_relation = schedule.source_relation
+    and weekly_periods_bounds.schedule_id = schedule.schedule_id
+    and weekly_periods_bounds.source_relation = schedule.source_relation
       -- this chooses the Daylight Savings Time or Standard Time version of the schedule
       -- We have everything calculated within a week, so take us to the appropriate week first by adding the week_number * minutes-in-a-week to the minute-mark where we start and stop counting for the week
-    and cast( {{ dbt.dateadd(datepart='minute', interval='cast(week_number * (7*24*60) + ticket_week_end_time as ' ~ dbt.type_int() ~ ")", from_date_or_timestamp='start_week_date') }} as date) > cast(schedule.valid_from as date)
-    and cast( {{ dbt.dateadd(datepart='minute', interval='cast(week_number * (7*24*60) + ticket_week_start_time as ' ~ dbt.type_int() ~ ")", from_date_or_timestamp='start_week_date') }} as date) < cast(schedule.valid_until as date)
-      
+    and ticket_week_end_at > cast(schedule.valid_from as date)
+    and ticket_week_start_at < cast(schedule.valid_until as date)
+
 )
 
   select 
