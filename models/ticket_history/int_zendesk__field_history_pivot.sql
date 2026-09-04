@@ -1,19 +1,20 @@
 -- depends_on: {{ ref('stg_zendesk__ticket_field_history') }}
+{% if var('using_ticket_custom_field', True) -%}
+-- depends_on: {{ ref('stg_zendesk__ticket_custom_field') }}
+{% endif -%}
 
-{{ 
+{{
     config(
         materialized='incremental',
         partition_by = {'field': 'date_day', 'data_type': 'date', 'granularity': 'month'} if target.type not in ['spark', 'databricks', 'duckdb'] else ['date_day'],
         unique_key='ticket_day_id',
         incremental_strategy = 'merge' if target.type not in ('snowflake', 'postgres', 'redshift') else 'delete+insert',
         file_format='delta'
-        ) 
+        )
 }}
 
-{% if execute and flags.WHICH in ('run', 'build') -%}
-    {% set results = run_query('select distinct field_name from ' ~ ref('stg_zendesk__ticket_field_history') ) %}
-    {% set results_list = results.columns[0].values() %}
-{% endif -%}
+--Maps each tracked field_name to the column alias it should be pivoted into.
+{% set resolved_columns = resolve_ticket_field_history_columns() %}
 
 with field_history as (
 
@@ -67,8 +68,7 @@ with field_history as (
         ticket_id,
         cast({{ dbt.date_trunc('day', 'valid_starting_at') }} as date) as date_day
 
-        {% for col in results_list if col in var('ticket_field_history_columns') %}
-            {% set col_xf = col|lower %}
+        {% for col, col_xf in resolved_columns.items() %}
             ,min(case when lower(field_name) = '{{ col|lower }}' then filtered.value end) as {{ col_xf }}
 
             --Only runs if the user passes updater fields through the final ticket field history model
@@ -76,7 +76,7 @@ with field_history as (
 
                 {% for upd in var('ticket_field_history_updater_columns') %}
 
-                    {% set upd_xf = (col|lower + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
+                    {% set upd_xf = (col_xf + '_' + upd ) %} --Creating the appropriate column name based on the history field + update field names.
 
                     {% if upd == 'updater_is_active' and target.type in ('postgres', 'redshift') %}
 

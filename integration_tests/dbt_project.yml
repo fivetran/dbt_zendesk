@@ -1,7 +1,7 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '1.7.1'
+version: '1.8.0'
 
 profile: 'integration_tests'
 
@@ -15,6 +15,7 @@ vars:
     zendesk_ticket_identifier:                            "ticket_data"
     zendesk_ticket_comment_identifier:                    "ticket_comment_data"
     zendesk_ticket_field_history_identifier:              "ticket_field_history_data"
+    zendesk_ticket_custom_field_identifier:               "ticket_custom_field_data"
     zendesk_ticket_schedule_identifier:                   "ticket_schedule_data"
     zendesk_ticket_tag_identifier:                        "ticket_tag_data"
     zendesk_ticket_form_history_identifier:               "ticket_form_history_data"
@@ -113,6 +114,12 @@ seeds:
         ticket_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         user_id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
         updated: timestamp
+    ticket_custom_field_data:
+      +column_types:
+        _fivetran_synced: timestamp
+        _fivetran_deleted: boolean
+        active: boolean
+        id: "{{ 'int64' if target.type == 'bigquery' else 'bigint' }}"
     ticket_schedule_data:
       +column_types:
         _fivetran_synced: timestamp
