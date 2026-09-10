@@ -60,16 +60,16 @@ queries:
         and {{ filter('t.priority', priority) }}
         and {{ filter('t.created_channel', channel) }}
 
-  daily_flow:
+  weekly_flow:
     sql: |
-      select {{ dbt.date_trunc('day', 'created_at') }} as day, 'created' as series, count(*) as tickets
+      select {{ dbt.date_trunc('week', 'created_at') }} as week, 'created' as series, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1, 2
       union all
-      select {{ dbt.date_trunc('day', 'first_solved_at') }} as day, 'solved' as series, count(*) as tickets
+      select {{ dbt.date_trunc('week', 'first_solved_at') }} as week, 'solved' as series, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
       where first_solved_at is not null
         and {{ filter_date_range('created_at', date_range) }}
@@ -164,10 +164,10 @@ charts:
         format: integer
 
   flow_chart:
-    title: Tickets Created and Solved per Day
-    query: daily_flow
+    title: Tickets Created and Solved per Week
+    query: weekly_flow
     type: line
-    x: day
+    x: week
     y: tickets
     color: series
     height: 240

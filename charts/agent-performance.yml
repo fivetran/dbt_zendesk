@@ -105,6 +105,7 @@ charts:
           align: right
         avg_handoffs:
           label: Avg Handoffs
+          format: number
           align: right
 
   workload_chart:
@@ -127,6 +128,10 @@ charts:
     type: bar
     x: assignee_name
     y: csat_rate
+    style:
+      axis_y:
+        labels:
+          format: .0%
 
 rows:
   - text: |
