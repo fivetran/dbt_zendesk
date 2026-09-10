@@ -1,0 +1,180 @@
+title: Zendesk SLA Attainment
+notes: |
+  SLA events, breaches, and attainment by policy and metric from
+  `zendesk__sla_policies`. Requires the package's SLA models, which are on
+  by default and off when `using_schedules` or `using_sla_policy` is false.
+
+variables:
+  date_range:
+    label: SLA applied between
+    input: daterange
+
+  metric:
+    label: Metric
+    input: multiselect
+    options:
+      query: metrics
+
+queries:
+  metrics:
+    sql: |
+      select distinct metric
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      order by 1
+
+  kpis:
+    sql: |
+      select
+        count(*) as sla_events,
+        sum(case when is_sla_breach then 1 else 0 end) as breaches,
+        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      where is_active_sla
+        and {{ filter_date_range('sla_applied_at', date_range) }}
+        and {{ filter('metric', metric) }}
+
+  by_policy:
+    sql: |
+      select
+        sla_policy_name,
+        count(*) as sla_events,
+        sum(case when is_sla_breach then 1 else 0 end) as breaches,
+        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      where is_active_sla
+        and {{ filter_date_range('sla_applied_at', date_range) }}
+        and {{ filter('metric', metric) }}
+      group by 1
+      order by breaches desc
+
+  by_metric:
+    sql: |
+      select
+        metric,
+        count(*) as sla_events,
+        sum(case when is_sla_breach then 1 else 0 end) as breaches,
+        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      where is_active_sla
+        and {{ filter_date_range('sla_applied_at', date_range) }}
+        and {{ filter('metric', metric) }}
+      group by 1
+      order by breaches desc
+
+  breaches_by_week:
+    sql: |
+      select {{ dbt.date_trunc('week', 'sla_applied_at') }} as week, metric, count(*) as breaches
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      where is_active_sla and is_sla_breach
+        and {{ filter_date_range('sla_applied_at', date_range) }}
+        and {{ filter('metric', metric) }}
+      group by 1, 2
+      order by 1, 2
+
+  recent_breaches:
+    sql: |
+      select
+        ticket_id,
+        sla_policy_name,
+        metric,
+        target,
+        sla_elapsed_time as elapsed_minutes,
+        sla_applied_at,
+        sla_breach_at
+      from {{ ref('zendesk', 'zendesk__sla_policies') }}
+      where is_active_sla and is_sla_breach
+        and {{ filter_date_range('sla_applied_at', date_range) }}
+        and {{ filter('metric', metric) }}
+      order by sla_breach_at desc
+      limit 100
+
+charts:
+  events_kpi:
+    label: SLA Events
+    query: kpis
+    type: kpi
+    value: sla_events
+    style:
+      value:
+        format: integer
+
+  breaches_kpi:
+    label: Breaches
+    query: kpis
+    type: kpi
+    value: breaches
+    style:
+      value:
+        format: integer
+
+  attainment_kpi:
+    label: Attainment
+    query: kpis
+    type: kpi
+    value: attainment_rate
+    style:
+      value:
+        format: percent_whole
+
+  policy_table:
+    title: By Policy
+    query: by_policy
+    type: table
+    style:
+      columns:
+        sla_policy_name:
+          label: Policy
+        sla_events:
+          label: Events
+          format: integer
+          align: right
+        breaches:
+          format: integer
+          align: right
+        attainment_rate:
+          label: Attainment
+          format: percent_whole
+          align: right
+
+  metric_chart:
+    title: Breaches by Metric
+    query: by_metric
+    type: bar
+    x: metric
+    y: breaches
+
+  weekly_chart:
+    title: Breaches per Week
+    query: breaches_by_week
+    type: bar
+    x: week
+    y: breaches
+    color: metric
+    height: 240
+
+  breaches_table:
+    title: Recent Breaches
+    query: recent_breaches
+    type: table
+    style:
+      columns:
+        ticket_id:
+          label: Ticket
+        sla_policy_name:
+          label: Policy
+        target:
+          label: Target (min)
+          format: integer
+          align: right
+        elapsed_minutes:
+          label: Elapsed (min)
+          format: integer
+          align: right
+
+rows:
+  - text: |
+      [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · [Agent performance](/zendesk/agent-performance) · **SLA**
+  - cols: [events_kpi, breaches_kpi, attainment_kpi]
+  - cols: [policy_table, metric_chart]
+  - weekly_chart
+  - breaches_table
