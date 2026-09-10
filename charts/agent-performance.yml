@@ -10,7 +10,6 @@ variables:
     input: daterange
 
   assignee:
-    label: Assignee
     input: multiselect
     options:
       query: assignees
@@ -19,7 +18,7 @@ queries:
   assignees:
     sql: |
       select distinct assignee_name
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where assignee_name is not null
       order by 1
 
@@ -29,7 +28,7 @@ queries:
         assignee_name,
         {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'assignee_name', '0.5') }} as median_first_reply_minutes,
         {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'assignee_name', '0.5') }} as median_resolution_minutes
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where assignee_name is not null
         and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('assignee_name', assignee) }}
@@ -48,7 +47,7 @@ queries:
              "sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
         {{ dbt_utils.safe_divide("sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)", "count(*)") }} as one_touch_rate,
         avg(t.count_ticket_handoffs) as avg_handoffs
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }} t
+      from {{ ref('zendesk__ticket_metrics') }} t
       left join ({{ queries.agent_medians }}) m on m.assignee_name = t.assignee_name
       where t.assignee_name is not null
         and {{ filter_date_range('t.created_at', date_range) }}
@@ -64,7 +63,7 @@ queries:
              "sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
              "sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
         sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) as rated_tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where assignee_name is not null
         and ticket_satisfaction_score in ('good', 'bad')
         and {{ filter_date_range('created_at', date_range) }}

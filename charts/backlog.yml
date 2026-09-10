@@ -11,13 +11,11 @@ variables:
     input: daterange
 
   priority:
-    label: Priority
     input: multiselect
     options:
       static: [urgent, high, normal, low]
 
   status:
-    label: Status
     input: multiselect
     options:
       static: [new, open, pending, hold]
@@ -26,7 +24,7 @@ queries:
   latest_day:
     sql: |
       select max(date_day) as date_day
-      from {{ ref('zendesk', 'zendesk__ticket_backlog') }}
+      from {{ ref('zendesk__ticket_backlog') }}
 
   kpis:
     sql: |
@@ -36,7 +34,7 @@ queries:
         sum(case when status = 'open' then 1 else 0 end) as open_now,
         sum(case when status = 'pending' then 1 else 0 end) as pending_now,
         sum(case when status = 'hold' then 1 else 0 end) as hold_now
-      from {{ ref('zendesk', 'zendesk__ticket_backlog') }}
+      from {{ ref('zendesk__ticket_backlog') }}
       where date_day = (select date_day from ({{ queries.latest_day }}) d)
         and {{ filter('priority', priority) }}
         and {{ filter('status', status) }}
@@ -44,7 +42,7 @@ queries:
   backlog_by_status:
     sql: |
       select date_day, status, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_backlog') }}
+      from {{ ref('zendesk__ticket_backlog') }}
       where {{ filter_date_range('date_day', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('status', status) }}
@@ -54,7 +52,7 @@ queries:
   backlog_by_priority:
     sql: |
       select date_day, coalesce(priority, 'none') as priority, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_backlog') }}
+      from {{ ref('zendesk__ticket_backlog') }}
       where {{ filter_date_range('date_day', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('status', status) }}
@@ -71,8 +69,8 @@ queries:
         b.created_channel as channel,
         m.assignee_name,
         {{ dbt.datediff('m.created_at', dbt.current_timestamp(), 'day') }} as age_days
-      from {{ ref('zendesk', 'zendesk__ticket_backlog') }} b
-      join {{ ref('zendesk', 'zendesk__ticket_metrics') }} m
+      from {{ ref('zendesk__ticket_backlog') }} b
+      join {{ ref('zendesk__ticket_metrics') }} m
         on m.ticket_id = b.ticket_id and m.source_relation = b.source_relation
       where b.date_day = (select date_day from ({{ queries.latest_day }}) d)
         and {{ filter('b.priority', priority) }}
