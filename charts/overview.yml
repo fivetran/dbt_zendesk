@@ -29,19 +29,20 @@ queries:
       order by 1
 
   # Medians come from fivetran_utils.percentile: a window on most warehouses,
-  # an ordered-set aggregate on Postgres — the DISTINCT + conditional GROUP BY
-  # yields one row per source_relation on both.
+  # an ordered-set aggregate on Postgres. One partition over the whole filtered
+  # set gives one overall median; DISTINCT (window) or GROUP BY (Postgres)
+  # collapses it to one row.
   medians:
     sql: |
       select distinct
-        source_relation,
-        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'source_relation', '0.5') }} as median_first_reply_minutes,
-        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'source_relation', '0.5') }} as median_resolution_minutes
+        1 as k,
+        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', '1', '0.5') }} as median_first_reply_minutes,
+        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', '1', '0.5') }} as median_resolution_minutes
       from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
-      {% if target.type == 'postgres' %}group by source_relation{% endif %}
+      {% if target.type == 'postgres' %}group by 1{% endif %}
 
   kpis:
     sql: |
@@ -55,7 +56,7 @@ queries:
         max(medians.median_first_reply_minutes) as median_first_reply_minutes,
         max(medians.median_resolution_minutes) as median_resolution_minutes
       from {{ ref('zendesk__ticket_metrics') }} t
-      left join {{ queries.medians }} on medians.source_relation = t.source_relation
+      cross join {{ queries.medians }}
       where {{ filter_date_range('t.created_at', date_range) }}
         and {{ filter('t.priority', priority) }}
         and {{ filter('t.created_channel', channel) }}

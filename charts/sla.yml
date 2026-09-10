@@ -1,8 +1,10 @@
 title: Zendesk SLA Attainment
 notes: |
   SLA events, breaches, and attainment by policy and metric from
-  `zendesk__sla_policies`. Requires the package's SLA models, which are on
-  by default and off when `using_schedules` or `using_sla_policy` is false.
+  `zendesk__sla_policies`, counting completed events only: the model flags
+  an in-flight event as `is_active_sla` with its breach outcome still
+  unknown. Requires the package's SLA models, which are on by default and
+  off when `using_schedules` or `using_sla_policy` is false.
 
 variables:
   date_range:
@@ -28,7 +30,7 @@ queries:
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
         {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
-      where is_active_sla
+      where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
 
@@ -40,7 +42,7 @@ queries:
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
         {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
-      where is_active_sla
+      where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
       group by 1
@@ -54,7 +56,7 @@ queries:
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
         {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
-      where is_active_sla
+      where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
       group by 1
@@ -64,7 +66,7 @@ queries:
     sql: |
       select {{ dbt.date_trunc('week', 'sla_applied_at') }} as week, metric, count(*) as breaches
       from {{ ref('zendesk__sla_policies') }}
-      where is_active_sla and is_sla_breach
+      where not is_active_sla and is_sla_breach
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
       group by 1, 2
@@ -81,7 +83,7 @@ queries:
         sla_applied_at,
         sla_breach_at
       from {{ ref('zendesk__sla_policies') }}
-      where is_active_sla and is_sla_breach
+      where not is_active_sla and is_sla_breach
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
       order by sla_breach_at desc

@@ -70,7 +70,7 @@ queries:
         m.assignee_name,
         {{ dbt.datediff('m.created_at', dbt.current_timestamp(), 'day') }} as age_days
       from {{ ref('zendesk__ticket_backlog') }} b
-      join {{ ref('zendesk__ticket_metrics') }} m
+      left join {{ ref('zendesk__ticket_metrics') }} m
         on m.ticket_id = b.ticket_id and m.source_relation = b.source_relation
       where b.date_day = (select date_day from {{ queries.latest_day }})
         and {{ filter('b.priority', priority) }}
