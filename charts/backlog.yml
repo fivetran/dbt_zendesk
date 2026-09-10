@@ -35,7 +35,7 @@ queries:
         sum(case when status = 'pending' then 1 else 0 end) as pending_now,
         sum(case when status = 'hold' then 1 else 0 end) as hold_now
       from {{ ref('zendesk__ticket_backlog') }}
-      where date_day = (select date_day from ({{ queries.latest_day }}) d)
+      where date_day = (select date_day from {{ queries.latest_day }})
         and {{ filter('priority', priority) }}
         and {{ filter('status', status) }}
 
@@ -72,7 +72,7 @@ queries:
       from {{ ref('zendesk__ticket_backlog') }} b
       join {{ ref('zendesk__ticket_metrics') }} m
         on m.ticket_id = b.ticket_id and m.source_relation = b.source_relation
-      where b.date_day = (select date_day from ({{ queries.latest_day }}) d)
+      where b.date_day = (select date_day from {{ queries.latest_day }})
         and {{ filter('b.priority', priority) }}
         and {{ filter('b.status', status) }}
       order by age_days desc
