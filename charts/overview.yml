@@ -11,13 +11,11 @@ variables:
     input: daterange
 
   priority:
-    label: Priority
     input: multiselect
     options:
       static: [urgent, high, normal, low]
 
   channel:
-    label: Channel
     input: multiselect
     options:
       query: channels
@@ -26,7 +24,7 @@ queries:
   channels:
     sql: |
       select distinct created_channel as channel
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where created_channel is not null
       order by 1
 
@@ -39,7 +37,7 @@ queries:
         source_relation,
         {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'source_relation', '0.5') }} as median_first_reply_minutes,
         {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'source_relation', '0.5') }} as median_resolution_minutes
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
@@ -56,7 +54,7 @@ queries:
              "sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
         max(m.median_first_reply_minutes) as median_first_reply_minutes,
         max(m.median_resolution_minutes) as median_resolution_minutes
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }} t
+      from {{ ref('zendesk__ticket_metrics') }} t
       left join ({{ queries.medians }}) m on m.source_relation = t.source_relation
       where {{ filter_date_range('t.created_at', date_range) }}
         and {{ filter('t.priority', priority) }}
@@ -65,14 +63,14 @@ queries:
   daily_flow:
     sql: |
       select {{ dbt.date_trunc('day', 'created_at') }} as day, 'created' as series, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1, 2
       union all
       select {{ dbt.date_trunc('day', 'first_solved_at') }} as day, 'solved' as series, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where first_solved_at is not null
         and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
@@ -83,7 +81,7 @@ queries:
   by_channel:
     sql: |
       select coalesce(created_channel, 'unknown') as channel, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
@@ -93,7 +91,7 @@ queries:
   by_priority:
     sql: |
       select coalesce(priority, 'none') as priority, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
@@ -103,7 +101,7 @@ queries:
   by_type:
     sql: |
       select coalesce(type, 'untyped') as ticket_type, count(*) as tickets
-      from {{ ref('zendesk', 'zendesk__ticket_metrics') }}
+      from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
