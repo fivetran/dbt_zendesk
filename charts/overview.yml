@@ -1,0 +1,204 @@
+title: Zendesk Support Overview
+notes: |
+  Ticket volume, backlog, first-reply and resolution medians, CSAT, and the
+  intake mix by channel, priority, and type. Every number comes from the
+  `zendesk__ticket_metrics` model this package builds, so it reads the same on
+  every warehouse the package supports.
+
+variables:
+  date_range:
+    label: Created between
+    input: daterange
+
+  priority:
+    input: multiselect
+    options:
+      static: [urgent, high, normal, low]
+
+  channel:
+    input: multiselect
+    options:
+      query: channels
+
+queries:
+  channels:
+    sql: |
+      select distinct created_channel as channel
+      from {{ ref('zendesk__ticket_metrics') }}
+      where created_channel is not null
+      order by 1
+
+  # Medians come from fivetran_utils.percentile: a window on most warehouses,
+  # an ordered-set aggregate on Postgres. One partition over the whole filtered
+  # set gives one overall median; DISTINCT (window) or GROUP BY (Postgres)
+  # collapses it to one row. The partition expression is a column comparison
+  # that is true for every row, NULL included, because BigQuery refuses a
+  # literal constant in a window partition.
+  medians:
+    sql: |
+      select distinct
+        1 as k,
+        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', "coalesce(source_relation, '') = coalesce(source_relation, '')", '0.5') }} as median_first_reply_minutes,
+        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', "coalesce(source_relation, '') = coalesce(source_relation, '')", '0.5') }} as median_resolution_minutes
+      from {{ ref('zendesk__ticket_metrics') }}
+      where {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      {% if target.type == 'postgres' %}group by 1{% endif %}
+
+  kpis:
+    sql: |
+      select
+        count(*) as tickets_created,
+        sum(case when status in ('solved', 'closed') then 1 else 0 end) as tickets_solved,
+        sum(case when status in ('new', 'open', 'pending', 'hold') then 1 else 0 end) as tickets_unsolved,
+        {{ dbt_utils.safe_divide(
+             "sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
+             "sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
+        max(medians.median_first_reply_minutes) as median_first_reply_minutes,
+        max(medians.median_resolution_minutes) as median_resolution_minutes
+      from {{ ref('zendesk__ticket_metrics') }} t
+      cross join {{ queries.medians }}
+      where {{ filter_date_range('t.created_at', date_range) }}
+        and {{ filter('t.priority', priority) }}
+        and {{ filter('t.created_channel', channel) }}
+
+  weekly_flow:
+    sql: |
+      select {{ dbt.date_trunc('week', 'created_at') }} as week, 'created' as series, count(*) as tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      group by 1, 2
+      union all
+      select {{ dbt.date_trunc('week', 'first_solved_at') }} as week, 'solved' as series, count(*) as tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where first_solved_at is not null
+        and {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      group by 1, 2
+      order by 1, 2
+
+  by_channel:
+    sql: |
+      select coalesce(created_channel, 'unknown') as channel, count(*) as tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      group by 1
+      order by 2 desc
+
+  by_priority:
+    sql: |
+      select coalesce(priority, 'none') as priority, count(*) as tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      group by 1
+      order by 2 desc
+
+  by_type:
+    sql: |
+      select coalesce(type, 'untyped') as ticket_type, count(*) as tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('created_channel', channel) }}
+      group by 1
+      order by 2 desc
+
+charts:
+  created_kpi:
+    label: Tickets Created
+    query: kpis
+    type: kpi
+    value: tickets_created
+    style:
+      value:
+        format: integer
+
+  solved_kpi:
+    label: Solved
+    query: kpis
+    type: kpi
+    value: tickets_solved
+    style:
+      value:
+        format: integer
+
+  unsolved_kpi:
+    label: Still Unsolved
+    query: kpis
+    type: kpi
+    value: tickets_unsolved
+    style:
+      value:
+        format: integer
+
+  csat_kpi:
+    label: CSAT
+    query: kpis
+    type: kpi
+    value: csat_rate
+    style:
+      value:
+        format: percent_whole
+
+  first_reply_kpi:
+    label: Median First Reply (min)
+    query: kpis
+    type: kpi
+    value: median_first_reply_minutes
+    style:
+      value:
+        format: integer
+
+  resolution_kpi:
+    label: Median Resolution (min)
+    query: kpis
+    type: kpi
+    value: median_resolution_minutes
+    style:
+      value:
+        format: integer
+
+  flow_chart:
+    title: Tickets Created and Solved per Week
+    query: weekly_flow
+    type: line
+    x: week
+    y: tickets
+    color: series
+    height: 240
+
+  channel_chart:
+    title: By Channel
+    query: by_channel
+    type: bar
+    x: channel
+    y: tickets
+
+  priority_chart:
+    title: By Priority
+    query: by_priority
+    type: bar
+    x: priority
+    y: tickets
+
+  type_chart:
+    title: By Type
+    query: by_type
+    type: bar
+    x: ticket_type
+    y: tickets
+
+rows:
+  - text: |
+      **Overview** · [Backlog](/zendesk/backlog) · [Agent performance](/zendesk/agent-performance) · [SLA](/zendesk/sla)
+  - cols: [created_kpi, solved_kpi, unsolved_kpi, csat_kpi, first_reply_kpi, resolution_kpi]
+  - flow_chart
+  - cols: [channel_chart, priority_chart, type_chart]

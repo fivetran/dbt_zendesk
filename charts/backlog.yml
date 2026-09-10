@@ -1,0 +1,163 @@
+title: Zendesk Ticket Backlog
+notes: |
+  The unsolved queue day by day from `zendesk__ticket_backlog`, and what is in
+  it right now. The queue table takes subject, assignee, and age from
+  `zendesk__ticket_metrics`, so it does not depend on which fields
+  `ticket_field_history_columns` tracks.
+
+variables:
+  date_range:
+    label: Backlog days
+    input: daterange
+
+  priority:
+    input: multiselect
+    options:
+      static: [urgent, high, normal, low]
+
+  status:
+    input: multiselect
+    options:
+      static: [new, open, pending, hold]
+
+queries:
+  latest_day:
+    sql: |
+      select max(date_day) as date_day
+      from {{ ref('zendesk__ticket_backlog') }}
+
+  kpis:
+    sql: |
+      select
+        count(*) as unsolved_now,
+        sum(case when status = 'new' then 1 else 0 end) as new_now,
+        sum(case when status = 'open' then 1 else 0 end) as open_now,
+        sum(case when status = 'pending' then 1 else 0 end) as pending_now,
+        sum(case when status = 'hold' then 1 else 0 end) as hold_now
+      from {{ ref('zendesk__ticket_backlog') }}
+      where date_day = (select date_day from {{ queries.latest_day }})
+        and {{ filter('priority', priority) }}
+        and {{ filter('status', status) }}
+
+  backlog_by_status:
+    sql: |
+      select date_day, status, count(*) as tickets
+      from {{ ref('zendesk__ticket_backlog') }}
+      where {{ filter_date_range('date_day', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('status', status) }}
+      group by 1, 2
+      order by 1, 2
+
+  backlog_by_priority:
+    sql: |
+      select date_day, coalesce(priority, 'none') as priority, count(*) as tickets
+      from {{ ref('zendesk__ticket_backlog') }}
+      where {{ filter_date_range('date_day', date_range) }}
+        and {{ filter('priority', priority) }}
+        and {{ filter('status', status) }}
+      group by 1, 2
+      order by 1, 2
+
+  current_queue:
+    sql: |
+      select
+        b.ticket_id,
+        m.subject,
+        b.status,
+        coalesce(b.priority, 'none') as priority,
+        b.created_channel as channel,
+        m.assignee_name,
+        {{ dbt.datediff('m.created_at', dbt.current_timestamp(), 'day') }} as age_days
+      from {{ ref('zendesk__ticket_backlog') }} b
+      left join {{ ref('zendesk__ticket_metrics') }} m
+        on m.ticket_id = b.ticket_id and m.source_relation = b.source_relation
+      where b.date_day = (select date_day from {{ queries.latest_day }})
+        and {{ filter('b.priority', priority) }}
+        and {{ filter('b.status', status) }}
+      order by age_days desc
+      limit 200
+
+charts:
+  unsolved_kpi:
+    label: Unsolved Now
+    query: kpis
+    type: kpi
+    value: unsolved_now
+    style:
+      value:
+        format: integer
+
+  new_kpi:
+    label: New
+    query: kpis
+    type: kpi
+    value: new_now
+    style:
+      value:
+        format: integer
+
+  open_kpi:
+    label: Open
+    query: kpis
+    type: kpi
+    value: open_now
+    style:
+      value:
+        format: integer
+
+  pending_kpi:
+    label: Pending
+    query: kpis
+    type: kpi
+    value: pending_now
+    style:
+      value:
+        format: integer
+
+  hold_kpi:
+    label: On Hold
+    query: kpis
+    type: kpi
+    value: hold_now
+    style:
+      value:
+        format: integer
+
+  status_chart:
+    title: Unsolved Tickets by Status
+    query: backlog_by_status
+    type: area
+    x: date_day
+    y: tickets
+    color: status
+    height: 240
+
+  priority_chart:
+    title: Unsolved Tickets by Priority
+    query: backlog_by_priority
+    type: area
+    x: date_day
+    y: tickets
+    color: priority
+    height: 240
+
+  queue_table:
+    title: Current Queue, Oldest First
+    query: current_queue
+    type: table
+    style:
+      columns:
+        ticket_id:
+          label: Ticket
+        age_days:
+          label: Age (days)
+          format: integer
+          align: right
+
+rows:
+  - text: |
+      [Overview](/zendesk/overview) · **Backlog** · [Agent performance](/zendesk/agent-performance) · [SLA](/zendesk/sla)
+  - cols: [unsolved_kpi, new_kpi, open_kpi, pending_kpi, hold_kpi]
+  - cols: [status_chart, priority_chart]
+  - queue_table

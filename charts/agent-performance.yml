@@ -1,0 +1,140 @@
+title: Zendesk Agent Performance
+notes: |
+  Per-assignee workload, responsiveness, resolution, and CSAT from
+  `zendesk__ticket_metrics`. Medians use `fivetran_utils.percentile`, so
+  they dispatch to each warehouse's own percentile function.
+
+variables:
+  date_range:
+    label: Created between
+    input: daterange
+
+  assignee:
+    input: multiselect
+    options:
+      query: assignees
+
+queries:
+  assignees:
+    sql: |
+      select distinct assignee_name
+      from {{ ref('zendesk__ticket_metrics') }}
+      where assignee_name is not null
+      order by 1
+
+  agent_medians:
+    sql: |
+      select distinct
+        assignee_name,
+        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'assignee_name', '0.5') }} as median_first_reply_minutes,
+        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'assignee_name', '0.5') }} as median_resolution_minutes
+      from {{ ref('zendesk__ticket_metrics') }}
+      where assignee_name is not null
+        and {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('assignee_name', assignee) }}
+      {% if target.type == 'postgres' %}group by assignee_name{% endif %}
+
+  agent_summary:
+    sql: |
+      select
+        t.assignee_name,
+        count(*) as tickets,
+        sum(case when t.status in ('solved', 'closed') then 1 else 0 end) as solved,
+        max(agent_medians.median_first_reply_minutes) as median_first_reply_minutes,
+        max(agent_medians.median_resolution_minutes) as median_resolution_minutes,
+        {{ dbt_utils.safe_divide(
+             "sum(case when t.ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
+             "sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
+        {{ dbt_utils.safe_divide("sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)", "count(*)") }} as one_touch_rate,
+        avg(t.count_ticket_handoffs) as avg_handoffs
+      from {{ ref('zendesk__ticket_metrics') }} t
+      left join {{ queries.agent_medians }} on agent_medians.assignee_name = t.assignee_name
+      where t.assignee_name is not null
+        and {{ filter_date_range('t.created_at', date_range) }}
+        and {{ filter('t.assignee_name', assignee) }}
+      group by 1
+      order by tickets desc
+
+  agent_csat:
+    sql: |
+      select
+        assignee_name,
+        {{ dbt_utils.safe_divide(
+             "sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
+             "sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
+        sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) as rated_tickets
+      from {{ ref('zendesk__ticket_metrics') }}
+      where assignee_name is not null
+        and ticket_satisfaction_score in ('good', 'bad')
+        and {{ filter_date_range('created_at', date_range) }}
+        and {{ filter('assignee_name', assignee) }}
+      group by 1
+      having sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) >= 5
+      order by 2 desc
+
+charts:
+  summary_table:
+    title: Agent Summary
+    query: agent_summary
+    type: table
+    style:
+      columns:
+        assignee_name:
+          label: Agent
+        tickets:
+          format: integer
+          align: right
+        solved:
+          format: integer
+          align: right
+        median_first_reply_minutes:
+          label: Median First Reply (min)
+          format: integer
+          align: right
+        median_resolution_minutes:
+          label: Median Resolution (min)
+          format: integer
+          align: right
+        csat_rate:
+          label: CSAT
+          format: percent_whole
+          align: right
+        one_touch_rate:
+          label: One-touch
+          format: percent_whole
+          align: right
+        avg_handoffs:
+          label: Avg Handoffs
+          format: number_full
+          align: right
+
+  workload_chart:
+    title: Tickets by Agent
+    query: agent_summary
+    type: bar
+    x: assignee_name
+    y: tickets
+
+  resolution_chart:
+    title: Median Resolution by Agent (min)
+    query: agent_summary
+    type: bar
+    x: assignee_name
+    y: median_resolution_minutes
+
+  csat_chart:
+    title: CSAT by Agent (5+ rated tickets)
+    query: agent_csat
+    type: bar
+    x: assignee_name
+    y: csat_rate
+    style:
+      axis_y:
+        labels:
+          format: .0%
+
+rows:
+  - text: |
+      [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · **Agent performance** · [SLA](/zendesk/sla)
+  - summary_table
+  - cols: [workload_chart, resolution_chart, csat_chart]
