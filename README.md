@@ -55,6 +55,12 @@ pip install dbt-charts
 dct serve            # from your dbt project root, after `dbt deps` and `dbt run`
 ```
 
+<p align="center">
+<a href="charts/overview.yml">
+    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/dbt-charts/zendesk-pack/images/dbt_charts/overview.png" alt="Zendesk Support Overview board rendered by dbt Charts" width="75%">
+</a>
+</p>
+
 Earlier reports were also available for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk) ([sample reports](https://fivetran-zendesk.streamlit.app/)).
 
 ## Prerequisites
