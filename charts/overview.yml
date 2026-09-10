@@ -31,13 +31,15 @@ queries:
   # Medians come from fivetran_utils.percentile: a window on most warehouses,
   # an ordered-set aggregate on Postgres. One partition over the whole filtered
   # set gives one overall median; DISTINCT (window) or GROUP BY (Postgres)
-  # collapses it to one row.
+  # collapses it to one row. The partition expression is a column comparison
+  # that is the same for every row because BigQuery refuses a literal constant
+  # in a window partition.
   medians:
     sql: |
       select distinct
         1 as k,
-        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', '1', '0.5') }} as median_first_reply_minutes,
-        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', '1', '0.5') }} as median_resolution_minutes
+        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'source_relation = source_relation', '0.5') }} as median_first_reply_minutes,
+        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'source_relation = source_relation', '0.5') }} as median_resolution_minutes
       from {{ ref('zendesk__ticket_metrics') }}
       where {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
