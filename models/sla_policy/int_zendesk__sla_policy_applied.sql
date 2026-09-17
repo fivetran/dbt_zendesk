@@ -23,22 +23,47 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__ticket_aggregates') }}
 
-), private_ticket_creation as (
-  -- Zendesk doesn't start measuring first-reply-time at ticket creation when a ticket is
-  -- created on a customer's behalf via a private/internal comment. Identify those tickets
-  -- (first public comment is internal, with private comments preceding it) and capture the
-  -- customer's first public comment so first_reply_time SLAs can be applied from that point
-  -- instead. Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+), comments_enriched as (
+
+  select *
+  from {{ ref('int_zendesk__comments_enriched') }}
+
+-- The customer's first comment (public or private) on the ticket. A private comment still
+-- means the customer has engaged, so it's not enough to check for any prior private comment;
+-- we need to know specifically whether the customer has said anything yet.
+), first_external_comment as (
+
   select
     source_relation,
     ticket_id,
-    max(case when previous_commenter_role = 'first_comment'
-          and commenter_role = 'internal_comment'
-          and previous_internal_comment_count > 0
+    min(valid_starting_at) as first_external_comment_at
+  from comments_enriched
+  where commenter_role = 'external_comment'
+  {{ dbt_utils.group_by(n=2) }}
+
+), private_ticket_creation as (
+  -- Zendesk doesn't start measuring first-reply-time at ticket creation when a ticket is
+  -- created on a customer's behalf via a private/internal comment. Identify those tickets
+  -- (first public comment is internal, the ticket already had private comments before it -
+  -- i.e. this wasn't simply the ticket's first-ever activity, such as an agent proactively
+  -- opening a ticket - and the customer hasn't said anything yet, publicly or privately) and
+  -- capture the customer's first public comment so first_reply_time SLAs can be applied from
+  -- that point instead. Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+  select
+    comments_enriched.source_relation,
+    comments_enriched.ticket_id,
+    max(case when comments_enriched.previous_commenter_role = 'first_comment'
+          and comments_enriched.commenter_role = 'internal_comment'
+          and comments_enriched.previous_internal_comment_count > 0
+          and (first_external_comment.first_external_comment_at is null
+            or comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at)
         then 1 else 0 end) = 1 as is_privately_created,
-    min(case when commenter_role = 'external_comment' then valid_starting_at end) as first_customer_public_comment_at
-  from {{ ref('int_zendesk__comments_enriched') }}
-  where is_public
+    min(case when comments_enriched.commenter_role = 'external_comment' then comments_enriched.valid_starting_at end) as first_customer_public_comment_at
+  from comments_enriched
+  left join first_external_comment
+    on first_external_comment.ticket_id = comments_enriched.ticket_id
+    and first_external_comment.source_relation = comments_enriched.source_relation
+  where comments_enriched.is_public
   {{ dbt_utils.group_by(n=2) }}
 
 {% if check_sla_policy_metric_history %}
