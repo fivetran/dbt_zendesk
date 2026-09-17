@@ -1,31 +1,24 @@
-{% set using_user_role_histories = var('using_user_role_histories', True) and var('using_audit_log', False) %}
-with users as (
-  select *
-  from {{ ref('int_zendesk__user_role_history' if using_user_role_histories else 'int_zendesk__user_aggregates') }}
+with comments_enriched as (
 
-), ticket_updates as (
   select *
-  from {{ ref('int_zendesk__updates') }}
+  from {{ ref('int_zendesk__comments_enriched') }}
+  where is_public
 
 ), final as (
-  select 
-    ticket_comment.source_relation,
-    ticket_comment.ticket_id,
-    ticket_comment.valid_starting_at as reply_at,
-    commenter.role
-  from ticket_updates as ticket_comment
 
-  join users as commenter
-    on ticket_comment.user_id = commenter.user_id
-    and ticket_comment.source_relation = commenter.source_relation
-  {% if using_user_role_histories %}
-    and ticket_comment.valid_starting_at >= commenter.valid_starting_at
-    and ticket_comment.valid_starting_at < commenter.valid_ending_at
-  {% endif %}
+  select
+    source_relation,
+    ticket_id,
+    valid_starting_at as reply_at,
+    commenter_role as role
+  from comments_enriched
+  where commenter_role = 'internal_comment'
+    -- Exclude an agent's public comment from counting as a reply when it is the ticket's
+    -- first public comment and the ticket was created via a private/internal comment, since
+    -- Zendesk doesn't start measuring first-reply-time until the customer's first public
+    -- comment. Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+    and not (previous_commenter_role = 'first_comment' and previous_internal_comment_count > 0)
 
-  where field_name = 'comment' 
-    and ticket_comment.is_public
-    and commenter.is_internal_role
 )
 
 select *

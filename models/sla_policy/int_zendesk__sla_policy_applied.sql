@@ -23,6 +23,24 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__ticket_aggregates') }}
 
+), private_ticket_creation as (
+  -- Zendesk doesn't start measuring first-reply-time at ticket creation when a ticket is
+  -- created on a customer's behalf via a private/internal comment. Identify those tickets
+  -- (first public comment is internal, with private comments preceding it) and capture the
+  -- customer's first public comment so first_reply_time SLAs can be applied from that point
+  -- instead. Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+  select
+    source_relation,
+    ticket_id,
+    max(case when previous_commenter_role = 'first_comment'
+          and commenter_role = 'internal_comment'
+          and previous_internal_comment_count > 0
+        then 1 else 0 end) = 1 as is_privately_created,
+    min(case when commenter_role = 'external_comment' then valid_starting_at end) as first_customer_public_comment_at
+  from {{ ref('int_zendesk__comments_enriched') }}
+  where is_public
+  {{ dbt_utils.group_by(n=2) }}
+
 {% if check_sla_policy_metric_history %}
 ), sla_policy_metrics as (
 
@@ -46,7 +64,13 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
-    case when ticket_field_history.field_name = 'first_reply_time' then ticket.created_at else ticket_field_history.valid_starting_at end as sla_applied_at,
+    case
+      when ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false)
+        then coalesce(private_ticket_creation.first_customer_public_comment_at, ticket.created_at)
+      when ticket_field_history.field_name = 'first_reply_time'
+        then ticket.created_at
+      else ticket_field_history.valid_starting_at
+    end as sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority
@@ -54,6 +78,9 @@ with ticket_field_history as (
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
     and ticket.source_relation = ticket_field_history.source_relation
+  left join private_ticket_creation
+    on private_ticket_creation.ticket_id = ticket_field_history.ticket_id
+    and private_ticket_creation.source_relation = ticket_field_history.source_relation
   where ticket_field_history.value is not null
     and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
 

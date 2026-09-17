@@ -1,3 +1,15 @@
+# dbt_zendesk v1.9.0
+
+[PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 1 possible breaking change**
+
+| Data Model(s) | Change type | Old | New | Notes |
+| ---------- | ----------- | -------- | -------- | ----- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Updated `first_reply_time` calculation | For a ticket created on a customer's behalf via a private/internal comment, the `first_reply_time` SLA clock started at ticket creation, and any agent public comment counted as the reply — even before the customer had commented publicly. | The `first_reply_time` SLA clock now starts at the customer's first public comment for privately-created tickets, matching Zendesk's own behavior and the logic already used in `zendesk__ticket_metrics`. | Affects only tickets created via a private/internal comment where an agent posted publicly before the customer's first public comment. Resolves false SLA breaches on these tickets ([RD-1277353](https://fivetran.atlassian.net/browse/RD-1277353)). |
+
 # dbt_zendesk v1.8.0
 
 [PR #270](https://github.com/fivetran/dbt_zendesk/pull/270) includes the following updates:
