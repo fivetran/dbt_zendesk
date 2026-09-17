@@ -3,9 +3,7 @@ with comments_enriched as (
   select *
   from {{ ref('int_zendesk__comments_enriched') }}
 
--- The customer's first comment (public or private) on the ticket. A private comment still
--- means the customer has engaged, so it's not enough to check for any prior private comment;
--- we need to know specifically whether the customer has said anything yet.
+-- The customer's first comment, public or private, so we can tell if they've engaged at all.
 ), first_external_comment as (
 
   select
@@ -34,12 +32,8 @@ with comments_enriched as (
     on first_external_comment.ticket_id = public_comments.ticket_id
     and first_external_comment.source_relation = public_comments.source_relation
   where public_comments.commenter_role = 'internal_comment'
-    -- Exclude an agent's public comment from counting as a reply when it is the ticket's
-    -- first public comment, the ticket already had private comments before it (i.e. this
-    -- wasn't simply the ticket's first-ever activity, such as an agent proactively opening a
-    -- ticket), and the customer hasn't said anything yet (publicly or privately). Zendesk
-    -- doesn't start measuring first-reply-time until the customer's first public comment.
-    -- Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+    -- Don't count an agent's first public comment as a reply if the ticket was created via
+    -- private comments and the customer hasn't engaged yet (mirrors int_zendesk__ticket_reply_times.sql).
     and not (
       public_comments.previous_commenter_role = 'first_comment'
       and public_comments.previous_internal_comment_count > 0

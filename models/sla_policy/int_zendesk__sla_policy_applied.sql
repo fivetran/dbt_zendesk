@@ -28,9 +28,7 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__comments_enriched') }}
 
--- The customer's first comment (public or private) on the ticket. A private comment still
--- means the customer has engaged, so it's not enough to check for any prior private comment;
--- we need to know specifically whether the customer has said anything yet.
+-- The customer's first comment, public or private, so we can tell if they've engaged at all.
 ), first_external_comment as (
 
   select
@@ -42,13 +40,9 @@ with ticket_field_history as (
   {{ dbt_utils.group_by(n=2) }}
 
 ), private_ticket_creation as (
-  -- Zendesk doesn't start measuring first-reply-time at ticket creation when a ticket is
-  -- created on a customer's behalf via a private/internal comment. Identify those tickets
-  -- (first public comment is internal, the ticket already had private comments before it -
-  -- i.e. this wasn't simply the ticket's first-ever activity, such as an agent proactively
-  -- opening a ticket - and the customer hasn't said anything yet, publicly or privately) and
-  -- capture the customer's first public comment so first_reply_time SLAs can be applied from
-  -- that point instead. Mirrors the handling in int_zendesk__ticket_reply_times.sql.
+  -- Flags tickets created via private comments where the customer hasn't engaged yet, so
+  -- first_reply_time can start at their first public comment instead of ticket_created_at
+  -- (mirrors int_zendesk__ticket_reply_times.sql).
   select
     comments_enriched.source_relation,
     comments_enriched.ticket_id,
