@@ -49,6 +49,14 @@ test_scenarios:
       using_ticket_chat: true
     include_incremental: false
 
+  - name: "sla pause criteria"
+    vars:
+      zendesk__ticket_passthrough_columns:
+        - name: "custom_support_should_not_contact_customer"
+          alias: "support_should_not_contact_customer"
+      sla_pause_criteria: "coalesce(ticket.support_should_not_contact_customer, false)"
+    include_incremental: false
+
   - name: "custom field history columns"
     vars:
       ticket_field_history_columns: ['assignee_id', 'status', 'priority', '987654321098', 'Escalation Reason', 'Support Tier', 'Channel Group']

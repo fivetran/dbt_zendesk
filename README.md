@@ -215,9 +215,9 @@ vars:
 ```
 
 #### Exclude Tickets from Counting as an SLA Breach
-Some tickets shouldn't count as an SLA breach even though Zendesk's SLA policy engine reports one — for example, a ticket flagged "do not contact customer" where an agent intentionally never replies. Use the `sla_pause_criteria` variable to define a SQL clause identifying these tickets; when it evaluates to `true` for a ticket, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`.
+Some tickets shouldn't count as an SLA breach even though Zendesk's SLA policy engine reports one — for example, a custom column flag like "do not contact customer" where an agent intentionally never replies. Use the `sla_pause_criteria` variable to define a SQL clause identifying these tickets; when it evaluates to `true` for a ticket, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`.
 
-The clause is evaluated against the `ticket` table in `int_zendesk__sla_policy_applied`, so it can reference any standard `TICKET` field (qualified as `ticket.<column>`) or a [pass-through column](#add-passthrough-columns) you've added via `zendesk__ticket_passthrough_columns`, which is how you'd reference a custom field.
+The clause is evaluated against the `ticket` table in `int_zendesk__sla_policy_applied`, so it can reference any standard `TICKET` field (qualified as `ticket.<column>`) or a [pass-through column](#add-passthrough-columns) you've added via `zendesk__ticket_passthrough_columns`, which is how you'd reference a custom column flag.
 
 Example usage:
 ```yml
