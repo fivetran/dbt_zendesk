@@ -93,7 +93,10 @@ with ticket_field_history as (
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
-    ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false) as is_privately_created
+    ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false) as is_privately_created,
+    -- Lets customers exempt tickets from SLA breaches via a custom SQL condition (e.g. a
+    -- passed-through ticket field), evaluated against the `ticket` CTE above.
+    {{ var('sla_pause_criteria', false) }} as is_sla_paused
   from ticket_field_history
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
@@ -158,7 +161,8 @@ with ticket_field_history as (
       add_historical_priority.current_priority,
       add_historical_priority.priority_applied,
       add_historical_priority.sla_policy_name,
-      add_historical_priority.is_privately_created
+      add_historical_priority.is_privately_created,
+      add_historical_priority.is_sla_paused
 
     from add_historical_priority
     left join ticket_sla_policy -- Bringing this in for joining purposes only. Alternatively can join on sla_policy_name, but that is subject to change
