@@ -40,6 +40,20 @@ This means if a ticket has been opened for a number of days and then a `first_re
 
 We have found that some reports of `sla_breach_at`, `sla_elapsed_time`, and the `first_reply_time_*` metrics in the aforementioned models do not match the metrics provided in the Zendesk Support UI. This is due to certain reports in Zendesk Support calculating the `first_reply_time` as the first public `agent` or `admin` reply following the SLA being applied to the ticket. We are taking the stance in this data model that this is not reflective of the `first_reply_time` metric and will continue to report the `first_reply_time` as mentioned above. As a result, some of your `first_reply_time` metrics may potentially not match exactly what you see reported in the Zendesk Support UI reports.
 
+### First Reply Time for Privately-Created Tickets
+Zendesk does not start measuring the `first_reply_time` SLA target at ticket creation when a ticket is created on a customer's behalf through one or more private/internal comments (for example, a CSE logging a phone call as internal notes before posting anything public). Instead, Zendesk waits until the customer's first comment — public or private — before it starts the clock (see [Zendesk's documentation](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time)).
+
+Prior to this fix, `int_zendesk__sla_policy_applied.sql` always set `sla_applied_at` to `ticket.created_at` for the `first_reply_time` metric, and `int_zendesk__commenter_reply_at.sql` treated any agent's public comment as a valid reply. Together, this meant `zendesk__sla_policies` could report a `first_reply_time` breach purely because an agent posted a proactive public update before the customer had said anything at all — even though Zendesk itself hadn't started the SLA clock yet ([RD-1277353](https://fivetran.atlassian.net/browse/RD-1277353)).
+
+We now treat a ticket as "privately created" for a given internal public comment when **all** of the following hold:
+- it is the ticket's first-ever public comment,
+- the ticket already had other (private) comments before it — so this isn't simply the ticket's very first activity, such as an agent proactively opening a ticket with an immediate public post, and
+- the customer hasn't said anything yet, publicly or privately, as of that comment's timestamp.
+
+When all three hold, that agent comment no longer counts as a reply in `int_zendesk__commenter_reply_at.sql`, and `sla_applied_at` in `int_zendesk__sla_policy_applied.sql` shifts to the customer's first public comment instead of `ticket.created_at`. We deliberately did not key this off of "any prior private comment," since a private comment can also come from the customer themselves (e.g. a message routed in privately before an agent replies publicly) — in that case the customer has already engaged, and the original `ticket.created_at` anchor is correct.
+
+This logic intentionally lives only in the SLA path (`zendesk__sla_policies`). `int_zendesk__ticket_reply_times.sql`, which feeds `zendesk__ticket_metrics`, is unchanged and keeps measuring `first_reply_time` as the ticket's creation to its first public comment regardless of who posted it, per the opinionated stance described above. As a result, for tickets matching the pattern above, `zendesk__sla_policies` and `zendesk__ticket_metrics` will now more frequently disagree on `first_reply_time` — that is expected, and `zendesk__sla_policies` is the one that now matches Zendesk's own SLA reporting.
+
 ## Zendesk Support Backlog Tickets
 - You may find some discrepancies between what Zendesk Support reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk Support taking a snapshot of each day sometime in the 23rd hour as stated in their [article](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
 
