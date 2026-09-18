@@ -54,7 +54,7 @@ test_scenarios:
       zendesk__ticket_passthrough_columns:
         - name: "custom_support_should_not_contact_customer"
           alias: "support_should_not_contact_customer"
-      sla_pause_criteria: "coalesce(ticket.support_should_not_contact_customer, false)"
+      sla_pause_criteria: "ticket.support_should_not_contact_customer"
     include_incremental: false
 
   - name: "custom field history columns"
