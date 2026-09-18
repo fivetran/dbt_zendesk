@@ -22,39 +22,16 @@ sla_policies as (
         and in_business_hours
 ),
 
-comments_enriched as (
-    select *
-    from {{ ref('int_zendesk__comments_enriched') }}
-),
-
-first_external_comment as (
-    select
-        source_relation,
-        ticket_id,
-        min(valid_starting_at) as first_external_comment_at
-    from comments_enriched
-    where commenter_role = 'external_comment'
-    {{ dbt_utils.group_by(n=2) }}
-),
-
 -- Tickets created via private comments where the customer hadn't engaged yet: zendesk__sla_policies
 -- anchors first_reply_time to the customer's first public comment for these, but zendesk__ticket_metrics
 -- intentionally does not (see DECISIONLOG.md), so they're expected to diverge and are excluded here.
 privately_created_tickets as (
-    select
-        comments_enriched.source_relation,
-        comments_enriched.ticket_id
-    from comments_enriched
-    left join first_external_comment
-        on first_external_comment.ticket_id = comments_enriched.ticket_id
-        and first_external_comment.source_relation = comments_enriched.source_relation
-    where comments_enriched.is_public
-        and comments_enriched.previous_commenter_role = 'first_comment'
-        and comments_enriched.commenter_role = 'internal_comment'
-        and comments_enriched.previous_internal_comment_count > 0
-        and (first_external_comment.first_external_comment_at is null
-            or comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at)
-    group by 1, 2
+    select distinct
+        source_relation,
+        ticket_id
+    from {{ ref('int_zendesk__sla_policy_applied') }}
+    where metric = 'first_reply_time'
+        and is_privately_created
 ),
 
 match_check as (
