@@ -1,14 +1,9 @@
-# dbt_zendesk v1.9.0-a1
+# dbt_zendesk v1.9.0
 
 [PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
 
-## Schema/Data Change
-
-**1 total change • 1 possible breaking change**
-
-| Data Model(s) | Change type | Old | New | Notes |
-| ---------- | ----------- | -------- | -------- | ----- |
-| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Updated `first_reply_time` calculation | For a ticket created on a customer's behalf via one or more private/internal comments, the `first_reply_time` SLA clock started at ticket creation, and an agent's own public comment counted as the reply — even before the customer had said anything, publicly or privately. | The `first_reply_time` SLA clock now starts at the customer's first public comment for these privately-created tickets, matching Zendesk's own SLA behavior. | Affects only tickets with private comments preceding their first public comment, where that first public comment is from an agent and the customer hadn't engaged yet. Resolves false SLA breaches on these tickets ([RD-1277353](https://fivetran.atlassian.net/browse/RD-1277353)). `zendesk__ticket_metrics` is unchanged and may now diverge from `zendesk__sla_policies` more often for these tickets, per its existing documented, intentionally different `first_reply_time` definition (see `DECISIONLOG.md`). |
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via one or more private/internal comments. The SLA clock now starts at the customer's first public comment for these tickets instead of ticket creation, matching Zendesk's own SLA behavior. `zendesk__ticket_metrics` is unchanged and may diverge from `zendesk__sla_policies` more often for these tickets, per its existing, intentionally different `first_reply_time` definition (see `DECISIONLOG.md`).
 
 # dbt_zendesk v1.8.0
 
