@@ -140,38 +140,56 @@ with ticket_field_history as (
         and {{ dbt.date_trunc("second", "add_sla_policy_name.sla_applied_at") }} >= {{ dbt.date_trunc("second", "ticket_priority_history.valid_starting_at") }}
         and {{ dbt.date_trunc("second", "add_sla_policy_name.sla_applied_at") }} < coalesce({{ dbt.date_trunc("second", "ticket_priority_history.valid_ending_at") }}, {{ dbt.current_timestamp() }})
 
+{% if check_sla_policy_metric_history %}
+), add_sla_policy_id as (
+
+    -- Zendesk re-logs the currently-applied SLA policy on most ticket updates, so a ticket can have many
+    -- `ticket_sla_policy` rows. An exact timestamp match against sla_applied_at misses cases where none
+    -- of those log entries land on that exact moment, so instead take whichever policy was most recently
+    -- applied at or before sla_applied_at.
+    select
+        add_historical_priority.*,
+        ticket_sla_policy.sla_policy_id,
+        row_number() over (
+            partition by add_historical_priority.source_relation, add_historical_priority.ticket_id, add_historical_priority.metric, add_historical_priority.valid_starting_at
+            order by ticket_sla_policy.policy_applied_at desc
+        ) as policy_rank
+    from add_historical_priority
+    left join ticket_sla_policy
+        on add_historical_priority.ticket_id = ticket_sla_policy.ticket_id
+        and add_historical_priority.source_relation = ticket_sla_policy.source_relation
+        and ticket_sla_policy.policy_applied_at <= add_historical_priority.sla_applied_at
+{% endif %}
+
 ), final as (
 
 {% if check_sla_policy_metric_history %}
 
     select
-      add_historical_priority.source_relation,
-      add_historical_priority.ticket_id,
-      add_historical_priority.ticket_created_at,
-      add_historical_priority.valid_starting_at,
-      add_historical_priority.ticket_current_status,
-      add_historical_priority.metric,
-      add_historical_priority.latest_sla,
-      add_historical_priority.sla_applied_at,
-      coalesce(sla_policy_metrics.target, add_historical_priority.target) as target,
-      add_historical_priority.in_business_hours,
-      add_historical_priority.current_priority,
-      add_historical_priority.priority_applied,
-      add_historical_priority.sla_policy_name,
-      add_historical_priority.is_privately_created
+      add_sla_policy_id.source_relation,
+      add_sla_policy_id.ticket_id,
+      add_sla_policy_id.ticket_created_at,
+      add_sla_policy_id.valid_starting_at,
+      add_sla_policy_id.ticket_current_status,
+      add_sla_policy_id.metric,
+      add_sla_policy_id.latest_sla,
+      add_sla_policy_id.sla_applied_at,
+      coalesce(sla_policy_metrics.target, add_sla_policy_id.target) as target,
+      add_sla_policy_id.in_business_hours,
+      add_sla_policy_id.current_priority,
+      add_sla_policy_id.priority_applied,
+      add_sla_policy_id.sla_policy_name,
+      add_sla_policy_id.is_privately_created
 
-    from add_historical_priority
-    left join ticket_sla_policy -- Bringing this in for joining purposes only. Alternatively can join on sla_policy_name, but that is subject to change
-      on add_historical_priority.ticket_id = ticket_sla_policy.ticket_id
-      and add_historical_priority.source_relation = ticket_sla_policy.source_relation
-      and add_historical_priority.sla_applied_at = ticket_sla_policy.policy_applied_at
+    from add_sla_policy_id
     left join sla_policy_metrics
-      on add_historical_priority.metric = sla_policy_metrics.metric
-      and ticket_sla_policy.sla_policy_id = sla_policy_metrics.sla_policy_id
-      and add_historical_priority.priority_applied = sla_policy_metrics.priority
-      and add_historical_priority.source_relation = sla_policy_metrics.source_relation
-      and add_historical_priority.sla_applied_at >= sla_policy_metrics.valid_starting_at
-      and add_historical_priority.sla_applied_at < coalesce(sla_policy_metrics.valid_ending_at, {{ dbt.current_timestamp() }})
+      on add_sla_policy_id.metric = sla_policy_metrics.metric
+      and add_sla_policy_id.sla_policy_id = sla_policy_metrics.sla_policy_id
+      and add_sla_policy_id.priority_applied = sla_policy_metrics.priority
+      and add_sla_policy_id.source_relation = sla_policy_metrics.source_relation
+      and add_sla_policy_id.sla_applied_at >= sla_policy_metrics.valid_starting_at
+      and add_sla_policy_id.sla_applied_at < coalesce(sla_policy_metrics.valid_ending_at, {{ dbt.current_timestamp() }})
+    where add_sla_policy_id.policy_rank = 1
 
 {% else %}
 

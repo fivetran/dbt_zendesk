@@ -4,6 +4,7 @@
 
 ## Bug Fix
 - Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via one or more private/internal comments. The SLA clock now starts at the customer's first public comment for these tickets instead of ticket creation, matching Zendesk's own SLA behavior. `zendesk__ticket_metrics` is unchanged and may diverge from `zendesk__sla_policies` more often for these tickets, per its existing, intentionally different `first_reply_time` definition (see `DECISIONLOG.md`).
+- Improves how `zendesk__sla_policies` matches each SLA event to its historical target duration in `int_zendesk__sla_policy_applied`. The lookup now takes the most recently applied policy as of that event instead of requiring an exact timestamp match, so more events pick up the correct historical target instead of silently falling back to Zendesk's raw reported value.
 
 # dbt_zendesk v1.8.0
 
