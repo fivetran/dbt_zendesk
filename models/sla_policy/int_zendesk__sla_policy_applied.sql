@@ -164,8 +164,8 @@ with ticket_field_history as (
     left join ticket_sla_policy_ranged
         on add_historical_priority.ticket_id = ticket_sla_policy_ranged.ticket_id
         and add_historical_priority.source_relation = ticket_sla_policy_ranged.source_relation
-        and {{ dbt.date_trunc("second", "add_historical_priority.sla_applied_at") }} >= {{ dbt.date_trunc("second", "ticket_sla_policy_ranged.policy_applied_at") }}
-        and {{ dbt.date_trunc("second", "add_historical_priority.sla_applied_at") }} < coalesce({{ dbt.date_trunc("second", "ticket_sla_policy_ranged.valid_ending_at") }}, {{ dbt.current_timestamp() }})
+        and add_historical_priority.sla_applied_at >= ticket_sla_policy_ranged.policy_applied_at
+        and add_historical_priority.sla_applied_at < coalesce(ticket_sla_policy_ranged.valid_ending_at, {{ dbt.current_timestamp() }})
 {% endif %}
 
 ), final as (
