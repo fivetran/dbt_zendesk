@@ -214,6 +214,22 @@ vars:
     internal_user_criteria: "lower(email) like '%@fivetran.com' or external_id = '12345' or name in ('Garrett', 'Alfredo')" # can reference any non-custom field in USER
 ```
 
+#### Exclude Tickets from Counting as an SLA Breach
+Some tickets shouldn't count as an SLA breach even though Zendesk's SLA policy engine reports one — for example, a custom column flag like "do not contact customer" where an agent intentionally never replies. Use the `sla_pause_criteria` variable to define a SQL clause identifying these tickets; when it evaluates to `true` for a ticket, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`.
+
+The clause is evaluated against the `ticket` table in `int_zendesk__sla_policy_applied`, so it can reference any standard `TICKET` field (qualified as `ticket.<column>`) or a [pass-through column](#add-passthrough-columns) you've added via `zendesk__ticket_passthrough_columns`, which is how you'd reference a custom column flag.
+
+Example usage:
+```yml
+# dbt_project.yml
+vars:
+  zendesk__ticket_passthrough_columns:
+    - name: "your_custom_field_id_or_name"
+      alias: "support_should_not_contact_customer"
+  zendesk:
+    sla_pause_criteria: "coalesce(ticket.support_should_not_contact_customer, false)"
+```
+
 #### Tracking Ticket Field History Columns
 The `zendesk__ticket_field_history` model generates historical data for the columns specified by the `ticket_field_history_columns` variable. By default, the columns tracked are `status`, `priority`, and `assignee_id`.  If you would like to change these columns, add the following configuration to your `dbt_project.yml` file. Additionally, the `zendesk__ticket_field_history` model allows for tracking the specified fields updater information through the use of the `zendesk_ticket_field_history_updater_columns` variable. The values passed through this variable are limited to the values shown within the config below. By default, the variable is empty and updater information is not tracked. If you would like to track field history updater information, add any of the below specified values to your `dbt_project.yml` file. After adding the columns to your root `dbt_project.yml` file, run the `dbt run --full-refresh` command to fully refresh any existing models.
 

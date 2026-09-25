@@ -85,3 +85,8 @@ supported_vars:
     description: "Number of years into the past that `zendesk__ticket_field_history` and `zendesk__ticket_backlog` will track"
     display_name: "Ticket Field History Timeframe (Years)"
 
+  sla_pause_criteria:
+    type: string
+    description: "SQL clause identifying tickets that should never count as an SLA breach in `zendesk__sla_policies`, regardless of what Zendesk's own SLA policy engine reports. See the [Exclude Tickets from Counting as an SLA Breach](https://github.com/fivetran/dbt_zendesk#exclude-tickets-from-counting-as-an-sla-breach) README section for an example"
+    display_name: "SLA Pause Criteria"
+
