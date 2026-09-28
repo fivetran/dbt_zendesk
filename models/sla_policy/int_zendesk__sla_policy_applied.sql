@@ -41,8 +41,8 @@ with ticket_field_history as (
 
 ), private_ticket_creation as (
   -- Flags tickets created via private comments where the customer hasn't engaged yet, so
-  -- first_reply_time can start at their first public comment instead of ticket_created_at
-  -- (mirrors int_zendesk__ticket_reply_times.sql).
+  -- first_reply_time can start at their first comment (public or private) instead of
+  -- ticket_created_at (mirrors int_zendesk__ticket_reply_times.sql).
   select
     comments_enriched.source_relation,
     comments_enriched.ticket_id,
@@ -52,7 +52,8 @@ with ticket_field_history as (
           and (first_external_comment.first_external_comment_at is null
             or comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at)
         then 1 else 0 end) = 1 as is_privately_created,
-    min(case when comments_enriched.commenter_role = 'external_comment' then comments_enriched.valid_starting_at end) as first_customer_public_comment_at
+    -- Any visibility, not just public: a private message from the customer still counts as engagement.
+    max(first_external_comment.first_external_comment_at) as first_customer_comment_at
   from comments_enriched
   left join first_external_comment
     on first_external_comment.ticket_id = comments_enriched.ticket_id
@@ -85,7 +86,7 @@ with ticket_field_history as (
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
     case
       when ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false)
-        then coalesce(private_ticket_creation.first_customer_public_comment_at, ticket.created_at)
+        then coalesce(private_ticket_creation.first_customer_comment_at, ticket.created_at)
       when ticket_field_history.field_name = 'first_reply_time'
         then ticket.created_at
       else ticket_field_history.valid_starting_at
