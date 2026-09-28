@@ -3,7 +3,7 @@
 [PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
 
 ## Bug Fix
-- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via private/internal comments. For these tickets, the SLA clock now starts at the customer's first public comment, matching Zendesk's behavior. `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
+- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via private/internal comments. For these tickets, the SLA clock now starts at the customer's first comment, public or private, matching Zendesk's behavior. `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
 - Improves historical SLA target matching in `int_zendesk__sla_policy_applied` by using the most recently applied policy as of each SLA event, rather than requiring an exact timestamp match. This reduces fallback to Zendesk's raw reported target value.
 
 ## Feature Update
