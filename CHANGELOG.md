@@ -1,3 +1,14 @@
+# dbt_zendesk v1.9.0-a1
+
+[PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
+
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via private/internal comments. For these tickets, the SLA clock now starts at the customer's first comment, public or private, matching Zendesk's behavior. An agent's own comment no longer counts as a reply until the customer has engaged, which can also surface previously-hidden breaches where a proactive agent comment was wrongly counted as the reply. `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
+- Improves historical SLA target matching in `int_zendesk__sla_policy_applied` by using the most recently applied policy as of each SLA event, rather than requiring an exact timestamp match. This reduces fallback to Zendesk's raw reported target value.
+
+## Feature Update
+- Adds a `sla_pause_criteria` variable that lets you define a SQL condition (referencing standard or [pass-through](https://github.com/fivetran/dbt_zendesk#add-passthrough-columns) `TICKET` fields) for tickets that should never count as an SLA breach in `zendesk__sla_policies`, regardless of what Zendesk's own SLA policy engine reports. See [Exclude Tickets from Counting as an SLA Breach](https://github.com/fivetran/dbt_zendesk#exclude-tickets-from-counting-as-an-sla-breach) for usage. Defaults to off; no impact unless configured.
+
 # dbt_zendesk v1.8.0
 
 [PR #270](https://github.com/fivetran/dbt_zendesk/pull/270) includes the following updates:
