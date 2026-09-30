@@ -25,11 +25,14 @@ with comments_enriched as (
   select
     public_comments.*,
     -- True when this is the ticket's first public comment, it was posted before the customer
-    -- said anything (public or private), and private comments already preceded it.
-    (public_comments.previous_commenter_role = 'first_comment'
-      and public_comments.previous_internal_comment_count > 0
-      and (first_external_comment.first_external_comment_at is null
-        or public_comments.valid_starting_at < first_external_comment.first_external_comment_at)
+    -- said anything (public or private), and private comments already preceded it. Requires a
+    -- real later external comment to exist -- if none ever does (e.g. an internal ticket with no
+    -- external requester), there's no one to wait for, so this comment counts as the reply.
+    coalesce(
+      public_comments.previous_commenter_role = 'first_comment'
+        and public_comments.previous_internal_comment_count > 0
+        and public_comments.valid_starting_at < first_external_comment.first_external_comment_at,
+      false
     ) as is_unengaged_first_comment
   from public_comments
   left join first_external_comment

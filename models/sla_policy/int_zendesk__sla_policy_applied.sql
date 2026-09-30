@@ -46,11 +46,13 @@ with ticket_field_history as (
   select
     comments_enriched.source_relation,
     comments_enriched.ticket_id,
+    -- Requires a real later external comment to exist -- if none ever does (e.g. an internal
+    -- ticket with no external requester), there's no one to wait for, so this isn't
+    -- privately-created in the sense that matters here.
     max(case when comments_enriched.previous_commenter_role = 'first_comment'
           and comments_enriched.commenter_role = 'internal_comment'
           and comments_enriched.previous_internal_comment_count > 0
-          and (first_external_comment.first_external_comment_at is null
-            or comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at)
+          and comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at
         then 1 else 0 end) = 1 as is_privately_created,
     -- Any visibility, not just public: a private message from the customer still counts as engagement.
     max(first_external_comment.first_external_comment_at) as first_customer_comment_at
