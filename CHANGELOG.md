@@ -1,10 +1,16 @@
 # dbt_zendesk v1.9.0-a2
 
+[PR #277](https://github.com/fivetran/dbt_zendesk/pull/277) includes the following updates:
+
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches for tickets with no real external requester (e.g. an agent filing a ticket on their own behalf). The a1 fix below disqualified an agent's early reply until "the customer" engaged, but on these tickets no customer ever will, so the reply now counts normally against the ticket's creation time, matching Zendesk's behavior.
+
+# dbt_zendesk v1.9.0-a1
+
 [PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
 
 ## Bug Fix
 - Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` for tickets created on a customer's behalf via private/internal comments. For these tickets, the SLA clock now starts at the customer's first comment, public or private, matching Zendesk's behavior. An agent's own comment no longer counts as a reply until the customer has engaged, which can also surface previously-hidden breaches where a proactive agent comment was wrongly counted as the reply. `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
-- Fixes false `first_reply_time` SLA breaches for tickets with no real external requester (e.g. an agent filing a ticket on their own behalf). The a1 fix above disqualified an agent's early reply until "the customer" engaged, but on these tickets no customer ever will, so the reply now counts normally against the ticket's creation time, matching Zendesk's behavior.
 - Improves historical SLA target matching in `int_zendesk__sla_policy_applied` by using the most recently applied policy as of each SLA event, rather than requiring an exact timestamp match. This reduces fallback to Zendesk's raw reported target value.
 
 ## Feature Update
