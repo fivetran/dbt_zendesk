@@ -34,6 +34,10 @@ Instead, we join SLA events to the ticket's priority history (sourced from `int_
 If no history record covers the `sla_applied_at` timestamp (e.g., priority was set at the same instant the ticket was created and the event predates the first history row), we fall back to `current_priority` via a `coalesce`.
 
 ## Zendesk Support First Reply Time SLA Opinionated Logic
+`zendesk__ticket_metrics` and `zendesk__sla_policies` intentionally define `first_reply_time` differently because the models serve different purposes. `zendesk__ticket_metrics` provides a general-purpose response-time metric that can be compared consistently across tickets, while `zendesk__sla_policies` reports performance against the SLA commitment tracked by Zendesk.
+
+As a result, `zendesk__sla_policies` is designed to mirror Zendesk's own SLA determination. Using a different definition of `first_reply_time` in this model would cause the reported SLA result to diverge from Zendesk rather than represent an alternative reporting choice.
+
 The logic for `first_reply_time` breach/achievement metrics within `zendesk__ticket_metrics` is structured on the Zendesk Support definition of [first reply time SLA events](https://support.zendesk.com/hc/en-us/articles/4408821871642-Understanding-ticket-reply-time?page=2#topic_jvw_nqd_1hb). For example, this data model calculates first reply time to be the duration of time (business or calendar) between the creation of the ticket and the first public comment from either an `agent` or `admin`. This holds true regardless of when the first reply time SLA was applied to the ticket.
 
 This means if a ticket has been opened for a number of days and then a `first_reply_time` SLA is applied to the ticket, this data model will still calculate the `first_reply_time` metric as the duration of time from the creation of the ticket and the first public comment, **not** from when the SLA was applied. 
