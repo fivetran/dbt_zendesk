@@ -5,6 +5,9 @@
 ## Bug Fix
 - Fixes false `first_reply_time` SLA breaches for follow-up tickets (Zendesk's `via_source_rel = 'follow_up'`, created from a prior closed ticket). Zendesk applies `first_reply_time` immediately on these, since the customer relationship already exists from the original ticket; the a1 fix was treating them the same as a brand-new privately-created ticket and incorrectly delaying the clock.
 
+## Under the Hood
+- Adds a `sla_privately_created_matches_zendesk` validation test (`integration_tests/tests/integrity/`) that flags any ticket we treat as privately-created where Zendesk's own `ticket_field_history` shows `first_reply_time` was actually applied right at ticket creation (not delayed) — catching the next edge case like the follow-up-ticket one above proactively instead of waiting for a support report.
+
 # dbt_zendesk v1.9.0-a2
 
 [PR #277](https://github.com/fivetran/dbt_zendesk/pull/277) includes the following updates:
