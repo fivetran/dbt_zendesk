@@ -22,16 +22,18 @@ sla_policies as (
         and in_business_hours
 ),
 
--- Tickets created via private comments where the customer hadn't engaged yet: zendesk__sla_policies
--- anchors first_reply_time to the customer's first public comment for these, but zendesk__ticket_metrics
--- intentionally does not (see DECISIONLOG.md), so they're expected to diverge and are excluded here.
+-- Tickets where Zendesk itself delayed applying first_reply_time past ticket creation (most often
+-- tickets created via private comments where the customer hadn't engaged yet): zendesk__sla_policies
+-- anchors to Zendesk's own applied timestamp for these, but zendesk__ticket_metrics intentionally
+-- always anchors to ticket_created_at (see DECISIONLOG.md), so they're expected to diverge and are
+-- excluded here.
 privately_created_tickets as (
     select distinct
         source_relation,
         ticket_id
     from {{ ref('int_zendesk__sla_policy_applied') }}
     where metric = 'first_reply_time'
-        and is_privately_created
+        and {{ dbt.date_trunc("second", "sla_applied_at") }} != {{ dbt.date_trunc("second", "ticket_created_at") }}
 ),
 
 match_check as (

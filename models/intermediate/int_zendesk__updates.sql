@@ -92,8 +92,7 @@ with ticket_history as (
         updates_union.user_id,
         updates_union.valid_starting_at,
         updates_union.valid_ending_at,
-        tickets.created_at as ticket_created_date,
-        tickets.source_rel as ticket_source_rel
+        tickets.created_at as ticket_created_date
     from updates_union
 
     left join tickets
