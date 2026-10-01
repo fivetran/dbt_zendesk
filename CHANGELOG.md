@@ -1,3 +1,10 @@
+# dbt_zendesk v1.9.0-a2
+
+[PR #277](https://github.com/fivetran/dbt_zendesk/pull/277) includes the following updates:
+
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches for tickets with no real external requester (e.g. an agent filing a ticket on their own behalf). The a1 fix below disqualified an agent's early reply until "the customer" engaged, but on these tickets no customer ever will, so the reply now counts normally against the ticket's creation time, matching Zendesk's behavior.
+
 # dbt_zendesk v1.9.0-a1
 
 [PR #273](https://github.com/fivetran/dbt_zendesk/pull/273) includes the following updates:
