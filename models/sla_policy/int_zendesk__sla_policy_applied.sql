@@ -23,46 +23,6 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__ticket_aggregates') }}
 
-), comments_enriched as (
-
-  select *
-  from {{ ref('int_zendesk__comments_enriched') }}
-
--- The customer's first comment, public or private, so we can tell if they've engaged at all.
-), first_external_comment as (
-
-  select
-    source_relation,
-    ticket_id,
-    min(valid_starting_at) as first_external_comment_at
-  from comments_enriched
-  where commenter_role = 'external_comment'
-  {{ dbt_utils.group_by(n=2) }}
-
-), private_ticket_creation as (
-  -- Flags tickets created via private comments where the customer hasn't engaged yet, so
-  -- first_reply_time can start at their first comment (public or private) instead of
-  -- ticket_created_at (mirrors int_zendesk__ticket_reply_times.sql).
-  select
-    comments_enriched.source_relation,
-    comments_enriched.ticket_id,
-    -- Requires a real later external comment to exist -- if none ever does (e.g. an internal
-    -- ticket with no external requester), there's no one to wait for, so this isn't
-    -- privately-created in the sense that matters here.
-    max(case when comments_enriched.previous_commenter_role = 'first_comment'
-          and comments_enriched.commenter_role = 'internal_comment'
-          and comments_enriched.previous_internal_comment_count > 0
-          and comments_enriched.valid_starting_at < first_external_comment.first_external_comment_at
-        then 1 else 0 end) = 1 as is_privately_created,
-    -- Any visibility, not just public: a private message from the customer still counts as engagement.
-    max(first_external_comment.first_external_comment_at) as first_customer_comment_at
-  from comments_enriched
-  left join first_external_comment
-    on first_external_comment.ticket_id = comments_enriched.ticket_id
-    and first_external_comment.source_relation = comments_enriched.source_relation
-  where comments_enriched.is_public
-  {{ dbt_utils.group_by(n=2) }}
-
 {% if check_sla_policy_metric_history %}
 ), sla_policy_metrics as (
 
@@ -86,17 +46,16 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
-    case
-      when ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false)
-        then coalesce(private_ticket_creation.first_customer_comment_at, ticket.created_at)
-      when ticket_field_history.field_name = 'first_reply_time'
-        then ticket.created_at
-      else ticket_field_history.valid_starting_at
-    end as sla_applied_at,
+    -- Zendesk itself decides when to apply (or re-apply) first_reply_time: immediately at ticket
+    -- creation for most tickets, but delayed until the customer's first comment for tickets
+    -- created on their behalf via a private comment -- and it doesn't log an entry at all until
+    -- whichever of those it's waiting for happens. ticket_field_history.valid_starting_at is
+    -- already that logged timestamp, so it's the correct anchor with no need to infer Zendesk's
+    -- decision from comment patterns ourselves, exactly like the other three metrics below.
+    ticket_field_history.valid_starting_at as sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
-    ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false) as is_privately_created,
     -- Lets customers exempt tickets from SLA breaches via a custom SQL condition (e.g. a
     -- passed-through ticket field), evaluated against the `ticket` CTE above.
     {{ var('sla_pause_criteria', false) }} as is_sla_paused
@@ -104,9 +63,6 @@ with ticket_field_history as (
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
     and ticket.source_relation = ticket_field_history.source_relation
-  left join private_ticket_creation
-    on private_ticket_creation.ticket_id = ticket_field_history.ticket_id
-    and private_ticket_creation.source_relation = ticket_field_history.source_relation
   where ticket_field_history.value is not null
     and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
 
@@ -189,7 +145,6 @@ with ticket_field_history as (
       add_sla_policy_id.current_priority,
       add_sla_policy_id.priority_applied,
       add_sla_policy_id.sla_policy_name,
-      add_sla_policy_id.is_privately_created,
       add_sla_policy_id.is_sla_paused
 
     from add_sla_policy_id

@@ -26,3 +26,6 @@ id,_fivetran_synced,body,created,facebook_comment,public,ticket_id,tweet,user_id
 20001005,2020-09-05 09:00:30.000,body_customer_public_reply,2020-09-05 09:00:00,FALSE,TRUE,20001,FALSE,2222,FALSE
 20002001,2020-09-10 10:00:30.000,body_internal_ticket_creation,2020-09-10 10:00:00,FALSE,FALSE,20002,FALSE,1111,FALSE
 20002002,2020-09-10 10:05:30.000,body_agent_first_public_no_customer,2020-09-10 10:05:00,FALSE,TRUE,20002,FALSE,1111,FALSE
+20003001,2020-09-15 10:00:30.000,body_followup_ticket_creation,2020-09-15 10:00:00,FALSE,FALSE,20003,FALSE,1111,FALSE
+20003002,2020-09-15 10:05:30.000,body_agent_prompt_reply_on_followup,2020-09-15 10:05:00,FALSE,TRUE,20003,FALSE,1111,FALSE
+20003003,2020-09-20 09:00:30.000,body_customer_real_first_comment_on_followup,2020-09-20 09:00:00,FALSE,TRUE,20003,FALSE,2222,FALSE

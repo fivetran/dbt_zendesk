@@ -1,3 +1,10 @@
+# dbt_zendesk v1.9.0-a3
+
+[PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
+
+## Bug Fix
+- Replaces the comment-pattern heuristic added in a1 (and narrowed further in a2) for deciding when `first_reply_time`'s clock should start with Zendesk's own logged `first_reply_time` application timestamp (`ticket_field_history`), matching how `next_reply_time`, `agent_work_time`, and `requester_wait_time` already work. The heuristic approach fixed one ticket shape per release (no real customer in a2, follow-up tickets in this release) but kept missing others — reading Zendesk's own decision directly fixes all of those at once, including patterns we hadn't identified yet.
+
 # dbt_zendesk v1.9.0-a2
 
 [PR #277](https://github.com/fivetran/dbt_zendesk/pull/277) includes the following updates:
