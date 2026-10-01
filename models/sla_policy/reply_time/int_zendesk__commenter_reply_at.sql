@@ -3,14 +3,6 @@ with comments_enriched as (
   select *
   from {{ ref('int_zendesk__comments_enriched') }}
 
-), ticket as (
-
-  select
-    ticket_id,
-    source_relation,
-    source_rel
-  from {{ ref('stg_zendesk__ticket') }}
-
 -- The customer's first comment, public or private, so we can tell if they've engaged at all.
 ), first_external_comment as (
 
@@ -42,16 +34,13 @@ with comments_enriched as (
       public_comments.previous_commenter_role = 'first_comment'
         and public_comments.previous_internal_comment_count > 0
         and public_comments.valid_starting_at < first_external_comment.first_external_comment_at
-        and coalesce(ticket.source_rel, '') != 'follow_up',
+        and coalesce(public_comments.ticket_source_rel, '') != 'follow_up',
       false
     ) as is_unengaged_first_comment
   from public_comments
   left join first_external_comment
     on first_external_comment.ticket_id = public_comments.ticket_id
     and first_external_comment.source_relation = public_comments.source_relation
-  left join ticket
-    on ticket.ticket_id = public_comments.ticket_id
-    and ticket.source_relation = public_comments.source_relation
 
 ), final as (
 
