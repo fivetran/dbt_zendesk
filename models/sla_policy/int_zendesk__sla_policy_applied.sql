@@ -86,8 +86,13 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
+    -- Zendesk doesn't apply the privately-created delay to follow-up tickets (via_source_rel =
+    -- 'follow_up') -- they continue an existing, already-engaged conversation from a prior
+    -- closed ticket, so first_reply_time is applied immediately like a normal ticket.
     case
-      when ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false)
+      when ticket_field_history.field_name = 'first_reply_time'
+        and coalesce(private_ticket_creation.is_privately_created, false)
+        and coalesce(ticket.source_rel, '') != 'follow_up'
         then coalesce(private_ticket_creation.first_customer_comment_at, ticket.created_at)
       when ticket_field_history.field_name = 'first_reply_time'
         then ticket.created_at
@@ -96,7 +101,9 @@ with ticket_field_history as (
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
-    ticket_field_history.field_name = 'first_reply_time' and coalesce(private_ticket_creation.is_privately_created, false) as is_privately_created,
+    ticket_field_history.field_name = 'first_reply_time'
+      and coalesce(private_ticket_creation.is_privately_created, false)
+      and coalesce(ticket.source_rel, '') != 'follow_up' as is_privately_created,
     -- Lets customers exempt tickets from SLA breaches via a custom SQL condition (e.g. a
     -- passed-through ticket field), evaluated against the `ticket` CTE above.
     {{ var('sla_pause_criteria', false) }} as is_sla_paused
