@@ -1,10 +1,16 @@
+# dbt_zendesk v1.9.0-a3
+
+[PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
+
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches for follow-up tickets (Zendesk's `via_source_rel = 'follow_up'`, created from a prior closed ticket). Zendesk applies `first_reply_time` immediately on these, since the customer relationship already exists from the original ticket; the a1 fix was treating them the same as a brand-new privately-created ticket and incorrectly delaying the clock.
+
 # dbt_zendesk v1.9.0-a2
 
 [PR #277](https://github.com/fivetran/dbt_zendesk/pull/277) includes the following updates:
 
 ## Bug Fix
 - Fixes false `first_reply_time` SLA breaches for tickets with no real external requester (e.g. an agent filing a ticket on their own behalf). The a1 fix below disqualified an agent's early reply until "the customer" engaged, but on these tickets no customer ever will, so the reply now counts normally against the ticket's creation time, matching Zendesk's behavior.
-- Fixes false `first_reply_time` SLA breaches for follow-up tickets (Zendesk's `via_source_rel = 'follow_up'`, created from a prior closed ticket). Zendesk applies `first_reply_time` immediately on these, since the customer relationship already exists from the original ticket; the a1 fix was treating them the same as a brand-new privately-created ticket and incorrectly delaying the clock.
 
 # dbt_zendesk v1.9.0-a1
 
