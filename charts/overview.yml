@@ -29,6 +29,8 @@ queries:
       where created_channel is not null
       order by 1
 
+  # Exact medians: rank each value, then average the one or two middle rows.
+  # Partitioning by `<col> is null` keeps nulls out of the 1..n ranking.
   medians:
     dialect: duckdb
     sql: |
