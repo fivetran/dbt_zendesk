@@ -23,6 +23,8 @@ queries:
       where assignee_name is not null
       order by 1
 
+  # Exact medians: rank each value, then average the one or two middle rows.
+  # Partitioning by `<col> is null` keeps nulls out of the 1..n ranking.
   agent_medians:
     dialect: duckdb
     sql: |
