@@ -18,29 +18,32 @@ variables:
 
 queries:
   metrics:
+    dialect: duckdb
     sql: |
       select distinct metric
       from {{ ref('zendesk__sla_policies') }}
       order by 1
 
   kpis:
+    dialect: duckdb
     sql: |
       select
         count(*) as sla_events,
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
-        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+        (sum(case when is_sla_breach then 0.0 else 1.0 end)) / nullif(count(*), 0) as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
       where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
 
   by_policy:
+    dialect: duckdb
     sql: |
       select
         sla_policy_name,
         count(*) as sla_events,
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
-        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+        (sum(case when is_sla_breach then 0.0 else 1.0 end)) / nullif(count(*), 0) as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
       where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
@@ -49,12 +52,13 @@ queries:
       order by breaches desc
 
   by_metric:
+    dialect: duckdb
     sql: |
       select
         metric,
         count(*) as sla_events,
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
-        {{ dbt_utils.safe_divide("sum(case when is_sla_breach then 0.0 else 1.0 end)", "count(*)") }} as attainment_rate
+        (sum(case when is_sla_breach then 0.0 else 1.0 end)) / nullif(count(*), 0) as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
       where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
@@ -63,8 +67,9 @@ queries:
       order by breaches desc
 
   breaches_by_week:
+    dialect: duckdb
     sql: |
-      select {{ dbt.date_trunc('week', 'sla_applied_at') }} as week, metric, count(*) as breaches
+      select date_trunc('week', sla_applied_at) as week, metric, count(*) as breaches
       from {{ ref('zendesk__sla_policies') }}
       where not is_active_sla and is_sla_breach
         and {{ filter_date_range('sla_applied_at', date_range) }}
@@ -73,6 +78,7 @@ queries:
       order by 1, 2
 
   recent_breaches:
+    dialect: duckdb
     sql: |
       select
         ticket_id,
