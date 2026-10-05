@@ -22,11 +22,13 @@ variables:
 
 queries:
   latest_day:
+    dialect: duckdb
     sql: |
       select max(date_day) as date_day
       from {{ ref('zendesk__ticket_backlog') }}
 
   kpis:
+    dialect: duckdb
     sql: |
       select
         count(*) as unsolved_now,
@@ -40,6 +42,7 @@ queries:
         and {{ filter('status', status) }}
 
   backlog_by_status:
+    dialect: duckdb
     sql: |
       select date_day, status, count(*) as tickets
       from {{ ref('zendesk__ticket_backlog') }}
@@ -50,6 +53,7 @@ queries:
       order by 1, 2
 
   backlog_by_priority:
+    dialect: duckdb
     sql: |
       select date_day, coalesce(priority, 'none') as priority, count(*) as tickets
       from {{ ref('zendesk__ticket_backlog') }}
@@ -60,6 +64,7 @@ queries:
       order by 1, 2
 
   current_queue:
+    dialect: duckdb
     sql: |
       select
         b.ticket_id,
@@ -68,7 +73,7 @@ queries:
         coalesce(b.priority, 'none') as priority,
         b.created_channel as channel,
         m.assignee_name,
-        {{ dbt.datediff('m.created_at', dbt.current_timestamp(), 'day') }} as age_days
+        date_diff('day', cast(m.created_at as date), current_date) as age_days
       from {{ ref('zendesk__ticket_backlog') }} b
       left join {{ ref('zendesk__ticket_metrics') }} m
         on m.ticket_id = b.ticket_id and m.source_relation = b.source_relation

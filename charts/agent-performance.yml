@@ -1,8 +1,8 @@
 title: Zendesk Agent Performance
 notes: |
   Per-assignee workload, responsiveness, resolution, and CSAT from
-  `zendesk__ticket_metrics`. Medians use `fivetran_utils.percentile`, so
-  they dispatch to each warehouse's own percentile function.
+  `zendesk__ticket_metrics`. Medians are exact and computed in plain SQL,
+  so they match on every warehouse.
 
 variables:
   date_range:
@@ -16,6 +16,7 @@ variables:
 
 queries:
   assignees:
+    dialect: duckdb
     sql: |
       select distinct assignee_name
       from {{ ref('zendesk__ticket_metrics') }}
@@ -23,18 +24,36 @@ queries:
       order by 1
 
   agent_medians:
+    dialect: duckdb
     sql: |
-      select distinct
+      select
         assignee_name,
-        {{ fivetran_utils.percentile('first_reply_time_calendar_minutes', 'assignee_name', '0.5') }} as median_first_reply_minutes,
-        {{ fivetran_utils.percentile('first_resolution_calendar_minutes', 'assignee_name', '0.5') }} as median_resolution_minutes
-      from {{ ref('zendesk__ticket_metrics') }}
-      where assignee_name is not null
-        and {{ filter_date_range('created_at', date_range) }}
-        and {{ filter('assignee_name', assignee) }}
-      {% if target.type == 'postgres' %}group by assignee_name{% endif %}
+        avg(case when reply_rn in (floor((reply_n + 1) / 2.0), ceil((reply_n + 1) / 2.0))
+            then first_reply_time_calendar_minutes end) as median_first_reply_minutes,
+        avg(case when resolution_rn in (floor((resolution_n + 1) / 2.0), ceil((resolution_n + 1) / 2.0))
+            then first_resolution_calendar_minutes end) as median_resolution_minutes
+      from (
+        select
+          assignee_name,
+          first_reply_time_calendar_minutes,
+          first_resolution_calendar_minutes,
+          row_number() over (
+            partition by assignee_name, first_reply_time_calendar_minutes is null
+            order by first_reply_time_calendar_minutes) as reply_rn,
+          count(first_reply_time_calendar_minutes) over (partition by assignee_name) as reply_n,
+          row_number() over (
+            partition by assignee_name, first_resolution_calendar_minutes is null
+            order by first_resolution_calendar_minutes) as resolution_rn,
+          count(first_resolution_calendar_minutes) over (partition by assignee_name) as resolution_n
+        from {{ ref('zendesk__ticket_metrics') }}
+        where assignee_name is not null
+          and {{ filter_date_range('created_at', date_range) }}
+          and {{ filter('assignee_name', assignee) }}
+      ) ranked
+      group by assignee_name
 
   agent_summary:
+    dialect: duckdb
     sql: |
       select
         t.assignee_name,
@@ -42,10 +61,8 @@ queries:
         sum(case when t.status in ('solved', 'closed') then 1 else 0 end) as solved,
         max(agent_medians.median_first_reply_minutes) as median_first_reply_minutes,
         max(agent_medians.median_resolution_minutes) as median_resolution_minutes,
-        {{ dbt_utils.safe_divide(
-             "sum(case when t.ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
-             "sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
-        {{ dbt_utils.safe_divide("sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)", "count(*)") }} as one_touch_rate,
+        (sum(case when t.ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
+        (sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)) / nullif(count(*), 0) as one_touch_rate,
         avg(t.count_ticket_handoffs) as avg_handoffs
       from {{ ref('zendesk__ticket_metrics') }} t
       left join {{ queries.agent_medians }} on agent_medians.assignee_name = t.assignee_name
@@ -56,12 +73,11 @@ queries:
       order by tickets desc
 
   agent_csat:
+    dialect: duckdb
     sql: |
       select
         assignee_name,
-        {{ dbt_utils.safe_divide(
-             "sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)",
-             "sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end)") }} as csat_rate,
+        (sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
         sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) as rated_tickets
       from {{ ref('zendesk__ticket_metrics') }}
       where assignee_name is not null
