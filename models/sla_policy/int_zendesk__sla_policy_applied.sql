@@ -46,18 +46,13 @@ with ticket_field_history as (
     ticket.status as ticket_current_status,
     ticket_field_history.field_name as metric,
     case when ticket_field_history.field_name = 'first_reply_time' then row_number() over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }} order by ticket_field_history.valid_starting_at desc) else 1 end as latest_sla,
-    -- Zendesk itself decides when to apply (or re-apply) first_reply_time: immediately at ticket
-    -- creation for most tickets, but delayed until the customer's first comment for tickets
-    -- created on their behalf via a private comment -- and it doesn't log an entry at all until
-    -- whichever of those it's waiting for happens. ticket_field_history.valid_starting_at is
-    -- already that logged timestamp, so it's the correct anchor with no need to infer Zendesk's
-    -- decision from comment patterns ourselves, exactly like the other three metrics below.
+    -- Zendesk logs first_reply_time the moment it actually starts that clock (immediate or
+    -- delayed), so we just read it directly, same as the other three metrics below.
     ticket_field_history.valid_starting_at as sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
-    -- Lets customers exempt tickets from SLA breaches via a custom SQL condition (e.g. a
-    -- passed-through ticket field), evaluated against the `ticket` CTE above.
+    -- Lets customers exempt tickets from SLA breaches via a custom SQL condition against the `ticket` CTE above.
     {{ var('sla_pause_criteria', false) }} as is_sla_paused
   from ticket_field_history
   join ticket
@@ -105,10 +100,7 @@ with ticket_field_history as (
 {% if check_sla_policy_metric_history %}
 ), ticket_sla_policy_ranged as (
 
-    -- Zendesk re-logs the currently-applied SLA policy on most ticket updates, so a ticket can have many
-    -- `ticket_sla_policy` rows. Turn each log entry into a range (itself until the next entry, or now for
-    -- the latest) so it can be looked up the same way as ticket_priority_history above, rather than
-    -- requiring an exact timestamp match against sla_applied_at.
+    -- Zendesk re-logs the active SLA policy often, so turn each entry into a range (until the next one, or now) instead of requiring an exact timestamp match.
     select
         *,
         lead(policy_applied_at) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by policy_applied_at) as valid_ending_at
