@@ -1,6 +1,6 @@
 # dbt_zendesk v1.9.0
 
-[PR #273](https://github.com/fivetran/dbt_zendesk/pull/273), [PR #277](https://github.com/fivetran/dbt_zendesk/pull/277), and [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) include the following updates:
+[PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
 
 ## Bug Fix
 - Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies`. `sla_applied_at` for `first_reply_time` now uses Zendesk's own logged application timestamp (`ticket_field_history`), the same source already used for `next_reply_time`, `agent_work_time`, and `requester_wait_time`, so it matches whatever Zendesk itself decided — whether that's immediate at ticket creation or delayed until the customer's first comment (for example, for a ticket created on a customer's behalf via a private comment). `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
