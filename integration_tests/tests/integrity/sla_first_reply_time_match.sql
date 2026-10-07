@@ -22,11 +22,7 @@ sla_policies as (
         and in_business_hours
 ),
 
--- Tickets where Zendesk itself delayed applying first_reply_time past ticket creation (most often
--- tickets created via private comments where the customer hadn't engaged yet): zendesk__sla_policies
--- anchors to Zendesk's own applied timestamp for these, but zendesk__ticket_metrics intentionally
--- always anchors to ticket_created_at (see DECISIONLOG.md), so they're expected to diverge and are
--- excluded here.
+-- Exclude tickets where Zendesk delayed first_reply_time past ticket creation: sla_policies tracks that delay, ticket_metrics intentionally doesn't (see DECISIONLOG.md), so the two are expected to diverge here.
 privately_created_tickets as (
     select distinct
         source_relation,
