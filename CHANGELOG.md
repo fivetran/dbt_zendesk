@@ -3,7 +3,8 @@
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
 
 ## Bug Fix
-- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies`. `sla_applied_at` for `first_reply_time` now uses Zendesk's own logged application timestamp (`ticket_field_history`), the same source already used for `next_reply_time`, `agent_work_time`, and `requester_wait_time`, so it matches whatever Zendesk itself decided — whether that's immediate at ticket creation or delayed until the customer's first comment (for example, for a ticket created on a customer's behalf via a private comment). `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition (see `DECISIONLOG.md`).
+- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies`. `sla_applied_at` for `first_reply_time` now uses the application time Zendesk logs in `ticket_field_history`. The SLA clock now starts when Zendesk starts it; for a ticket created on a customer's behalf with a private comment, that's the customer's first comment.
+  - `zendesk__ticket_metrics` is unchanged and may differ due to its intentionally separate `first_reply_time` definition ([see the DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#zendesk-support-first-reply-time-sla-opinionated-logic)).
 - Improves historical SLA target matching in `int_zendesk__sla_policy_applied` by using the most recently applied policy as of each SLA event, rather than requiring an exact timestamp match. This reduces fallback to Zendesk's raw reported target value.
 
 ## Feature Update

@@ -215,7 +215,7 @@ vars:
 ```
 
 #### Exclude Tickets from Counting as an SLA Breach
-Some tickets shouldn't count as an SLA breach even though Zendesk reports one — for example, a "do not contact customer" flag where an agent intentionally never replies. Use `sla_pause_criteria` to define a SQL clause identifying these tickets; when it evaluates to `true`, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`.
+Some tickets shouldn't count as an SLA breach even though Zendesk reports one — for example, a "do not contact customer" flag where an agent intentionally never replies. Use `sla_pause_criteria` to define a SQL clause identifying these tickets; when it evaluates to `true`, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`. By default, no tickets are excluded.
 
 The clause is evaluated against the `ticket` table in `int_zendesk__sla_policy_applied`, so it can reference any standard `TICKET` field or a [pass-through column](#add-passthrough-columns). Reference columns by name only — no table prefix (`support_should_not_contact_customer`, not `ticket.support_should_not_contact_customer`) and no functions like `coalesce(...)`, since the Quickstart UI doesn't accept special characters here and a missing or null value is already treated as `false`.
 

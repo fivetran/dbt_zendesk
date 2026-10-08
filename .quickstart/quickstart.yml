@@ -88,6 +88,6 @@ supported_vars:
   sla_pause_criteria:
     type: string
     value: "false"
-    description: "SQL clause identifying tickets that should never count as an SLA breach in `zendesk__sla_policies`, regardless of what Zendesk's own SLA policy engine reports. Reference columns by name only, without a table prefix. Defaults to `false` (no tickets excluded). See the [Exclude Tickets from Counting as an SLA Breach](https://github.com/fivetran/dbt_zendesk#exclude-tickets-from-counting-as-an-sla-breach) README section for an example"
+    description: "SQL clause for tickets that should never count as an SLA breach in `zendesk__sla_policies`. Reference a column by name only, no table prefix or functions. Defaults to false (no tickets excluded)."
     display_name: "SLA Pause Criteria"
 
