@@ -49,9 +49,7 @@ with ticket_field_history as (
     -- Zendesk logs first_reply_time the moment it actually starts that clock (immediate or
     -- delayed), so we just read it directly, same as the other three metrics below.
     ticket_field_history.valid_starting_at as sla_applied_at,
-    -- Zendesk can re-log first_reply_time later (e.g. a priority change) without resetting
-    -- when the clock actually started. Keep the earliest instance so a reply made before that
-    -- re-application isn't missed; target/priority still reflect the latest instance below.
+    -- A re-application (e.g. priority change) shouldn't discard an earlier, already-met instance.
     case when ticket_field_history.field_name = 'first_reply_time'
       then min(ticket_field_history.valid_starting_at) over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }})
       else ticket_field_history.valid_starting_at
@@ -138,9 +136,7 @@ with ticket_field_history as (
       add_sla_policy_id.ticket_current_status,
       add_sla_policy_id.metric,
       add_sla_policy_id.latest_sla,
-      -- A later re-application (e.g. priority change) shouldn't discard a reply that already
-      -- satisfied an earlier instance, so first_reply_time always anchors to the earliest one.
-      -- (earliest_sla_applied_at already equals sla_applied_at for every other metric.)
+      -- earliest_sla_applied_at equals sla_applied_at except for first_reply_time re-applications.
       add_sla_policy_id.earliest_sla_applied_at as sla_applied_at,
       coalesce(sla_policy_metrics.target, add_sla_policy_id.target) as target,
       add_sla_policy_id.in_business_hours,
