@@ -140,7 +140,8 @@ with ticket_field_history as (
       add_sla_policy_id.latest_sla,
       -- A later re-application (e.g. priority change) shouldn't discard a reply that already
       -- satisfied an earlier instance, so first_reply_time always anchors to the earliest one.
-      case when add_sla_policy_id.metric = 'first_reply_time' then add_sla_policy_id.earliest_sla_applied_at else add_sla_policy_id.sla_applied_at end as sla_applied_at,
+      -- (earliest_sla_applied_at already equals sla_applied_at for every other metric.)
+      add_sla_policy_id.earliest_sla_applied_at as sla_applied_at,
       coalesce(sla_policy_metrics.target, add_sla_policy_id.target) as target,
       add_sla_policy_id.in_business_hours,
       add_sla_policy_id.current_priority,
@@ -167,7 +168,7 @@ with ticket_field_history as (
     add_historical_priority.ticket_current_status,
     add_historical_priority.metric,
     add_historical_priority.latest_sla,
-    case when add_historical_priority.metric = 'first_reply_time' then add_historical_priority.earliest_sla_applied_at else add_historical_priority.sla_applied_at end as sla_applied_at,
+    add_historical_priority.earliest_sla_applied_at as sla_applied_at,
     add_historical_priority.target,
     add_historical_priority.in_business_hours,
     add_historical_priority.current_priority,
