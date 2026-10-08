@@ -49,7 +49,8 @@ with ticket_field_history as (
     -- Zendesk logs first_reply_time the moment it actually starts that clock (immediate or
     -- delayed), so we just read it directly, same as the other three metrics below.
     ticket_field_history.valid_starting_at as sla_applied_at,
-    -- A re-application (e.g. priority change) shouldn't discard an earlier, already-met instance.
+    -- Only first_reply_time dedupes to one row per ticket, so only it needs the earliest instance
+    -- (a re-application, e.g. priority change, shouldn't discard an earlier, already-met one).
     case when ticket_field_history.field_name = 'first_reply_time'
       then min(ticket_field_history.valid_starting_at) over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }})
       else ticket_field_history.valid_starting_at
