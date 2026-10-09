@@ -74,7 +74,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=1.8.0", "<1.9.0"]
+    version: [">=1.9.0", "<1.10.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -212,6 +212,22 @@ Example usage:
 vars:
   zendesk:
     internal_user_criteria: "lower(email) like '%@fivetran.com' or external_id = '12345' or name in ('Garrett', 'Alfredo')" # can reference any non-custom field in USER
+```
+
+#### Exclude Tickets from Counting as an SLA Breach
+Some tickets shouldn't count as an SLA breach even though Zendesk reports one — for example, a "do not contact customer" flag where an agent intentionally never replies. Use `sla_pause_criteria` to define a SQL clause identifying these tickets; when it evaluates to `true`, `is_sla_breach` is set to `false` for every SLA metric on that ticket in `zendesk__sla_policies`. By default, no tickets are excluded.
+
+The clause is evaluated against the `ticket` table in `int_zendesk__sla_policy_applied`, so it can reference any standard `TICKET` field or a [pass-through column](#add-passthrough-columns). Reference columns by name only — no table prefix (`support_should_not_contact_customer`, not `ticket.support_should_not_contact_customer`) and no functions like `coalesce(...)`, since the Quickstart UI doesn't accept special characters here and a missing or null value is already treated as `false`.
+
+Example usage:
+```yml
+# dbt_project.yml
+vars:
+  zendesk__ticket_passthrough_columns:
+    - name: "your_custom_field_id_or_name"
+      alias: "support_should_not_contact_customer"
+  zendesk:
+    sla_pause_criteria: "support_should_not_contact_customer"
 ```
 
 #### Tracking Ticket Field History Columns
