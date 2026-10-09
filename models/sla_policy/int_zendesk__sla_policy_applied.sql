@@ -49,6 +49,12 @@ with ticket_field_history as (
     -- Zendesk logs first_reply_time the moment it actually starts that clock (immediate or
     -- delayed), so we just read it directly, same as the other three metrics below.
     ticket_field_history.valid_starting_at as sla_applied_at,
+    -- Only first_reply_time dedupes to one row per ticket, so only it needs the earliest instance
+    -- (a re-application, e.g. priority change, shouldn't discard an earlier, already-met one).
+    case when ticket_field_history.field_name = 'first_reply_time'
+      then min(ticket_field_history.valid_starting_at) over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }})
+      else ticket_field_history.valid_starting_at
+    end as earliest_sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
     {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
@@ -131,7 +137,8 @@ with ticket_field_history as (
       add_sla_policy_id.ticket_current_status,
       add_sla_policy_id.metric,
       add_sla_policy_id.latest_sla,
-      add_sla_policy_id.sla_applied_at,
+      -- earliest_sla_applied_at equals sla_applied_at except for first_reply_time re-applications.
+      add_sla_policy_id.earliest_sla_applied_at as sla_applied_at,
       coalesce(sla_policy_metrics.target, add_sla_policy_id.target) as target,
       add_sla_policy_id.in_business_hours,
       add_sla_policy_id.current_priority,
@@ -150,7 +157,21 @@ with ticket_field_history as (
 
 {% else %}
 
-  select *
+  select
+    add_historical_priority.source_relation,
+    add_historical_priority.ticket_id,
+    add_historical_priority.ticket_created_at,
+    add_historical_priority.valid_starting_at,
+    add_historical_priority.ticket_current_status,
+    add_historical_priority.metric,
+    add_historical_priority.latest_sla,
+    add_historical_priority.earliest_sla_applied_at as sla_applied_at,
+    add_historical_priority.target,
+    add_historical_priority.in_business_hours,
+    add_historical_priority.current_priority,
+    add_historical_priority.priority_applied,
+    add_historical_priority.sla_policy_name,
+    add_historical_priority.is_sla_paused
   from add_historical_priority
 {% endif %}
 )
