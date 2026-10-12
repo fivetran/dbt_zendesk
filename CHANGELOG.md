@@ -6,9 +6,9 @@
 - Adds an opt-in `zendesk_static_mode` variable (default `false`) that replaces the package's runtime warehouse introspection with columns and names declared in code and vars. With it off, nothing changes. With it on:
   - Staging models select the package's declared column list instead of checking which columns exist in each source table. A declared column missing from the source now fails the run instead of being filled with nulls.
   - `int_zendesk__field_history_pivot` creates a column for every field in `ticket_field_history_columns`, even if that field has no history yet, instead of scanning `ticket_field_history` to drop empty ones.
-  - Custom field columns are named by the new `ticket_field_history_custom_field_aliases` variable (`{field ID: column name}`) instead of looking up each field's current title in `ticket_custom_field`. A field without an alias is named by its ID. Two fields resolving to the same name fail at compile.
+  - Custom field columns are named by the new `ticket_field_history_custom_field_aliases` variable (`{field ID: column name}`) instead of looking up each field's current title in `ticket_custom_field`. Aliases are slugified, and a field without an alias is named by its slugified ID (for example, `_360012345678`). Entries that aren't a field name or numeric ID (such as a custom field title), aliases that resolve to the same name, and aliases matching the models' grain columns all fail at compile.
   - `int_zendesk__field_history_scd`, `zendesk__ticket_field_history`, and `zendesk__ticket_backlog` build their column lists from the vars instead of reading the upstream table's columns.
-  - `int_zendesk__field_history_pivot` sets `on_schema_change = 'fail'`, so changing `ticket_field_history_columns` without a full refresh fails at the pivot with a clear message instead of carrying stale columns forward.
+  - `int_zendesk__field_history_pivot` sets `on_schema_change = 'fail'` (static mode only; default mode keeps your project's setting), so changing `ticket_field_history_columns` without a full refresh fails at the pivot with a clear message instead of carrying stale columns forward.
 - See [Static mode](https://github.com/fivetran/dbt_zendesk#static-mode) in the README for setup.
 
 ## Under the Hood

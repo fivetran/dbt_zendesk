@@ -15,7 +15,7 @@ with first_date as (
 ), series as (
 
     -- Enough days to cover the full timeframe plus the trailing week; the filter below trims the excess.
-    {{ dbt_utils.generate_series(timeframe_years * 366 + 8) }}
+    {{ dbt_utils.generate_series(timeframe_years * 366 + 7) }}
 
 ), spine as (
 
@@ -28,7 +28,8 @@ with first_date as (
     select
         cast(date_day as date) as date_day
     from spine
-    where cast(date_day as date) <= cast({{ dbt.dateadd("week", 1, "current_date") }} as date)
+    -- Exclusive, matching the dbt_utils.date_spine call this replaced.
+    where cast(date_day as date) < cast({{ dbt.dateadd("week", 1, "current_date") }} as date)
 )
 
 select *

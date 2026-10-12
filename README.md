@@ -287,14 +287,14 @@ vars:
   zendesk:
     zendesk_static_mode: true # default = false
     ticket_field_history_columns: ['status', 'priority', '360012345678']
-    ticket_field_history_custom_field_aliases: # optional; a custom field without an alias is named by its ID
+    ticket_field_history_custom_field_aliases: # optional; a custom field without an alias is named by its slugified ID, e.g. _360012345678
       '360012345678': 'support_tier'
 ```
 
 With static mode on:
 - Every column the package declares for a staging model must exist in your source table, or the run fails naming the missing column.
-- Every field in `ticket_field_history_columns` becomes a column, even before it has any history. Custom fields must be listed by their numeric ID (titles are not looked up), and `ticket_field_history_custom_field_aliases` sets their column names.
-- Changing `ticket_field_history_columns` or `ticket_field_history_updater_columns` fails the next incremental run at `int_zendesk__field_history_pivot` until you run `dbt run --full-refresh`.
+- Every field in `ticket_field_history_columns` becomes a column, even before it has any history. Custom fields must be listed by their numeric ID (titles are not looked up and fail at compile), and `ticket_field_history_custom_field_aliases` sets their column names.
+- Turning static mode on, or changing `ticket_field_history_columns`, `ticket_field_history_updater_columns`, or `ticket_field_history_custom_field_aliases`, fails the next incremental run at `int_zendesk__field_history_pivot` until you run `dbt run --full-refresh`. If your project sets `on_schema_change` for these models, your setting wins.
 
 The `stg_zendesk__*_tmp` models still check that each source table exists and read its columns, through `fivetran_utils.union_connections`. To make those static as well, override that macro with [dispatch](https://docs.getdbt.com/reference/dbt-jinja-functions/dispatch) in your project.
 
