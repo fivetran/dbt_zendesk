@@ -1,6 +1,6 @@
 # dbt_zendesk v1.10.0-a1
 
-[PR #TBD](https://github.com/fivetran/dbt_zendesk/pull/TBD) includes the following updates:
+[PR #283](https://github.com/fivetran/dbt_zendesk/pull/283) includes the following updates:
 
 ## Feature Update
 - Adds an opt-in `zendesk_static_mode` variable (default `false`) that replaces the package's runtime warehouse introspection with columns and names declared in code and vars. With it off, nothing changes. With it on:
