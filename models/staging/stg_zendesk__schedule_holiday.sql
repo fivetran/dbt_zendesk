@@ -12,7 +12,7 @@ fields as (
     select
         {{
             fivetran_utils.fill_staging_columns(
-                source_columns=adapter.get_columns_in_relation(ref('stg_zendesk__schedule_holiday_tmp')),
+                source_columns=zendesk_staging_source_columns(ref('stg_zendesk__schedule_holiday_tmp'), get_schedule_holiday_columns()),
                 staging_columns=get_schedule_holiday_columns()
             )
         }}

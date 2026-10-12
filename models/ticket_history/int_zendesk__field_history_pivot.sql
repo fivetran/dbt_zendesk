@@ -9,7 +9,8 @@
         partition_by = {'field': 'date_day', 'data_type': 'date', 'granularity': 'month'} if target.type not in ['spark', 'databricks', 'duckdb'] else ['date_day'],
         unique_key='ticket_day_id',
         incremental_strategy = 'merge' if target.type not in ('snowflake', 'postgres', 'redshift') else 'delete+insert',
-        file_format='delta'
+        file_format='delta',
+        on_schema_change = 'fail' if var('zendesk_static_mode', false) else 'ignore'
         )
 }}
 

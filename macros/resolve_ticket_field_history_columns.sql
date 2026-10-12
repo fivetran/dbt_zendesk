@@ -2,6 +2,11 @@
 
 {# Returns a dict of {field_name: column alias} for each tracked ticket_field_history_columns entry. #}
 
+{# Static mode resolves from vars alone, with no warehouse queries. #}
+{% if var('zendesk_static_mode', false) %}
+    {{ return(resolve_ticket_field_history_columns_static()) }}
+{% endif %}
+
 {# Stays empty outside of a run/build (e.g. during dbt compile) so callers never have to guard the result. #}
 {% set resolved_columns = {} %}
 

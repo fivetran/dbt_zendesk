@@ -8,7 +8,8 @@
         ) 
 }}
 
-{%- set change_data_columns = adapter.get_columns_in_relation(ref('int_zendesk__field_history_scd')) -%}
+{#- Field columns carried from the scd; static mode derives them from vars instead of reading the scd. -#}
+{%- set change_data_columns = get_ticket_field_history_value_columns(ref('int_zendesk__field_history_scd')) -%}
 
 with change_data as (
 
@@ -47,13 +48,13 @@ with change_data as (
         calendar.date_day,
         calendar.ticket_id
         {% if is_incremental() %}    
-            {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
-            , coalesce(change_data.{{ col.name }}, most_recent_data.{{ col.name }}) as {{ col.name }}
+            {% for col in change_data_columns if col|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
+            , coalesce(change_data.{{ col }}, most_recent_data.{{ col }}) as {{ col }}
             {% endfor %}
         
         {% else %}
-            {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
-            , {{ col.name }}
+            {% for col in change_data_columns if col|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
+            , {{ col }}
             {% endfor %}
         {% endif %}
 
@@ -77,11 +78,11 @@ with change_data as (
         date_day,
         ticket_id
 
-        {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
-        , {{ col.name }}
+        {% for col in change_data_columns if col|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        , {{ col }}
         -- create a batch/partition once a new value is provided
-        , sum( case when {{ col.name }} is null then 0 else 1 end) over ( partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
-            order by date_day rows unbounded preceding) as {{ col.name }}_field_partition
+        , sum( case when {{ col }} is null then 0 else 1 end) over ( partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
+            order by date_day rows unbounded preceding) as {{ col }}_field_partition
 
         {% endfor %}
 
@@ -95,11 +96,11 @@ fill_values as (
         date_day,
         ticket_id
 
-        {% for col in change_data_columns if col.name|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
+        {% for col in change_data_columns if col|lower not in ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %}
         -- grab the value that started this batch/partition
-        , first_value( {{ col.name }} ) over (
-            partition by ticket_id, {{ col.name }}_field_partition {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} 
-            order by date_day asc rows between unbounded preceding and current row) as {{ col.name }}
+        , first_value( {{ col }} ) over (
+            partition by ticket_id, {{ col }}_field_partition {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} 
+            order by date_day asc rows between unbounded preceding and current row) as {{ col }}
         {% endfor %}
 
     from set_values
@@ -110,10 +111,10 @@ fill_values as (
         source_relation, 
         date_day,
         ticket_id
-        {% for col in change_data_columns if col.name|lower not in  ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
+        {% for col in change_data_columns if col|lower not in  ['source_relation','ticket_id','valid_from','valid_to','ticket_day_id'] %} 
 
         -- we de-nulled the true null values earlier in order to differentiate them from nulls that just needed to be backfilled
-        , case when  cast( {{ col.name }} as {{ dbt.type_string() }} ) = 'is_null' then null else {{ col.name }} end as {{ col.name }}
+        , case when  cast( {{ col }} as {{ dbt.type_string() }} ) = 'is_null' then null else {{ col }} end as {{ col }}
         {% endfor %}
 
     from fill_values

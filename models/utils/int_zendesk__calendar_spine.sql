@@ -1,39 +1,34 @@
--- depends_on: {{ ref('stg_zendesk__ticket') }}
-with spine as (
+--Earliest ticket date is found in SQL rather than at compile time, so compiled SQL matches what runs and no extra query is needed.
+{%- set timeframe_years = var('ticket_field_history_timeframe_years', 50) %}
 
-    {% if execute and flags.WHICH in ('run', 'build') %}
+with first_date as (
 
-    {%- set first_date_query %}
-    select 
+    select
         coalesce(
-            min(cast(created_at as date)), 
+            min(cast(created_at as date)),
             cast({{ dbt.dateadd("month", -1, "current_date") }} as date)
             ) as min_date
     from {{ ref('stg_zendesk__ticket') }}
-    -- by default take all the data 
-    where cast(created_at as date) >= {{ dbt.dateadd('year', 
-        - var('ticket_field_history_timeframe_years', 50), "current_date") }}
-    {% endset -%}
+    -- by default take all the data
+    where cast(created_at as date) >= {{ dbt.dateadd('year', - timeframe_years, "current_date") }}
 
-    {%- set first_date = dbt_utils.get_single_value(first_date_query) %}
+), series as (
 
-    {% else %}
-    {%- set first_date = '2016-01-01' %}
+    -- Enough days to cover the full timeframe plus the trailing week; the filter below trims the excess.
+    {{ dbt_utils.generate_series(timeframe_years * 366 + 8) }}
 
-    {% endif %}
+), spine as (
 
-{{
-    dbt_utils.date_spine(
-        datepart = "day", 
-        start_date = "cast('" ~ first_date ~ "' as date)",
-        end_date = dbt.dateadd("week", 1, "current_date")
-    )   
-}}
+    select
+        {{ dbt.dateadd("day", "series.generated_number - 1", "first_date.min_date") }} as date_day
+    from series
+    cross join first_date
 
 ), recast as (
     select
         cast(date_day as date) as date_day
     from spine
+    where cast(date_day as date) <= cast({{ dbt.dateadd("week", 1, "current_date") }} as date)
 )
 
 select *

@@ -17,7 +17,7 @@ fields as (
         */
         {{
             fivetran_utils.fill_staging_columns(
-                source_columns=adapter.get_columns_in_relation(ref('stg_zendesk__group_tmp')),
+                source_columns=zendesk_staging_source_columns(ref('stg_zendesk__group_tmp'), get_group_columns()),
                 staging_columns=get_group_columns()
             )
         }}

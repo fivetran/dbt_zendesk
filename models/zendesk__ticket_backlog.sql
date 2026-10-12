@@ -1,8 +1,8 @@
 --This model will only run if 'status' is included within the `ticket_field_history_columns` variable.
 {{ config(enabled = 'status' in var('ticket_field_history_columns')) }}
 
---Passes through the upstream columns as-is, rather than re-resolving custom field names.
-{% set ticket_field_history_relation_columns = adapter.get_columns_in_relation(ref('zendesk__ticket_field_history')) %}
+--Passes through the upstream columns as-is, rather than re-resolving custom field names. Static mode derives them from vars.
+{% set ticket_field_history_relation_columns = get_ticket_field_history_value_columns(ref('zendesk__ticket_field_history')) %}
 
 --ID fields that resolve to a readable name via a join, declared once so the passthrough loop below can exclude
 --exactly what was handled here. A field left out of this mapping passes through as its raw ID instead.
@@ -70,8 +70,8 @@ with ticket_field_history as (
         {% for col in var('ticket_field_history_columns') if col in id_fields_with_names %} --Standard ID fields where the name can easily be joined from stg model.
             ,{{ id_fields_with_names[col] }}
         {% endfor %}
-        {% for column in ticket_field_history_relation_columns if column.name|lower not in columns_already_selected %} --Everything else, including resolved custom field names, passes through as-is.
-            ,ticket_field_history.{{ column.name }}
+        {% for column in ticket_field_history_relation_columns if column|lower not in columns_already_selected %} --Everything else, including resolved custom field names, passes through as-is.
+            ,ticket_field_history.{{ column }}
         {% endfor %}
 
     from ticket_field_history
