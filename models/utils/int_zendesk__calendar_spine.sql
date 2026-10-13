@@ -19,8 +19,9 @@ with first_date as (
 
 ), spine as (
 
+    -- generate_series builds its numbers with power(), which returns a float on BigQuery and Redshift; day intervals must be integers.
     select
-        {{ dbt.dateadd("day", "series.generated_number - 1", "first_date.min_date") }} as date_day
+        {{ dbt.dateadd("day", "cast(series.generated_number as " ~ dbt.type_int() ~ ") - 1", "first_date.min_date") }} as date_day
     from series
     cross join first_date
 
