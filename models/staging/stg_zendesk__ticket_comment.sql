@@ -17,7 +17,7 @@ fields as (
         */
         {{
             fivetran_utils.fill_staging_columns(
-                source_columns=adapter.get_columns_in_relation(ref('stg_zendesk__ticket_comment_tmp')),
+                source_columns=zendesk_staging_source_columns(ref('stg_zendesk__ticket_comment_tmp'), get_ticket_comment_columns()),
                 staging_columns=get_ticket_comment_columns()
             )
         }}

@@ -13,6 +13,11 @@
         )
 }}
 
+{#- Static mode only, so default mode keeps whatever on_schema_change the project sets. -#}
+{%- if var('zendesk_static_mode', false) %}
+{{ config(on_schema_change='fail') }}
+{%- endif %}
+
 --Maps each tracked field_name to the column alias it should be pivoted into.
 {% set resolved_columns = resolve_ticket_field_history_columns() %}
 

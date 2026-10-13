@@ -13,7 +13,7 @@ fields as (
     select
         {{
             fivetran_utils.fill_staging_columns(
-                source_columns=adapter.get_columns_in_relation(ref('stg_zendesk__time_zone_tmp')),
+                source_columns=zendesk_staging_source_columns(ref('stg_zendesk__time_zone_tmp'), get_time_zone_columns()),
                 staging_columns=get_time_zone_columns()
             )
         }}
