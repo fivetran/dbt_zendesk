@@ -153,7 +153,7 @@ charts:
   weekly_chart:
     title: Breaches per Week
     query: breaches_by_week
-    type: bar
+    type: line
     x: week
     y: breaches
     color: metric

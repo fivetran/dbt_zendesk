@@ -136,6 +136,8 @@ charts:
     x: date_day
     y: tickets
     color: status
+    style:
+      stack: zero
     height: 240
 
   priority_chart:
@@ -145,6 +147,8 @@ charts:
     x: date_day
     y: tickets
     color: priority
+    style:
+      stack: zero
     height: 240
 
   queue_table:
