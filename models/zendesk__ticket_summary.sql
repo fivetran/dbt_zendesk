@@ -76,11 +76,11 @@ with ticket_metrics as (
             then 1
             else 0
                 end) as unassigned_unsolved_ticket_count,
-        sum(case when total_agent_replies < 0
+        sum(case when total_agent_replies = 0
             then 1
             else 0
                 end) as unreplied_ticket_count,
-        sum(case when total_agent_replies < 0 and lower(status) not in ('solved', 'closed')
+        sum(case when total_agent_replies = 0 and lower(status) not in ('solved', 'closed')
             then 1
             else 0
                 end) as unreplied_unsolved_ticket_count,
