@@ -1,3 +1,11 @@
+# dbt_zendesk v1.9.1
+
+[PR #287](https://github.com/fivetran/dbt_zendesk/pull/287) includes the following updates:
+
+## Bug Fix
+- Fixes false `first_reply_time` SLA breaches in `zendesk__sla_policies` when an agent already replied publicly before Zendesk delayed the SLA clock to the customer's own first public comment. `sla_applied_at` now anchors to ticket creation in this case, so that earlier reply counts instead of the model waiting for a later one.
+  - As above, `sla_event_id` also changes for the `first_reply_time` events affected by this fix.
+
 # dbt_zendesk v1.9.0
 
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
