@@ -37,7 +37,7 @@ test_scenarios:
   - name: "custom user criteria"
     vars:
       using_audit_log: true
-      internal_user_criteria: "role like '%agent%'"
+      internal_user_criteria: "role like '%agent%' or email like '%@internal-example.com'"
       using_schedule_histories: false
       using_holidays: false
       using_ticket_chat: true
