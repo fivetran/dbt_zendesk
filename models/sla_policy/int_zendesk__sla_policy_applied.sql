@@ -23,6 +23,15 @@ with ticket_field_history as (
   select *
   from {{ ref('int_zendesk__ticket_aggregates') }}
 
+), earliest_reply as (
+
+  select
+    source_relation,
+    ticket_id,
+    min(reply_at) as earliest_reply_at
+  from {{ ref('int_zendesk__commenter_reply_at') }}
+  group by 1, 2
+
 {% if check_sla_policy_metric_history %}
 ), sla_policy_metrics as (
 
@@ -49,10 +58,14 @@ with ticket_field_history as (
     -- Zendesk logs first_reply_time the moment it actually starts that clock (immediate or
     -- delayed), so we just read it directly, same as the other three metrics below.
     ticket_field_history.valid_starting_at as sla_applied_at,
-    -- Only first_reply_time dedupes to one row per ticket, so only it needs the earliest instance
-    -- (a re-application, e.g. priority change, shouldn't discard an earlier, already-met one).
+    -- Only first_reply_time dedupes to one row per ticket. If an agent already replied publicly
+    -- before this instance's logged start -- whether a later re-application (e.g. priority change)
+    -- discarded an earlier, already-met instance, or the agent replied before Zendesk delayed the
+    -- clock to the customer's own first public comment -- anchor at ticket creation instead, so
+    -- that reply isn't ignored.
     case when ticket_field_history.field_name = 'first_reply_time'
-      then min(ticket_field_history.valid_starting_at) over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }})
+      and earliest_reply.earliest_reply_at < ticket_field_history.valid_starting_at
+      then ticket.created_at
       else ticket_field_history.valid_starting_at
     end as earliest_sla_applied_at,
     cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
@@ -64,6 +77,9 @@ with ticket_field_history as (
   join ticket
     on ticket.ticket_id = ticket_field_history.ticket_id
     and ticket.source_relation = ticket_field_history.source_relation
+  left join earliest_reply
+    on earliest_reply.ticket_id = ticket_field_history.ticket_id
+    and earliest_reply.source_relation = ticket_field_history.source_relation
   where ticket_field_history.value is not null
     and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
 
@@ -137,7 +153,8 @@ with ticket_field_history as (
       add_sla_policy_id.ticket_current_status,
       add_sla_policy_id.metric,
       add_sla_policy_id.latest_sla,
-      -- earliest_sla_applied_at equals sla_applied_at except for first_reply_time re-applications.
+      -- earliest_sla_applied_at only differs from sla_applied_at when an agent already replied
+      -- publicly before this logged instance (see the comment above where it's computed).
       add_sla_policy_id.earliest_sla_applied_at as sla_applied_at,
       coalesce(sla_policy_metrics.target, add_sla_policy_id.target) as target,
       add_sla_policy_id.in_business_hours,
