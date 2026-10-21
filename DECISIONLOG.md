@@ -46,6 +46,13 @@ We have found that some reports of the `first_reply_time_*` metrics in `zendesk_
 
 `zendesk__sla_policies` does not share this stance. Its `sla_applied_at` for `first_reply_time` is Zendesk's own logged application timestamp (`ticket_field_history`), the same source already used for `next_reply_time`, `agent_work_time`, and `requester_wait_time`. Zendesk doesn't always start this clock at ticket creation — for example, for a ticket created on a customer's behalf via a private comment, it waits until the customer's first comment (public or private) before applying the target (see the article linked above). We read whatever Zendesk actually logged, so `zendesk__sla_policies` matches Zendesk's own SLA reporting for this metric directly, and `zendesk__ticket_metrics` and `zendesk__sla_policies` can disagree on `first_reply_time` for a ticket where Zendesk itself delayed applying the target — that is expected; `zendesk__sla_policies` is the one that matches what you'd see in Zendesk's own SLA reporting.
 
+### Solves Reopened Before a Reply
+For `first_reply_time` and `next_reply_time`, `zendesk__sla_policies` ignores a solved or closed status if the ticket was reopened before the reply that the SLA is waiting on. The reply time clock keeps running until the actual reply, or until a solve that was not reopened before that reply.
+
+Zendesk's documentation states that setting a ticket to Solved fulfills all active SLA targets. In practice, a ticket can be marked solved for a few seconds and then immediately reopened (for example, by mistake or by an automation), with the real reply arriving days later. Counting that brief solve would end the reply time clock long before anyone replied. We treat only a solve that was not reopened before the reply as the ticket's actual resolution, which also keeps `zendesk__sla_policies` and `zendesk__ticket_metrics` consistent for these tickets.
+
+As a result, for tickets that were solved and then reopened before the first or next reply, `zendesk__sla_policies` may report a longer elapsed time, or a breach, where Zendesk's own SLA reporting shows the target as fulfilled at the solve.
+
 ## Zendesk Support Backlog Tickets
 - You may find some discrepancies between what Zendesk Support reports and our model the total number of backlog tickets on a given day. After investigating this we have realized this is due to Zendesk Support taking a snapshot of each day sometime in the 23rd hour as stated in their [article](https://support.zendesk.com/hc/en-us/articles/4408819342490-Why-does-the-Backlog-dataset-only-show-the-Backlog-recorded-Hour-as-23-).
 

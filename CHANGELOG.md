@@ -1,3 +1,18 @@
+# dbt_zendesk v1.9.2
+
+[PR #XXX](https://github.com/fivetran/dbt_zendesk/pull/XXX) includes the following updates:
+
+## Schema/Data Change
+
+**1 total change • 0 possible breaking changes**
+
+| **Data Model(s)** | **Change type** | **Old** | **New** | **Notes** |
+| ----------------- | --------------- | ------- | ------- | --------- |
+| [`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Changed logic | For `first_reply_time` and `next_reply_time`, the first solved or closed status after the SLA was applied ended the reply time clock, even if the ticket was reopened right away. Business hours SLAs could stop counting weeks before the actual reply, and both business and calendar hours SLAs could be marked as not breached when the reply was late. | Solves that were reopened before the reply are ignored, so `sla_elapsed_time` and `is_sla_breach` reflect the actual reply. | Only affects tickets solved and then reopened before the first or next reply. For business hours `first_reply_time`, this brings `zendesk__sla_policies` in line with `first_reply_time_business_minutes` in `zendesk__ticket_metrics`. See the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#solves-reopened-before-a-reply). ([#280](https://github.com/fivetran/dbt_zendesk/issues/280)) |
+
+## Under the Hood
+- Adds two seed tickets that are solved, reopened a few seconds later, and replied to well after their SLA target: one on business hours (with a dedicated test schedule) and one on calendar hours.
+
 # dbt_zendesk v1.9.0
 
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
