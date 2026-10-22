@@ -124,7 +124,25 @@ with ticket_schedules as (
 
 ), first_reply_solve_times as (
   select
-    first_reply_times.*,
+    first_reply_times.source_relation,
+    first_reply_times.ticket_id,
+    first_reply_times.ticket_created_at,
+    first_reply_times.valid_starting_at,
+    first_reply_times.ticket_current_status,
+    first_reply_times.metric,
+    first_reply_times.latest_sla,
+    first_reply_times.sla_applied_at,
+    first_reply_times.target,
+    first_reply_times.in_business_hours,
+    first_reply_times.priority_applied,
+    first_reply_times.sla_policy_name,
+    first_reply_times.schedule_id,
+    first_reply_times.schedule_invalidated_at,
+    first_reply_times.schedule_period_start,
+    first_reply_times.start_time_in_minutes_from_week,
+    first_reply_times.total_schedule_weekly_business_minutes,
+    first_reply_times.start_week_date,
+    first_reply_times.first_reply_time,
     min(ticket_solved_times.solved_at) as first_solved_time
   from first_reply_times
   left join ticket_solved_times

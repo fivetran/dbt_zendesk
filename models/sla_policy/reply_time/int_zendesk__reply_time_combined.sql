@@ -114,7 +114,21 @@ with reply_time_calendar_hours_sla as (
 ), reply_time_breached_at_with_next_reply_timestamp as (
 
   select
-    reply_time_breached_at_with_reply_timestamp.*,
+    reply_time_breached_at_with_reply_timestamp.source_relation,
+    reply_time_breached_at_with_reply_timestamp.ticket_id,
+    reply_time_breached_at_with_reply_timestamp.sla_policy_name,
+    reply_time_breached_at_with_reply_timestamp.metric,
+    reply_time_breached_at_with_reply_timestamp.ticket_created_at,
+    reply_time_breached_at_with_reply_timestamp.sla_applied_at,
+    reply_time_breached_at_with_reply_timestamp.sum_lapsed_business_minutes,
+    reply_time_breached_at_with_reply_timestamp.target,
+    reply_time_breached_at_with_reply_timestamp.in_business_hours,
+    reply_time_breached_at_with_reply_timestamp.priority_applied,
+    reply_time_breached_at_with_reply_timestamp.sla_breach_at,
+    reply_time_breached_at_with_reply_timestamp.week_number,
+    reply_time_breached_at_with_reply_timestamp.sla_schedule_start_at,
+    reply_time_breached_at_with_reply_timestamp.sla_schedule_end_at,
+    reply_time_breached_at_with_reply_timestamp.agent_reply_at,
     min(ticket_solved_times.solved_at) as next_solved_at
   from reply_time_breached_at_with_reply_timestamp
   left join ticket_solved_times
