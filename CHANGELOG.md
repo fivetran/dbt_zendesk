@@ -1,19 +1,3 @@
-# dbt_zendesk v1.9.1
-
-[PR #286](https://github.com/fivetran/dbt_zendesk/pull/286) includes the following updates:
-
-## Schema/Data Change
-
-**1 total change • 0 possible breaking changes**
-
-| **Data Model(s)** | **Change type** | **Old** | **New** | **Notes** |
-| ----------------- | --------------- | ------- | ------- | --------- |
-| [`zendesk__ticket_metrics`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__ticket_metrics)<br>[`zendesk__sla_policies`](https://fivetran.github.io/dbt_zendesk/#!/model/model.zendesk.zendesk__sla_policies) | Changed logic | Comments from users matching `internal_user_criteria` were treated as customer comments when the user's historical support role was `not set` or `end-user`. | These comments are now treated as agent comments, so reply-time and SLA metrics count them as replies. | Only applies when `using_audit_log`, `using_user_role_histories`, and `internal_user_criteria` are all configured. Without audit logs, `internal_user_criteria` already worked as documented, and results are unchanged. ([#276](https://github.com/fivetran/dbt_zendesk/issues/276)) |
-
-## Under the Hood
-- Adds a seeded user whose support role is removed by an audit log event, plus a comment made after that change, to cover `internal_user_criteria` in the "custom user criteria" CI scenario.
-- Adds the `internal_user_criteria_commenter_role` integrity test, which checks that comments from users marked internal by `internal_user_criteria` are labeled `internal_comment`.
-
 # dbt_zendesk v1.9.0
 
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
