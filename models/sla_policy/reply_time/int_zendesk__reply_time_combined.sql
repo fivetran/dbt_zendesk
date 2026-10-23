@@ -69,10 +69,11 @@ with reply_time_calendar_hours_sla as (
     ticket_id,
     valid_starting_at,
     value,
-    -- the next time the ticket left solved/closed, so solves that were reopened can be identified
-    min(case when value not in ('solved','closed') then valid_starting_at end) over (
+    -- the next time the ticket was reopened, so solves that were reopened can be identified (deleted is not a reopen)
+    min(case when value not in ('solved','closed','deleted') then valid_starting_at end) over (
       partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
-      order by valid_starting_at
+      -- a solve sorts before any status change at the same timestamp, so a same-instant reopen is still caught
+      order by valid_starting_at, case when value in ('solved','closed') then 0 else 1 end
       rows between current row and unbounded following) as reopened_at
   from ticket_updates
   where field_name = 'status'
