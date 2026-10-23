@@ -63,16 +63,31 @@ with reply_time_calendar_hours_sla as (
 {% endif %}
 
 -- Now that we have the breach time, see when the first reply after the sla policy was applied took place.
+), ticket_status_changes as (
+  select
+    source_relation,
+    ticket_id,
+    valid_starting_at,
+    value,
+    -- the next time the ticket was reopened, so solves that were reopened can be identified (deleted is not a reopen)
+    min(case when value not in ('solved','closed','deleted') then valid_starting_at end) over (
+      partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
+      -- a solve sorts before any status change at the same timestamp, so a same-instant reopen is still caught
+      order by valid_starting_at, case when value in ('solved','closed') then 0 else 1 end
+      rows between current row and unbounded following) as reopened_at
+  from ticket_updates
+  where field_name = 'status'
+
 ), ticket_solved_times as (
   select
     source_relation,
     ticket_id,
-    valid_starting_at as solved_at
-  from ticket_updates
-  where field_name = 'status'
-  and value in ('solved','closed')
+    valid_starting_at as solved_at,
+    reopened_at
+  from ticket_status_changes
+  where value in ('solved','closed')
 
-), reply_time_breached_at_with_next_reply_timestamp as (
+), reply_time_breached_at_with_reply_timestamp as (
 
   select
     reply_time_breached_at.source_relation,
@@ -89,18 +104,41 @@ with reply_time_calendar_hours_sla as (
     reply_time_breached_at.week_number,
     min(reply_time_breached_at.sla_schedule_start_at) as sla_schedule_start_at,
     min(reply_time_breached_at.sla_schedule_end_at) as sla_schedule_end_at,
-    min(reply_at) as agent_reply_at,
-    min(solved_at) as next_solved_at
+    min(reply_at) as agent_reply_at
   from reply_time_breached_at
   left join reply_time
     on reply_time.ticket_id = reply_time_breached_at.ticket_id
     and reply_time.reply_at > reply_time_breached_at.sla_applied_at
     and reply_time.source_relation = reply_time_breached_at.source_relation
-  left join ticket_solved_times
-    on reply_time_breached_at.ticket_id = ticket_solved_times.ticket_id
-    and ticket_solved_times.solved_at > reply_time_breached_at.sla_applied_at
-    and ticket_solved_times.source_relation = reply_time_breached_at.source_relation
   {{ dbt_utils.group_by(n=12) }}
+
+), reply_time_breached_at_with_next_reply_timestamp as (
+
+  select
+    reply_time_breached_at_with_reply_timestamp.source_relation,
+    reply_time_breached_at_with_reply_timestamp.ticket_id,
+    reply_time_breached_at_with_reply_timestamp.sla_policy_name,
+    reply_time_breached_at_with_reply_timestamp.metric,
+    reply_time_breached_at_with_reply_timestamp.ticket_created_at,
+    reply_time_breached_at_with_reply_timestamp.sla_applied_at,
+    reply_time_breached_at_with_reply_timestamp.sum_lapsed_business_minutes,
+    reply_time_breached_at_with_reply_timestamp.target,
+    reply_time_breached_at_with_reply_timestamp.in_business_hours,
+    reply_time_breached_at_with_reply_timestamp.priority_applied,
+    reply_time_breached_at_with_reply_timestamp.sla_breach_at,
+    reply_time_breached_at_with_reply_timestamp.week_number,
+    reply_time_breached_at_with_reply_timestamp.sla_schedule_start_at,
+    reply_time_breached_at_with_reply_timestamp.sla_schedule_end_at,
+    reply_time_breached_at_with_reply_timestamp.agent_reply_at,
+    min(ticket_solved_times.solved_at) as next_solved_at
+  from reply_time_breached_at_with_reply_timestamp
+  left join ticket_solved_times
+    on reply_time_breached_at_with_reply_timestamp.ticket_id = ticket_solved_times.ticket_id
+    and ticket_solved_times.solved_at > reply_time_breached_at_with_reply_timestamp.sla_applied_at
+    and ticket_solved_times.source_relation = reply_time_breached_at_with_reply_timestamp.source_relation
+    -- ignore solves that were reopened before the reply, matching int_zendesk__reply_time_business_hours
+    and (ticket_solved_times.reopened_at is null or ticket_solved_times.reopened_at > reply_time_breached_at_with_reply_timestamp.agent_reply_at)
+  {{ dbt_utils.group_by(n=15) }}
 
 ), lagging_time_block as (
   select

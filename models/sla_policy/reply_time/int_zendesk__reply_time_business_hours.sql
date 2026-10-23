@@ -27,14 +27,29 @@ with ticket_schedules as (
   select *
   from {{ ref('int_zendesk__updates') }}
 
+), ticket_status_changes as (
+  select
+    source_relation,
+    ticket_id,
+    valid_starting_at,
+    value,
+    -- the next time the ticket was reopened, so solves that were reopened can be identified (deleted is not a reopen)
+    min(case when value not in ('solved','closed','deleted') then valid_starting_at end) over (
+      partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }}
+      -- a solve sorts before any status change at the same timestamp, so a same-instant reopen is still caught
+      order by valid_starting_at, case when value in ('solved','closed') then 0 else 1 end
+      rows between current row and unbounded following) as reopened_at
+  from ticket_updates
+  where field_name = 'status'
+
 ), ticket_solved_times as (
   select
     source_relation,
     ticket_id,
-    valid_starting_at as solved_at
-  from ticket_updates
-  where field_name = 'status'
-  and value in ('solved','closed')
+    valid_starting_at as solved_at,
+    reopened_at
+  from ticket_status_changes
+  where value in ('solved','closed')
 
 ), schedule_business_hours as (
 
@@ -80,7 +95,7 @@ with ticket_schedules as (
     {{ zendesk.fivetran_week_start('sla_applied_at') }} as start_week_date
   from ticket_sla_applied_with_schedules
 
-), first_reply_solve_times as (
+), first_reply_times as (
   select
     ticket_sla_applied_with_schedule_week_info.source_relation,
     ticket_sla_applied_with_schedule_week_info.ticket_id,
@@ -100,18 +115,44 @@ with ticket_schedules as (
     ticket_sla_applied_with_schedule_week_info.start_time_in_minutes_from_week,
     ticket_sla_applied_with_schedule_week_info.total_schedule_weekly_business_minutes,
     ticket_sla_applied_with_schedule_week_info.start_week_date,
-    min(reply_time.reply_at) as first_reply_time,
-    min(ticket_solved_times.solved_at) as first_solved_time
+    min(reply_time.reply_at) as first_reply_time
   from ticket_sla_applied_with_schedule_week_info
   left join reply_time
     on reply_time.ticket_id = ticket_sla_applied_with_schedule_week_info.ticket_id
     and reply_time.reply_at > ticket_sla_applied_with_schedule_week_info.sla_applied_at
     and reply_time.source_relation = ticket_sla_applied_with_schedule_week_info.source_relation
-  left join ticket_solved_times
-    on ticket_sla_applied_with_schedule_week_info.ticket_id = ticket_solved_times.ticket_id
-    and ticket_solved_times.solved_at > ticket_sla_applied_with_schedule_week_info.sla_applied_at
-    and ticket_solved_times.source_relation = ticket_sla_applied_with_schedule_week_info.source_relation
   {{ dbt_utils.group_by(n=18) }}
+
+), first_reply_solve_times as (
+  select
+    first_reply_times.source_relation,
+    first_reply_times.ticket_id,
+    first_reply_times.ticket_created_at,
+    first_reply_times.valid_starting_at,
+    first_reply_times.ticket_current_status,
+    first_reply_times.metric,
+    first_reply_times.latest_sla,
+    first_reply_times.sla_applied_at,
+    first_reply_times.target,
+    first_reply_times.in_business_hours,
+    first_reply_times.priority_applied,
+    first_reply_times.sla_policy_name,
+    first_reply_times.schedule_id,
+    first_reply_times.schedule_invalidated_at,
+    first_reply_times.schedule_period_start,
+    first_reply_times.start_time_in_minutes_from_week,
+    first_reply_times.total_schedule_weekly_business_minutes,
+    first_reply_times.start_week_date,
+    first_reply_times.first_reply_time,
+    min(ticket_solved_times.solved_at) as first_solved_time
+  from first_reply_times
+  left join ticket_solved_times
+    on first_reply_times.ticket_id = ticket_solved_times.ticket_id
+    and ticket_solved_times.solved_at > first_reply_times.sla_applied_at
+    and ticket_solved_times.source_relation = first_reply_times.source_relation
+    -- ignore solves that were reopened before the reply, since they didn't end the reply clock
+    and (ticket_solved_times.reopened_at is null or ticket_solved_times.reopened_at > first_reply_times.first_reply_time)
+  {{ dbt_utils.group_by(n=19) }}
 
 ), week_index_calc as (
     select
