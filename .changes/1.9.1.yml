@@ -2,8 +2,8 @@ version: 1.9.1
 pr_number: 288
 is_breaking: false
 bug_fixes:
-- description: Fixes `internal_user_criteria` not applying to comments from users whose
-    historical support role was `not set` or `end-user`. Affects `zendesk__ticket_metrics`
+- description: Fixes `internal_user_criteria` not applying to comments from users
+    whose historical support role was `not set` or `end-user`. Affects `zendesk__ticket_metrics`
     and `zendesk__sla_policies`.
   details:
   - '[PR #286](https://github.com/fivetran/dbt_zendesk/pull/286) reorders the `commenter_role`
@@ -11,9 +11,9 @@ bug_fixes:
     are labeled `internal_comment` before the raw role check is applied.'
   - Only changes results when `using_audit_log`, `using_user_role_histories`, and
     `internal_user_criteria` are all configured. Other configurations are unchanged.
-- description: Fixes inflated `first_reply_time` and `next_reply_time` values and missed
-    SLA breaches in `zendesk__sla_policies` for tickets that were solved and then
-    reopened before the reply.
+- description: Fixes inflated `first_reply_time` and `next_reply_time` values and
+    missed SLA breaches in `zendesk__sla_policies` for tickets that were solved and
+    then reopened before the reply.
   details:
   - '[PR #288](https://github.com/fivetran/dbt_zendesk/pull/288) updates `int_zendesk__reply_time_business_hours`
     and `int_zendesk__reply_time_combined`. A solved or closed status now only ends
