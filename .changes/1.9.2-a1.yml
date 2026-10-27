@@ -26,8 +26,4 @@ bug_fixes:
   - If a custom field you request by ID has the same title as a standard field, only
     the custom field column gets the ID suffix (for example, `status_666000333444`).
     The standard field keeps its name.
-under_the_hood:
-- description: Adds a custom ticket field titled `Status` to the `ticket_custom_field_data`
-    and `ticket_field_history_data` seeds, and to the `custom field history columns`
-    CI scenario.
 date: '2026-10-27'
