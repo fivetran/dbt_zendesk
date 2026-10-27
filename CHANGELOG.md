@@ -1,6 +1,6 @@
 # dbt_zendesk v1.9.2-a1
 
-[PR #PR_NUMBER](https://github.com/fivetran/dbt_zendesk/pull/PR_NUMBER) includes the following updates:
+[PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:
 
 ## Schema/Data Change (--full-refresh required after upgrading if affected)
 **1 total change • 1 possible breaking change**
