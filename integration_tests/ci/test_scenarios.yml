@@ -59,7 +59,7 @@ test_scenarios:
 
   - name: "custom field history columns"
     vars:
-      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '987654321098', 'Escalation Reason', 'Support Tier', 'Channel Group']
+      ticket_field_history_columns: ['assignee_id', 'status', 'priority', '987654321098', 'Escalation Reason', 'Support Tier', 'Channel Group', '666000333444']
     include_incremental: false
 
   - name: "MDLS"

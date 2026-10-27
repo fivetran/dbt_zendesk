@@ -1,3 +1,22 @@
+# dbt_zendesk v1.9.2-a1
+
+[PR #PR_NUMBER](https://github.com/fivetran/dbt_zendesk/pull/PR_NUMBER) includes the following updates:
+
+## Schema/Data Change (--full-refresh required after upgrading if affected)
+**1 total change • 1 possible breaking change**
+
+| Data Model(s) | Change type | Old | New | Notes |
+| ---------- | ----------- | -------- | -------- | ----- |
+| `zendesk__ticket_field_history`<br>`int_zendesk__field_history_pivot` | Column rename | `<field>_<field>` (for example, `status_status`) | `<field>` (for example, `status`) | Only affects you if a custom ticket field's title matches a standard field in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>` column. |
+
+## Bug Fix
+- Fixes `zendesk__ticket_backlog` failing with `invalid identifier 'TICKET_FIELD_HISTORY.STATUS'` when a custom ticket field has a title like `Status`. Since v1.8.0, a `ticket_field_history_columns` entry for a standard field, such as `status`, also matched custom fields with that title. Both columns then got a suffix, so the `status` column was missing.
+  - An entry that names a standard field now refers only to that field. To track the custom field too, add its numeric ID.
+  - If a custom field you request by ID has the same title as a standard field, only the custom field column gets the ID suffix (for example, `status_666000333444`). The standard field keeps its name.
+
+## Under the Hood
+- Adds a custom ticket field titled `Status` to the `ticket_custom_field_data` and `ticket_field_history_data` seeds, and to the `custom field history columns` CI scenario.
+
 # dbt_zendesk v1.9.0
 
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
