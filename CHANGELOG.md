@@ -7,7 +7,7 @@
 
 | Data Model(s) | Change type | Old | New | Notes |
 | ------------- | ----------- | --- | --- | ----- |
-| zendesk__ticket_field_history<br>int_zendesk__field_history_pivot<br>(Breaking) | Changed field/model | `<field>_<field>` (for example, `status_status`) | `<field>` (for example, `status`) | Only affects you if a custom ticket field's title matches a standard field in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>` column. Both models are incremental, so run `--full-refresh` after upgrading if you're affected. |
+| zendesk__ticket_field_history<br>zendesk__ticket_backlog<br>int_zendesk__field_history_pivot<br>(Breaking) | Changed field/model | `<field>_<field>` (for example, `status_status`) | `<field>` (for example, `status`) | Only affects you if a custom ticket field's title matches a standard field in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>` column. `zendesk__ticket_field_history` and `int_zendesk__field_history_pivot` are incremental, so run `--full-refresh` after upgrading if you're affected. |
 
 ## Bug Fix
 - Fixes `zendesk__ticket_backlog` failing with `invalid identifier 'TICKET_FIELD_HISTORY.STATUS'` when a custom ticket field has a title like `Status`.
