@@ -1,5 +1,6 @@
-version: 1.9.2
+version: 1.10.0
 pr_number: 290
+is_breaking: true
 schema_data_changes:
   entries:
   - models:
@@ -13,7 +14,7 @@ schema_data_changes:
     notes: Only affects you if a custom ticket field's title matches a standard field
       in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>`
       column. `zendesk__ticket_field_history` and `int_zendesk__field_history_pivot`
-      are incremental, so run `--full-refresh` after upgrading if you're affected.
+      are incremental, so a `--full-refresh` is required after upgrading.
 bug_fixes:
 - description: Fixes `zendesk__ticket_backlog` failing with `invalid identifier 'TICKET_FIELD_HISTORY.STATUS'`
     when a custom ticket field has a title like `Status`.
@@ -26,4 +27,3 @@ bug_fixes:
   - If a custom field you request by ID has the same title as a standard field, only
     the custom field column gets the ID suffix (for example, `status_666000333444`).
     The standard field keeps its name.
-date: '2026-10-28'
