@@ -106,22 +106,3 @@
 {{ return(resolved_columns) }}
 
 {% endmacro %}
-
-
-{% macro zendesk_slugify(string) %}
-
-{# Same as dbt_utils.slugify, except a value with no Latin letters or numbers (e.g. 購入段階) returns '' instead of failing with "str object has no element 0". #}
-
-{% if not string %}
-{{ return('') }}
-{% endif %}
-
-{% set string = string | string | lower %}
-{% set string = modules.re.sub('[ -]+', '_', string) %}
-{% set string = modules.re.sub('[^a-z0-9_]+', '', string) %}
-{# Prepends "_" if the string begins with a number. #}
-{% set string = modules.re.sub('^([0-9])', '_\\1', string) %}
-
-{{ return(string) }}
-
-{% endmacro %}
