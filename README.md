@@ -249,16 +249,11 @@ Custom ticket fields can also be included in `ticket_field_history_columns` by p
 
 An entry that names a standard field, such as `status`, refers only to that standard field, even if a custom field has the same title. To track that custom field as well, pass its numeric ID. Its column then gets the ID as a suffix (for example, `status_666000333444`), and the standard field keeps its name.
 
-You can enter a title in any language. Column names can only use Latin letters, numbers, and underscores, so a title with none of these (for example, `購入段階`) uses the field ID as its column name (for example, `_10447640753167`). To choose the column name for a custom field, pass a `field` and `alias` pair instead. The alias must use only letters, numbers, and underscores, must not start with a number, and must be unique.
+You can enter a title in any language. Column names can only use Latin letters, numbers, and underscores, so a title with none of these (for example, `購入段階`) uses the field ID as its column name (for example, `_10447640753167`).
 
 ```yml
 vars:
-    ticket_field_history_columns: 
-      - 'status'
-      - 'priority'
-      - 'Support Tier' # A custom field title. Its numeric ID is also a valid input.
-      - field: '購入段階' # A custom field title or numeric ID.
-        alias: 'purchase_stage' # The column name to use.
+    ticket_field_history_columns: ['status', 'priority', 'Support Tier'] # 'Support Tier' is a custom field title; its numeric ID is also a valid input.
 ```
 
 #### Extending and Limiting the Ticket Field History

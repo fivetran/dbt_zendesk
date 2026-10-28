@@ -67,7 +67,7 @@ with ticket_field_history as (
         ,ticket_field_history.ticket_id
         ,ticket_field_history.status
         ,tickets.created_channel
-        {% for col in var('ticket_field_history_columns') if col is string and col in id_fields_with_names %} --Standard ID fields where the name can easily be joined from stg model. Skips {'field', 'alias'} entries, which are custom fields.
+        {% for col in var('ticket_field_history_columns') if col in id_fields_with_names %} --Standard ID fields where the name can easily be joined from stg model.
             ,{{ id_fields_with_names[col] }}
         {% endfor %}
         {% for column in ticket_field_history_relation_columns if column.name|lower not in columns_already_selected %} --Everything else, including resolved custom field names, passes through as-is.

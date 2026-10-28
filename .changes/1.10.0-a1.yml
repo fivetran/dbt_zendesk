@@ -15,11 +15,6 @@ schema_data_changes:
       in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>`
       column. `zendesk__ticket_field_history` and `int_zendesk__field_history_pivot`
       are incremental, so a `--full-refresh` is required after upgrading.
-new_features:
-- description: '`ticket_field_history_columns` now accepts a `field` and `alias` pair
-    for a custom field, so you can choose its column name (for example, `{field: ''購入段階'',
-    alias: ''purchase_stage''}`). See the [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#tracking-custom-ticket-fields)
-    for details.'
 bug_fixes:
 - description: Fixes `int_zendesk__field_history_pivot` failing with `str object has
     no element 0` when a custom ticket field title has no Latin letters or numbers
@@ -28,8 +23,7 @@ bug_fixes:
   details:
   - This affected every run with such a title, even if you didn't track that field.
   - You can now enter custom field titles in any language. A title with no Latin letters
-    or numbers uses the field ID as its column name (for example, `_10447640753167`),
-    unless you set an alias.
+    or numbers uses the field ID as its column name (for example, `_10447640753167`).
 - description: Fixes `zendesk__ticket_backlog` failing with `invalid identifier 'TICKET_FIELD_HISTORY.STATUS'`
     when a custom ticket field has a title like `Status`.
   details:
