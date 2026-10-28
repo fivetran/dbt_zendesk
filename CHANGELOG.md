@@ -15,9 +15,6 @@
   - An entry that names a standard field now refers only to that field. To track the custom field too, add its numeric ID.
   - If a custom field you request by ID has the same title as a standard field, only the custom field column gets the ID suffix (for example, `status_666000333444`). The standard field keeps its name.
 
-## Under the Hood
-- Adds a custom ticket field titled `Status` to the `ticket_custom_field_data` and `ticket_field_history_data` seeds, and to the `custom field history columns` CI scenario.
-
 # dbt_zendesk v1.9.0
 
 [PR #278](https://github.com/fivetran/dbt_zendesk/pull/278) includes the following updates:
