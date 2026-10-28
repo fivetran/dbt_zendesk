@@ -74,7 +74,7 @@ Include the following zendesk package version in your `packages.yml` file:
 ```yml
 packages:
   - package: fivetran/zendesk
-    version: [">=1.9.0", "<1.10.0"]
+    version: [">=1.10.0", "<1.11.0"]
 ```
 > All required sources and staging models are now bundled into this transformation package. Do not include `fivetran/zendesk_source` in your `packages.yml` since this package has been deprecated.
 
@@ -246,6 +246,8 @@ vars:
 
 ##### Tracking Custom Ticket Fields
 Custom ticket fields can also be included in `ticket_field_history_columns` by passing either the field's numeric ID or its title (Zendesk stores custom field history using the numeric ID, not the field's name, but you don't need to look that ID up). When `using_ticket_custom_field` is enabled (the default), the package resolves either form to the custom field's readable title and uses that as the resulting column name.
+
+An entry that names a standard field, such as `status`, refers only to that standard field, even if a custom field has the same title. To track that custom field as well, pass its numeric ID. Its column then gets the ID as a suffix (for example, `status_666000333444`), and the standard field keeps its name.
 
 ```yml
 vars:

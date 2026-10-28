@@ -36,24 +36,31 @@
         {% do requested_slugs.append(dbt_utils.slugify(entry)) %}
     {% endfor %}
 
+    {# An entry that names a field_name directly (e.g. 'status') refers to that field, so it never matches a custom field title too. #}
+    {% set field_name_slugs = [] %}
+    {% for field_name in field_names %}
+        {% do field_name_slugs.append(dbt_utils.slugify(field_name)) %}
+    {% endfor %}
+
     {# Keep fields requested by ID/name or title; the `title and` guard stops slugify(none)='' matching everything. #}
     {% set aliases = {} %}
     {% for field_name in field_names %}
         {% set title = titles_by_id.get(field_name | string) %}
-        {% if dbt_utils.slugify(field_name) in requested_slugs or (title and dbt_utils.slugify(title) in requested_slugs) %}
-            {% do aliases.update({field_name: dbt_utils.slugify(title if title else field_name)}) %}
+        {% set title_slug = dbt_utils.slugify(title) if title else none %}
+        {% if dbt_utils.slugify(field_name) in requested_slugs or (title_slug and title_slug in requested_slugs and title_slug not in field_name_slugs) %}
+            {% do aliases.update({field_name: title_slug if title_slug else dbt_utils.slugify(field_name)}) %}
         {% endif %}
     {% endfor %}
 
-    {# Two custom fields can share a title, which would generate duplicate column aliases. #}
+    {# Two custom fields can share a title, or a custom field's title can match a standard field, which would generate duplicate column aliases. #}
     {% set alias_counts = {} %}
     {% for field_name, alias in aliases.items() %}
         {% do alias_counts.update({alias: alias_counts.get(alias, 0) + 1}) %}
     {% endfor %}
 
-    {# Append the field_name to any alias more than one field claims, to keep the column names unique. #}
+    {# Append the field_name to any custom field alias more than one field claims, to keep the column names unique. Standard fields keep their name so downstream references (e.g. status) still resolve. #}
     {% for field_name, alias in aliases.items() %}
-        {% if alias_counts[alias] > 1 %}
+        {% if alias_counts[alias] > 1 and (field_name | string) in titles_by_id %}
             {% set suffix = dbt_utils.slugify(field_name) %}
             {# slugify prepends an underscore to values starting with a digit, which would double up here. #}
             {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
