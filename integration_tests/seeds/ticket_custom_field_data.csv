@@ -5,3 +5,5 @@ id,title,raw_title,key,type,active,_fivetran_synced,_fivetran_deleted
 555000111222,Channel Group,{{zd.channel_group_ticket_field}},channel_group,dropdown,true,2020-10-02 14:08:33.216,false
 444000222111,,{{zd.orphan_raw_title_field}},orphan,text,true,2020-10-02 14:08:33.216,false
 666000333444,Status,Status,internal_status,dropdown,true,2020-10-02 14:08:33.216,false
+777000444555,購入段階,購入段階,,dropdown,true,2020-10-02 14:08:33.216,false
+777000444556,お名前,お名前,,text,true,2020-10-02 14:08:33.216,false

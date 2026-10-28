@@ -1,0 +1,43 @@
+version: 1.10.0-a1
+is_breaking: true
+schema_data_changes:
+  entries:
+  - models:
+    - zendesk__ticket_field_history
+    - zendesk__ticket_backlog
+    - int_zendesk__field_history_pivot
+    change_type: Changed field/model
+    old: '`<field>_<field>` (for example, `status_status`)'
+    new: '`<field>` (for example, `status`)'
+    is_breaking: true
+    notes: Only affects you if a custom ticket field's title matches a standard field
+      in `ticket_field_history_columns`. Also removes the unrequested `<field>_<custom_field_id>`
+      column. `zendesk__ticket_field_history` and `int_zendesk__field_history_pivot`
+      are incremental, so a `--full-refresh` is required after upgrading.
+new_features:
+- description: '`ticket_field_history_columns` now accepts a `field` and `alias` pair
+    for a custom field, so you can choose its column name (for example, `{field: ''購入段階'',
+    alias: ''purchase_stage''}`). See the [README](https://github.com/fivetran/dbt_zendesk/blob/main/README.md#tracking-custom-ticket-fields)
+    for details.'
+bug_fixes:
+- description: Fixes `int_zendesk__field_history_pivot` failing with `str object has
+    no element 0` when a custom ticket field title has no Latin letters or numbers
+    (for example, `購入段階`). `zendesk__ticket_field_history` and `zendesk__ticket_backlog`
+    were skipped as a result.
+  details:
+  - This affected every run with such a title, even if you didn't track that field.
+  - You can now enter custom field titles in any language. A title with no Latin letters
+    or numbers uses the field ID as its column name (for example, `_10447640753167`),
+    unless you set an alias.
+- description: Fixes `zendesk__ticket_backlog` failing with `invalid identifier 'TICKET_FIELD_HISTORY.STATUS'`
+    when a custom ticket field has a title like `Status`.
+  details:
+  - Since v1.8.0, a `ticket_field_history_columns` entry for a standard field, such
+    as `status`, also matched custom fields with that title. Both columns then got
+    a suffix, so the `status` column was missing.
+  - An entry that names a standard field now refers only to that field. To track the
+    custom field too, add its numeric ID.
+  - If a custom field you request by ID has the same title as a standard field, only
+    the custom field column gets the ID suffix (for example, `status_666000333444`).
+    The standard field keeps its name.
+date: '2026-10-28'
