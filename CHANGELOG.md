@@ -14,6 +14,7 @@
   - Since v1.8.0, a `ticket_field_history_columns` entry for a standard field, such as `status`, also matched custom fields with that title. Both columns then got a suffix, so the `status` column was missing.
   - An entry that names a standard field now refers only to that field. To track the custom field too, add its numeric ID.
   - If a custom field you request by ID has the same title as a standard field, only the custom field column gets the ID suffix (for example, `status_666000333444`). The standard field keeps its name.
+
 # dbt_zendesk v1.9.1
 
 [PR #288](https://github.com/fivetran/dbt_zendesk/pull/288) includes the following updates:
