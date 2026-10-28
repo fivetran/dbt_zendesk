@@ -16,8 +16,9 @@ with ticket_comment as (
     select 
 
         ticket_comment.*,
-        case when commenter.role in ('not set', 'end-user') then 'external_comment'
-            when commenter.is_internal_role then 'internal_comment'
+        -- check is_internal_role first so internal_user_criteria can reclassify 'not set' and 'end-user' roles
+        case when commenter.is_internal_role then 'internal_comment'
+            when commenter.role in ('not set', 'end-user') then 'external_comment'
             else 'unknown'
             end as commenter_role
     

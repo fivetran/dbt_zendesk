@@ -14,6 +14,18 @@
   - Since v1.8.0, a `ticket_field_history_columns` entry for a standard field, such as `status`, also matched custom fields with that title. Both columns then got a suffix, so the `status` column was missing.
   - An entry that names a standard field now refers only to that field. To track the custom field too, add its numeric ID.
   - If a custom field you request by ID has the same title as a standard field, only the custom field column gets the ID suffix (for example, `status_666000333444`). The standard field keeps its name.
+# dbt_zendesk v1.9.1
+
+[PR #288](https://github.com/fivetran/dbt_zendesk/pull/288) includes the following updates:
+
+## Bug Fix
+- Fixes `internal_user_criteria` not applying to comments from users whose historical support role was `not set` or `end-user`. Affects `zendesk__ticket_metrics` and `zendesk__sla_policies`.
+  - Reorders the `commenter_role` logic in `int_zendesk__comments_enriched` so users matching `internal_user_criteria` are labeled `internal_comment` before the raw role check is applied.
+  - Only changes results when `using_audit_log`, `using_user_role_histories`, and `internal_user_criteria` are all configured. Other configurations are unchanged.
+- Fixes inflated `first_reply_time` and `next_reply_time` values and missed SLA breaches in `zendesk__sla_policies` for tickets that were solved and then reopened before the reply.
+  - Updates `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined`. A solved or closed status now only ends the reply time clock if the ticket was never reopened, or was reopened after the reply. A reopen at the same moment as the reply counts as reopened before it.
+  - Previously, the first solve after `sla_applied_at` ended the clock even if it lasted a few seconds. This could skip the weeks containing the real reply, which reported the wrong business minutes, and could mark late replies as `is_sla_breach = false`. Calendar hour SLAs were affected by the breach flag too.
+  - This intentionally departs from Zendesk's SLA documentation, which treats a solve as fulfilling all active SLA targets. For these tickets, `zendesk__sla_policies` can differ from Zendesk's own SLA badge. See the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md#solves-reopened-before-a-reply) for details.
 
 # dbt_zendesk v1.9.0
 
