@@ -252,6 +252,8 @@ vars:
     ticket_field_history_columns: ['status', 'priority', 'Support Tier'] # 'Support Tier' is a custom field title; its numeric ID is also a valid input.
 ```
 
+If you use [static mode](#static-mode), list custom fields by numeric ID and name their columns with `ticket_field_history_custom_field_aliases` instead.
+
 #### Extending and Limiting the Ticket Field History
 This package will create a row in `zendesk__ticket_field_history` for each day that a ticket is open, starting at its creation date. A Zendesk Support ticket cannot be altered after being closed, so its field values will not change after this date. However, you may want to extend a ticket's history past its closure date for easier reporting and visualizing. To do so, add the following configuration to your root `dbt_project.yml` file:
 
@@ -272,6 +274,29 @@ vars:
   zendesk:
     ticket_field_history_timeframe_years: integer_number_of_years # default = 50 (everything)
 ```
+
+#### Static mode
+By default, the package queries your warehouse while it compiles: it checks which columns exist in each source table, scans `ticket_field_history` for which requested fields have data, looks up custom field titles, and reads upstream column lists in the field history models. This keeps the package flexible but means compiled SQL depends on warehouse state, and a missing table or column becomes silent nulls instead of an error.
+
+Setting `zendesk_static_mode` to `true` replaces those queries with what you declare:
+
+```yml
+# dbt_project.yml
+
+vars:
+  zendesk:
+    zendesk_static_mode: true # default = false
+    ticket_field_history_columns: ['status', 'priority', '360012345678']
+    ticket_field_history_custom_field_aliases: # optional; a custom field without an alias is named by its slugified ID, e.g. _360012345678
+      '360012345678': 'support_tier'
+```
+
+With static mode on:
+- Every column the package declares for a staging model must exist in your source table, or the run fails naming the missing column.
+- Every field in `ticket_field_history_columns` becomes a column, even before it has any history. Custom fields must be listed by their numeric ID (titles are not looked up and fail at compile), and `ticket_field_history_custom_field_aliases` sets their column names.
+- Turning static mode on, or changing `ticket_field_history_columns`, `ticket_field_history_updater_columns`, or `ticket_field_history_custom_field_aliases`, fails the next incremental run at `int_zendesk__field_history_pivot` until you run `dbt run --full-refresh`. If your project sets `on_schema_change` for these models, your setting wins.
+
+The `stg_zendesk__*_tmp` models still check that each source table exists and read its columns, through `fivetran_utils.union_connections`. To make those static as well, override that macro with [dispatch](https://docs.getdbt.com/reference/dbt-jinja-functions/dispatch) in your project.
 
 #### Configuring Maximum Ticket Length
 By default, this package assumes that tickets will not remain open for longer than 52 weeks (1 year). This assumption is used in business hour calculations and SLA policy computations to generate the appropriate number of week intervals for time-based calculations.

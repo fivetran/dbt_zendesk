@@ -157,3 +157,8 @@ Below is a quick explanation of how this is calculated within the dbt package fo
 | `Level 2 San Francisco` | >**5220**<  | 5790 | 3902 | 5461.46 | 241.46 |
 
 - Adding the differences above we arrive at a total `first_reply_time_business_minutes` of 689.46 minutes.
+
+## Static Mode Is Opt-In
+`zendesk_static_mode` defaults to `false` because each of its behaviors trades flexibility for predictability, and that trade is only right for some users. Turning it on by default would break projects whose connector doesn't sync every declared column (for example, voice comment fields on `ticket_comment` or `system_*` fields on `ticket`), rename custom field columns for anyone relying on title lookups, and require a full refresh whenever `ticket_field_history_columns` changes.
+
+`int_zendesk__calendar_spine` is the exception: moving its date math into SQL produces the same output in both modes, so it applies to everyone.

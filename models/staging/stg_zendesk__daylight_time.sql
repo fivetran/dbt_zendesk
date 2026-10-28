@@ -19,7 +19,7 @@ fields as (
         */
         {{
             fivetran_utils.fill_staging_columns(
-                source_columns=adapter.get_columns_in_relation(ref('stg_zendesk__daylight_time_tmp')),
+                source_columns=zendesk_staging_source_columns(ref('stg_zendesk__daylight_time_tmp'), get_daylight_time_columns()),
                 staging_columns=get_daylight_time_columns()
             )
         }}
