@@ -6,19 +6,19 @@ bug_fixes:
     whose historical support role was `not set` or `end-user`. Affects `zendesk__ticket_metrics`
     and `zendesk__sla_policies`.
   details:
-  - 'Reorders the `commenter_role`
-    logic in `int_zendesk__comments_enriched` so users matching `internal_user_criteria`
-    are labeled `internal_comment` before the raw role check is applied.'
+  - Reorders the `commenter_role` logic in `int_zendesk__comments_enriched` so users
+    matching `internal_user_criteria` are labeled `internal_comment` before the raw
+    role check is applied.
   - Only changes results when `using_audit_log`, `using_user_role_histories`, and
     `internal_user_criteria` are all configured. Other configurations are unchanged.
 - description: Fixes inflated `first_reply_time` and `next_reply_time` values and
     missed SLA breaches in `zendesk__sla_policies` for tickets that were solved and
     then reopened before the reply.
   details:
-  - 'Updates `int_zendesk__reply_time_business_hours`
-    and `int_zendesk__reply_time_combined`. A solved or closed status now only ends
-    the reply time clock if the ticket was never reopened, or was reopened after the
-    reply. A reopen at the same moment as the reply counts as reopened before it.'
+  - Updates `int_zendesk__reply_time_business_hours` and `int_zendesk__reply_time_combined`.
+    A solved or closed status now only ends the reply time clock if the ticket was
+    never reopened, or was reopened after the reply. A reopen at the same moment as
+    the reply counts as reopened before it.
   - Previously, the first solve after `sla_applied_at` ended the clock even if it
     lasted a few seconds. This could skip the weeks containing the real reply, which
     reported the wrong business minutes, and could mark late replies as `is_sla_breach
