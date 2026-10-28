@@ -1,4 +1,4 @@
-# dbt_zendesk v1.9.2-a1
+# dbt_zendesk v1.9.2
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:
 
