@@ -14,7 +14,7 @@
 }}
 
 --Maps each tracked field_name to the column alias it should be pivoted into.
-{% set resolved_columns = resolve_ticket_field_history_columns() %}
+{% set resolved_columns = zendesk.resolve_ticket_field_history_columns() %}
 
 with field_history as (
 

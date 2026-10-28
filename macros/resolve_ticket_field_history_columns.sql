@@ -1,4 +1,8 @@
 {% macro resolve_ticket_field_history_columns() %}
+  {{ return(adapter.dispatch('resolve_ticket_field_history_columns', 'zendesk')()) }}
+{% endmacro %}
+
+{% macro default__resolve_ticket_field_history_columns() %}
 
 {# Returns a dict of {field_name: column alias} for each tracked ticket_field_history_columns entry. #}
 
@@ -39,22 +43,22 @@
         {% if alias and not modules.re.match('^[a-z_][a-z0-9_]*$', alias | string | lower) %}
             {{ exceptions.raise_compiler_error("ticket_field_history_columns alias '" ~ alias ~ "' for '" ~ field ~ "' is not a valid column name. Use only letters, numbers, and underscores, and don't start with a number.") }}
         {% endif %}
-        {% do requested.append({'slug': zendesk_slugify(field), 'raw': field | lower, 'alias': (alias | string | lower) if alias else none}) %}
+        {% do requested.append({'slug': zendesk.zendesk_slugify(field), 'raw': field | lower, 'alias': (alias | string | lower) if alias else none}) %}
     {% endfor %}
 
     {# An entry that names a field_name directly (e.g. 'status') refers to that field, so it never matches a custom field title too. #}
     {% set field_name_slugs = [] %}
     {% for field_name in field_names %}
-        {% do field_name_slugs.append(zendesk_slugify(field_name)) %}
+        {% do field_name_slugs.append(zendesk.zendesk_slugify(field_name)) %}
     {% endfor %}
 
     {# Keep fields requested by ID/name or title, using the first matching entry. #}
     {% set aliases = {} %}
     {% set explicit_aliases = [] %}
     {% for field_name in field_names %}
-        {% set field_name_slug = zendesk_slugify(field_name) %}
+        {% set field_name_slug = zendesk.zendesk_slugify(field_name) %}
         {% set title = titles_by_id.get(field_name | string) %}
-        {% set title_slug = zendesk_slugify(title) if title else '' %}
+        {% set title_slug = zendesk.zendesk_slugify(title) if title else '' %}
         {% set title_raw = (title | string | trim | lower) if title else none %}
         {% set match = [] %}
         {% for entry in requested if not match %}
@@ -92,7 +96,7 @@
         {% if alias_counts[alias] > 1 and field_name in explicit_aliases %}
             {{ exceptions.raise_compiler_error("ticket_field_history_columns alias '" ~ alias ~ "' for custom field " ~ field_name ~ " is already used by another tracked field. Choose a unique alias.") }}
         {% elif alias_counts[alias] > 1 and (field_name | string) in titles_by_id %}
-            {% set suffix = zendesk_slugify(field_name) %}
+            {% set suffix = zendesk.zendesk_slugify(field_name) %}
             {# slugify prepends an underscore to values starting with a digit, which would double up here. #}
             {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
             {% do resolved_columns.update({field_name: alias ~ '_' ~ suffix}) %}
