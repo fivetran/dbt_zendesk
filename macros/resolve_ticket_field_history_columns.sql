@@ -34,34 +34,25 @@
         {% endfor %}
     {% endif %}
 
+    {# Slugify the input, so matching ignores spacing and punctuation differences. Entries with no Latin letters or numbers (e.g. 購入段階) are skipped, since dbt_utils.slugify fails on them with "str object has no element 0". #}
+    {% set requested_slugs = [] %}
+    {% for entry in var('ticket_field_history_columns') if modules.re.search('[A-Za-z0-9]', entry | string) %}
+        {% do requested_slugs.append(dbt_utils.slugify(entry)) %}
+    {% endfor %}
+
     {# An entry that names a field_name directly (e.g. 'status') refers to that field, so it never matches a custom field title too. #}
     {% set field_name_slugs = [] %}
     {% for field_name in field_names %}
-        {% do field_name_slugs.append(zendesk.zendesk_slugify(field_name)) %}
+        {% do field_name_slugs.append(dbt_utils.slugify(field_name)) %}
     {% endfor %}
 
-    {# Slugify each entry, so matching ignores spacing and punctuation. Also keep the raw entry, to match titles with no Latin letters or numbers (e.g. 購入段階), which slugify to ''. #}
-    {% set requested_slugs = [] %}
-    {% set requested_title_raws = [] %}
-    {% for entry in var('ticket_field_history_columns') %}
-        {% set entry_slug = zendesk.zendesk_slugify(entry) %}
-        {% do requested_slugs.append(entry_slug) %}
-        {% if entry_slug not in field_name_slugs %}
-            {% do requested_title_raws.append(entry | string | trim | lower) %}
-        {% endif %}
-    {% endfor %}
-
-    {# Keep fields requested by ID/name or title. The `title_slug and` guard stops an empty slug from matching other empty slugs. #}
+    {# Keep fields requested by ID/name or title; the `title and` guard stops slugify(none)='' matching everything. A title with no Latin letters or numbers is skipped for the same reason as above, so that field can only be requested by ID. #}
     {% set aliases = {} %}
     {% for field_name in field_names %}
-        {% set field_name_slug = zendesk.zendesk_slugify(field_name) %}
         {% set title = titles_by_id.get(field_name | string) %}
-        {% set title_slug = zendesk.zendesk_slugify(title) if title else '' %}
-        {% set title_raw = (title | string | trim | lower) if title else none %}
-        {% set title_requested = title and ((title_slug and title_slug in requested_slugs and title_slug not in field_name_slugs) or title_raw in requested_title_raws) %}
-        {% if field_name_slug in requested_slugs or title_requested %}
-            {# A title with no letters or numbers left after slugifying falls back to the field ID, the same column as requesting it by ID. #}
-            {% do aliases.update({field_name: title_slug if modules.re.search('[a-z0-9]', title_slug) else field_name_slug}) %}
+        {% set title_slug = dbt_utils.slugify(title) if title and modules.re.search('[A-Za-z0-9]', title | string) else none %}
+        {% if dbt_utils.slugify(field_name) in requested_slugs or (title_slug and title_slug in requested_slugs and title_slug not in field_name_slugs) %}
+            {% do aliases.update({field_name: title_slug if title_slug else dbt_utils.slugify(field_name)}) %}
         {% endif %}
     {% endfor %}
 
@@ -74,7 +65,7 @@
     {# Append the field_name to any custom field alias more than one field claims, to keep the column names unique. Standard fields keep their name so downstream references (e.g. status) still resolve. #}
     {% for field_name, alias in aliases.items() %}
         {% if alias_counts[alias] > 1 and (field_name | string) in titles_by_id %}
-            {% set suffix = zendesk.zendesk_slugify(field_name) %}
+            {% set suffix = dbt_utils.slugify(field_name) %}
             {# slugify prepends an underscore to values starting with a digit, which would double up here. #}
             {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
             {% do resolved_columns.update({field_name: alias ~ '_' ~ suffix}) %}
