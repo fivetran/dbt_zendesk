@@ -1,4 +1,8 @@
 {% macro resolve_ticket_field_history_columns() %}
+  {{ return(adapter.dispatch('resolve_ticket_field_history_columns', 'zendesk')()) }}
+{% endmacro %}
+
+{% macro default__resolve_ticket_field_history_columns() %}
 
 {# Returns a dict of {field_name: column alias} for each tracked ticket_field_history_columns entry. #}
 
@@ -30,9 +34,9 @@
         {% endfor %}
     {% endif %}
 
-    {# Slugify the input, so matching ignores spacing and punctuation differences. #}
+    {# Slugify the input, so matching ignores spacing and punctuation differences. Entries with no Latin letters or numbers (e.g. 購入段階) are skipped, since dbt_utils.slugify fails on them with "str object has no element 0". #}
     {% set requested_slugs = [] %}
-    {% for entry in var('ticket_field_history_columns') %}
+    {% for entry in var('ticket_field_history_columns') if modules.re.search('[A-Za-z0-9]', entry | string) %}
         {% do requested_slugs.append(dbt_utils.slugify(entry)) %}
     {% endfor %}
 
@@ -42,11 +46,11 @@
         {% do field_name_slugs.append(dbt_utils.slugify(field_name)) %}
     {% endfor %}
 
-    {# Keep fields requested by ID/name or title; the `title and` guard stops slugify(none)='' matching everything. #}
+    {# Keep fields requested by ID/name or title; the `title and` guard stops slugify(none)='' matching everything. A title with no Latin letters or numbers is skipped for the same reason as above, so that field can only be requested by ID. #}
     {% set aliases = {} %}
     {% for field_name in field_names %}
         {% set title = titles_by_id.get(field_name | string) %}
-        {% set title_slug = dbt_utils.slugify(title) if title else none %}
+        {% set title_slug = dbt_utils.slugify(title) if title and modules.re.search('[A-Za-z0-9]', title | string) else none %}
         {% if dbt_utils.slugify(field_name) in requested_slugs or (title_slug and title_slug in requested_slugs and title_slug not in field_name_slugs) %}
             {% do aliases.update({field_name: title_slug if title_slug else dbt_utils.slugify(field_name)}) %}
         {% endif %}
