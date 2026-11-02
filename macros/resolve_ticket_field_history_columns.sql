@@ -4,17 +4,15 @@
 
 {% macro default__resolve_ticket_field_history_columns() %}
 
-{# Returns a dict of {field_name: column alias} for each tracked ticket_field_history_columns entry. #}
-
-{# Stays empty outside of a run/build (e.g. during dbt compile) so callers never have to guard the result. #}
+{# Returns {field_name: column alias} for each tracked field; empty outside run/build. #}
 {% set resolved_columns = {} %}
 
 {% if execute and flags.WHICH in ('run', 'build') %}
 
-    {# Every field_name in the history data, sorted so the pivot's column order is stable across runs. #}
+    {# Sorted so the pivot's column order is stable. #}
     {% set field_names = dbt_utils.get_column_values(ref('stg_zendesk__ticket_field_history'), 'field_name', default=[]) | sort %}
 
-    {# Custom field ID -> title, since history is recorded under the ID; max() breaks ties across connections. #}
+    {# Custom field ID -> title; max() breaks ties across connections. #}
     {% set titles_by_id = {} %}
     {% if var('using_ticket_custom_field', True) %}
         {% set custom_field_query %}
@@ -28,25 +26,25 @@
 
         {% set custom_fields = run_query(custom_field_query) %}
 
-        {# Positional access, since adapters differ on the casing of unquoted result column names. #}
+        {# Positional access, since adapters differ on result column casing. #}
         {% for row in custom_fields.rows %}
             {% do titles_by_id.update({row[0] | string: row[1]}) %}
         {% endfor %}
     {% endif %}
 
-    {# Slugify the input, so matching ignores spacing and punctuation differences. Entries with no Latin letters or numbers (e.g. 購入段階) are skipped, since dbt_utils.slugify fails on them with "str object has no element 0". #}
+    {# Skips entries with no Latin letters or numbers (e.g. 購入段階), which dbt_utils.slugify fails on. #}
     {% set requested_slugs = [] %}
     {% for entry in var('ticket_field_history_columns') if modules.re.search('[A-Za-z0-9]', entry | string) %}
         {% do requested_slugs.append(dbt_utils.slugify(entry)) %}
     {% endfor %}
 
-    {# An entry that names a field_name directly (e.g. 'status') refers to that field, so it never matches a custom field title too. #}
+    {# An entry naming a field_name (e.g. 'status') never also matches a custom field title. #}
     {% set field_name_slugs = [] %}
     {% for field_name in field_names %}
         {% do field_name_slugs.append(dbt_utils.slugify(field_name)) %}
     {% endfor %}
 
-    {# Keep fields requested by ID/name or title; the `title and` guard stops slugify(none)='' matching everything. A title with no Latin letters or numbers is skipped for the same reason as above, so that field can only be requested by ID. #}
+    {# Match by ID/name or title; non-Latin titles are skipped, so those fields match by ID only. #}
     {% set aliases = {} %}
     {% for field_name in field_names %}
         {% set title = titles_by_id.get(field_name | string) %}
@@ -56,17 +54,17 @@
         {% endif %}
     {% endfor %}
 
-    {# Two custom fields can share a title, or a custom field's title can match a standard field, which would generate duplicate column aliases. #}
+    {# Counts aliases, since custom fields can share a title with each other or a standard field. #}
     {% set alias_counts = {} %}
     {% for field_name, alias in aliases.items() %}
         {% do alias_counts.update({alias: alias_counts.get(alias, 0) + 1}) %}
     {% endfor %}
 
-    {# Append the field_name to any custom field alias more than one field claims, to keep the column names unique. Standard fields keep their name so downstream references (e.g. status) still resolve. #}
+    {# Suffixes duplicate custom field aliases with the ID; standard fields keep their name. #}
     {% for field_name, alias in aliases.items() %}
         {% if alias_counts[alias] > 1 and (field_name | string) in titles_by_id %}
             {% set suffix = dbt_utils.slugify(field_name) %}
-            {# slugify prepends an underscore to values starting with a digit, which would double up here. #}
+            {# Drops slugify's leading underscore so it doesn't double up. #}
             {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
             {% do resolved_columns.update({field_name: alias ~ '_' ~ suffix}) %}
         {% else %}
