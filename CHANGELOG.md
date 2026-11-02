@@ -1,12 +1,3 @@
-# dbt_zendesk v1.9.2-a2
-
-[PR #292](https://github.com/fivetran/dbt_zendesk/pull/292) includes the following updates:
-
-## Bug Fix
-- Fixes `int_zendesk__field_history_pivot` failing with `str object has no element 0` when a custom ticket field title has no Latin letters or numbers (for example, `購入段階`). `zendesk__ticket_field_history` and `zendesk__ticket_backlog` were skipped as a result.
-  - This affected every run with such a title, even if you didn't track that field.
-  - To track a custom field whose title has no Latin letters or numbers, pass its numeric ID in `ticket_field_history_columns`. Its column uses the ID as its name (for example, `_10447640753167`).
-
 # dbt_zendesk v1.9.1
 
 [PR #288](https://github.com/fivetran/dbt_zendesk/pull/288) includes the following updates:
