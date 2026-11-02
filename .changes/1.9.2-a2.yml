@@ -1,0 +1,13 @@
+version: 1.9.2-a2
+pr_number: 292
+bug_fixes:
+- description: "Fixes `int_zendesk__field_history_pivot` failing with `str object\
+    \ has no element 0` when a custom ticket field title has no Latin letters or numbers\
+    \ (for example, `\u8CFC\u5165\u6BB5\u968E`). `zendesk__ticket_field_history` and\
+    \ `zendesk__ticket_backlog` were skipped as a result."
+  details:
+  - This affected every run with such a title, even if you didn't track that field.
+  - To track a custom field whose title has no Latin letters or numbers, pass its
+    numeric ID in `ticket_field_history_columns`. Its column uses the ID as its name
+    (for example, `_10447640753167`).
+date: '2026-10-29'
