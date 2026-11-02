@@ -64,7 +64,7 @@
     {% for field_name, alias in aliases.items() %}
         {% if alias_counts[alias] > 1 and (field_name | string) in titles_by_id %}
             {% set suffix = dbt_utils.slugify(field_name) %}
-            {# Drops slugify's leading underscore so it doesn't double up. #}
+            {# slugify turns an ID into _123, so this drops the _ to avoid status__123. #}
             {% set suffix = suffix[1:] if suffix.startswith('_') else suffix %}
             {% do resolved_columns.update({field_name: alias ~ '_' ~ suffix}) %}
         {% else %}
