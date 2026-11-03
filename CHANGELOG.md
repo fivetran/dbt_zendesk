@@ -10,8 +10,8 @@
 | `zendesk__ticket_field_history`<br>`zendesk__ticket_backlog`<br>`int_zendesk__field_history_pivot`<br>(Breaking) | Changed column | `status_status` | `status` | Fixes column naming conflicts when a custom field shares a title with a standard field. Also removes unintended `<field>_<custom_field_id>` columns. Only affects configurations with these conflicts. |
 
 ## Bug Fix
-- Fixes `zendesk__ticket_backlog` failing when a custom ticket field shares a title with a standard field (for example, `Status`). Standard fields now retain their names; custom fields can be tracked separately by adding their numeric IDs to `ticket_field_history_columns`.
-- Fixes failures when custom ticket field titles contain no Latin letters or numbers (for example, `購入段階`). These fields can be tracked using their numeric IDs, regardless of title.
+- Fixes `zendesk__ticket_backlog` failing when a custom ticket field shares a title with a standard field (for example, `Status`). Standard fields now retain their names; custom fields can be tracked separately by adding their numeric IDs to `ticket_field_history_columns` (for example, `status_<field_id>`).
+- Fixes failures when custom ticket field titles contain no Latin letters or numbers (for example, `購入段階`). These fields can be tracked regardless of title using their numeric IDs, with a leading underscore (for example, `_<field_id>`).
 
 # dbt_zendesk v1.9.1
 

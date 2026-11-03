@@ -19,7 +19,8 @@ bug_fixes:
     shares a title with a standard field (for example, `Status`). Standard fields
     now retain their names; custom fields can be tracked separately by adding their
     numeric IDs to `ticket_field_history_columns` (for example, `status_<field_id>`).
-- description: Fixes failures when custom ticket field titles contain no Latin letters
-    or numbers (for example, `購入段階`). These fields can be tracked regardless of
-    title using their numeric IDs, with a leading underscore (for example, `_<field_id>`).
+- description: "Fixes failures when custom ticket field titles contain no Latin letters\
+    \ or numbers (for example, `\u8CFC\u5165\u6BB5\u968E`). These fields can be tracked\
+    \ regardless of title using their numeric IDs, with a leading underscore (for\
+    \ example, `_<field_id>`)."
 date: '2026-11-02'
