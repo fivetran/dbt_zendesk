@@ -1,12 +1,13 @@
 config-version: 2
 
 name: 'zendesk_integration_tests'
-version: '1.9.1'
+version: '1.10.0'
 
 profile: 'integration_tests'
 
 vars:  
   zendesk_schema: zendesk_integration_tests
+  ticket_field_history_timeframe_years: 1 # keeps the field history date spine short so CI runs faster
 
   zendesk:
     zendesk_organization_identifier:                      "organization_data"
