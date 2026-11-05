@@ -1,0 +1,2 @@
+# meta.yml: defaults for every board in this folder and below, e.g. `theme: paper` or `source: my_warehouse`.
+# Same keys as a board, minus the layout; a board's own keys win.

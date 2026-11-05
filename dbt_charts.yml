@@ -1,0 +1,46 @@
+# dbt charts project configuration
+#
+# This file anchors your project root. Running `dct serve` from any
+# subdirectory will walk up to find this file and use its directory
+# as the serve root.
+#
+# sources: is the registry of named connections your boards read from.
+# A board picks one with `source: <name>`; it never defines a connection
+# inline. Full list of types and fields: https://docs.dbtcharts.com/sources/
+#
+# Inside a dbt project, leaving sources: out is fine: SQL queries then run
+# against the connection of the profile named in dbt_project.yml. Declaring
+# any source turns that off, so name every source your boards use.
+#
+# sources:
+#   # A dbt project — credentials stay in dbt profiles.yml / env vars.
+#   analytics:
+#     type: dbt_profile
+#     profile: my_dbt_project   # optional: defaults to the dbt project's profile
+#     target: dev
+#
+#   # A local DuckDB file. Local-only: dbt charts Cloud cannot read it —
+#   # for Cloud, use a warehouse, or export each table to Parquet/CSV/JSON
+#   # and register it under sources: (type: csv | json | parquet, a files:
+#   # map) so queries reference it by name with no connection step. A
+#   # board that's the only reader of one file can point at it inline
+#   # instead (`source: ../data/orders.parquet` from a board in charts/).
+#   local:
+#     type: duckdb
+#     path: ./data/analytics.duckdb
+#
+#   # A warehouse directly. Use env vars for secrets, never literals.
+#   warehouse:
+#     type: postgres
+#     host: "{{ env_var('PGHOST') }}"
+#     port: 5432
+#     dbname: analytics
+#     user: "{{ env_var('PGUSER') }}"
+#     password: "{{ env_var('PGPASSWORD') }}"
+#
+# serve:
+#   # Override the SQL dialect (auto-detected from dbt profile when possible)
+#   # dialect: bigquery
+#
+#   # dbt target override (defaults to DBT_TARGET env var, then profile default)
+#   # target: dev
