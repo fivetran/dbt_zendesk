@@ -20,7 +20,7 @@ queries:
     dialect: duckdb
     sql: |
       select distinct assignee_name
-      from {{ ref('zendesk__ticket_metrics') }}
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
       where assignee_name is not null
       order by 1
 
@@ -48,7 +48,7 @@ queries:
             partition by assignee_name, first_resolution_calendar_minutes is null
             order by first_resolution_calendar_minutes) as resolution_rn,
           count(first_resolution_calendar_minutes) over (partition by assignee_name) as resolution_n
-        from {{ ref('zendesk__ticket_metrics') }}
+        from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
         where assignee_name is not null
           and {{ filter_date_range('created_at', date_range) }}
           and {{ filter('assignee_name', assignee) }}
@@ -67,7 +67,7 @@ queries:
         (sum(case when t.ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
         (sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)) / nullif(count(*), 0) as one_touch_rate,
         avg(t.count_ticket_handoffs) as avg_handoffs
-      from {{ ref('zendesk__ticket_metrics') }} t
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics` t
       left join {{ queries.agent_medians }} on agent_medians.assignee_name = t.assignee_name
       where t.assignee_name is not null
         and {{ filter_date_range('t.created_at', date_range) }}
@@ -82,7 +82,7 @@ queries:
         assignee_name,
         (sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
         sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) as rated_tickets
-      from {{ ref('zendesk__ticket_metrics') }}
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
       where assignee_name is not null
         and ticket_satisfaction_score in ('good', 'bad')
         and {{ filter_date_range('created_at', date_range) }}
