@@ -1,4 +1,5 @@
 title: Zendesk Agent Performance
+source: dbt_package_testing
 notes: |
   Per-assignee workload, responsiveness, resolution, and CSAT from
   `zendesk__ticket_metrics`. Medians are exact and computed in plain SQL,
