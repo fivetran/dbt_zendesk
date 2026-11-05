@@ -1,3 +1,17 @@
+# dbt_zendesk v1.11.0-a1
+
+[PR #294](https://github.com/fivetran/dbt_zendesk/pull/294) includes the following updates:
+
+## Schema/Data Change
+**1 total change • 0 possible breaking changes**
+
+| Data Model(s) | Change type | Old | New | Notes |
+| ------------- | ----------- | --- | --- | ----- |
+| `zendesk__sla_policies` | Changed field | `metric` values: `first_reply_time`, `next_reply_time`, `agent_work_time`, `requester_wait_time` | Adds `periodic_update_time` | Adds one row per `periodic_update_time` SLA event in calendar and business hours. Each event starts when Zendesk applies the target and ends at the next public agent comment or solve. Only affects accounts with periodic update targets in their SLA policies. |
+
+## Under the Hood
+- Adds `periodic_update_time` seed data for calendar and business hour targets, and includes the metric in the `sla_count_match` integrity test.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:

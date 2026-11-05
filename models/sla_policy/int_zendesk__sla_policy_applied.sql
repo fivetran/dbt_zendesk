@@ -1,7 +1,7 @@
 -- step 1, figure out when sla was applied to tickets
 
 -- more on SLA policies here: https://support.zendesk.com/hc/en-us/articles/204770038-Defining-and-using-SLA-policies-Professional-and-Enterprise-
--- SLA policies are calculated for next_reply_time, first_reply_time, agent_work_time, requester_wait_time.  If you're company uses other SLA metrics, and would like this
+-- SLA policies are calculated for next_reply_time, first_reply_time, periodic_update_time, agent_work_time, requester_wait_time.  If you're company uses other SLA metrics, and would like this
 -- package to support those, please reach out to the Fivetran team on Slack.
 
 {% set check_sla_policy_metric_history = var('using_sla_policy_metric_history', True) and var('using_ticket_sla_policy', True) %}
@@ -65,7 +65,7 @@ with ticket_field_history as (
     on ticket.ticket_id = ticket_field_history.ticket_id
     and ticket.source_relation = ticket_field_history.source_relation
   where ticket_field_history.value is not null
-    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
+    and ticket_field_history.field_name in ('next_reply_time', 'first_reply_time', 'periodic_update_time', 'agent_work_time', 'requester_wait_time')
 
 ), add_sla_policy_name as (
 

@@ -1,4 +1,4 @@
---final step where we union together all of the reply time, agent work time, and requester wait time sla's
+--final step where we union together all of the reply time (including periodic update time), agent work time, and requester wait time sla's
 
 -- is_sla_paused is constant per ticket, so one row per ticket is enough to override is_sla_breach below.
 with ticket_sla_pause as (

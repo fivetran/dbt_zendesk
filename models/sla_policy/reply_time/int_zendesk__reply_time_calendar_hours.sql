@@ -15,7 +15,7 @@ with sla_policy_applied as (
         "sla_applied_at" ) }} as sla_breach_at
   from sla_policy_applied
   where not in_business_hours
-    and metric in ('next_reply_time', 'first_reply_time')
+    and metric in ('next_reply_time', 'first_reply_time', 'periodic_update_time')
 
 )
 
