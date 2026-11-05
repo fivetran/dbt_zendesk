@@ -80,7 +80,7 @@ with ticket_schedules as (
     on ticket_schedules.schedule_id = schedule_business_hours.schedule_id
     and ticket_schedules.source_relation = schedule_business_hours.source_relation
   where sla_policy_applied.in_business_hours
-    and metric in ('next_reply_time', 'first_reply_time')
+    and metric in ('next_reply_time', 'first_reply_time', 'periodic_update_time')
 
 ), ticket_sla_applied_with_schedule_week_info as (
   -- Compute week-relative start fields from schedule_period_start so the

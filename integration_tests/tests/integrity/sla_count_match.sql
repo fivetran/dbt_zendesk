@@ -18,7 +18,7 @@ source_filter as (
         source_relation,
         count(*) as source_row_count
     from source
-    where field_name in ('next_reply_time', 'first_reply_time', 'agent_work_time', 'requester_wait_time')
+    where field_name in ('next_reply_time', 'first_reply_time', 'periodic_update_time', 'agent_work_time', 'requester_wait_time')
         and value is not null
         and latest_sla = 1
     group by 1,2
