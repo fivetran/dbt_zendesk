@@ -6,7 +6,8 @@ schema_data_changes:
   - models:
     - '`zendesk__sla_policies`'
     change_type: Changed field
-    old: '`metric` values: `first_reply_time`, `next_reply_time`, `agent_work_time`, `requester_wait_time`'
+    old: '`metric` values: `first_reply_time`, `next_reply_time`, `agent_work_time`,
+      `requester_wait_time`'
     new: Adds `periodic_update_time`
     is_breaking: false
     notes: Adds one row per `periodic_update_time` SLA event in calendar and business
