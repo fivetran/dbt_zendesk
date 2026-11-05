@@ -17,7 +17,6 @@ variables:
 
 queries:
   assignees:
-    dialect: duckdb
     sql: |
       select distinct assignee_name
       from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
@@ -27,7 +26,6 @@ queries:
   # Exact medians: rank each value, then average the one or two middle rows.
   # Partitioning by `<col> is null` keeps nulls out of the 1..n ranking.
   agent_medians:
-    dialect: duckdb
     sql: |
       select
         assignee_name,
@@ -56,7 +54,6 @@ queries:
       group by assignee_name
 
   agent_summary:
-    dialect: duckdb
     sql: |
       select
         t.assignee_name,
@@ -76,7 +73,6 @@ queries:
       order by tickets desc
 
   agent_csat:
-    dialect: duckdb
     sql: |
       select
         assignee_name,
