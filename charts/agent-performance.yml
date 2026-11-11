@@ -15,6 +15,13 @@ variables:
     options:
       query: assignees
 
+  chart_agents:
+    label: Agents shown in charts
+    input: select
+    options:
+      static: ['10', '25', '50', 'All']
+    default: '10'
+
 queries:
   assignees:
     sql: |
@@ -87,6 +94,36 @@ queries:
       having sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) >= 5
       order by 2 desc
 
+  top_workload:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by tickets desc, assignee_name) as agent_rank
+        from {{ queries.agent_summary }}
+      )
+      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by tickets desc, assignee_name
+
+  top_resolution:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by median_resolution_minutes desc nulls last, assignee_name) as agent_rank
+        from {{ queries.agent_summary }}
+      )
+      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by median_resolution_minutes desc nulls last, assignee_name
+
+  top_csat:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by csat_rate desc nulls last, rated_tickets desc, assignee_name) as agent_rank
+        from {{ queries.agent_csat }}
+      )
+      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by csat_rate desc nulls last, rated_tickets desc, assignee_name
+
 charts:
   summary_table:
     title: Agent Summary
@@ -125,21 +162,21 @@ charts:
 
   workload_chart:
     title: Tickets by Agent
-    query: agent_summary
+    query: top_workload
     type: bar
     x: assignee_name
     y: tickets
 
   resolution_chart:
     title: Median Resolution by Agent (min)
-    query: agent_summary
+    query: top_resolution
     type: bar
     x: assignee_name
     y: median_resolution_minutes
 
   csat_chart:
     title: CSAT by Agent (5+ rated tickets)
-    query: agent_csat
+    query: top_csat
     type: bar
     x: assignee_name
     y: csat_rate
