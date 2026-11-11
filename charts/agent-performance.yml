@@ -15,12 +15,6 @@ variables:
     options:
       query: assignees
 
-  chart_agents:
-    label: Agents shown in charts
-    options:
-      static: ['10', '25', '50']
-    default: '10'
-
 queries:
   assignees:
     sql: |
@@ -188,4 +182,10 @@ rows:
   - text: |
       [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · **Agent performance** · [SLA](/zendesk/sla)
   - summary_table
-  - cols: [workload_chart, resolution_chart, csat_chart]
+  - variables:
+      chart_agents:
+        label: Agents shown in charts
+        options:
+          static: ['10', '25', '50']
+        default: '10'
+    cols: [workload_chart, resolution_chart, csat_chart]
