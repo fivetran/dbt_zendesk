@@ -17,9 +17,8 @@ variables:
 
   chart_agents:
     label: Agents shown in charts
-    input: select
     options:
-      static: ['10', '25', '50', 'All']
+      static: ['10', '25', '50']
     default: '10'
 
 queries:
@@ -101,7 +100,7 @@ queries:
         select *, row_number() over (order by tickets desc, assignee_name) as agent_rank
         from {{ queries.agent_summary }}
       )
-      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
       order by tickets desc, assignee_name
 
   top_resolution:
@@ -111,7 +110,7 @@ queries:
         select *, row_number() over (order by median_resolution_minutes desc nulls last, assignee_name) as agent_rank
         from {{ queries.agent_summary }}
       )
-      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
       order by median_resolution_minutes desc nulls last, assignee_name
 
   top_csat:
@@ -121,7 +120,7 @@ queries:
         select *, row_number() over (order by csat_rate desc nulls last, rated_tickets desc, assignee_name) as agent_rank
         from {{ queries.agent_csat }}
       )
-      where {{ chart_agents }} = 'All' or agent_rank <= safe_cast({{ chart_agents }} as int64)
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
       order by csat_rate desc nulls last, rated_tickets desc, assignee_name
 
 charts:
