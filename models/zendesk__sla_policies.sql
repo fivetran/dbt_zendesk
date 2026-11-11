@@ -65,7 +65,7 @@ union all
     priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
+    {{ dbt.bool_or("is_breached_during_schedule") }} as is_sla_breached
   from agent_work_calendar_sla
 
   {{ dbt_utils.group_by(n=8) }}
@@ -83,7 +83,7 @@ union all
     priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_calendar_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
+    {{ dbt.bool_or("is_breached_during_schedule") }} as is_sla_breached
   from requester_wait_calendar_sla
 
   {{ dbt_utils.group_by(n=8) }}
@@ -104,7 +104,7 @@ union all
     priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
+    {{ dbt.bool_or("is_breached_during_schedule") }} as is_sla_breached
   from agent_work_business_sla
 
   {{ dbt_utils.group_by(n=8) }}
@@ -122,7 +122,7 @@ union all
     priority_applied,
     max(sla_breach_at) as sla_breach_at,
     max(running_total_scheduled_minutes) as sla_elapsed_time,
-    {{ fivetran_utils.max_bool("is_breached_during_schedule") }} as is_sla_breached
+    {{ dbt.bool_or("is_breached_during_schedule") }} as is_sla_breached
 
   from requester_wait_business_sla
 

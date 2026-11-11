@@ -14,7 +14,7 @@ with organizations as (
     select
         organizations.organization_id,
         organizations.source_relation,
-        {{ fivetran_utils.string_agg('organization_tags.tags', "', '" ) }} as organization_tags
+        {{ dbt.listagg('organization_tags.tags', "', '" ) }} as organization_tags
     from organizations
 
     left join organization_tags
@@ -36,7 +36,7 @@ with organizations as (
     select
         organizations.organization_id,
         organizations.source_relation,
-        {{ fivetran_utils.string_agg('domain_names.domain_name', "', '" ) }} as domain_names
+        {{ dbt.listagg('domain_names.domain_name', "', '" ) }} as domain_names
     from organizations
 
     left join domain_names

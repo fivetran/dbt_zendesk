@@ -13,7 +13,7 @@ with users as (
   select
     user_tags.user_id,
     source_relation,
-    {{ fivetran_utils.string_agg( 'user_tags.tags', "', '" )}} as user_tags
+    {{ dbt.listagg( 'user_tags.tags', "', '" )}} as user_tags
   from user_tags
   group by 1, 2
 
