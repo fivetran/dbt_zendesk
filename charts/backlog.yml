@@ -166,7 +166,7 @@ charts:
 
 rows:
   - text: |
-      [Overview](/zendesk/overview) · **Backlog** · [Agent performance](/zendesk/agent-performance) · [SLA](/zendesk/sla)
+      [Overview](./overview) · **Backlog** · [Agent performance](./agent-performance) · [SLA](./sla)
   - cols: [unsolved_kpi, new_kpi, open_kpi, pending_kpi, hold_kpi]
   - cols: [status_chart, priority_chart]
   - queue_table

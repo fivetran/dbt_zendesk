@@ -212,7 +212,7 @@ charts:
 
 rows:
   - text: |
-      **Overview** · [Backlog](/zendesk/backlog) · [Agent performance](/zendesk/agent-performance) · [SLA](/zendesk/sla)
+      **Overview** · [Backlog](./backlog) · [Agent performance](./agent-performance) · [SLA](./sla)
   - cols: [created_kpi, solved_kpi, unsolved_kpi, csat_kpi, first_reply_kpi, resolution_kpi]
   - flow_chart
   - cols: [channel_chart, priority_chart, type_chart]

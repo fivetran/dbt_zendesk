@@ -180,7 +180,7 @@ charts:
 
 rows:
   - text: |
-      [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · [Agent performance](/zendesk/agent-performance) · **SLA**
+      [Overview](./overview) · [Backlog](./backlog) · [Agent performance](./agent-performance) · **SLA**
   - cols: [events_kpi, breaches_kpi, attainment_kpi]
   - cols: [policy_table, metric_chart]
   - weekly_chart

@@ -48,7 +48,11 @@ By default, this package materializes the following final tables:
 ## Visualizations
 This package ships a set of [dbt Charts](https://dbtcharts.com) boards in [`charts/`](charts/) built on the final output tables above: a support overview, the ticket backlog, agent performance, and SLA attainment. Every query is written in DuckDB SQL (`dialect: duckdb`), and dbt Charts translates it to your warehouse's SQL when it runs, so the boards render on every warehouse this package supports.
 
-Once the package is installed, the boards appear under `zendesk/` in your dbt project. They need dbt Charts 0.10.0 or later, and no `dbt_charts.yml`: queries run against the target in your `profiles.yml`.
+The boards need dbt Charts 0.10.0 or later. Locally, after `dbt deps` and `dbt run`, they appear under `zendesk/` in your dbt project. When your project does not declare its own dbt Charts sources, no `dbt_charts.yml` is needed: queries use the target in your local `profiles.yml`.
+
+In [dbt Charts Cloud](https://dbtcharts.com), connect a warehouse and configure the project's default source with the database and schema where dbt builds these models. Cloud does not read your local `profiles.yml`. Keep the boards' `ref()` calls and `dialect: duckdb` declarations so the same boards resolve your models and run on your warehouse. See the [Cloud connection guide](https://docs.dbtcharts.com/cloud/connections/).
+
+Sibling-relative navigation works both when these boards are installed under `zendesk/` and when this package repository is opened directly with the boards at its root.
 
 ```bash
 pip install dbt-charts

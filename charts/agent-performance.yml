@@ -153,6 +153,6 @@ charts:
 
 rows:
   - text: |
-      [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · **Agent performance** · [SLA](/zendesk/sla)
+      [Overview](./overview) · [Backlog](./backlog) · **Agent performance** · [SLA](./sla)
   - summary_table
   - cols: [workload_chart, resolution_chart, csat_chart]
