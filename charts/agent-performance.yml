@@ -1,4 +1,5 @@
 title: Zendesk Agent Performance
+source: dbt_package_testing
 notes: |
   Per-assignee workload, responsiveness, resolution, and CSAT from
   `zendesk__ticket_metrics`. Medians are exact and computed in plain SQL,
@@ -16,17 +17,15 @@ variables:
 
 queries:
   assignees:
-    dialect: duckdb
     sql: |
       select distinct assignee_name
-      from {{ ref('zendesk__ticket_metrics') }}
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
       where assignee_name is not null
       order by 1
 
   # Exact medians: rank each value, then average the one or two middle rows.
   # Partitioning by `<col> is null` keeps nulls out of the 1..n ranking.
   agent_medians:
-    dialect: duckdb
     sql: |
       select
         assignee_name,
@@ -47,7 +46,7 @@ queries:
             partition by assignee_name, first_resolution_calendar_minutes is null
             order by first_resolution_calendar_minutes) as resolution_rn,
           count(first_resolution_calendar_minutes) over (partition by assignee_name) as resolution_n
-        from {{ ref('zendesk__ticket_metrics') }}
+        from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
         where assignee_name is not null
           and {{ filter_date_range('created_at', date_range) }}
           and {{ filter('assignee_name', assignee) }}
@@ -55,7 +54,6 @@ queries:
       group by assignee_name
 
   agent_summary:
-    dialect: duckdb
     sql: |
       select
         t.assignee_name,
@@ -66,7 +64,7 @@ queries:
         (sum(case when t.ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when t.ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
         (sum(case when t.is_one_touch_resolution then 1.0 else 0.0 end)) / nullif(count(*), 0) as one_touch_rate,
         avg(t.count_ticket_handoffs) as avg_handoffs
-      from {{ ref('zendesk__ticket_metrics') }} t
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics` t
       left join {{ queries.agent_medians }} on agent_medians.assignee_name = t.assignee_name
       where t.assignee_name is not null
         and {{ filter_date_range('t.created_at', date_range) }}
@@ -75,13 +73,12 @@ queries:
       order by tickets desc
 
   agent_csat:
-    dialect: duckdb
     sql: |
       select
         assignee_name,
         (sum(case when ticket_satisfaction_score = 'good' then 1.0 else 0.0 end)) / nullif(sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end), 0) as csat_rate,
         sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) as rated_tickets
-      from {{ ref('zendesk__ticket_metrics') }}
+      from `dbt-package-testing.zz_dbt_avinash_zendesk.zendesk__ticket_metrics`
       where assignee_name is not null
         and ticket_satisfaction_score in ('good', 'bad')
         and {{ filter_date_range('created_at', date_range) }}
@@ -89,6 +86,36 @@ queries:
       group by 1
       having sum(case when ticket_satisfaction_score in ('good', 'bad') then 1 else 0 end) >= 5
       order by 2 desc
+
+  top_workload:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by tickets desc, assignee_name) as agent_rank
+        from {{ queries.agent_summary }}
+      )
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by tickets desc, assignee_name
+
+  top_resolution:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by median_resolution_minutes desc nulls last, assignee_name) as agent_rank
+        from {{ queries.agent_summary }}
+      )
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by median_resolution_minutes desc nulls last, assignee_name
+
+  top_csat:
+    sql: |
+      select * except (agent_rank)
+      from (
+        select *, row_number() over (order by csat_rate desc nulls last, rated_tickets desc, assignee_name) as agent_rank
+        from {{ queries.agent_csat }}
+      )
+      where agent_rank <= safe_cast({{ chart_agents }} as int64)
+      order by csat_rate desc nulls last, rated_tickets desc, assignee_name
 
 charts:
   summary_table:
@@ -128,21 +155,21 @@ charts:
 
   workload_chart:
     title: Tickets by Agent
-    query: agent_summary
+    query: top_workload
     type: bar
     x: assignee_name
     y: tickets
 
   resolution_chart:
     title: Median Resolution by Agent (min)
-    query: agent_summary
+    query: top_resolution
     type: bar
     x: assignee_name
     y: median_resolution_minutes
 
   csat_chart:
     title: CSAT by Agent (5+ rated tickets)
-    query: agent_csat
+    query: top_csat
     type: bar
     x: assignee_name
     y: csat_rate
@@ -155,4 +182,20 @@ rows:
   - text: |
       [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · **Agent performance** · [SLA](/zendesk/sla)
   - summary_table
+  - cols:
+      - width: 320px
+        text: ' '
+        variables:
+          chart_agents:
+            label: Agents shown in charts
+            options:
+              static: ['10', '25', '50']
+            default: '10'
+        style:
+          variables:
+            input:
+              height: 40
+            label:
+              font:
+                size: 16
   - cols: [workload_chart, resolution_chart, csat_chart]
