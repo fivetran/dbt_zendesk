@@ -182,10 +182,20 @@ rows:
   - text: |
       [Overview](/zendesk/overview) · [Backlog](/zendesk/backlog) · **Agent performance** · [SLA](/zendesk/sla)
   - summary_table
-  - variables:
-      chart_agents:
-        label: Agents shown in charts
-        options:
-          static: ['10', '25', '50']
-        default: '10'
-    cols: [workload_chart, resolution_chart, csat_chart]
+  - cols:
+      - width: 320px
+        text: ' '
+        variables:
+          chart_agents:
+            label: Agents shown in charts
+            options:
+              static: ['10', '25', '50']
+            default: '10'
+        style:
+          variables:
+            input:
+              height: 40
+            label:
+              font:
+                size: 16
+  - cols: [workload_chart, resolution_chart, csat_chart]
