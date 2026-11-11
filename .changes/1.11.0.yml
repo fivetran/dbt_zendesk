@@ -2,7 +2,11 @@ version: 1.11.0
 pr_number: 272
 is_breaking: false
 new_features:
-  - description: Adds dbt Charts boards for Zendesk overview, ticket backlog, agent performance, and SLA reporting.
-    details:
-      - Boards retain portable dbt model references and include navigation that works within an installed package or a connected repository.
-      - Setup documentation distinguishes local profile discovery from Cloud warehouse and default-source configuration.
+- description: Adds dbt Charts boards for Zendesk overview, ticket backlog, agent
+    performance, and SLA reporting.
+  details:
+  - Boards retain portable dbt model references and include navigation that works
+    within an installed package or a connected repository.
+  - Setup documentation distinguishes local profile discovery from Cloud warehouse
+    and default-source configuration.
+date: '2026-11-11'
