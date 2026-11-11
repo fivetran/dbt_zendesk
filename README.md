@@ -50,7 +50,7 @@ This package ships a set of [dbt Charts](https://dbtcharts.com) boards in [`char
 
 The boards need dbt Charts 0.10.0 or later. Locally, after `dbt deps` and `dbt run`, they appear under `zendesk/` in your dbt project. When your project does not declare its own dbt Charts sources, no `dbt_charts.yml` is needed: queries use the target in your local `profiles.yml`.
 
-In [dbt Charts Cloud](https://dbtcharts.com), connect a warehouse and configure the project's default source with the database and schema where dbt builds these models. Cloud does not read your local `profiles.yml`. Keep the boards' `ref()` calls and `dialect: duckdb` declarations so the same boards resolve your models and run on your warehouse. See the [Cloud connection guide](https://docs.dbtcharts.com/cloud/connections/).
+In [dbt Charts Cloud](https://dbtcharts.com), connect a warehouse and configure the project's default source with your dbt target's database and base schema or dataset, before dbt appends package schema suffixes such as `_zendesk`. Cloud does not read your local `profiles.yml`. Keep the boards' `ref()` calls and `dialect: duckdb` declarations so the same boards resolve your models and run on your warehouse. See the [Cloud connection guide](https://docs.dbtcharts.com/cloud/connections/).
 
 Sibling-relative navigation works both when these boards are installed under `zendesk/` and when this package repository is opened directly with the boards at its root.
 
