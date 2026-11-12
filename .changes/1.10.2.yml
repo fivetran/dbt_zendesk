@@ -1,4 +1,5 @@
 version: 1.10.2
+pr_number: 299
 under_the_hood:
   - title: Column documentation sync
     description: Updates the yml documentation to match the columns the models actually output, so the dbt docs site and Quickstart field listings are accurate.
