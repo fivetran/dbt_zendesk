@@ -9,7 +9,7 @@ with sla_policy_applied as (
 ), final as (
   select
     *,
-    {{ fivetran_utils.timestamp_add(
+    {{ zendesk.zendesk_timestamp_add(
         "second",
         "cast((target * 60) as " ~ dbt.type_int() ~ " )",
         "sla_applied_at" ) }} as sla_breach_at

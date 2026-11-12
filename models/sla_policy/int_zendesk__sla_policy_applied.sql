@@ -55,8 +55,8 @@ with ticket_field_history as (
       then min(ticket_field_history.valid_starting_at) over (partition by ticket_field_history.ticket_id, ticket_field_history.field_name {{ fivetran_utils.partition_by_source_relation(package_name='zendesk', alias='ticket_field_history') }})
       else ticket_field_history.valid_starting_at
     end as earliest_sla_applied_at,
-    cast({{ fivetran_utils.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
-    {{ fivetran_utils.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
+    cast({{ dbt.json_parse('ticket_field_history.value', ['minutes']) }} as {{ dbt.type_int() }} ) as target,
+    {{ dbt.json_parse('ticket_field_history.value', ['in_business_hours']) }} = 'true' as in_business_hours,
     ticket.priority as current_priority,
     -- Lets customers exempt tickets from SLA breaches via a custom SQL condition against the `ticket` CTE above.
     {{ var('sla_pause_criteria', false) }} as is_sla_paused

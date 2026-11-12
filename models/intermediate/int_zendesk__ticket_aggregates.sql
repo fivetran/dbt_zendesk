@@ -19,7 +19,7 @@ with tickets as (
   select
     source_relation,
     ticket_tags.ticket_id,
-    {{ fivetran_utils.string_agg( 'ticket_tags.tags', "', '" )}} as ticket_tags
+    {{ dbt.listagg( 'ticket_tags.tags', "', '" )}} as ticket_tags
   from ticket_tags
   group by 1, 2
 
