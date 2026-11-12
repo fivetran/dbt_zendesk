@@ -12,3 +12,7 @@ models:
         description: Approximate number of tokens for the chunk, assuming 4 characters per token.
       - name: chunk
         description: The text of the chunk.
+      - name: source_relation
+        description: >
+          The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
+          Empty string if you are not.

@@ -92,6 +92,8 @@ models:
         description: For tickets of type "incident", the ID of the problem the incident is linked to.
       - name: external_id
         description: An id you can use to link Zendesk Support tickets to local records.
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -150,12 +152,6 @@ models:
           - not_null 
       - name: name
         description: The name of the group
-      - name: external_id
-        description: A unique external id to associate organizations to an external record
-      - name: created_at
-        description: The time the organization was created
-      - name: updated_at
-        description: The time of the last update of the organization
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -166,8 +162,8 @@ models:
     columns:
       - name: organization_id
         description: Reference to the organization
-      - name: tag
-        description: Tag associated with the organization
+      - name: tags
+        description: Tag associated with the organization.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -188,6 +184,12 @@ models:
         description: A unique name for the organization
       - name: details
         description: Any details obout the organization, such as the address
+      - name: external_id
+        description: A unique external id to associate organizations to an external record
+      - name: created_at
+        description: The time the organization was created
+      - name: updated_at
+        description: The time of the last update of the organization
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -216,6 +218,8 @@ models:
         description: Boolean field indicating if the comment is a twitter tweet
       - name: is_voice_comment
         description: Boolean field indicating if the comment is a voice comment
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -260,6 +264,8 @@ models:
         description: The user's time zone. See Time Zone
       - name: ticket_restriction
         description: Specifies which tickets the user has access to. Possible values are organization, groups, assigned, requested and null
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.
@@ -432,7 +438,7 @@ models:
   - name: stg_zendesk__schedule_holiday
     description: Information about holidays for each specified schedule.
     columns:
-      - name: end_date_at
+      - name: holiday_end_date_at
         description: ISO 8601 representation of the holiday end date.
       - name: holiday_id
         description: The ID of the scheduled holiday.
@@ -442,7 +448,11 @@ models:
         description: Name of the holiday.
       - name: schedule_id
         description: The ID of the schedule.
-      - name: start_date_at
+      - name: _fivetran_synced
+        description: The timestamp when the record was last synchronized by Fivetran, used to track data freshness.
+      - name: _fivetran_deleted
+        description: Boolean created by Fivetran to indicate whether the record has been deleted.
+      - name: holiday_start_date_at
         description: ISO 8601 representation of the holiday start date.
       - name: source_relation
         description: >
@@ -512,8 +522,6 @@ models:
         description: Where the message originated from (e.g. `NATIVE_MESSAGING`)
       - name: mime_type
         description: MIME type of the document for `ChatFileAttachment` types of events.
-      - name: original_message
-        description: JSON storing information about the message event object.
       - name: original_message_type
         description: Type of message. Including but not limited to - `file`, `text`, `form_response`, `form`, and `image`.
       - name: parent_message_id
@@ -554,6 +562,8 @@ models:
         description: Priority that a ticket must match to be subject to this SLA metric, such as urgent, high, normal, or low.
       - name: target
         description: The total time within which the end-state for a metric should be met, measured in minutes
+      - name: is_most_recent_record
+        description: Boolean indicating whether the record represents the latest version of the SLA policy metric target.
       - name: source_relation
         description: >
           The schema or database this record came from if you are unioning multiple Zendesk connectors together in this package.

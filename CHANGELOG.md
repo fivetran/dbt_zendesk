@@ -1,3 +1,14 @@
+# dbt_zendesk v1.10.2
+
+[PR #299](https://github.com/fivetran/dbt_zendesk/pull/299) includes the following updates:
+
+## Under the Hood
+- **Column documentation sync**: Updates the yml documentation to match the columns the models actually output, so the dbt docs site and Quickstart field listings are accurate.
+  - Documents `_fivetran_synced` in `stg_zendesk__ticket`, `stg_zendesk__ticket_comment`, `stg_zendesk__user`, and `stg_zendesk__schedule_holiday`; `_fivetran_deleted` in `stg_zendesk__schedule_holiday`; `is_most_recent_record` in `stg_zendesk__sla_policy_metric_history`; and `source_relation` in `zendesk__document`.
+  - Corrects `tag` to `tags` in `stg_zendesk__organization_tag`, and `start_date_at` and `end_date_at` to `holiday_start_date_at` and `holiday_end_date_at` in `stg_zendesk__schedule_holiday`.
+  - Moves `external_id`, `created_at`, and `updated_at` from `stg_zendesk__group` to `stg_zendesk__organization`, where they are actually output.
+  - Removes `original_message` from `stg_zendesk__ticket_chat_event`, which the model does not output.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:
