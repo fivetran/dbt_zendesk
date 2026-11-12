@@ -6,6 +6,7 @@ bug_fixes:
     built without `distinct` also keep duplicate values on Databricks now, which matches the other
     warehouses. Output on other warehouses doesn't change.
 under_the_hood:
+- description: Replaces `fivetran_utils.json_parse` with dbt's built-in `dbt.json_parse`.
 - description: Moves the `timestamp_add` macro from `fivetran_utils` into this package as
     `zendesk_timestamp_add`. Zendesk was the only package that used it, and `fivetran_utils`
     removes it in a future release. The macro logic is unchanged, so model outputs don't change.
