@@ -141,6 +141,13 @@ models:
 
   - name: stg_zendesk__domain_name
     description: Domain names associated with an organization. An organization may have multiple domain names.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - organization_id
+              - index
     columns:
       - name: organization_id
         description: Reference to the organization
@@ -187,6 +194,13 @@ models:
 
   - name: stg_zendesk__organization_tag
     description: The tags associated with an organization. An organization may have multiple tags.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - organization_id
+              - tags
     columns:
       - name: organization_id
         description: Reference to the organization
@@ -410,6 +424,13 @@ models:
     description: >
       Tags are words, or combinations of words, you can use to add more context to tickets. The table lists all
       tags currently associated with a ticket.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
+              - tags
     columns: 
       - name: ticket_id
         description: The ID of the ticket associated with the tag
@@ -422,6 +443,14 @@ models:
   
   - name: stg_zendesk__ticket_field_history
     description: All fields and field values associated with tickets.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
+              - field_name
+              - valid_starting_at
     columns: 
       - name: ticket_id
         description: The ID of the ticket associated with the field
@@ -547,6 +576,12 @@ models:
 
   - name: stg_zendesk__ticket_chat
     description: Information about ticket chat conversations.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - chat_id
     columns:
       - name: chat_id
         description: Unique ID of the chat.
