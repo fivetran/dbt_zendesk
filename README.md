@@ -354,7 +354,7 @@ The Fivetran team maintaining this package only maintains the [latest version](h
 ### Contributions
 A small team of analytics engineers at Fivetran develops these dbt packages. However, the packages are made better by community contributions.
 
-We highly encourage and welcome contributions to this package. Learn how to contribute to a package in dbt's [Contributing to an external dbt package article](https://discourse.getdbt.com/t/contributing-to-a-dbt-package/657).
+We highly encourage and welcome contributions to this package. Learn how to contribute to a package by reading the guidelines in our [CONTRIBUTING.md](https://github.com/fivetran/dbt_zendesk/blob/main/CONTRIBUTING.md) document.
 
 ### Opinionated Modelling Decisions
 This dbt package takes an opinionated stance on how business time metrics are calculated. The dbt package takes **all** schedules into account when calculating the business time duration. Whereas, the Zendesk Support UI logic takes into account **only** the latest schedule assigned to the ticket. If you would like a deeper explanation of the logic used by default in the dbt package you may reference the [DECISIONLOG](https://github.com/fivetran/dbt_zendesk/blob/main/DECISIONLOG.md).
