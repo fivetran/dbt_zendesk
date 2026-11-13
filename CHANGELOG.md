@@ -1,3 +1,12 @@
+# dbt_zendesk v1.11.0
+
+[PR #272](https://github.com/fivetran/dbt_zendesk/pull/272) includes the following updates:
+
+## Feature Update
+- Adds dbt Charts boards for Zendesk overview, ticket backlog, agent performance, and SLA reporting.
+  - Boards retain portable dbt model references and include navigation that works within an installed package or a connected repository.
+  - Setup documentation distinguishes local profile discovery from Cloud warehouse and default-source configuration.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:

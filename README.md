@@ -46,13 +46,44 @@ By default, this package materializes the following final tables:
 ---
 
 ## Visualizations
-Many of the above reports are now configurable for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk). Check out some [sample reports here](https://fivetran-zendesk.streamlit.app/).
+This package ships a set of [dbt Charts](https://dbtcharts.com) boards in [`charts/`](https://github.com/fivetran/dbt_zendesk/tree/main/charts) built on the final output tables above: a support overview, the ticket backlog, agent performance, and SLA attainment. Every query is written in DuckDB SQL (`dialect: duckdb`), and dbt Charts translates it to your warehouse's SQL when it runs, so the boards render on every warehouse this package supports.
+
+The boards need dbt Charts 0.10.1 or later. Locally, after `dbt deps` and `dbt run`, they appear under `zendesk/` in your dbt project. When your project does not declare its own dbt Charts sources, no `dbt_charts.yml` is needed: queries use the target in your local `profiles.yml`.
+
+In [dbt Charts Cloud](https://dbtcharts.com), connect a warehouse and configure the project's default source with your dbt target's database and base schema or dataset, before dbt appends package schema suffixes such as `_zendesk`. Cloud does not read your local `profiles.yml`. Keep the boards' `ref()` calls and `dialect: duckdb` declarations so the same boards resolve your models and run on your warehouse. See the [Cloud connection guide](https://docs.dbtcharts.com/cloud/connections/).
+
+Sibling-relative navigation works both when these boards are installed under `zendesk/` and when this package repository is opened directly with the boards at its root.
+
+```bash
+pip install dbt-charts
+dct serve            # from your dbt project root, after `dbt deps` and `dbt run`
+```
 
 <p align="center">
-<a href="https://fivetran-zendesk.streamlit.app/">
-    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/sla_policy_streamlit_example.png" alt="Zendesk Streamlit App" width="75%">
+<a href="https://github.com/fivetran/dbt_zendesk/blob/main/charts/overview.yml">
+    <img src="https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/dbt_charts/overview.png" alt="Zendesk Support Overview board rendered by dbt Charts" width="75%">
 </a>
 </p>
+
+| Board | What it shows | Screenshot |
+|---|---|---|
+| [Support Overview](https://github.com/fivetran/dbt_zendesk/blob/main/charts/overview.yml) | Current status of the creation cohort, first-solved activity, CSAT, and response medians | [View](https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/dbt_charts/overview.png) |
+| [Ticket Backlog](https://github.com/fivetran/dbt_zendesk/blob/main/charts/backlog.yml) | Daily unsolved tickets and the current queue | [View](https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/dbt_charts/backlog.png) |
+| [Agent Performance](https://github.com/fivetran/dbt_zendesk/blob/main/charts/agent-performance.yml) | Workload, exact medians, CSAT, and solved-ticket one-touch rate; filter by group or assignee | [View](https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/dbt_charts/agent_performance.png) |
+| [SLA Attainment](https://github.com/fivetran/dbt_zendesk/blob/main/charts/sla.yml) | Completed SLA outcomes and attainment, plus recent breaches with business/calendar hour basis | [View](https://raw.githubusercontent.com/fivetran/dbt_zendesk/main/images/dbt_charts/sla.png) |
+
+The overview and agent boards initially show the last 90 days; change the date picker to explore another period. Backlog history requires `status` and `priority` in `ticket_field_history_columns` (included by default). If you change that variable, run `dbt run --full-refresh` before using the board so existing incremental tables gain the tracked columns.
+
+To inspect a board's queries from your consuming dbt project:
+
+```bash
+dct describe dbt_packages/zendesk/charts/overview.yml
+dct query dbt_packages/zendesk/charts/overview.yml kpis
+```
+
+The SQL and filter definitions are in each board's linked YAML. See the [dbt Charts documentation](https://docs.dbtcharts.com) for customizing boards.
+
+Earlier reports were also available for [visualization via Streamlit](https://github.com/fivetran/streamlit_zendesk) ([sample reports](https://fivetran-zendesk.streamlit.app/)).
 
 ## Prerequisites
 To use this dbt package, you must have the following:
