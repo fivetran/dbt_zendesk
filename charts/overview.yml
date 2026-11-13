@@ -5,10 +5,16 @@ notes: |
   `zendesk__ticket_metrics` model this package builds, so it reads the same on
   every warehouse the package supports.
 
+text: |
+  KPIs describe tickets created in the selected period and their current status.
+  The first-solved trend counts first resolutions in the period, including tickets
+  created earlier or later reopened. Weeks without events have no point; the first and last weeks may be partial.
+
 variables:
   date_range:
     label: Created between
     input: daterange
+    default: last_90_days
 
   priority:
     input: multiselect
@@ -27,6 +33,7 @@ queries:
       select distinct created_channel as channel
       from {{ ref('zendesk__ticket_metrics') }}
       where created_channel is not null
+        and status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
       order by 1
 
   # Exact medians: rank each value, then average the one or two middle rows.
@@ -36,9 +43,9 @@ queries:
     sql: |
       select
         avg(case when reply_rn in (floor((reply_n + 1) / 2.0), ceil((reply_n + 1) / 2.0))
-            then first_reply_time_calendar_minutes end) as median_first_reply_minutes,
+            then cast(first_reply_time_calendar_minutes as double) end) as median_first_reply_minutes,
         avg(case when resolution_rn in (floor((resolution_n + 1) / 2.0), ceil((resolution_n + 1) / 2.0))
-            then first_resolution_calendar_minutes end) as median_resolution_minutes
+            then cast(first_resolution_calendar_minutes as double) end) as median_resolution_minutes
       from (
         select
           first_reply_time_calendar_minutes,
@@ -52,7 +59,8 @@ queries:
             order by first_resolution_calendar_minutes) as resolution_rn,
           count(first_resolution_calendar_minutes) over () as resolution_n
         from {{ ref('zendesk__ticket_metrics') }}
-        where {{ filter_date_range('created_at', date_range) }}
+        where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and {{ filter_date_range('created_at', date_range) }}
           and {{ filter('priority', priority) }}
           and {{ filter('created_channel', channel) }}
       ) ranked
@@ -69,7 +77,8 @@ queries:
         max(medians.median_resolution_minutes) as median_resolution_minutes
       from {{ ref('zendesk__ticket_metrics') }} t
       cross join {{ queries.medians }}
-      where {{ filter_date_range('t.created_at', date_range) }}
+      where t.status is distinct from 'deleted' and not coalesce(t._fivetran_deleted, false)
+        and {{ filter_date_range('t.created_at', date_range) }}
         and {{ filter('t.priority', priority) }}
         and {{ filter('t.created_channel', channel) }}
 
@@ -78,15 +87,17 @@ queries:
     sql: |
       select date_trunc('week', created_at) as week, 'created' as series, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
-      where {{ filter_date_range('created_at', date_range) }}
+      where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1, 2
       union all
-      select date_trunc('week', first_solved_at) as week, 'solved' as series, count(*) as tickets
+      select date_trunc('week', first_solved_at) as week, 'first solved' as series, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
-      where first_solved_at is not null
-        and {{ filter_date_range('created_at', date_range) }}
+      where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and first_solved_at is not null
+        and {{ filter_date_range('first_solved_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1, 2
@@ -97,7 +108,8 @@ queries:
     sql: |
       select coalesce(created_channel, 'unknown') as channel, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
-      where {{ filter_date_range('created_at', date_range) }}
+      where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1
@@ -108,7 +120,8 @@ queries:
     sql: |
       select coalesce(priority, 'none') as priority, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
-      where {{ filter_date_range('created_at', date_range) }}
+      where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1
@@ -119,7 +132,8 @@ queries:
     sql: |
       select coalesce(type, 'untyped') as ticket_type, count(*) as tickets
       from {{ ref('zendesk__ticket_metrics') }}
-      where {{ filter_date_range('created_at', date_range) }}
+      where status is distinct from 'deleted' and not coalesce(_fivetran_deleted, false)
+        and {{ filter_date_range('created_at', date_range) }}
         and {{ filter('priority', priority) }}
         and {{ filter('created_channel', channel) }}
       group by 1
@@ -136,7 +150,7 @@ charts:
         format: integer
 
   solved_kpi:
-    label: Solved
+    label: Currently solved
     query: kpis
     type: kpi
     value: tickets_solved
@@ -163,27 +177,27 @@ charts:
         format: percent_whole
 
   first_reply_kpi:
-    label: Median First Reply (min)
+    label: Median first reply (min)
     query: kpis
     type: kpi
     value: median_first_reply_minutes
     style:
       value:
-        format: integer
+        format: number_full
 
   resolution_kpi:
-    label: Median Resolution (min)
+    label: Median resolution (min)
     query: kpis
     type: kpi
     value: median_resolution_minutes
     style:
       value:
-        format: integer
+        format: number_full
 
   flow_chart:
-    title: Tickets Created and Solved per Week
+    title: Tickets Created and First Solved per Week
     query: weekly_flow
-    type: line
+    type: scatter
     x: week
     y: tickets
     color: series

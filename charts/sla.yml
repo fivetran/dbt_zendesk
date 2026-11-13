@@ -6,6 +6,10 @@ notes: |
   unknown. Requires the package's SLA models, which are on by default and
   off when `using_schedules` or `using_sla_policy` is false.
 
+text: |
+  Weekly points show attainment among completed SLA events. Weeks without
+  completed events have no point. Breach times show their business or calendar basis.
+
 variables:
   date_range:
     label: SLA applied between
@@ -40,7 +44,7 @@ queries:
     dialect: duckdb
     sql: |
       select
-        sla_policy_name,
+        coalesce(sla_policy_name, 'Unknown policy') as sla_policy_name,
         count(*) as sla_events,
         sum(case when is_sla_breach then 1 else 0 end) as breaches,
         (sum(case when is_sla_breach then 0.0 else 1.0 end)) / nullif(count(*), 0) as attainment_rate
@@ -66,12 +70,15 @@ queries:
       group by 1
       order by breaches desc
 
-  breaches_by_week:
+  attainment_by_week:
+    formats:
+      attainment_rate: percent_whole
     dialect: duckdb
     sql: |
-      select date_trunc('week', sla_applied_at) as week, metric, count(*) as breaches
+      select date_trunc('week', sla_applied_at) as week, metric,
+        sum(case when is_sla_breach then 0.0 else 1.0 end) / nullif(count(*), 0) as attainment_rate
       from {{ ref('zendesk__sla_policies') }}
-      where not is_active_sla and is_sla_breach
+      where not is_active_sla
         and {{ filter_date_range('sla_applied_at', date_range) }}
         and {{ filter('metric', metric) }}
       group by 1, 2
@@ -82,8 +89,10 @@ queries:
     sql: |
       select
         ticket_id,
-        sla_policy_name,
+        coalesce(sla_policy_name, 'Unknown policy') as sla_policy_name,
         metric,
+        case when in_business_hours then 'Business'
+          when not in_business_hours then 'Calendar' else 'Unknown' end as hours_basis,
         target,
         sla_elapsed_time as elapsed_minutes,
         sla_applied_at,
@@ -139,7 +148,7 @@ charts:
           format: integer
           align: right
         attainment_rate:
-          label: Attainment
+          label: Attainment (%)
           format: percent_whole
           align: right
 
@@ -151,11 +160,12 @@ charts:
     y: breaches
 
   weekly_chart:
-    title: Breaches per Week
-    query: breaches_by_week
-    type: line
+    title: SLA Attainment per Week
+    query: attainment_by_week
+    type: scatter
     x: week
-    y: breaches
+    y: attainment_rate
+    y_label: Attainment (%)
     color: metric
     height: 240
 
@@ -167,6 +177,7 @@ charts:
       columns:
         ticket_id:
           label: Ticket
+          format: id
         sla_policy_name:
           label: Policy
         target:

@@ -3,7 +3,10 @@ notes: |
   The unsolved queue day by day from `zendesk__ticket_backlog`, and what is in
   it right now. The queue table takes subject, assignee, and age from
   `zendesk__ticket_metrics`, so it does not depend on which fields
-  `ticket_field_history_columns` tracks.
+  `ticket_field_history_columns` tracks. The daily backlog still requires
+  `status` and `priority` in that variable (both defaults). Keep them when
+  overriding the variable, and rebuild with `dbt run --full-refresh` after
+  changing tracked history fields so existing incremental tables gain the columns.
 
 variables:
   date_range:
@@ -159,6 +162,7 @@ charts:
       columns:
         ticket_id:
           label: Ticket
+          format: id
         age_days:
           label: Age (days)
           format: integer
