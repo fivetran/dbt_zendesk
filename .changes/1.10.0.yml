@@ -11,10 +11,16 @@ schema_data_changes:
     old: '`status_status`'
     new: '`status`'
     is_breaking: true
-    notes: Fixes column naming conflicts when a custom field shares a title with a standard field. Also removes unintended `<field>_<custom_field_id>` columns. Only affects configurations with these conflicts.
+    notes: Fixes column naming conflicts when a custom field shares a title with a
+      standard field. Also removes unintended `<field>_<custom_field_id>` columns.
+      Only affects configurations with these conflicts.
 bug_fixes:
-- description: Fixes `zendesk__ticket_backlog` failing when a custom ticket field shares a title with a standard field (for example, `Status`). Standard fields now retain their names; custom fields can be tracked separately by adding their numeric IDs to `ticket_field_history_columns` (for example, `status_<field_id>`).
-- description: Fixes failures when custom ticket field titles contain no Latin letters or numbers (for example, `購入段階`). These fields can be tracked regardless of title using their numeric IDs, with a leading underscore (for example, `_<field_id>`).
-under_the_hood:
-- description: Adds `dbt_utils.unique_combination_of_columns` tests to the staging and end models. The tests use the `arguments` syntax introduced in dbt v1.10, which the new v1.11.0 minimum supports.
+- description: Fixes `zendesk__ticket_backlog` failing when a custom ticket field
+    shares a title with a standard field (for example, `Status`). Standard fields
+    now retain their names; custom fields can be tracked separately by adding their
+    numeric IDs to `ticket_field_history_columns` (for example, `status_<field_id>`).
+- description: "Fixes failures when custom ticket field titles contain no Latin letters\
+    \ or numbers (for example, `\u8CFC\u5165\u6BB5\u968E`). These fields can be tracked\
+    \ regardless of title using their numeric IDs, with a leading underscore (for\
+    \ example, `_<field_id>`)."
 date: '2026-11-02'
