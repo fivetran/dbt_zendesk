@@ -3,6 +3,12 @@ version: 2
 models:
   - name: zendesk__ticket_enriched
     description: Each record represents a Zendesk ticket, enriched with data about it's tags, assignees, requester, submitter, organization and group.  
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
     columns:
       - name: ticket_id
         description: Automatically assigned when the ticket is created
@@ -179,6 +185,12 @@ models:
 
   - name: zendesk__sla_policies
     description: Each record represents an SLA policy event and additional sla breach and achievement metrics. Calendar and business hour SLA breaches for `first_reply_time`, `next_reply_time`, `requester_wait_time`, and `agent_work_time` are supported. If there is a SLA you would like supported that is not included, please create a feature request.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - sla_event_id
     columns:
       - name: sla_event_id
         description: A surrogate key generated from the combination of `ticket_id`, `metric`, `sla_applied_at`, and `source_relation` fields
@@ -213,6 +225,13 @@ models:
     description: >
       A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable 
       and the corresponding updater fields defined in the `ticket_field_history_updater_columns` variable.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
+              - date_day
     columns:
       - name: date_day
         description: The date of the day associated with the field values.
@@ -227,6 +246,12 @@ models:
 
   - name: zendesk__ticket_metrics
     description: Each record represents a Zendesk Support ticket, enriched with metrics about reply times, resolution times and work times.  Calendar and business hours are supported
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
     columns:
       - name: first_reply_time_calendar_minutes
         description: The number of calendar minutes between when the ticket was created and when the first public agent response occurred
@@ -511,6 +536,11 @@ models:
 
   - name: zendesk__ticket_summary
     description: A single record table containing Zendesk ticket and user summary metrics. These metrics are updated for the current day the model is run.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
     columns:
       - name: user_count
         description: Total count of users created
@@ -563,6 +593,13 @@ models:
     description: >
       A daily historical view of the ticket field values defined in the `ticket_field_history_columns` variable 
       for all backlog tickets. Backlog tickets being defined as any ticket not a 'closed', 'deleted', or 'solved' status.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - source_relation
+              - ticket_id
+              - date_day
     columns:
       - name: date_day
         description: The date of the day associated with the field values
