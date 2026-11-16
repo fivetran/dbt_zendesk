@@ -1,3 +1,10 @@
+# dbt_zendesk v1.10.1
+
+[PR #301](https://github.com/fivetran/dbt_zendesk/pull/301) includes the following updates:
+
+## Bug Fix
+- Fixes date/timestamp type mismatches in `int_zendesk__field_calendar_spine` and `int_zendesk__timezone_daylight` that dbt Fusion's `--static-analysis strict` flags. Results are unchanged.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:
