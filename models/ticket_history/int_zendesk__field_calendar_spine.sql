@@ -34,7 +34,7 @@ with calendar as (
     inner join ticket
         on calendar.date_day >= cast(ticket.created_at as date)
         -- use this variable to extend the ticket's history past its close date (for reporting/data viz purposes :-)
-        and {{ dbt.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} >= cast(calendar.date_day as {{ dbt.type_timestamp() }})
+        and cast({{ dbt.dateadd('month', var('ticket_field_history_extension_months', 0), 'ticket.open_until') }} as date) >= calendar.date_day
 
 ), surrogate_key as (
 
