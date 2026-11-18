@@ -1,4 +1,5 @@
 title: Zendesk Ticket Backlog
+source: dbt_package_testing
 notes: |
   The unsolved queue day by day from `zendesk__ticket_backlog`, and what is in
   it right now. The queue table takes subject, assignee, and age from
