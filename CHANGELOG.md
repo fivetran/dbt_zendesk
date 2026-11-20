@@ -1,3 +1,14 @@
+# dbt_zendesk v1.11.0
+
+[PR #300](https://github.com/fivetran/dbt_zendesk/pull/300) includes the following updates:
+
+## Feature Update
+- **Breaking change**: Raises the minimum dbt version to 1.10.0.
+- Adds `dbt_utils.unique_combination_of_columns` tests to staging and end models. If a test fails, please [open an issue](https://github.com/fivetran/dbt_zendesk/issues/new/choose).
+
+## Under the Hood
+- Updates yml column documentation to match model output.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:
