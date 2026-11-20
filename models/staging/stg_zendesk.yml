@@ -50,7 +50,7 @@ models:
     columns:
       - name: ticket_id
         description: Automatically assigned when the ticket is created
-        tests:
+        data_tests:
             - not_null  
       - name: url
         description: The API url of this ticket
@@ -126,7 +126,7 @@ models:
     columns:
       - name: brand_id
         description: The ID automatically assigned when the brand is created
-        tests:
+        data_tests:
           - not_null
       - name: brand_url
         description: The url of the brand
@@ -153,7 +153,7 @@ models:
     columns:
       - name: organization_id
         description: Reference to the organization
-        tests:
+        data_tests:
           - not_null
       - name: domain_name
         description: The name of the domain associated with the organization
@@ -179,7 +179,7 @@ models:
     columns:
       - name: group_id
         description: Automatically assigned when creating groups
-        tests:
+        data_tests:
           - not_null 
       - name: name
         description: The name of the group
@@ -222,7 +222,7 @@ models:
     columns:
       - name: organization_id
         description: Automatically assigned when the organization is created
-        tests:
+        data_tests:
           - not_null 
       - name: name
         description: A unique name for the organization
@@ -250,7 +250,7 @@ models:
     columns:
       - name: ticket_comment_id
         description: Automatically assigned when the comment is created
-        tests:
+        data_tests:
           - not_null 
       - name: body
         description: The comment string
@@ -307,7 +307,7 @@ models:
     columns:
       - name: user_id
         description: Automatically assigned when the user is created
-        tests:
+        data_tests:
           - not_null 
       - name: email
         description: The user's primary email address. *Writeable on create only. On update, a secondary email is added. See Email Address
@@ -359,7 +359,7 @@ models:
     columns: 
       - name: schedule_id
         description: ID automatically assigned to the schedule upon creation
-        tests:
+        data_tests:
           - not_null
       - name: schedule_name
         description: Name of the schedule
@@ -409,7 +409,7 @@ models:
     columns:
       - name: ticket_form_id
         description: Automatically assigned when creating ticket form
-        tests:
+        data_tests:
           - not_null
       - name: created_at
         description: The time the ticket form was created
@@ -543,7 +543,7 @@ models:
     columns:
       - name: time_zone
         description: Name of the time zone. 
-        tests:
+        data_tests:
           - not_null
       - name: standard_offset 
         description: Standard offset of the timezone (non-daylight savings hours). In `+/-hh:mm` format.
@@ -567,7 +567,7 @@ models:
         description: ISO 8601 representation of the holiday end date.
       - name: holiday_id
         description: The ID of the scheduled holiday.
-        tests:
+        data_tests:
           - not_null
       - name: holiday_name
         description: Name of the holiday.
