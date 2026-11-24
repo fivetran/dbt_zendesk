@@ -8,6 +8,7 @@
 
 ## Bug Fix
 - Fixes date/timestamp type mismatches in `int_zendesk__field_calendar_spine` and `int_zendesk__timezone_daylight` that dbt Fusion's `--static-analysis strict` flags. Results are unchanged.
+- Fixes the `tags` field in `stg_zendesk__user_tag` and `stg_zendesk__organization_tag` on Redshift, which returned the literal string `tag` for every record instead of the tag value. This also corrects the `requester_tag`, `submitter_tag`, `assignee_tag`, and `requester_organization_tags` fields in `zendesk__ticket_enriched`.
 
 ## Under the Hood
 - Updates yml column documentation to match model output.
