@@ -1,4 +1,5 @@
 title: Zendesk SLA Attainment
+source: dbt_package_testing
 notes: |
   SLA events, breaches, and attainment by policy and metric from
   `zendesk__sla_policies`, counting completed events only: the model flags
