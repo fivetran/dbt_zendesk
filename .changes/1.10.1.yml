@@ -1,7 +1,0 @@
-version: 1.10.1
-pr_number: 301
-is_breaking: false
-bug_fixes:
-- description: Fixes date/timestamp type mismatches in `int_zendesk__field_calendar_spine`
-    and `int_zendesk__timezone_daylight` that dbt Fusion's `--static-analysis strict`
-    flags. Results are unchanged.
