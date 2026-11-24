@@ -47,10 +47,10 @@ with timezone as (
         standard_offset_minutes as offset_minutes,
 
         -- last_daylight_end_utc is null for the first record of the time_zone's daylight time, or if the TZ doesn't use DT
-        coalesce(last_daylight_end_utc, cast('1970-01-01' as date)) as valid_from,
+        coalesce(cast(last_daylight_end_utc as {{ dbt.type_timestamp() }}), cast('1970-01-01' as {{ dbt.type_timestamp() }})) as valid_from,
 
         -- daylight_start_utc is null for timezones that don't use DT
-        coalesce(daylight_start_utc, cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date)) as valid_until
+        coalesce(cast(daylight_start_utc as {{ dbt.type_timestamp() }}), cast(cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date) as {{ dbt.type_timestamp() }})) as valid_until
 
     from order_timezone_dt
 
@@ -64,8 +64,8 @@ with timezone as (
         time_zone,
         -- Pacific Time is -8h during standard time and -7h during DT
         standard_offset_minutes + daylight_offset_minutes as offset_minutes,
-        daylight_start_utc as valid_from,
-        daylight_end_utc as valid_until
+        cast(daylight_start_utc as {{ dbt.type_timestamp() }}) as valid_from,
+        cast(daylight_end_utc as {{ dbt.type_timestamp() }}) as valid_until
 
     from order_timezone_dt
     where daylight_offset_minutes is not null
@@ -78,10 +78,10 @@ with timezone as (
         standard_offset_minutes as offset_minutes,
 
         -- Get the latest daylight_end_utc time and set that as the valid_from
-        max(daylight_end_utc) as valid_from,
+        cast(max(daylight_end_utc) as {{ dbt.type_timestamp() }}) as valid_from,
 
         -- If the latest_daylight_end_time_utc is less than todays timestamp, that means DST has ended. Therefore, we will make the valid_until in the future.
-        cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date) as valid_until
+        cast(cast( {{ dbt.dateadd('year', 1, dbt.current_timestamp()) }} as date) as {{ dbt.type_timestamp() }}) as valid_until
 
     from order_timezone_dt
     group by 1, 2, 3

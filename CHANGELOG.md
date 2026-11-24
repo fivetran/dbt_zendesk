@@ -1,3 +1,18 @@
+# dbt_zendesk v1.11.0
+
+[PR #300](https://github.com/fivetran/dbt_zendesk/pull/300) includes the following updates:
+
+## Feature Update
+- **Breaking change**: Raises the minimum dbt version to 1.10.0.
+- Adds `dbt_utils.unique_combination_of_columns` tests to staging and end models. If a test fails, please [open an issue](https://github.com/fivetran/dbt_zendesk/issues/new/choose).
+
+## Bug Fix
+- Fixes date/timestamp type mismatches in `int_zendesk__field_calendar_spine` and `int_zendesk__timezone_daylight` that dbt Fusion's `--static-analysis strict` flags. Results are unchanged.
+- Fixes the `tags` field in `stg_zendesk__user_tag` and `stg_zendesk__organization_tag` on Redshift, which returned the literal string `tag` for every record instead of the tag value. This also corrects the `requester_tag`, `submitter_tag`, `assignee_tag`, and `requester_organization_tags` fields in `zendesk__ticket_enriched`.
+
+## Under the Hood
+- Updates yml column documentation to match model output.
+
 # dbt_zendesk v1.10.0
 
 [PR #290](https://github.com/fivetran/dbt_zendesk/pull/290) includes the following updates:

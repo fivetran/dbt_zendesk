@@ -34,7 +34,7 @@ final as (
     select 
         organization_id,
         {% if target.type == 'redshift' %}
-        'tag'
+        "tag"
         {% else %}
         tag
         {% endif %}
