@@ -1,0 +1,5 @@
+sources:
+  dbt_package_testing:
+    type: bigquery
+    project: "{{ env_var('DCT_DBT_PACKAGE_TESTING_PROJECT', 'my-gcp-project') }}"
+    dataset: "{{ env_var('DCT_DBT_PACKAGE_TESTING_DATASET', 'analytics') }}"
