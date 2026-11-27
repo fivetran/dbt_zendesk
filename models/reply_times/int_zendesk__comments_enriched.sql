@@ -58,5 +58,8 @@ with ticket_comment as (
 select 
     *,
     first_value(valid_starting_at) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at desc, ticket_id rows unbounded preceding) as last_comment_added_at,
-    sum(case when not is_public then 1 else 0 end) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at rows between unbounded preceding and current row) as previous_internal_comment_count
+    -- Only internal comments created strictly before a public comment count as preceding it. Sorting public comments first within a
+    -- shared created timestamp keeps a same-second internal comment from counting. Without this, the count depends on warehouse
+    -- row order and can change between runs.
+    sum(case when not is_public then 1 else 0 end) over (partition by ticket_id {{ fivetran_utils.partition_by_source_relation(package_name='zendesk') }} order by valid_starting_at, is_public desc rows between unbounded preceding and current row) as previous_internal_comment_count
 from add_previous_commenter_role
