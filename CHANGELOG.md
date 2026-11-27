@@ -1,3 +1,13 @@
+# dbt_zendesk v1.11.1
+
+[PR #304](https://github.com/fivetran/dbt_zendesk/pull/304) includes the following updates:
+
+## Bug Fix
+- Fixes non-deterministic `first_reply_time_calendar_minutes` and `first_reply_time_business_minutes` in `zendesk__ticket_metrics` for agent-created tickets whose first public comment shares a created timestamp with an internal comment. The tied internal comment no longer counts as preceding the first public comment, so first reply time runs to the agent's next public reply instead of depending on warehouse row order. Values may change for affected tickets.
+
+## Under the Hood
+- Adds seed tickets covering comments with tied timestamps.
+
 # dbt_zendesk v1.11.0
 
 [PR #300](https://github.com/fivetran/dbt_zendesk/pull/300) includes the following updates:

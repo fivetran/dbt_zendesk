@@ -1,0 +1,12 @@
+version: 1.11.1
+pr_number: 304
+bug_fixes:
+- description: Fixes non-deterministic `first_reply_time_calendar_minutes` and `first_reply_time_business_minutes`
+    in `zendesk__ticket_metrics` for agent-created tickets whose first public comment
+    shares a created timestamp with an internal comment. The tied internal comment
+    no longer counts as preceding the first public comment, so first reply time runs
+    to the agent's next public reply instead of depending on warehouse row order.
+    Values may change for affected tickets.
+under_the_hood:
+- description: Adds seed tickets covering comments with tied timestamps.
+date: TBD
